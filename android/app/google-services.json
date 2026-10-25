@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317134622865",
+    "project_id": "mylittleproject1-54cc5",
+    "storage_bucket": "mylittleproject1-54cc5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317134622865:android:7ec7d5059dc90c249c6f30",
+        "android_client_info": {
+          "package_name": "com.example.ritme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCziUtpk5kyJCVU-Z8_Q5gX5AKv4fY4-pA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
