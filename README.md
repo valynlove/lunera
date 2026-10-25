@@ -63,6 +63,23 @@
 
 ---
 
+## 📦 Releases & Automated Changelog
+
+Lunera includes an automated GitHub Action Workflow (`.github/workflows/release.yml`) for publishing GitHub Releases.
+
+Whenever a version tag (e.g. `v1.0.0`) is pushed to GitHub, GitHub Actions automatically:
+1. Builds the production Android release APK (`app-release.apk`).
+2. Extracts the release notes from [`CHANGELOG.md`](./CHANGELOG.md).
+3. Creates a official **GitHub Release** with the APK attached for direct download!
+
+To publish a new release:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+---
+
 ## 🌐 Deploy to GitHub Pages
 
 Lunera is fully compatible with **GitHub Pages**! A pre-configured GitHub Actions workflow (`.github/workflows/deploy.yml`) automatically builds and deploys Flutter Web to GitHub Pages whenever you push code to the `main` or `master` branch.
