@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
@@ -9,6 +10,10 @@ class BiometricService {
   static final _auth = LocalAuthentication();
 
   static Future<bool> isAvailable() async {
+    // Biometric lock is tailored for mobile devices (Android / iOS)
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      return false;
+    }
     try {
       final canBio = await _auth.canCheckBiometrics;
       final supported = await _auth.isDeviceSupported();
@@ -19,6 +24,9 @@ class BiometricService {
   }
 
   static Future<bool> isAppLockEnabled() async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      return false;
+    }
     try {
       final sp = await SharedPreferences.getInstance();
       return sp.getBool('lunera_app_lock') ?? false;
@@ -35,6 +43,9 @@ class BiometricService {
   }
 
   static Future<bool> authenticate() async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      return true;
+    }
     try {
       return await _auth.authenticate(
         localizedReason: 'Scan fingerprint or face to unlock Lunera',
@@ -85,7 +96,6 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
       if (_pausedTime != null) {
         final elapsed = DateTime.now().difference(_pausedTime!);
         _pausedTime = null;
-        // Mencegah terkunci saat memilih foto dari galeri (kembali kurang dari 3 detik)
         if (elapsed.inSeconds >= 3) {
           _lockAppAndAuth();
         }
@@ -94,6 +104,16 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   }
 
   Future<void> _initAndCheckLock() async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      if (mounted) {
+        setState(() {
+          _initialized = true;
+          _locked = false;
+        });
+      }
+      return;
+    }
+
     final localLock = await BiometricService.isAppLockEnabled();
     final firestoreLock = ref.read(prefsProvider).value?.appLock ?? false;
     final isEnabled = localLock || firestoreLock;
@@ -110,6 +130,10 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   }
 
   Future<void> _lockAppAndAuth() async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      return;
+    }
+
     final localLock = await BiometricService.isAppLockEnabled();
     final firestoreLock = ref.read(prefsProvider).value?.appLock ?? false;
     if ((localLock || firestoreLock) && mounted) {
@@ -127,10 +151,14 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
+    // Automatically skip biometric gate on Windows desktop
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      return widget.child;
+    }
+
     final prefs = ref.watch(prefsProvider).value;
     final isLockConfigured = (prefs?.appLock ?? false);
 
-    // Jika belum inisialisasi lokal, tampilkan layar pengunci aman
     if (!_initialized) {
       return const Scaffold(
         body: SafeArea(
@@ -156,7 +184,6 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
       return widget.child;
     }
 
-    // Tampilan layar kunci biometrik
     return Scaffold(
       body: SafeArea(
         child: Center(

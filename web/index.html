@@ -1,24 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Lunera - Every Phase, Your Own. A personal health and therapy tracking application.">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Lunera">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="description" content="Lunera - Every Phase, Your Own. A personal health and therapy tracking application for Android and Windows.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>Lunera - Personal Health & HRT Tracker</title>
-  <link rel="manifest" href="manifest.json">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,25 +37,15 @@
       color: var(--text);
       font-family: 'Montserrat', sans-serif;
       overflow-x: hidden;
-    }
-
-    #flutter-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 9999;
-      background-color: var(--midnight);
-      display: none;
+      line-height: 1.6;
     }
 
     .landing-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 8%;
-      background: rgba(15, 18, 43, 0.85);
+      padding: 20px 8%;
+      background: rgba(15, 18, 43, 0.9);
       backdrop-filter: blur(12px);
       position: sticky;
       top: 0;
@@ -95,7 +76,7 @@
 
     .nav-buttons {
       display: flex;
-      gap: 14px;
+      gap: 12px;
     }
 
     .btn {
@@ -137,14 +118,14 @@
 
     .hero {
       text-align: center;
-      padding: 90px 20px 60px;
+      padding: 80px 20px 50px;
       max-width: 850px;
       margin: 0 auto;
     }
 
     .hero-badge {
       display: inline-block;
-      padding: 6px 16px;
+      padding: 6px 18px;
       background: rgba(169, 151, 255, 0.15);
       border: 1px solid rgba(169, 151, 255, 0.3);
       border-radius: 20px;
@@ -159,7 +140,7 @@
       font-size: 56px;
       font-weight: 700;
       color: var(--moonlight);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       line-height: 1.15;
     }
 
@@ -172,21 +153,77 @@
     }
 
     .hero-desc {
-      font-size: 17px;
-      color: rgba(247, 246, 251, 0.8);
+      font-size: 16px;
+      color: rgba(247, 246, 251, 0.85);
       line-height: 1.6;
       margin-bottom: 36px;
     }
 
-    .hero-actions {
+    .download-section {
+      background: var(--surface);
+      border: 1px solid rgba(169, 151, 255, 0.2);
+      border-radius: 28px;
+      padding: 36px 28px;
+      margin: 20px auto 60px;
+      max-width: 750px;
+    }
+
+    .download-title {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      color: var(--moonlight);
+      margin-bottom: 12px;
+    }
+
+    .download-sub {
+      font-size: 14px;
+      color: rgba(247, 246, 251, 0.7);
+      margin-bottom: 28px;
+    }
+
+    .download-grid {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
     }
 
+    .download-card {
+      flex: 1;
+      min-width: 240px;
+      background: rgba(15, 18, 43, 0.6);
+      border: 1px solid rgba(169, 151, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .download-card:hover {
+      border-color: var(--lavender);
+      transform: translateY(-3px);
+    }
+
+    .platform-icon {
+      font-size: 38px;
+      margin-bottom: 10px;
+    }
+
+    .platform-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--lavender);
+      margin-bottom: 4px;
+    }
+
+    .platform-desc {
+      font-size: 12px;
+      color: rgba(247, 246, 251, 0.6);
+      margin-bottom: 16px;
+    }
+
     .features {
-      padding: 70px 8%;
+      padding: 40px 8% 80px;
       max-width: 1200px;
       margin: 0 auto;
     }
@@ -196,7 +233,7 @@
       font-family: 'Cinzel', serif;
       font-size: 32px;
       color: var(--moonlight);
-      margin-bottom: 48px;
+      margin-bottom: 40px;
     }
 
     .grid {
@@ -207,7 +244,7 @@
 
     .card {
       background: var(--surface);
-      padding: 30px;
+      padding: 28px;
       border-radius: 24px;
       border: 1px solid rgba(169, 151, 255, 0.12);
       transition: transform 0.25s ease, border-color 0.25s ease;
@@ -220,25 +257,25 @@
 
     .card-icon {
       font-size: 36px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .card-title {
       font-size: 18px;
       font-weight: 700;
       color: var(--lavender);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .card-desc {
-      font-size: 14px;
+      font-size: 13.5px;
       color: rgba(247, 246, 251, 0.75);
       line-height: 1.5;
     }
 
     .footer {
       text-align: center;
-      padding: 40px 20px;
+      padding: 36px 20px;
       border-top: 1px solid rgba(169, 151, 255, 0.15);
       font-size: 13px;
       color: rgba(247, 246, 251, 0.6);
@@ -253,7 +290,7 @@
 </head>
 <body>
 
-  <!-- Landing Page UI -->
+  <!-- Landing Header -->
   <header class="landing-header">
     <a href="#" class="brand">
       <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -264,42 +301,64 @@
       <span class="brand-title">LUNERA</span>
     </a>
     <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="launchWebApp()">Try Web App</button>
-      <a class="btn btn-primary" href="https://github.com/hyenavia/lunera/releases/latest/download/app-release.apk">Download APK</a>
+      <a class="btn btn-secondary" href="https://github.com/hyenavia/lunera" target="_blank">GitHub Repo</a>
+      <a class="btn btn-primary" href="#download">Get App</a>
     </div>
   </header>
 
   <main>
+    <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-badge">🌙 Personal Health & Therapy Tracker</div>
+      <div class="hero-badge">🌙 Personal Health & Therapy Tracker (v1.0.0)</div>
       <h1 class="hero-title">Lunera</h1>
       <div class="hero-tagline">Every Phase, Your Own.</div>
       <p class="hero-desc">
-        A gentle, elegant, and privacy-focused application designed to accompany your hormone therapy journey.
-        Track dosage schedules, simulate level curves, log journals, and protect your data with biometric security.
+        A gentle, elegant, and privacy-focused application designed to accompany your personal health and hormone therapy journey.
+        Track dosage schedules, simulate level curves, log journals, and protect your data with biometric security on Android & Windows.
       </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="https://github.com/hyenavia/lunera/releases/latest/download/app-release.apk" style="padding: 14px 32px; font-size: 16px;">
-          📥 Download Android APK
-        </a>
-        <button class="btn btn-secondary" onclick="launchWebApp()" style="padding: 14px 32px; font-size: 16px;">
-          🌐 Open Live Web App
-        </button>
+
+      <!-- Download Section -->
+      <div class="download-section" id="download">
+        <h2 class="download-title">Download Lunera</h2>
+        <p class="download-sub">Choose your target platform below to download the latest release.</p>
+
+        <div class="download-grid">
+          <!-- Android APK Card -->
+          <div class="download-card">
+            <div class="platform-icon">🤖</div>
+            <div class="platform-name">Android</div>
+            <div class="platform-desc">Requires Android 5.0 (API 21) or higher</div>
+            <a class="btn btn-primary" href="https://github.com/hyenavia/lunera/releases/latest/download/app-release.apk" style="width: 100%;">
+              Download APK
+            </a>
+          </div>
+
+          <!-- Windows Desktop Card -->
+          <div class="download-card">
+            <div class="platform-icon">💻</div>
+            <div class="platform-name">Windows</div>
+            <div class="platform-desc">Requires Windows 10 / 11 (64-bit)</div>
+            <a class="btn btn-secondary" href="https://github.com/hyenavia/lunera/releases/latest/download/lunera-windows.zip" style="width: 100%;">
+              Download for Windows
+            </a>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- Features Showcase -->
     <section class="features">
       <h2 class="section-title">Designed for Your Journey</h2>
       <div class="grid">
         <div class="card">
           <div class="card-icon">🔒</div>
           <h3 class="card-title">Biometric Security</h3>
-          <p class="card-desc">Protect your private medical data with Fingerprint and Face ID authentication.</p>
+          <p class="card-desc">Protect your private medical data with Fingerprint and Face ID authentication on supported devices.</p>
         </div>
         <div class="card">
           <div class="card-icon">📊</div>
           <h3 class="card-title">Level Simulations</h3>
-          <p class="card-desc">Interactive pharmacokinetic curves for Estradiol and Testosterone with target zones.</p>
+          <p class="card-desc">Interactive pharmacokinetic curves for Estradiol and Testosterone levels with target zones.</p>
         </div>
         <div class="card">
           <div class="card-icon">📅</div>
@@ -326,18 +385,8 @@
   </main>
 
   <footer class="footer">
-    <p>Lunera &copy; 2026. Every Phase, Your Own. Open Source under MIT License.</p>
+    <p>Lunera &copy; 2026. Every Phase, Your Own. Released under MIT License.</p>
   </footer>
 
-  <!-- Container where Flutter Web renders -->
-  <div id="flutter-container"></div>
-
-  <script>
-    function launchWebApp() {
-      const container = document.getElementById('flutter-container');
-      container.style.display = 'block';
-    }
-  </script>
-  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

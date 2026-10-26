@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:file_selector/file_selector.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models.dart';
@@ -397,18 +398,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Lock app with Biometrics'),
-              subtitle: const Text('Require fingerprint / face ID when app is opened or from background.'),
-              value: p.appLock,
-              onChanged: (v) async {
-                if (v && !await BiometricService.isAvailable()) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometrics / fingerprint not available on this device.')));
-                  }
-                  return;
-                }
-                await BiometricService.setAppLockEnabled(v);
-                _save(p.copy(appLock: v));
-              },
+              subtitle: Text(!kIsWeb && defaultTargetPlatform == TargetPlatform.windows
+                  ? 'Biometric security is tailored for Android and iOS mobile devices.'
+                  : 'Require fingerprint / face ID when app is opened or from background.'),
+              value: (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) ? false : p.appLock,
+              onChanged: (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows)
+                  ? null
+                  : (v) async {
+                      if (v && !await BiometricService.isAvailable()) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Biometrics / fingerprint not available on this device.')));
+                        }
+                        return;
+                      }
+                      await BiometricService.setAppLockEnabled(v);
+                      _save(p.copy(appLock: v));
+                    },
             ),
           ]),
           _card('Account', [
