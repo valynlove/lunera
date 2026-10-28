@@ -4,6 +4,16 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-10-28
+
+### Added
+- **Exit Warning & Confirmation Dialog (`PopScope`):**
+  - Integrated graceful back navigation and exit confirmation dialog matching *Wall o' Pay*.
+  - When pressing back on secondary tabs (Timeline, Insights, Journal), automatically navigates back to the Home tab first.
+  - When pressing back on the Home tab, displays a themed Lunera exit dialog with Cancel and Exit actions, preventing accidental app closure.
+
+---
+
 ## [1.0.0] - 2026-10-28
 
 ### Added

@@ -10,7 +10,7 @@ async function fetchLatestRelease() {
     const res = await fetch(`https://api.github.com/repos/${LUNERA_REPO}/releases/latest`);
     if (!res.ok) return;
     const data = await res.json();
-    const tagName = data.tag_name || "v1.0.0";
+    const tagName = data.tag_name || "v1.0.1";
 
     const badge = document.querySelector(".hero-badge");
     if (badge) {

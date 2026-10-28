@@ -33,7 +33,7 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.0.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.0.1'));
     });
   });
 }
