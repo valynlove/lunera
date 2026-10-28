@@ -148,9 +148,3 @@ jobs:
               --notes-file release_notes.md \
               --target main
           fi
-
-      - name: Deploy Landing Page to GitHub Pages
-        uses: PeaceIris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
