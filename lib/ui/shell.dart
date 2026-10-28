@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifications.dart';
 import '../repo.dart';
 import '../theme.dart';
+import '../update_checker.dart';
 import 'home.dart';
 import 'journal_page.dart';
 import 'levels.dart';
@@ -33,6 +34,11 @@ class _ShellState extends ConsumerState<Shell> {
           AppNotifier.instance.requestPermission();
         }
       }
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: true);
+        }
+      });
     });
   }
 

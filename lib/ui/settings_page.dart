@@ -9,6 +9,7 @@ import '../models.dart';
 import '../notifications.dart';
 import '../repo.dart';
 import '../theme.dart';
+import '../update_checker.dart';
 import 'auth.dart';
 import 'data_page.dart';
 import 'pin_lock_gate.dart';
@@ -558,6 +559,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       label: const Text('Delete Account'),
                     ),
                   ],
+                ),
+              ]),
+              _card('About & Updates', [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.system_update_rounded, color: C.lavender),
+                  title: const Text('Check for Updates'),
+                  subtitle: const Text('Current version: v${UpdateCheckerService.currentVersion}'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: false),
+                ),
+                gap(6),
+                Center(
+                  child: Text(
+                    'Lunera • Every Phase, Your Own.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .5),
+                    ),
+                  ),
                 ),
               ]),
             ]),

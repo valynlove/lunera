@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunera/models.dart';
 import 'package:lunera/sim.dart';
+import 'package:lunera/update_checker.dart';
 
 void main() {
   group('Lunera Model & Simulation Tests', () {
@@ -29,6 +30,10 @@ void main() {
       expect(mgOf(500, 'mcg'), equals(0.5));
       expect(mgOf(1, 'g'), equals(1000));
       expect(mgOf(5, 'mg'), equals(5));
+    });
+
+    test('UpdateCheckerService version check configuration', () {
+      expect(UpdateCheckerService.currentVersion, equals('1.0.0'));
     });
   });
 }

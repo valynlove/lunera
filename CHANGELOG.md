@@ -29,10 +29,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Cloud backup synchronization via Firebase Cloud Firestore.
 - **Cross-Platform Support:**
   - Optimized for Android mobile devices, Windows desktop, and clean Flutter Web runtime.
+- **In-App Update Checker (`UpdateCheckerService`):**
+  - Integrated automatic release polling via GitHub Releases public API.
+  - Displays a dedicated update dialog showing new version numbers, release notes, and a direct 1-tap "Update Now" button.
+  - Added on-demand "Check for Updates" option in Settings dashboard.
+  - Added background check 3 seconds after application launch.
 - **Dedicated Web Showcase Library:**
   - Standalone web landing page in `docs/` with dynamic release detection and responsive layouts.
 
 ### Fixed
+- **Persistent Release Key Signing for Seamless Updates:**
+  - Configured repository-level release signing credentials (`key.properties` and `release-keystore.jks`) for GitHub Actions CI and local builds.
+  - Ensures every GitHub Actions build is signed with the identical cryptographic signature, eliminating Android's `INSTALL_FAILED_UPDATE_INCOMPATIBLE` ("App not installed as package conflicts with an existing package") error when updating in-place.
 - **Scheduled Dose Notifications:**
   - Registered `ScheduledNotificationReceiver` and `ScheduledNotificationBootReceiver` in Android manifest to prevent scheduled alarms from being dropped by the OS.
   - Added `USE_EXACT_ALARM` permission and explicit high-importance `doses` notification channel with sound & vibration.
