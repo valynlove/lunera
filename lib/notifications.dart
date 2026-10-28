@@ -30,7 +30,16 @@ class AppNotifier {
     tzdata.initializeTimeZones();
     try {
       final info = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(info.identifier));
+      try {
+        tz.setLocalLocation(tz.getLocation(info.identifier));
+      } catch (_) {
+        final offset = DateTime.now().timeZoneOffset;
+        final matching = tz.timeZoneDatabase.locations.values.firstWhere(
+          (l) => l.currentTimeZone.offset == offset,
+          orElse: () => tz.getLocation('UTC'),
+        );
+        tz.setLocalLocation(matching);
+      }
     } catch (e) {
       debugPrint('Gagal set timezone lokal, fallback ke UTC: $e');
       tz.setLocalLocation(tz.getLocation('UTC'));
@@ -41,6 +50,17 @@ class AppNotifier {
         iOS: DarwinInitializationSettings(requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false),
       ),
     );
+
+    const channel = AndroidNotificationChannel(
+      'doses',
+      'Dose Reminders',
+      description: 'Medication and injection schedule reminders',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+    await _android?.createNotificationChannel(channel);
+
     _ready = true;
   }
 
@@ -51,6 +71,8 @@ class AppNotifier {
           channelDescription: 'Medication and injection schedule reminders',
           importance: Importance.max,
           priority: Priority.max,
+          playSound: true,
+          enableVibration: true,
         ),
         iOS: DarwinNotificationDetails(interruptionLevel: InterruptionLevel.timeSensitive, presentAlert: true, presentBadge: true, presentSound: true),
       );
@@ -120,11 +142,15 @@ class AppNotifier {
     for (final s in slots.take(60)) {
       final t = s.t;
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
+      final scheduledDate = tz.TZDateTime.from(s.at, tz.local);
+      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+        continue;
+      }
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
         title: '${_verb(t)}: ${t.name}',
         body: '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', site: $place'}',
-        scheduledDate: tz.TZDateTime(tz.local, s.at.year, s.at.month, s.at.day, s.at.hour, s.at.minute),
+        scheduledDate: scheduledDate,
         notificationDetails: _details,
         androidScheduleMode: mode,
       );

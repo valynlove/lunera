@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifications.dart';
+import '../repo.dart';
 import '../theme.dart';
 import 'home.dart';
 import 'journal_page.dart';
@@ -21,6 +22,19 @@ class _ShellState extends ConsumerState<Shell> {
     (Icons.insights_rounded, 'Insights'),
     (Icons.auto_stories_rounded, 'Journal'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (AppNotifier.instance.supported) {
+        final prefs = ref.read(prefsProvider).value;
+        if (prefs == null || prefs.notify) {
+          AppNotifier.instance.requestPermission();
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

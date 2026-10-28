@@ -1,30 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:lunera/main.dart';
+import 'package:lunera/models.dart';
+import 'package:lunera/sim.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const LuneraApp());
+  group('Lunera Model & Simulation Tests', () {
+    test('Hormone preset conversion works properly', () {
+      final e2 = presetOf('estradiol');
+      expect(e2.toBase(100, 'pg/mL'), equals(100));
+      expect(e2.toBase(367.1, 'pmol/L'), closeTo(100, 0.1));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      final t = presetOf('testosterone');
+      expect(t.toBase(5, 'ng/mL'), equals(500));
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('Number parsing handles both comma and dot formats', () {
+      expect(parseNum('12.5'), equals(12.5));
+      expect(parseNum('12,5'), equals(12.5));
+      expect(parseNum('  40  '), equals(40.0));
+      expect(parseNum('abc'), isNull);
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('Pharmacokinetic profile lookup and dose conversion', () {
+      final pk = pkOf('e2_valerate');
+      expect(pk, isNotNull);
+      expect(pk!.name, equals('Valerat'));
+
+      // Test mgOf
+      expect(mgOf(500, 'mcg'), equals(0.5));
+      expect(mgOf(1, 'g'), equals(1000));
+      expect(mgOf(5, 'mg'), equals(5));
+    });
   });
 }

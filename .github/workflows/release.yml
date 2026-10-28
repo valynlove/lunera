@@ -1,58 +1,156 @@
-name: Automatic Release Notes & Landing Page Deployment
+name: Auto Release & Build APK
 
 on:
   push:
     branches:
       - main
-      - master
     tags:
       - 'v*'
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  release-notes:
+  release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Read Changelog
-        id: read_changelog
-        run: |
-          if [ -f CHANGELOG.md ]; then
-            CONTENT=$(cat CHANGELOG.md)
-          else
-            CONTENT="Release built automatically from commit ${{ github.sha }}"
-          fi
-          echo "BODY<<EOF" >> $GITHUB_OUTPUT
-          echo "$CONTENT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Create or Update Official GitHub Release
-        uses: ncipollo/release-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          body: ${{ steps.read_changelog.outputs.BODY }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: "v1.0.0"
-          name: "Lunera v1.0.0 - Personal Health & HRT Tracker"
-          allowUpdates: true
-          makeLatest: true
+          python-version: '3.x'
 
-  deploy-landing-page:
-    runs-on: ubuntu-latest
+      - name: Extract Version & Changelog
+        id: extract_info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREV_TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName' 2>/dev/null || echo "")
+          export PREV_RELEASE_TAG="$PREV_TAG"
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          python - << 'EOF'
+          import os
+          import re
+
+          # Baca versi dari pubspec.yaml
+          with open("pubspec.yaml", "r", encoding="utf-8") as f:
+              pub = f.read()
+          v_match = re.search(r'version:\s*([0-9]+\.[0-9]+\.[0-9]+)', pub)
+          version = v_match.group(1).strip() if v_match else "1.0.0"
+          tag = f"v{version}"
+
+          prev_tag = os.environ.get("PREV_RELEASE_TAG", "").strip()
+          prev_version = re.sub(r'^v', '', prev_tag) if prev_tag else ""
+
+          notes = f"Release {tag}"
+          if os.path.exists("CHANGELOG.md"):
+              with open("CHANGELOG.md", "r", encoding="utf-8") as f:
+                  cl = f.read()
+
+              start_match = re.search(rf'(## \[{re.escape(version)}\][^\n]*)', cl)
+              if start_match:
+                  start_idx = start_match.start()
+                  if prev_version and re.search(rf'\n## \[{re.escape(prev_version)}\]', cl[start_idx:]):
+                      stop_match = re.search(rf'\n(?=## \[{re.escape(prev_version)}\])', cl[start_idx:])
+                      extracted = cl[start_idx : start_idx + stop_match.start()].strip()
+                  else:
+                      extracted = cl[start_idx:].strip()
+
+                  extracted = re.sub(r'\n---\s*$', '', extracted).strip()
+                  if extracted:
+                      notes = extracted
+
+          with open("release_notes.md", "w", encoding="utf-8") as f:
+              f.write(notes)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"version={version}\n")
+              f.write(f"tag={tag}\n")
+          EOF
+
+      - name: Check if Release Already Exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.extract_info.outputs.tag }}"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            ASSET_COUNT=$(gh release view "$TAG" --json assets -q '.assets | length' 2>/dev/null || echo "0")
+            if [ "$ASSET_COUNT" -gt 0 ]; then
+              echo "exists=true" >> $GITHUB_OUTPUT
+              echo "Release $TAG already exists with assets. Skipping APK build."
+            else
+              echo "exists=false" >> $GITHUB_OUTPUT
+              echo "Release $TAG found incomplete without assets. Rebuilding..."
+            fi
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release $TAG not found. Starting build..."
+          fi
+
+      - name: Set up Java 17
+        if: steps.check_release.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        if: steps.check_release.outputs.exists == 'false'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        if: steps.check_release.outputs.exists == 'false'
+        run: flutter pub get
+
+      - name: Build Release APK
+        if: steps.check_release.outputs.exists == 'false'
+        run: flutter build apk --release
+
+      - name: Create GitHub Release with APK
+        if: steps.check_release.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.extract_info.outputs.tag }}"
+          VERSION="${{ steps.extract_info.outputs.version }}"
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          
+          if [ -f "$APK_PATH" ]; then
+            cp "$APK_PATH" "build/app/outputs/flutter-apk/Lunera.apk"
+            cp "$APK_PATH" "build/app/outputs/flutter-apk/Lunera_${TAG}.apk"
+
+            if gh release view "$TAG" > /dev/null 2>&1; then
+              echo "Cleaning incomplete release..."
+              gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || gh release delete "$TAG" --yes 2>/dev/null || true
+            fi
+
+            gh release create "$TAG" \
+              --title "Lunera $TAG" \
+              --notes-file release_notes.md \
+              --target main \
+              "build/app/outputs/flutter-apk/Lunera.apk" \
+              "build/app/outputs/flutter-apk/Lunera_${TAG}.apk"
+          else
+            if gh release view "$TAG" > /dev/null 2>&1; then
+              gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || gh release delete "$TAG" --yes 2>/dev/null || true
+            fi
+
+            gh release create "$TAG" \
+              --title "Lunera $TAG" \
+              --notes-file release_notes.md \
+              --target main
+          fi
 
       - name: Deploy Landing Page to GitHub Pages
         uses: PeaceIris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web
+          publish_dir: ./docs

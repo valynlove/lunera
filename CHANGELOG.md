@@ -1,26 +1,45 @@
-# Changelog
+# Changelog 📋
 
-All notable changes to the **Lunera** project will be documented in this file.
+All notable changes to the **Lunera** personal health & therapy tracking application will be documented in this file.
 
-## [1.0.0] - 2026-10-21
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2026-10-28
 
 ### Added
-- **Rebranding to Lunera**: Introduced slogan *"Every Phase, Your Own."* with custom-painted orbital crescent moon emblem.
-- **Biometric Security & Privacy**: Integrated Fingerprint & Face ID lock (`local_auth`) with persistent `SharedPreferences` gate and 3-second grace period protection.
-- **Pharmacokinetic Level Simulations**: Real-time interactive simulation curves for Estradiol and Testosterone with customizable target zones and lab result calibration.
-- **Calendar & Timeline Dual View**: Schedule View and Full History Timeline View with interactive Date Picker.
-- **HRT Duration Counter**: Real-time tracker calculating years, months, and days on therapy alongside total logged doses.
-- **Mood & Body Journal**: Emotional state selectors (Calm, Happy, Neutral, Energetic, Tired), category filter chips, and CRUD operations.
-- **Supply & Tool Management**: Medication vials, pills, patches, and equipment tracking (syringes, wipes, needles, gloves) with low stock and expiration alerts.
-- **Avatar Performance Engine**: Zero-lag in-memory RAM image cache (`_avatarCache`), `BoxFit.cover` cropping dialog, and live circular avatar preview.
-- **Data Backup & Export**: Offline JSON export/import and Firebase cloud backup.
-- **Windows & Android Platform Support**: Deployment support for Android (APK) and Windows desktop platforms.
+- **Rebranding to Lunera:**
+  - Modernized brand identity with *"Every Phase, Your Own."* motto and orbital crescent moon emblem.
+  - Curated Midnight UI palette with Midnight (`#0F122B`), Indigo (`#3B3F7A`), and Lavender (`#A997FF`).
+- **Biometric Security & Privacy (`local_auth`):**
+  - Integrated Fingerprint and Face ID authentication gate (`pin_lock_gate.dart`) protecting all private health records.
+  - Implemented 3-second grace period protection for seamless camera/file-picker transitions.
+- **Pharmacokinetic Level Simulations (`fl_chart`):**
+  - Interactive multi-compartment pharmacokinetic curves for Estradiol and Testosterone esters.
+  - Configurable target hormone ranges with visual target zone overlays and lab result calibration.
+- **Dose Schedule & Dual View Timeline:**
+  - Interactive calendar picker, rolling interval schedule calculations, and historical dose logs.
+  - Real-time HRT duration counter tracking years, months, and days since therapy start.
+- **Mood & Body Observation Journal:**
+  - Daily emotional status logging, physical observation notes, and category filters.
+- **Supply & Inventory Management:**
+  - Track medication vials, syringes, alcohol wipes, and needles with automatic stock deduction upon dose intake.
+  - Low stock reminders and expiration warning alerts.
+- **Local & Cloud Data Safety:**
+  - Completely offline JSON backup export and import with validation.
+  - Cloud backup synchronization via Firebase Cloud Firestore.
+- **Cross-Platform Support:**
+  - Optimized for Android mobile devices, Windows desktop, and clean Flutter Web runtime.
+- **Dedicated Web Showcase Library:**
+  - Standalone web landing page in `docs/` with dynamic release detection and responsive layouts.
 
 ### Fixed
-- **Photo Squishing Bug**: Solved photo distortion in profile avatar crop dialog using `paintImage` with `BoxFit.cover`.
-- **Gallery Lock Screen Trigger**: Implemented 3-second grace period to prevent biometric lock screen from triggering when selecting photos from external pickers.
-- **Historical Site Translation**: Live on-the-fly translation (`translatePlace`) converting legacy Indonesian injection site names (`Paha kiri`, `Paha kanan`, etc.) to English (`Left thigh`, `Right thigh`, etc.).
-
-### Changed
-- **Default Application Language**: Standardized 100% of user interface strings, schedule text, chart legends, and notifications to English (EN).
-- **Midnight Theme System**: Refined Midnight palette featuring Midnight (`#0F122B`), Indigo (`#3B3F7A`), Lavender (`#A997FF`), and customizable accent choices (`Lunera`, `Moonlight`, `Ocean`, `Rose Quartz`).
+- **Scheduled Dose Notifications:**
+  - Registered `ScheduledNotificationReceiver` and `ScheduledNotificationBootReceiver` in Android manifest to prevent scheduled alarms from being dropped by the OS.
+  - Added `USE_EXACT_ALARM` permission and explicit high-importance `doses` notification channel with sound & vibration.
+  - Resilient timezone offset fallback ensuring notifications fire at exact local device clock times.
+  - Automatic notification permission prompt upon entering app dashboard.
+- **Profile Photo Cropping:**
+  - Resolved avatar photo aspect distortion in crop dialog using `paintImage` with `BoxFit.cover`.
+  - Added in-memory RAM image cache (`_avatarCache`) for butter-smooth profile rendering.
+- **Injection Site Localization:**
+  - On-the-fly translation converting legacy Indonesian site names to standardized English (`Left thigh`, `Right thigh`, etc.).

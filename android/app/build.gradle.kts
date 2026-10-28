@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -7,9 +10,16 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.example.ritme"
     compileSdk = 36
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -25,9 +35,38 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val keyFile = keystoreProperties.getProperty("storeFile")
+            val targetFile = if (keyFile != null) {
+                if (file(keyFile).exists()) file(keyFile)
+                else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
+                else null
+            } else null
+
+            if (targetFile != null) {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = targetFile
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            val keyFile = keystoreProperties.getProperty("storeFile")
+            val targetFile = if (keyFile != null) {
+                if (file(keyFile).exists()) file(keyFile)
+                else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
+                else null
+            } else null
+
+            if (targetFile != null) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
     }
 }

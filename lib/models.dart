@@ -3,8 +3,9 @@ import 'package:flutter/material.dart' show IconData, Icons;
 
 DateTime _d(dynamic t) => (t as Timestamp).toDate();
 Timestamp _t(DateTime d) => Timestamp.fromDate(d);
-String fmt(double v) =>
-    v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
+String fmt(double v) => v == v.roundToDouble()
+    ? v.toStringAsFixed(0)
+    : v.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
 double? parseNum(String s) => double.tryParse(s.trim().replaceAll(',', '.'));
 
 /// Hormon untuk hasil lab. `units`: satuan -> faktor ke satuan dasar (satuan pertama).
@@ -18,13 +19,16 @@ class HormonePreset {
 
 const presets = <HormonePreset>[
   HormonePreset('estradiol', 'Estradiol', {'pg/mL': 1, 'pmol/L': 1 / 3.671}),
-  HormonePreset('testosterone', 'Testosteron', {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84}),
-  HormonePreset('progesterone', 'Progesteron', {'ng/mL': 1, 'nmol/L': 1 / 3.18}),
+  HormonePreset('testosterone', 'Testosteron',
+      {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84}),
+  HormonePreset(
+      'progesterone', 'Progesteron', {'ng/mL': 1, 'nmol/L': 1 / 3.18}),
   HormonePreset('lh', 'LH', {'IU/L': 1, 'mIU/mL': 1}),
   HormonePreset('fsh', 'FSH', {'IU/L': 1, 'mIU/mL': 1}),
   HormonePreset('prolactin', 'Prolaktin', {'ng/mL': 1, 'mIU/L': 1 / 21.2}),
 ];
-HormonePreset presetOf(String id) => presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
+HormonePreset presetOf(String id) =>
+    presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
 
 /// Cara pemakaian obat. `places`: butuh lokasi (suntik, patch).
 class AdminRoute {
@@ -45,7 +49,8 @@ const routes = <AdminRoute>[
   AdminRoute('spray', 'Spray', Icons.water_drop_rounded),
   AdminRoute('drops', 'Drops', Icons.opacity_rounded),
 ];
-AdminRoute routeOf(String id) => routes.firstWhere((r) => r.id == id, orElse: () => routes.first);
+AdminRoute routeOf(String id) =>
+    routes.firstWhere((r) => r.id == id, orElse: () => routes.first);
 
 const genericTypes = <String, (String, IconData)>{
   'syringe': ('Syringe', Icons.vaccines_rounded),
@@ -55,9 +60,21 @@ const genericTypes = <String, (String, IconData)>{
   'bandage': ('Bandage', Icons.healing_rounded),
 };
 
-const defaultPlaces = ['Left thigh', 'Right thigh', 'Left glute', 'Right glute'];
+const defaultPlaces = [
+  'Left thigh',
+  'Right thigh',
+  'Left glute',
+  'Right glute'
+];
 const placePresets = [
-  'Left thigh', 'Right thigh', 'Left arm', 'Right arm', 'Left glute', 'Right glute', 'Left abdomen', 'Right abdomen'
+  'Left thigh',
+  'Right thigh',
+  'Left arm',
+  'Right arm',
+  'Left glute',
+  'Right glute',
+  'Left abdomen',
+  'Right abdomen'
 ];
 
 String translatePlace(String place) {
@@ -102,7 +119,8 @@ class Therapy {
   final String? supplyId, pk, injType;
   final List<int> weekdays; // 1 = Senin ... 7 = Minggu
   final List<String> times; // 'HH:mm'
-  final bool rolling; // jadwal berikutnya dihitung dari dosis terakhir (hanya interval 2 hari atau lebih)
+  final bool
+      rolling; // jadwal berikutnya dihitung dari dosis terakhir (hanya interval 2 hari atau lebih)
   AdminRoute get adm => routeOf(route);
   bool get asNeeded => kind == 'asneeded';
   bool get daily => kind == 'interval' && everyDays == 1;
@@ -137,11 +155,17 @@ class Therapy {
         route: m['route'] ?? 'inj',
         pk: m['pk'],
         kind: m['kind'] ?? 'interval',
-        weekdays: m['weekdays'] is List ? [for (final x in m['weekdays'] as List) (x as num).toInt()] : const <int>[],
+        weekdays: m['weekdays'] is List
+            ? [for (final x in m['weekdays'] as List) (x as num).toInt()]
+            : const <int>[],
         monthDay: (m['monthDay'] as num?)?.toInt() ?? 1,
-        times: m['times'] is List ? [for (final x in m['times'] as List) x as String] : const ['09:00'],
+        times: m['times'] is List
+            ? [for (final x in m['times'] as List) x as String]
+            : const ['09:00'],
         injType: m['injType'],
-        rolling: m['rolling'] ?? ((m['kind'] ?? 'interval') == 'interval' && ((m['everyDays'] as num?)?.toInt() ?? 1) > 1),
+        rolling: m['rolling'] ??
+            ((m['kind'] ?? 'interval') == 'interval' &&
+                ((m['everyDays'] as num?)?.toInt() ?? 1) > 1),
       );
 }
 
@@ -163,7 +187,9 @@ class DoseLog {
   final DateTime at;
   final List<String> places;
   final double? dose, wasted, dead; // wasted: mL, dead: µL
-  final String? note, injType, slot; // slot: 'yyyy-MM-dd HH:mm' jadwal yang dipenuhi
+  final String? note,
+      injType,
+      slot; // slot: 'yyyy-MM-dd HH:mm' jadwal yang dipenuhi
   final Map<String, double> used; // id stok -> jumlah yang terpakai
   String get site => places.isEmpty ? '' : places.first;
 
@@ -187,7 +213,9 @@ class DoseLog {
         at: _d(m['at']),
         places: m['places'] is List
             ? [for (final x in m['places'] as List) x as String]
-            : (m['site'] is String && m['site'] != '' && m['site'] != 'oral' ? [m['site'] as String] : <String>[]),
+            : (m['site'] is String && m['site'] != '' && m['site'] != 'oral'
+                ? [m['site'] as String]
+                : <String>[]),
         dose: (m['dose'] as num?)?.toDouble(),
         note: m['note'],
         wasted: (m['wasted'] as num?)?.toDouble(),
@@ -195,19 +223,34 @@ class DoseLog {
         injType: m['injType'],
         slot: m['slot'],
         used: m['used'] is Map
-            ? {for (final e in (m['used'] as Map).entries) e.key as String: (e.value as num).toDouble()}
+            ? {
+                for (final e in (m['used'] as Map).entries)
+                  e.key as String: (e.value as num).toDouble()
+              }
             : const <String, double>{},
       );
 }
 
 class Lab {
-  const Lab({required this.id, required this.hormoneId, required this.at, required this.value, required this.unit, this.note});
+  const Lab(
+      {required this.id,
+      required this.hormoneId,
+      required this.at,
+      required this.value,
+      required this.unit,
+      this.note});
   final String id, hormoneId, unit;
   final DateTime at;
   final double value;
   final String? note;
   double get base => presetOf(hormoneId).toBase(value, unit);
-  Map<String, dynamic> toMap() => {'hormoneId': hormoneId, 'at': _t(at), 'value': value, 'unit': unit, 'note': note};
+  Map<String, dynamic> toMap() => {
+        'hormoneId': hormoneId,
+        'at': _t(at),
+        'value': value,
+        'unit': unit,
+        'note': note
+      };
   factory Lab.from(String id, Map<String, dynamic> m) => Lab(
       id: id,
       hormoneId: m['hormoneId'],
@@ -303,7 +346,7 @@ class Prefs {
     this.hrtCounter = true,
     this.dayStart = 240,
     this.accent = 'lagoon',
-    this.notify = false,
+    this.notify = true,
     this.appLock = false,
     this.nickname = '',
     this.avatarUrl = '',
@@ -365,7 +408,10 @@ class Prefs {
   factory Prefs.from(Map<String, dynamic> m) => Prefs(
         theme: m['theme'] ?? 'system',
         units: m['units'] is Map
-            ? {for (final e in (m['units'] as Map).entries) e.key as String: e.value as String}
+            ? {
+                for (final e in (m['units'] as Map).entries)
+                  e.key as String: e.value as String
+              }
             : const <String, String>{},
         places: m['places'] is List && (m['places'] as List).isNotEmpty
             ? [for (final x in m['places'] as List) x as String]
@@ -381,7 +427,11 @@ class Prefs {
 }
 
 class CloudBackup {
-  const CloudBackup({required this.id, required this.at, required this.count, required this.bytes});
+  const CloudBackup(
+      {required this.id,
+      required this.at,
+      required this.count,
+      required this.bytes});
   final String id;
   final DateTime at;
   final int count, bytes;
