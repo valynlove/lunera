@@ -11,118 +11,144 @@ String authError(Object e) {
   if (e is FirebaseAuthException) {
     return switch (e.code) {
       'invalid-credential' || 'wrong-password' || 'user-not-found' || 'invalid-login-credentials' =>
-        'Incorrect username/email or password.',
-      'email-already-in-use' => 'This email is already registered. Try signing in.',
-      'weak-password' => 'Password is too weak (minimum 6 characters).',
-      'invalid-email' => 'Invalid email format.',
-      'network-request-failed' => 'No internet connection.',
-      'too-many-requests' => 'Too many attempts. Please try again later.',
+        'Username/email atau kata sandi salah.',
+      'email-already-in-use' => 'Email ini sudah terdaftar. Coba masuk.',
+      'weak-password' => 'Kata sandi terlalu lemah (minimal 6 karakter).',
+      'invalid-email' => 'Format email tidak valid.',
+      'network-request-failed' => 'Tidak ada koneksi internet.',
+      'too-many-requests' => 'Terlalu banyak percobaan. Coba lagi nanti.',
       _ => e.message ?? e.code,
     };
   }
   if (e is FirebaseException) {
     return e.code == 'permission-denied'
-        ? 'Firestore rules not updated. Please publish firestore.rules.'
+        ? 'Aturan Firestore belum diperbarui. Tempel isi firestore.rules lalu Publish.'
         : (e.message ?? e.code);
   }
-  return 'An error occurred: $e';
+  return 'Terjadi kesalahan: $e';
 }
 
-/// Sign out and cancel all reminders on this device.
+/// Keluar dan batalkan semua pengingat di perangkat ini.
 Future<void> signOutAll() async {
   await AppNotifier.instance.cancelAll();
   await FirebaseAuth.instance.signOut();
 }
 
-/// Sign in with username or email.
+Future<String?> _emailFor(String id) async {
+  final v = id.trim();
+  if (v.contains('@')) return v;
+  final d = await FirebaseFirestore.instance.doc('usernames/${v.toLowerCase()}').get();
+  return d.exists ? d.get('email') as String : null;
+}
+
+/// [id] boleh username atau email.
 Future<void> signIn(String id, String pass) async {
-  var email = id.trim();
-  if (email.isEmpty || pass.isEmpty) throw const FormatException('Enter your username/email and password.');
-  if (!email.contains('@')) {
-    final d = await FirebaseFirestore.instance.doc('usernames/${email.toLowerCase()}').get();
-    if (!d.exists) throw const FormatException('Incorrect username/email or password.');
-    email = d.get('email') as String;
-  }
+  if (id.trim().isEmpty || pass.isEmpty) throw const FormatException('Isi username/email dan kata sandi.');
+  final email = await _emailFor(id);
+  if (email == null) throw const FormatException('Username/email atau kata sandi salah.');
   await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
 }
 
-Future<void> resetPassword(String email) async {
-  final mail = email.trim().toLowerCase();
-  if (mail.isEmpty || !mail.contains('@')) {
-    throw const FormatException('Please enter a valid email address.');
+/// Kirim email atur ulang kata sandi. Hasilnya sengaja sama, ada atau tidaknya akun,
+/// supaya tidak membocorkan siapa saja yang terdaftar.
+Future<void> resetPassword(String id) async {
+  if (id.trim().isEmpty) throw const FormatException('Isi username atau email.');
+  final email = await _emailFor(id);
+  if (email == null) return;
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  } on FirebaseAuthException catch (e) {
+    if (e.code != 'user-not-found') rethrow;
   }
-  await FirebaseAuth.instance.sendPasswordResetEmail(email: mail);
 }
 
 Future<void> signUp(String username, String email, String pass) async {
   final name = username.trim().toLowerCase();
   final mail = email.trim().toLowerCase();
   if (!_nameRe.hasMatch(name)) {
-    throw const FormatException('Username 3 to 20 characters: lowercase letters, numbers, dot, or underscore.');
+    throw const FormatException('Username 3 sampai 20 karakter: huruf kecil, angka, titik, atau garis bawah.');
   }
-  if (!mail.contains('@')) throw const FormatException('Invalid email format.');
+  if (!mail.contains('@')) throw const FormatException('Format email tidak valid.');
   final db = FirebaseFirestore.instance;
-  if ((await db.doc('usernames/$name').get()).exists) throw const FormatException('Username is already taken.');
+  if ((await db.doc('usernames/$name').get()).exists) throw const FormatException('Username sudah dipakai.');
   final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: mail, password: pass);
   try {
     await db.doc('usernames/$name').set({'uid': cred.user!.uid, 'email': mail});
     await cred.user!.updateDisplayName(name);
-    await cred.user!.reload();
   } on FirebaseException catch (e) {
     await cred.user!.delete();
-    throw FormatException(e.code == 'permission-denied' ? 'Username is already taken.' : 'Failed to save username: ${e.message}');
+    throw FormatException(e.code == 'permission-denied' ? 'Username sudah dipakai.' : 'Gagal menyimpan username: ${e.message}');
   }
 }
 
 void _toast(BuildContext c, String s) => ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(s)));
 
+/// Halaman masuk/daftar selalu bertema malam, seperti layar pembuka.
 class _AuthShell extends StatelessWidget {
   const _AuthShell({required this.title, required this.subtitle, required this.children, this.back = false});
   final String title, subtitle;
   final List<Widget> children;
   final bool back;
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: ListView(shrinkWrap: true, padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24), children: [
-                if (back)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-                  ),
-                const Center(child: LuneraLogo(size: 88)),
-                gap(16),
-                Center(
-                  child: Text(
-                    title,
-                    style: display(back ? 36 : 46, color: C.lavender),
-                    textAlign: TextAlign.center,
-                  ),
+  Widget build(BuildContext context) => Theme(
+        data: buildTheme(Brightness.dark),
+        child: Scaffold(
+          body: NightScene(
+            child: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: ListView(shrinkWrap: true, padding: const EdgeInsets.fromLTRB(28, 8, 28, 120), children: [
+                    if (back)
+                      Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)))
+                    else
+                      gap(40),
+                    const MoonLogo(size: 56),
+                    gap(14),
+                    Text(title, style: display(36, color: Colors.white)),
+                    gap(8),
+                    Text(subtitle, style: TextStyle(color: Colors.white.withValues(alpha: .8))),
+                    gap(26),
+                    ...children,
+                  ]),
                 ),
-                if (!back) ...[
-                  gap(4),
-                  Center(
-                    child: Text(
-                      'Every Phase, Your Own.',
-                      style: tagline(13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7)),
-                      textAlign: TextAlign.center,
-                    ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Layar pembuka: bulan, nama, dan ajakan mulai.
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
+  @override
+  Widget build(BuildContext context) => Theme(
+        data: buildTheme(Brightness.dark),
+        child: Scaffold(
+          body: NightScene(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 110),
+                child: Column(children: [
+                  const Spacer(flex: 2),
+                  const MoonLogo(size: 120),
+                  gap(18),
+                  Text(appName, style: wordmark(48, color: Colors.white)),
+                  gap(12),
+                  Text(tagline, style: TextStyle(color: Colors.white.withValues(alpha: .85), fontSize: 17)),
+                  const Spacer(flex: 3),
+                  SizedBox(
+                    width: double.infinity,
+                    child: pillButton('Mulai', () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpPage()))),
                   ),
-                ],
-                gap(12),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .75),
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                gap(28),
-                ...children,
-              ]),
+                  gap(8),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Text('Sudah punya akun?', style: TextStyle(color: Colors.white.withValues(alpha: .85))),
+                    TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignInPage())), child: const Text('Masuk')),
+                  ]),
+                ]),
+              ),
             ),
           ),
         ),
@@ -146,7 +172,7 @@ class _PassFieldState extends State<_PassField> {
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => widget.onSubmit?.call(),
         decoration: InputDecoration(
-          labelText: 'Password',
+          labelText: 'Kata sandi',
           suffixIcon: IconButton(
             onPressed: () => setState(() => hide = !hide),
             icon: Icon(hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
@@ -170,78 +196,63 @@ class _SignInState extends State<SignInPage> {
     setState(() => _busy = true);
     try {
       await signIn(_id.text, _p.text);
+      // AuthGate sudah menampilkan beranda di bawah halaman ini; tutup halaman masuk.
+      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     } catch (e) {
       if (mounted) _toast(context, authError(e));
     }
     if (mounted) setState(() => _busy = false);
   }
 
-  Future<void> _forgotPassword() async {
-    final mailCtrl = TextEditingController(text: _id.text.contains('@') ? _id.text : '');
+  Future<void> _forgot() async {
+    final c = TextEditingController(text: _id.text);
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: const Text('Forgot Password?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Enter your registered email. We will send a password reset link to your email.'),
-            gap(14),
-            TextField(
-              controller: mailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email Address'),
-            ),
-          ],
-        ),
+        title: const Text('Atur ulang kata sandi'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Kami kirim tautan atur ulang ke email akunmu.'),
+          gap(12),
+          TextField(controller: c, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Username atau email')),
+        ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: const Text('Send Email')),
+          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Batal')),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: const Text('Kirim tautan')),
         ],
       ),
     );
-
-    if (ok == true && mounted) {
-      try {
-        await resetPassword(mailCtrl.text);
-        if (mounted) {
-          _toast(context, 'Reset link sent! Check your inbox or spam folder.');
-        }
-      } catch (e) {
-        if (mounted) _toast(context, authError(e));
-      }
+    if (ok != true) return;
+    try {
+      await resetPassword(c.text);
+      if (mounted) _toast(context, 'Jika akunnya ada, tautan atur ulang sudah dikirim ke emailnya. Cek juga folder spam.');
+    } catch (e) {
+      if (mounted) _toast(context, authError(e));
     }
   }
 
   @override
   Widget build(BuildContext context) => _AuthShell(
-        title: 'Lunera',
-        subtitle: 'Because every phase is part of your journey.',
+        back: true,
+        title: 'Selamat datang kembali',
+        subtitle: 'Masuk untuk melanjutkan ritme terapimu.',
         children: [
           TextField(
             controller: _id,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Username or email'),
+            decoration: const InputDecoration(labelText: 'Username atau email'),
           ),
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: _busy ? null : _forgotPassword,
-              child: const Text('Forgot password?'),
-            ),
-          ),
-          gap(12),
-          pillButton(_busy ? 'Processing...' : 'Sign In', _go),
+          Align(alignment: Alignment.centerRight, child: TextButton(onPressed: _forgot, child: const Text('Lupa kata sandi?'))),
+          gap(8),
+          pillButton(_busy ? 'Memproses...' : 'Masuk', _go),
           gap(8),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text("Don't have an account?"),
+            const Text('Belum punya akun?'),
             TextButton(
-              onPressed: _busy ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpPage())),
-              child: const Text('Sign Up'),
+              onPressed: _busy ? null : () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignUpPage())),
+              child: const Text('Daftar'),
             ),
           ]),
         ],
@@ -273,13 +284,13 @@ class _SignUpState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) => _AuthShell(
         back: true,
-        title: 'Create Account',
-        subtitle: 'Username is used for sign in, email for account recovery.',
+        title: 'Buat akun',
+        subtitle: 'Username dipakai untuk masuk, email untuk pemulihan akun.',
         children: [
           TextField(
             controller: _u,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Username', prefixText: '@', helperText: 'Lowercase letters, numbers, dot, or underscore (3 to 20)'),
+            decoration: const InputDecoration(labelText: 'Username', prefixText: '@', helperText: 'Huruf kecil, angka, titik, garis bawah (3 sampai 20)'),
           ),
           gap(12),
           TextField(
@@ -291,11 +302,14 @@ class _SignUpState extends State<SignUpPage> {
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
           gap(20),
-          pillButton(_busy ? 'Processing...' : 'Sign Up', _go),
+          pillButton(_busy ? 'Memproses...' : 'Daftar', _go),
           gap(8),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text('Already have an account?'),
-            TextButton(onPressed: _busy ? null : () => Navigator.pop(context), child: const Text('Sign In')),
+            const Text('Sudah punya akun?'),
+            TextButton(
+              onPressed: _busy ? null : () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignInPage())),
+              child: const Text('Masuk'),
+            ),
           ]),
         ],
       );

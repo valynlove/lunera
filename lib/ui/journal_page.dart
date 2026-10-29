@@ -35,7 +35,8 @@ class _JournalPageState extends ConsumerState<JournalPage> {
           children: [
             Row(
               children: [
-                Expanded(child: Text('Journal', style: display(32))),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
+                Expanded(child: Text('Jurnal & Catatan', style: display(32))),
                 IconButton.filledTonal(
                   onPressed: () => _openAddSheet(context),
                   icon: const Icon(Icons.add_rounded),

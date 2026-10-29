@@ -4,6 +4,27 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-29
+
+### Added
+- **Comprehensive UI & Navigation Overhaul:**
+  - Modernized visual experience with NightScene dynamic backdrops, orbital crescent moon emblem (`MoonLogo`), and curated Manrope & Jost typography.
+  - Reorganized into a streamlined 5-tab navigation shell: Beranda (Home), Kalender (Calendar), Level (Insights/Labs), Stok (Supplies), and Lainnya (More).
+- **Dedicated PIN & Biometric Security Engine (`lib/lock.dart` & `lock_screen.dart`):**
+  - Salted SHA-256 6-digit PIN hashing stored safely on-device with `crypto`.
+  - Biometric authentication (Fingerprint and Face ID) with configurable auto-lock timeouts (Immediate, 1 min, 5 min) and 30-second cooldown on failed attempts.
+  - Full-screen PIN flow for secure PIN setup, verification, and change in dedicated Security dashboard (`security_page.dart`).
+- **Interactive Weekly Calendar & Agenda (`calendar.dart`):**
+  - Week strip date selector with schedule indicators, dynamic agenda list, and 1-tap view switcher between upcoming doses and full intake history.
+- **Automated Stock & Expiration Reminders:**
+  - Automatic daily 09:00 notifications for depleted supplies and medications.
+  - Advance expiration alerts at 14 days, 3 days, and day-of expiry.
+- **Username Registration & Cloud Rules:**
+  - Seamless account sign-up and sign-in using customized `@username` handles or email addresses.
+  - Preserved in-app update checking and exit warning confirmation across all tabs.
+
+---
+
 ## [1.0.1] - 2026-10-28
 
 ### Added

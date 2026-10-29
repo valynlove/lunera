@@ -60,6 +60,7 @@ List<Intake> intakesFor(String hormoneId, List<Therapy> ths, List<DoseLog> logs)
   final byId = {for (final t in ths) t.id: t};
   final out = <Intake>[];
   for (final l in logs) {
+    if (l.skipped) continue;
     final t = byId[l.therapyId];
     final pk = pkOf(t?.pk);
     if (t == null || pk == null || t.hormoneId != hormoneId) continue;

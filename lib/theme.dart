@@ -1,31 +1,29 @@
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'models.dart';
 
-/// Palet warna resmi Lunera
+const appName = 'Lunera';
+const tagline = 'Setiap fase, milikmu.';
+
 class C {
-  static const midnight = Color(0xFF0F122B);
-  static const indigo = Color(0xFF3B3F7A);
-  static const lavender = Color(0xFFA997FF);
-  static const moonlight = Color(0xFFE6E2FF);
-  static const ivory = Color(0xFFF7F6FB);
-
-  static const ink = Color(0xFF12142B);
-  static const deepCard = Color(0xFF181B3B);
+  static const ink = Color(0xFF1E1B4B);
+  static const mist = Color(0xFFF4F3FD);
   static const amber = Color(0xFFF0B541);
+  static const deep = Color(0xFF12112F);
+  static const deepCard = Color(0xFF1C1B45);
+  static const midnight = Color(0xFF0F122B);
+  static const lavender = Color(0xFFA997FF);
 
-  // Dynamic accents (dapat disesuaikan lewat Pengaturan)
-  static Color lagoon = const Color(0xFFA997FF); // Primary accent (Lavender)
-  static Color peony = const Color(0xFF3B3F7A);  // Secondary accent (Indigo)
+  static Color lagoon = const Color(0xFF34B08F); // aksen kedua (mint): selesai, perkiraan
+  static Color peony = const Color(0xFF6B5CE0); // aksen utama (violet): tombol, hari ini
 }
 
+/// (nama, aksen kedua, aksen utama)
 const accents = <String, (String, Color, Color)>{
-  'lunera': ('Lunera', Color(0xFFA997FF), Color(0xFF3B3F7A)),
-  'moonlight': ('Moonlight', Color(0xFFC5B8FF), Color(0xFF0F122B)),
-  'ocean': ('Ocean', Color(0xFF638EFF), Color(0xFFA997FF)),
-  'rose': ('Rose Quartz', Color(0xFFE89BFF), Color(0xFFA997FF)),
+  'lunera': ('Violet dan mint', Color(0xFF34B08F), Color(0xFF6B5CE0)),
+  'lagoon': ('Teal dan peony', Color(0xFF1E9E9A), Color(0xFFE8628C)),
+  'ocean': ('Biru dan jingga', Color(0xFF2F7FD6), Color(0xFFF08A3C)),
+  'forest': ('Hijau dan koral', Color(0xFF3E9B5F), Color(0xFFE5675A)),
 };
 
 void applyAccent(String id) {
@@ -34,57 +32,29 @@ void applyAccent(String id) {
   C.peony = a.$3;
 }
 
-/// Tipografi Seri Lunera (Playfair Display untuk Judul / Header)
-TextStyle display(double size, {Color? color, FontWeight? weight}) => GoogleFonts.playfairDisplay(
+TextStyle display(double size, {Color? color, FontWeight? weight}) => GoogleFonts.manrope(
       fontSize: size,
-      fontWeight: weight ?? FontWeight.w600,
-      height: 1.15,
+      fontWeight: weight ?? (size >= 40 ? FontWeight.w800 : FontWeight.w700),
+      height: 1.05,
       letterSpacing: -size * 0.02,
       color: color,
     );
 
-/// Tipografi Tagline Lunera (Montserrat)
-TextStyle tagline(double size, {Color? color}) => GoogleFonts.montserrat(
-      fontSize: size,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 1.4,
-      color: color,
-    );
+TextStyle wordmark(double size, {Color? color}) =>
+    GoogleFonts.jost(fontSize: size, fontWeight: FontWeight.w300, letterSpacing: size * .14, height: 1, color: color);
 
 ThemeData buildTheme(Brightness b) {
   final dark = b == Brightness.dark;
-  final fg = dark ? const Color(0xFFEAE7FF) : C.ink;
-  final primary = C.lagoon;
-  final secondary = C.peony;
-
-  final scheme = ColorScheme.fromSeed(seedColor: primary, brightness: b).copyWith(
-    primary: primary,
-    secondary: secondary,
-    surface: dark ? C.deepCard : Colors.white,
-    onSurface: fg,
-  );
-
-  final base = ThemeData(
-    useMaterial3: true,
-    colorScheme: scheme,
-    scaffoldBackgroundColor: dark ? C.midnight : C.ivory,
-  );
-
+  final fg = dark ? const Color(0xFFECEAFF) : C.ink;
+  final scheme = ColorScheme.fromSeed(seedColor: C.peony, brightness: b)
+      .copyWith(primary: C.peony, secondary: C.lagoon, surface: dark ? C.deepCard : Colors.white, onSurface: fg);
+  final base = ThemeData(useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: Colors.transparent);
   return base.copyWith(
-    textTheme: GoogleFonts.montserratTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
+    textTheme: GoogleFonts.figtreeTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: dark ? Colors.white.withValues(alpha: .06) : C.moonlight.withValues(alpha: .4),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    ),
-    chipTheme: ChipThemeData(
-      backgroundColor: dark ? C.indigo.withValues(alpha: .4) : C.moonlight.withValues(alpha: .5),
-      side: BorderSide.none,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      fillColor: fg.withValues(alpha: .06),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: scheme.surface,
@@ -93,137 +63,169 @@ ThemeData buildTheme(Brightness b) {
   );
 }
 
+/// Latar gradien seluruh aplikasi (malam di mode gelap, kabut lavender di mode terang).
+Widget appBackdrop(BuildContext context, Widget? child) {
+  final dark = Theme.of(context).brightness == Brightness.dark;
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: dark ? const [Color(0xFF1B1A4B), Color(0xFF0F0E2A)] : const [Color(0xFFF6F5FF), Color(0xFFE9E7F9)],
+      ),
+    ),
+    child: child,
+  );
+}
+
+/// Kartu: tepi tipis di mode gelap, bayangan lembut ungu di mode terang.
+BoxDecoration cardBox(BuildContext c, {double radius = 28}) {
+  final t = Theme.of(c), dark = t.brightness == Brightness.dark;
+  return BoxDecoration(
+    color: t.colorScheme.surface,
+    borderRadius: BorderRadius.circular(radius),
+    border: dark ? Border.all(color: Colors.white.withValues(alpha: .07)) : null,
+    boxShadow: dark ? null : [BoxShadow(color: const Color(0xFF6B5CE0).withValues(alpha: .08), blurRadius: 24, offset: const Offset(0, 8))],
+  );
+}
+
 Widget pillButton(String label, VoidCallback onTap, {IconData? icon, Color? color}) {
-  final bg = color ?? C.lavender;
-  final fg = bg.computeLuminance() > 0.5 ? C.midnight : Colors.white;
   final style = FilledButton.styleFrom(
-    backgroundColor: bg,
-    foregroundColor: fg,
+    backgroundColor: color ?? C.peony,
+    foregroundColor: Colors.white,
     shape: const StadiumBorder(),
-    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 15),
-    textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 15),
+    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+    textStyle: const TextStyle(fontWeight: FontWeight.w700),
   );
   return icon == null
       ? FilledButton(onPressed: onTap, style: style, child: Text(label))
       : FilledButton.icon(onPressed: onTap, style: style, icon: Icon(icon, size: 20), label: Text(label));
 }
 
-/// Logo Resmi Lunera (Bulan, Orbit Ring, dan Bintang)
-class LuneraLogo extends StatelessWidget {
-  const LuneraLogo({
-    super.key,
-    this.size = 100,
-    this.color,
-    this.showText = false,
-    this.showTagline = false,
-  });
-
-  final double size;
-  final Color? color;
-  final bool showText;
-  final bool showTagline;
-
+/// Tab berbentuk pil: yang aktif berisi gradien violet.
+class PillTabs<T> extends StatelessWidget {
+  const PillTabs({super.key, required this.items, required this.value, required this.onChanged});
+  final List<(T, String)> items;
+  final T value;
+  final ValueChanged<T> onChanged;
   @override
   Widget build(BuildContext context) {
-    final primary = color ?? C.lavender;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: size,
-          height: size,
-          child: CustomPaint(
-            painter: _LuneraLogoPainter(primaryColor: primary),
+    final fg = Theme.of(context).colorScheme.onSurface;
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(color: fg.withValues(alpha: .07), borderRadius: BorderRadius.circular(999)),
+      child: Row(children: [
+        for (final it in items)
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onChanged(it.$1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: it.$1 == value ? LinearGradient(colors: [C.peony, Color.lerp(C.peony, Colors.white, .22)!]) : null,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  it.$2,
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: it.$1 == value ? Colors.white : fg.withValues(alpha: .7)),
+                ),
+              ),
+            ),
           ),
-        ),
-        if (showText) ...[
-          SizedBox(height: size * 0.12),
-          Text('Lunera', style: display(size * 0.36, color: Theme.of(context).colorScheme.onSurface)),
-        ],
-        if (showTagline) ...[
-          const SizedBox(height: 6),
-          Text(
-            'Every Phase, Your Own.',
-            style: tagline(size * 0.11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .7)),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ],
+      ]),
     );
   }
 }
 
-class _LuneraLogoPainter extends CustomPainter {
-  _LuneraLogoPainter({required this.primaryColor});
-  final Color primaryColor;
+/// Logo: bulan sabit dengan bintang.
+class MoonLogo extends StatelessWidget {
+  const MoonLogo({super.key, this.size = 72});
+  final double size;
+  @override
+  Widget build(BuildContext context) => SizedBox(width: size, height: size, child: CustomPaint(painter: _MoonPainter()));
+}
 
+class _MoonPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width * 0.33;
-
-    final grad = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        primaryColor,
-        primaryColor.withValues(alpha: .75),
-        const Color(0xFFE6E2FF),
-      ],
+    canvas.save();
+    canvas.scale(size.width / 48);
+    final paint = Paint()..color = const Color(0xFFE7E3FF);
+    final moon = Path.combine(
+      PathOperation.difference,
+      Path()..addOval(Rect.fromCircle(center: const Offset(24, 24), radius: 16)),
+      Path()..addOval(Rect.fromCircle(center: const Offset(32, 19), radius: 13)),
     );
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final paintFill = Paint()
-      ..shader = grad.createShader(rect)
-      ..style = PaintingStyle.fill;
-
-    // 1. Crescent Moon
-    final moonPath = Path();
-    moonPath.addOval(Rect.fromCircle(center: center, radius: radius));
-
-    final innerCenter = center + Offset(radius * 0.38, -radius * 0.22);
-    final innerPath = Path()..addOval(Rect.fromCircle(center: innerCenter, radius: radius * 0.88));
-
-    final crescentPath = Path.combine(PathOperation.difference, moonPath, innerPath);
-
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(-22 * math.pi / 180);
-    canvas.translate(-center.dx, -center.dy);
-    canvas.drawPath(crescentPath, paintFill);
+    canvas.drawPath(moon, paint);
+    final star = Path()
+      ..moveTo(38, 6)
+      ..lineTo(39.6, 10.4)
+      ..lineTo(44, 12)
+      ..lineTo(39.6, 13.6)
+      ..lineTo(38, 18)
+      ..lineTo(36.4, 13.6)
+      ..lineTo(32, 12)
+      ..lineTo(36.4, 10.4)
+      ..close();
+    canvas.drawPath(star, paint);
     canvas.restore();
-
-    // 2. Orbit Ring
-    final orbitPaint = Paint()
-      ..shader = grad.createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.038;
-
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(-28 * math.pi / 180);
-    final orbitRect = Rect.fromCenter(center: Offset.zero, width: radius * 2.45, height: radius * 0.82);
-    canvas.drawOval(orbitRect, orbitPaint);
-    canvas.restore();
-
-    // 3. Sparkle / 4-Pointed Star
-    final starCenter = center + Offset(radius * 1.02, -radius * 0.85);
-    final starSize = size.width * 0.085;
-    final starPath = Path();
-    starPath.moveTo(starCenter.dx, starCenter.dy - starSize);
-    starPath.quadraticBezierTo(starCenter.dx, starCenter.dy, starCenter.dx + starSize, starCenter.dy);
-    starPath.quadraticBezierTo(starCenter.dx, starCenter.dy, starCenter.dx, starCenter.dy + starSize);
-    starPath.quadraticBezierTo(starCenter.dx, starCenter.dy, starCenter.dx - starSize, starCenter.dy);
-    starPath.quadraticBezierTo(starCenter.dx, starCenter.dy, starCenter.dx, starCenter.dy - starSize);
-    starPath.close();
-
-    final starPaint = Paint()
-      ..color = const Color(0xFFE6E2FF)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(starPath, starPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _LuneraLogoPainter oldDelegate) => oldDelegate.primaryColor != primaryColor;
+  bool shouldRepaint(_MoonPainter o) => false;
+}
+
+/// Langit malam dengan bintang dan pegunungan, untuk layar masuk dan kunci.
+class NightScene extends StatelessWidget {
+  const NightScene({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Stack(fit: StackFit.expand, children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF12112F), Color(0xFF25225A), Color(0xFF5C4A8F), Color(0xFFC98AA8)],
+              stops: [0, .52, .84, 1],
+            ),
+          ),
+        ),
+        CustomPaint(painter: _NightPainter()),
+        child,
+      ]);
+}
+
+class _NightPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size s) {
+    final rnd = math.Random(7);
+    for (var i = 0; i < 40; i++) {
+      final p = Paint()..color = Colors.white.withValues(alpha: .35 + rnd.nextDouble() * .6);
+      canvas.drawCircle(Offset(rnd.nextDouble() * s.width, rnd.nextDouble() * s.height * .6), .6 + rnd.nextDouble() * 1.2, p);
+    }
+    final hh = (s.height * .16).clamp(100.0, 170.0);
+    Path ridge(List<List<double>> pts) {
+      final path = Path()..moveTo(0, s.height);
+      for (final q in pts) {
+        path.lineTo(q[0] / 1440 * s.width, s.height - hh + q[1] / 140 * hh);
+      }
+      return path..lineTo(s.width, s.height)..close();
+    }
+
+    canvas.drawPath(
+        ridge([[0, 82], [140, 36], [260, 74], [430, 16], [620, 82], [790, 38], [990, 90], [1140, 50], [1320, 88], [1440, 62]]),
+        Paint()..color = const Color(0xFF1A1844));
+    canvas.drawPath(
+        ridge([[0, 108], [180, 78], [330, 104], [550, 66], [750, 100], [990, 70], [1240, 102], [1440, 92]]),
+        Paint()..color = const Color(0xFF12112F));
+  }
+
+  @override
+  bool shouldRepaint(_NightPainter o) => false;
 }
 
 Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
@@ -238,62 +240,15 @@ Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
 
 Widget gap(double h) => SizedBox(height: h);
 
-Future<bool> confirm(BuildContext c, String text, {String ok = 'Delete'}) async =>
+Future<bool> confirm(BuildContext c, String text, {String ok = 'Hapus'}) async =>
     (await showDialog<bool>(
       context: c,
       builder: (d) => AlertDialog(
         content: Text(text),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Batal')),
           FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(ok)),
         ],
       ),
     )) ??
     false;
-
-final Map<String, ImageProvider> _avatarCache = {};
-
-ImageProvider? getAvatarImageProvider(String avatarUrl) {
-  if (!avatarUrl.startsWith('data:image/')) return null;
-  if (_avatarCache.containsKey(avatarUrl)) {
-    return _avatarCache[avatarUrl];
-  }
-  try {
-    final base64Str = avatarUrl.split(',').last;
-    final bytes = base64Decode(base64Str);
-    final provider = MemoryImage(bytes);
-    if (_avatarCache.length > 10) _avatarCache.clear();
-    _avatarCache[avatarUrl] = provider;
-    return provider;
-  } catch (_) {
-    return null;
-  }
-}
-
-Widget buildAvatar(Prefs prefs, {double radius = 24, VoidCallback? onTap}) {
-  Widget content;
-  final provider = getAvatarImageProvider(prefs.avatarUrl);
-
-  if (provider != null) {
-    content = CircleAvatar(
-      radius: radius,
-      backgroundImage: provider,
-    );
-  } else if (prefs.avatarUrl.isNotEmpty && !prefs.avatarUrl.startsWith('data:image/')) {
-    content = CircleAvatar(
-      radius: radius,
-      backgroundColor: C.lavender.withValues(alpha: .25),
-      child: Text(prefs.avatarUrl, style: TextStyle(fontSize: radius * 1.1)),
-    );
-  } else {
-    content = CircleAvatar(
-      radius: radius,
-      backgroundColor: C.lavender.withValues(alpha: .25),
-      child: Icon(Icons.person_rounded, size: radius * 1.1, color: C.lavender),
-    );
-  }
-
-  return onTap == null
-      ? content
-      : GestureDetector(onTap: onTap, child: content);
-}

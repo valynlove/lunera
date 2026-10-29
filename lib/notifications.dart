@@ -44,6 +44,7 @@ class AppNotifier {
       debugPrint('Gagal set timezone lokal, fallback ke UTC: $e');
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
+
     await _plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -51,15 +52,16 @@ class AppNotifier {
       ),
     );
 
-    const channel = AndroidNotificationChannel(
+    // Daftarkan channel Android secara eksplisit dengan sound & vibration
+    const dosesChannel = AndroidNotificationChannel(
       'doses',
-      'Dose Reminders',
-      description: 'Medication and injection schedule reminders',
+      'Pengingat dosis',
+      description: 'Pengingat jadwal obat dan suntikan',
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
     );
-    await _android?.createNotificationChannel(channel);
+    await _android?.createNotificationChannel(dosesChannel);
 
     _ready = true;
   }
@@ -67,8 +69,8 @@ class AppNotifier {
   NotificationDetails get _details => const NotificationDetails(
         android: AndroidNotificationDetails(
           'doses',
-          'Dose Reminders',
-          channelDescription: 'Medication and injection schedule reminders',
+          'Pengingat dosis',
+          channelDescription: 'Pengingat jadwal obat dan suntikan',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
@@ -94,23 +96,16 @@ class AppNotifier {
   int _id(Therapy t, DateTime at) => '${t.id}|${slotKey(at)}'.hashCode & 0x7fffffff;
 
   String _verb(Therapy t) => switch (t.route) {
-        'inj' => 'Time for injection',
-        'oral' || 'sublingual' || 'supp' => 'Time to take medication',
-        'patch' => 'Time to change patch',
-        _ => 'Time to take medication',
+        'inj' => 'Waktunya suntik',
+        'oral' || 'sublingual' || 'supp' => 'Waktunya minum obat',
+        'patch' => 'Waktunya ganti patch',
+        _ => 'Waktunya pakai obat',
       };
 
-  Future<bool> test() async {
-    if (!supported) return false;
+  Future<void> test() async {
+    if (!supported) return;
     await init();
-    await requestPermission();
-    await _plugin.show(
-      id: 1,
-      title: 'Lunera',
-      body: 'Notification reminders are working properly. ✨',
-      notificationDetails: _details,
-    );
-    return true;
+    await _plugin.show(id: 1, title: 'Lunera', body: 'Notifikasi pengingat berfungsi.', notificationDetails: _details);
   }
 
   Future<void> cancelAll() async {
@@ -120,14 +115,14 @@ class AppNotifier {
   }
 
   /// Jadwalkan ulang semua pengingat (diserialkan agar tidak saling menimpa).
-  Future<void> sync(List<Therapy> ths, List<DoseLog> logs, Prefs prefs) {
-    _chain = _chain.then((_) => _sync(ths, logs, prefs)).catchError((Object e) {
-      debugPrint('Failed to schedule notifications: $e');
+  Future<void> sync(List<Therapy> ths, List<DoseLog> logs, List<Supply> supplies, Prefs prefs) {
+    _chain = _chain.then((_) => _sync(ths, logs, supplies, prefs)).catchError((Object e) {
+      debugPrint('Gagal menjadwalkan notifikasi: $e');
     });
     return _chain;
   }
 
-  Future<void> _sync(List<Therapy> ths, List<DoseLog> logs, Prefs prefs) async {
+  Future<void> _sync(List<Therapy> ths, List<DoseLog> logs, List<Supply> supplies, Prefs prefs) async {
     if (!supported) return;
     await init();
     await _plugin.cancelAll();
@@ -137,47 +132,44 @@ class AppNotifier {
     final desc = [...logs]..sort((a, b) => b.at.compareTo(a.at));
     final slots = [
       for (final s in buildSlots(ths, logs, prefs, back: 0, ahead: 21))
-        if (!s.taken && s.at.isAfter(now)) s,
+        if (s.pending && s.at.isAfter(now)) s,
     ];
     for (final s in slots.take(60)) {
       final t = s.t;
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
-      final scheduledDate = tz.TZDateTime.from(s.at, tz.local);
-      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-        continue;
-      }
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
         title: '${_verb(t)}: ${t.name}',
-        body: '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', site: $place'}',
-        scheduledDate: scheduledDate,
+        body: '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', lokasi: $place'}',
+        scheduledDate: tz.TZDateTime.from(s.at, tz.local),
         notificationDetails: _details,
         androidScheduleMode: mode,
       );
     }
-  }
 
-  Future<void> checkStockAlerts(List<Supply> supplies) async {
-    if (!supported) return;
-    await init();
-    for (final s in supplies) {
-      if (s.doses > 0 && s.doses <= 3) {
-        await _plugin.show(
-          id: ('stock|${s.id}').hashCode & 0x7fffffff,
-          title: 'Low Stock Alert: ${s.name}',
-          body: 'Only ${s.doses} doses remaining. Please restock soon.',
+    // Stok hampir habis: pagi pukul 09:00, tiga hari berturut-turut selama masih menipis.
+    Future<void> at9(DateTime at, String key, String title, String body) => _plugin.zonedSchedule(
+          id: key.hashCode & 0x7fffffff,
+          title: title,
+          body: body,
+          scheduledDate: tz.TZDateTime(tz.local, at.year, at.month, at.day, at.hour, at.minute),
           notificationDetails: _details,
+          androidScheduleMode: mode,
         );
+    final firstMorning = now.hour < 9 ? DateTime(now.year, now.month, now.day, 9) : DateTime(now.year, now.month, now.day + 1, 9);
+    for (final s in supplies) {
+      if (s.low && !s.expired) {
+        for (var d = 0; d < 3; d++) {
+          await at9(DateTime(firstMorning.year, firstMorning.month, firstMorning.day + d, 9), 'low|${s.id}|$d', 'Stok hampir habis',
+              s.generic ? '${s.name}: tinggal ${fmt(s.qty)}' : '${s.name}: ${s.doses} dosis tersisa');
+        }
       }
-      if (s.expiry != null) {
-        final leftDays = s.expiry!.difference(DateTime.now()).inDays;
-        if (leftDays <= 7 && leftDays >= 0) {
-          await _plugin.show(
-            id: ('expiry|${s.id}').hashCode & 0x7fffffff,
-            title: 'Expiry Warning: ${s.name}',
-            body: 'Stock ${s.name} will expire in $leftDays days.',
-            notificationDetails: _details,
-          );
+      final e = s.expiry;
+      if (e != null) {
+        for (final lead in const [14, 3, 0]) {
+          final at = DateTime(e.year, e.month, e.day - lead, 9);
+          if (!at.isAfter(now)) continue;
+          await at9(at, 'exp|${s.id}|$lead', lead == 0 ? 'Obat kedaluwarsa hari ini' : 'Obat segera kedaluwarsa', lead == 0 ? s.name : '${s.name}: $lead hari lagi');
         }
       }
     }
@@ -190,9 +182,6 @@ final notifySyncProvider = Provider<void>((ref) {
   final logs = ref.watch(logsProvider).value;
   final supplies = ref.watch(suppliesProvider).value;
   final prefs = ref.watch(prefsProvider).value;
-  if (ths == null || logs == null || prefs == null) return;
-  AppNotifier.instance.sync(ths, logs, prefs);
-  if (supplies != null) {
-    AppNotifier.instance.checkStockAlerts(supplies);
-  }
+  if (ths == null || logs == null || supplies == null || prefs == null) return;
+  AppNotifier.instance.sync(ths, logs, supplies, prefs);
 });

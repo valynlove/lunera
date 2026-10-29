@@ -11,38 +11,24 @@ String slotKey(DateTime at) => '${at.year}-${two(at.month)}-${two(at.day)} ${two
   return (int.parse(p[0]), int.parse(p[1]));
 }
 
-/// Logical today starting at dayStart
+/// "Hari ini" menurut pengaturan awal hari (mis. 04:00: pukul 02:00 masih dihitung kemarin).
 DateTime logicalToday(Prefs p) => DateUtils.dateOnly(DateTime.now().subtract(Duration(minutes: p.dayStart)));
 
-const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-String _ordinal(int n) {
-  if (n >= 11 && n <= 13) return 'th';
-  switch (n % 10) {
-    case 1:
-      return 'st';
-    case 2:
-      return 'nd';
-    case 3:
-      return 'rd';
-    default:
-      return 'th';
-  }
-}
+const _dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 String scheduleText(Therapy t) {
   final n = t.times.length;
   switch (t.kind) {
     case 'weekly':
       final d = [...t.weekdays]..sort();
-      return 'Every ${d.map((x) => _dayNames[x - 1]).join(', ')}';
+      return 'Tiap ${d.map((x) => _dayNames[x - 1]).join(', ')}';
     case 'monthly':
-      return 'Every ${t.monthDay}${_ordinal(t.monthDay)} of month';
+      return 'Tiap tanggal ${t.monthDay}';
     case 'asneeded':
-      return 'As needed';
+      return 'Saat perlu';
     default:
-      if (t.everyDays == 1) return n > 1 ? 'Daily, $n times' : 'Daily';
-      return 'Every ${t.everyDays} days';
+      if (t.everyDays == 1) return n > 1 ? 'Setiap hari, $n kali' : 'Setiap hari';
+      return 'Tiap ${t.everyDays} hari';
   }
 }
 
@@ -53,7 +39,7 @@ int cycleOf(Therapy t) => switch (t.kind) {
       _ => t.everyDays < 1 ? 1 : t.everyDays,
     };
 
-/// Scheduled times for [t] between [from] and [to] (inclusive).
+/// Waktu jadwal untuk [t] pada tanggal [from] sampai [to] (inklusif).
 List<DateTime> occurrences(Therapy t, DateTime from, DateTime to) {
   if (t.asNeeded) return [];
   final out = <DateTime>[];
@@ -78,14 +64,16 @@ List<DateTime> occurrences(Therapy t, DateTime from, DateTime to) {
   return out;
 }
 
-/// status: taken | overdue | late | today | upcoming
+/// status: taken | skipped | overdue | late | today | upcoming
 class Slot {
   const Slot(this.t, this.at, this.log, this.status);
   final Therapy t;
   final DateTime at;
   final DoseLog? log;
   final String status;
-  bool get taken => log != null;
+  bool get taken => log != null && !log!.skipped;
+  bool get skipped => log?.skipped ?? false;
+  bool get pending => log == null;
 }
 
 List<Slot> buildSlots(List<Therapy> ths, List<DoseLog> logs, Prefs p, {int back = 3, int ahead = 40}) {
@@ -96,9 +84,10 @@ List<Slot> buildSlots(List<Therapy> ths, List<DoseLog> logs, Prefs p, {int back 
   for (final t in ths) {
     final tl = logs.where((l) => l.therapyId == t.id).toList();
     if (t.rolling && t.kind == 'interval' && t.everyDays > 1) {
+      // Jadwal berikutnya = tanggal dosis terakhir + N hari (atau tanggal mulai jika belum ada catatan).
       final last = tl.fold<DoseLog?>(null, (a, b) => a == null || b.at.isAfter(a.at) ? b : a);
       final first = last == null ? DateUtils.dateOnly(t.start) : DateTime(last.at.year, last.at.month, last.at.day + t.everyDays);
-      if (last != null && sameDay(last.at, today)) out.add(Slot(t, last.at, last, 'taken'));
+      if (last != null && sameDay(last.at, today)) out.add(Slot(t, last.at, last, last.skipped ? 'skipped' : 'taken'));
       final rtimes = [...t.times]..sort();
       for (var k = 0;; k++) {
         final d = DateTime(first.year, first.month, first.day + k * t.everyDays);
@@ -114,12 +103,13 @@ List<Slot> buildSlots(List<Therapy> ths, List<DoseLog> logs, Prefs p, {int back 
       continue;
     }
     final byKey = {for (final l in tl) if (l.slot != null) l.slot!: l};
+    // Catatan lama tanpa jadwal: cocokkan per hari (hanya jika jadwalnya sekali sehari).
     final legacy = t.times.length <= 1 ? tl.where((l) => l.slot == null).toList() : <DoseLog>[];
     for (final at in occurrences(t, from, to)) {
       final log = byKey[slotKey(at)] ?? legacy.where((l) => sameDay(l.at, at)).firstOrNull;
       final d = DateUtils.dateOnly(at);
       final st = log != null
-          ? 'taken'
+          ? (log.skipped ? 'skipped' : 'taken')
           : d.isBefore(today)
               ? 'overdue'
               : d.isAfter(today)
@@ -132,6 +122,7 @@ List<Slot> buildSlots(List<Therapy> ths, List<DoseLog> logs, Prefs p, {int back 
   return out;
 }
 
+/// Lokasi berikutnya yang disarankan (bergantian sesuai daftar lokasi).
 String suggestPlace(Prefs p, List<DoseLog> logsDesc, String therapyId) {
   if (p.places.isEmpty) return '';
   final last = logsDesc.where((l) => l.therapyId == therapyId && l.places.isNotEmpty).firstOrNull;
@@ -150,10 +141,6 @@ String hrtDuration(DateTime from, DateTime to) {
     y -= 1;
     m += 12;
   }
-  final parts = [
-    if (y > 0) '$y ${y == 1 ? "year" : "years"}',
-    if (m > 0) '$m ${m == 1 ? "month" : "months"}',
-    if (d > 0 || (y == 0 && m == 0)) '$d ${d == 1 ? "day" : "days"}',
-  ];
+  final parts = [if (y > 0) '$y tahun', if (m > 0) '$m bulan', if (d > 0 || (y == 0 && m == 0)) '$d hari'];
   return parts.join(' ');
 }

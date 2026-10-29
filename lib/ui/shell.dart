@@ -5,24 +5,26 @@ import '../notifications.dart';
 import '../repo.dart';
 import '../theme.dart';
 import '../update_checker.dart';
+import 'calendar.dart';
 import 'home.dart';
-import 'journal_page.dart';
 import 'levels.dart';
-import 'timeline_page.dart';
+import 'more.dart';
+import 'supplies.dart';
 
 class Shell extends ConsumerStatefulWidget {
   const Shell({super.key});
+
   @override
   ConsumerState<Shell> createState() => _ShellState();
 }
 
 class _ShellState extends ConsumerState<Shell> {
-  int i = 0;
   static const _items = [
-    (Icons.home_rounded, 'Home'),
-    (Icons.calendar_month_rounded, 'Timeline'),
-    (Icons.insights_rounded, 'Insights'),
-    (Icons.auto_stories_rounded, 'Journal'),
+    (Icons.home_rounded, Icons.home_outlined, 'Beranda'),
+    (Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'Kalender'),
+    (Icons.show_chart_rounded, Icons.show_chart_rounded, 'Level'),
+    (Icons.inventory_2_rounded, Icons.inventory_2_outlined, 'Stok'),
+    (Icons.grid_view_rounded, Icons.grid_view_outlined, 'Lainnya'),
   ];
 
   @override
@@ -53,22 +55,22 @@ class _ShellState extends ConsumerState<Shell> {
         icon: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: C.lagoon.withValues(alpha: 0.15),
+            color: C.peony.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.exit_to_app_rounded,
-            color: C.lagoon,
+            color: C.peony,
             size: 32,
           ),
         ),
         title: Text(
-          'Exit Lunera?',
+          'Keluar dari Lunera?',
           textAlign: TextAlign.center,
           style: display(20, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
         ),
         content: Text(
-          'Are you sure you want to close the application?',
+          'Apakah kamu yakin ingin keluar dari aplikasi?',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -85,7 +87,7 @@ class _ShellState extends ConsumerState<Shell> {
               side: BorderSide(color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.2)),
             ),
             child: Text(
-              'Cancel',
+              'Batal',
               style: TextStyle(
                 color: dark ? Colors.white70 : C.midnight,
                 fontWeight: FontWeight.w600,
@@ -95,13 +97,13 @@ class _ShellState extends ConsumerState<Shell> {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: C.lagoon,
-              foregroundColor: C.midnight,
+              backgroundColor: C.peony,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
             ),
             child: const Text(
-              'Exit',
+              'Keluar',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
@@ -114,16 +116,16 @@ class _ShellState extends ConsumerState<Shell> {
   @override
   Widget build(BuildContext context) {
     ref.watch(notifySyncProvider); // jadwalkan ulang pengingat saat data berubah
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = dark ? C.deepCard : Colors.white;
-    final fgColor = Theme.of(context).colorScheme.onSurface;
+    final i = ref.watch(tabProvider);
+    final theme = Theme.of(context), dark = theme.brightness == Brightness.dark;
+    final fg = theme.colorScheme.onSurface;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (i != 0) {
-          setState(() => i = 0);
+          ref.read(tabProvider.notifier).state = 0;
           return;
         }
         final shouldExit = await _showExitDialog(context);
@@ -132,83 +134,77 @@ class _ShellState extends ConsumerState<Shell> {
         }
       },
       child: Scaffold(
-      body: Stack(children: [
-        SafeArea(
-          bottom: false,
-          child: IndexedStack(
-            index: i,
-            children: const [
-              HomePage(),
-              TimelinePage(),
-              LevelsPage(),
-              JournalPage(),
-            ],
-          ),
-        ),
-        Positioned.fill(
-          child: SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: barColor,
-                    borderRadius: BorderRadius.circular(40),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: dark ? .4 : .08),
-                        blurRadius: 18,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var k = 0; k < _items.length; k++)
-                        GestureDetector(
-                          onTap: () => setState(() => i = k),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.easeOutCubic,
-                            padding: EdgeInsets.symmetric(horizontal: i == k ? 16 : 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: i == k ? C.lavender : Colors.transparent,
-                              borderRadius: BorderRadius.circular(32),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  _items[k].$1,
-                                  size: 20,
-                                  color: i == k ? C.midnight : fgColor.withValues(alpha: .6),
-                                ),
-                                if (i == k) ...[
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _items[k].$2,
-                                    style: const TextStyle(
-                                      color: C.midnight,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+        body: Column(children: [
+          Expanded(
+            child: SafeArea(
+              bottom: false,
+              child: IndexedStack(
+                index: i,
+                children: const [HomePage(), CalendarPage(), LevelsPage(), SuppliesPage(), MorePage()],
               ),
             ),
           ),
-        ),
-      ]),
-    ),
-  );
-}
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              border: dark ? Border(top: BorderSide(color: Colors.white.withValues(alpha: .07))) : null,
+              boxShadow: dark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: const Color(0xFF6B5CE0).withValues(alpha: .10),
+                        blurRadius: 24,
+                        offset: const Offset(0, -6),
+                      ),
+                    ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
+                child: Row(children: [
+                  for (var k = 0; k < _items.length; k++)
+                    Expanded(
+                      child: InkResponse(
+                        onTap: () => ref.read(tabProvider.notifier).state = k,
+                        radius: 36,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Column(mainAxisSize: MainAxisSize.min, children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 56,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: i == k ? C.peony.withValues(alpha: .16) : Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                i == k ? _items[k].$1 : _items[k].$2,
+                                size: 24,
+                                color: i == k ? C.peony : fg.withValues(alpha: .6),
+                              ),
+                            ),
+                            gap(2),
+                            Text(
+                              _items[k].$3,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: i == k ? FontWeight.w700 : FontWeight.w500,
+                                color: i == k ? C.peony : fg.withValues(alpha: .6),
+                              ),
+                            ),
+                          ]),
+                        ),
+                      ),
+                    ),
+                ]),
+              ),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
 }

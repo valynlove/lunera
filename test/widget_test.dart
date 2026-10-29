@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
 import 'package:lunera/sim.dart';
 import 'package:lunera/update_checker.dart';
@@ -32,8 +33,29 @@ void main() {
       expect(mgOf(5, 'mg'), equals(5));
     });
 
+    test('DoseLog handles skipped doses properly', () {
+      final log = DoseLog(
+        id: '1',
+        therapyId: 't1',
+        at: DateTime(2026, 10, 29),
+        skipped: true,
+      );
+      expect(log.skipped, isTrue);
+      final map = log.toMap();
+      expect(map['skipped'], isTrue);
+      final reconstructed = DoseLog.from('1', map);
+      expect(reconstructed.skipped, isTrue);
+    });
+
+    test('AppLockState default values', () {
+      const state = AppLockState();
+      expect(state.enabled, isFalse);
+      expect(state.bio, isFalse);
+      expect(state.delayMin, equals(1));
+    });
+
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.0.1'));
+      expect(UpdateCheckerService.currentVersion, equals('1.1.0'));
     });
   });
 }

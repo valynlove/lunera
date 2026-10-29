@@ -7,9 +7,9 @@ import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 
-const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const _dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
-/// Log new dose or edit existing entry [edit].
+/// Catat dosis baru (dari jadwal [slot] atau tambahan) atau ubah catatan [edit].
 class DoseSheet extends ConsumerStatefulWidget {
   const DoseSheet({super.key, required this.t, required this.supplies, required this.prefs, this.slot, this.edit, this.suggested = ''});
   final Therapy t;
@@ -52,7 +52,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
   void _save() {
     final amt = parseNum(amount.text);
     if (amt == null || amt <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid dose amount.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Isi jumlah dosis.')));
       return;
     }
     final w = parseNum(wasted.text), dd = parseNum(dead.text);
@@ -87,30 +87,8 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
     Navigator.pop(context);
   }
 
-  void _skip() {
-    final t = widget.t;
-    final log = DoseLog(
-      id: widget.edit?.id ?? '',
-      therapyId: t.id,
-      at: at,
-      places: const [],
-      dose: 0,
-      note: note.text.trim().isEmpty ? 'Skipped' : '[Skipped] ${note.text.trim()}',
-      slot: widget.edit?.slot ?? (widget.slot == null ? null : slotKey(widget.slot!.at)),
-      used: const {},
-    );
-    final repo = ref.read(repoProvider);
-    if (widget.edit != null) {
-      repo?.updateLog(log);
-    } else {
-      repo?.logDose(log);
-    }
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dose marked as skipped.')));
-  }
-
   Future<void> _delete() async {
-    if (!await confirm(context, 'Delete this entry? Used supplies will be restored.', ok: 'Delete') || !mounted) return;
+    if (!await confirm(context, 'Hapus catatan ini? Stok yang terpakai akan dikembalikan.') || !mounted) return;
     ref.read(repoProvider)?.deleteLog(widget.edit!, {for (final s in widget.supplies) s.id});
     Navigator.pop(context);
   }
@@ -121,24 +99,24 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
     final meds = widget.supplies.where((s) => !s.generic).toList();
     final gens = widget.supplies.where((s) => s.generic).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? 'Edit Record' : (t.route == 'inj' ? 'Log Injection' : 'Log Dose'), style: display(28)),
+      Text(editing ? 'Ubah catatan' : (t.route == 'inj' ? 'Catat suntikan' : 'Catat dosis'), style: display(28)),
       gap(4),
-      Text(widget.slot == null ? t.name : '${t.name}, schedule ${DateFormat('HH:mm').format(widget.slot!.at)}'),
+      Text(widget.slot == null ? t.name : '${t.name}, jadwal ${DateFormat('HH:mm').format(widget.slot!.at)}'),
       gap(16),
-      TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: 'Dose Amount (${t.doseUnit})')),
+      TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: 'Dosis (${t.doseUnit})')),
       gap(10),
       OutlinedButton.icon(
         onPressed: _pick,
         icon: const Icon(Icons.schedule_rounded, size: 18),
-        label: Text('Time: ${DateFormat('d MMM, HH:mm', 'en').format(at)}'),
+        label: Text('Waktu: ${DateFormat('d MMM, HH:mm', 'id').format(at)}'),
       ),
       if (t.adm.places && widget.prefs.places.isNotEmpty) ...[
         gap(14),
-        const Text('Injection/Patch Site'),
+        const Text('Lokasi'),
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final p in widget.prefs.places)
             FilterChip(
-              label: Text(translatePlace(p)),
+              label: Text(p),
               selected: places.contains(p),
               onSelected: (v) => setState(() => v ? places.add(p) : places.remove(p)),
             ),
@@ -147,21 +125,21 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       if (t.route == 'inj') ...[
         gap(8),
         Wrap(spacing: 8, children: [
-          ChoiceChip(label: const Text('Intramuscular (IM)'), selected: injType == 'im', onSelected: (_) => setState(() => injType = 'im')),
-          ChoiceChip(label: const Text('Subcutaneous (SC)'), selected: injType == 'sc', onSelected: (_) => setState(() => injType = 'sc')),
+          ChoiceChip(label: const Text('Intramuskular (IM)'), selected: injType == 'im', onSelected: (_) => setState(() => injType = 'im')),
+          ChoiceChip(label: const Text('Subkutan (SC)'), selected: injType == 'sc', onSelected: (_) => setState(() => injType = 'sc')),
         ]),
       ],
       if (!editing && meds.isNotEmpty) ...[
         gap(14),
-        const Text('Deduct from supply'),
+        const Text('Potong stok obat'),
         Wrap(spacing: 8, runSpacing: 4, children: [
-          ChoiceChip(label: const Text('None'), selected: supplyId == null, onSelected: (_) => setState(() => supplyId = null)),
+          ChoiceChip(label: const Text('Tanpa stok'), selected: supplyId == null, onSelected: (_) => setState(() => supplyId = null)),
           for (final s in meds) ChoiceChip(label: Text(s.name), selected: supplyId == s.id, onSelected: (_) => setState(() => supplyId = s.id)),
         ]),
       ],
       if (!editing && gens.isNotEmpty) ...[
         gap(8),
-        const Text('Tools used (1 each)'),
+        const Text('Perlengkapan terpakai (masing-masing 1)'),
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final s in gens)
             FilterChip(
@@ -176,35 +154,31 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
         shape: const Border(),
         collapsedShape: const Border(),
         tilePadding: EdgeInsets.zero,
-        title: const Text('Advanced Settings'),
+        title: const Text('Lanjutan'),
         children: [
           if (t.route == 'inj') ...[
-            TextField(controller: wasted, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Wasted (mL)')),
+            TextField(controller: wasted, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Terbuang (mL)')),
             gap(10),
-            TextField(controller: dead, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Needle dead space (µL)')),
+            TextField(controller: dead, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Ruang mati jarum (µL)')),
             gap(10),
           ],
-          TextField(controller: note, maxLines: 2, decoration: const InputDecoration(labelText: 'Notes')),
+          TextField(controller: note, maxLines: 2, decoration: const InputDecoration(labelText: 'Catatan')),
           gap(8),
         ],
       ),
       gap(12),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: const Text('Delete')),
-        if (!editing) ...[
-          OutlinedButton(onPressed: _skip, child: const Text('Skip')),
-          const SizedBox(width: 8),
-        ],
-        Expanded(child: pillButton(editing ? 'Save Changes' : 'Log Dose', _save)),
+        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: const Text('Hapus')),
+        Expanded(child: pillButton(editing ? 'Simpan perubahan' : 'Simpan', _save)),
       ]),
     ]);
   }
 }
 
-const _mols = [('estradiol', 'Estradiol'), ('testosterone', 'Testosterone'), ('progesterone', 'Progesterone'), ('other', 'Other Medication')];
-const _kinds = [('interval', 'Every N Days'), ('weekly', 'Weekly'), ('monthly', 'Monthly'), ('asneeded', 'As Needed')];
+const _mols = [('estradiol', 'Estradiol'), ('testosterone', 'Testosteron'), ('progesterone', 'Progesteron'), ('other', 'Obat lain')];
+const _kinds = [('interval', 'Setiap N hari'), ('weekly', 'Mingguan'), ('monthly', 'Bulanan'), ('asneeded', 'Saat perlu')];
 
-/// New or Edit Therapy
+/// Terapi baru, atau ubah [initial].
 class TherapySheet extends ConsumerStatefulWidget {
   const TherapySheet({super.key, required this.supplies, this.initial});
   final List<Supply> supplies;
@@ -238,8 +212,8 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
         if (widget.initial == null) {
           every.text = switch (r) { 'inj' => '7', 'patch' => '3', 'implant' => '90', _ => '1' };
         }
-        if (r == 'patch' && unit.text.trim() == 'mg') unit.text = 'µg/day';
-        if (r != 'patch' && unit.text.trim() == 'µg/day') unit.text = 'mg';
+        if (r == 'patch' && unit.text.trim() == 'mg') unit.text = 'µg/hari';
+        if (r != 'patch' && unit.text.trim() == 'µg/hari') unit.text = 'mg';
       });
 
   Future<void> _addTime() async {
@@ -253,12 +227,12 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
 
   void _save() {
     final d = parseNum(dose.text), e = int.tryParse(every.text) ?? 0, md = int.tryParse(monthDay.text) ?? 0;
-    if (d == null || d <= 0) return _err('Please enter dose amount.');
-    if (kind == 'interval' && e < 1) return _err('Repeat interval must be at least 1 day.');
-    if (kind == 'weekly' && weekdays.isEmpty) return _err('Select at least one day.');
-    if (kind == 'monthly' && (md < 1 || md > 31)) return _err('Date must be between 1 and 31.');
-    if (kind != 'asneeded' && times.isEmpty) return _err('Add at least one time.');
-    final fallback = hormone == 'other' ? 'Medication' : presetOf(hormone).name;
+    if (d == null || d <= 0) return _err('Isi dosis.');
+    if (kind == 'interval' && e < 1) return _err('Ulangi tiap minimal 1 hari.');
+    if (kind == 'weekly' && weekdays.isEmpty) return _err('Pilih minimal satu hari.');
+    if (kind == 'monthly' && (md < 1 || md > 31)) return _err('Tanggal harus 1 sampai 31.');
+    if (kind != 'asneeded' && times.isEmpty) return _err('Tambahkan minimal satu jam.');
+    final fallback = hormone == 'other' ? 'Obat' : presetOf(hormone).name;
     final t = Therapy(
       id: widget.initial?.id ?? '',
       hormoneId: hormone,
@@ -287,7 +261,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
   }
 
   Future<void> _delete() async {
-    if (!await confirm(context, 'Delete this therapy? Recorded dose logs will remain saved.') || !mounted) return;
+    if (!await confirm(context, 'Hapus terapi ini? Riwayat dosisnya tetap tersimpan.') || !mounted) return;
     ref.read(repoProvider)?.deleteTherapy(widget.initial!.id);
     Navigator.pop(context);
   }
@@ -297,7 +271,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
     final editing = widget.initial != null;
     final meds = widget.supplies.where((s) => !s.generic).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? 'Edit Therapy' : 'New Therapy', style: display(28)),
+      Text(editing ? 'Ubah terapi' : 'Terapi baru', style: display(28)),
       gap(16),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final m in _mols)
@@ -311,47 +285,47 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
           ),
       ]),
       gap(8),
-      const Text('Route'),
+      const Text('Cara pakai'),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final r in routes) ChoiceChip(avatar: Icon(r.icon, size: 16), label: Text(r.label), selected: route == r.id, onSelected: (_) => _setRoute(r.id)),
       ]),
       if (hormone == 'estradiol' && (route == 'inj' || route == 'oral')) ...[
         gap(8),
-        Text(route == 'oral' ? 'Simulation Profile:' : 'Estradiol Ester (for level simulation):'),
+        Text(route == 'oral' ? 'Profil simulasi level:' : 'Ester estradiol (untuk simulasi level):'),
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final p in pkProfiles.where((p) => p.oral == (route == 'oral')))
             ChoiceChip(label: Text(p.name), selected: pk == p.id, onSelected: (_) => setState(() => pk = p.id)),
-          ChoiceChip(label: const Text('No simulation'), selected: pk == null, onSelected: (_) => setState(() => pk = null)),
+          ChoiceChip(label: const Text('Tanpa simulasi'), selected: pk == null, onSelected: (_) => setState(() => pk = null)),
         ]),
       ],
       if (route == 'inj') ...[
         gap(8),
         Wrap(spacing: 8, children: [
-          ChoiceChip(label: const Text('Intramuscular (IM)'), selected: injType == 'im', onSelected: (_) => setState(() => injType = 'im')),
-          ChoiceChip(label: const Text('Subcutaneous (SC)'), selected: injType == 'sc', onSelected: (_) => setState(() => injType = 'sc')),
+          ChoiceChip(label: const Text('Intramuskular (IM)'), selected: injType == 'im', onSelected: (_) => setState(() => injType = 'im')),
+          ChoiceChip(label: const Text('Subkutan (SC)'), selected: injType == 'sc', onSelected: (_) => setState(() => injType = 'sc')),
         ]),
       ],
       gap(12),
-      TextField(controller: name, decoration: InputDecoration(labelText: hormone == 'other' ? 'Medication name' : 'Medication name (e.g. ${presetOf(hormone).name} valerate)')),
+      TextField(controller: name, decoration: InputDecoration(labelText: hormone == 'other' ? 'Nama obat' : 'Nama obat (mis. ${presetOf(hormone).name} valerat)')),
       gap(10),
       Row(children: [
-        Expanded(flex: 2, child: TextField(controller: dose, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Dose'))),
+        Expanded(flex: 2, child: TextField(controller: dose, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Dosis'))),
         const SizedBox(width: 10),
-        Expanded(child: TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit'))),
+        Expanded(child: TextField(controller: unit, decoration: const InputDecoration(labelText: 'Satuan'))),
       ]),
       if (route == 'patch') ...[
         gap(8),
         Wrap(spacing: 8, children: [
-          for (final u in const ['mg', 'µg/day'])
+          for (final u in const ['mg', 'µg/hari'])
             ChoiceChip(
-              label: Text(u == 'mg' ? 'Mass Dose (mg)' : 'Release Rate (µg/day)'),
+              label: Text(u == 'mg' ? 'Dosis massa (mg)' : 'Laju lepas (µg/hari)'),
               selected: unit.text.trim() == u,
               onSelected: (_) => setState(() => unit.text = u),
             ),
         ]),
       ],
       gap(14),
-      const Text('Schedule'),
+      const Text('Jadwal'),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final k in _kinds) ChoiceChip(label: Text(k.$2), selected: kind == k.$1, onSelected: (_) => setState(() {
               kind = k.$1;
@@ -364,13 +338,13 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
           controller: every,
           keyboardType: TextInputType.number,
           onChanged: (_) => setState(() {}),
-          decoration: const InputDecoration(labelText: 'Repeat interval (days), 1 = daily'),
+          decoration: const InputDecoration(labelText: 'Ulangi tiap (hari), 1 = setiap hari'),
         ),
         if ((int.tryParse(every.text) ?? 1) > 1)
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Calculate from last dose'),
-            subtitle: const Text('Next schedule follows when you last logged a dose, not the start date.'),
+            title: const Text('Hitung dari dosis terakhir'),
+            subtitle: const Text('Jadwal berikutnya mengikuti kapan kamu terakhir mencatat dosis, bukan tanggal mulai.'),
             value: rolling,
             onChanged: (v) => setState(() => rolling = v),
           ),
@@ -384,14 +358,14 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
       ],
       if (kind == 'monthly') ...[
         gap(8),
-        TextField(controller: monthDay, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Day of month (1 to 31)')),
+        TextField(controller: monthDay, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Tanggal tiap bulan (1 sampai 31)')),
       ],
       if (kind != 'asneeded') ...[
         gap(8),
-        const Text('Time'),
+        const Text('Jam'),
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final s in times) InputChip(label: Text(s), onDeleted: times.length > 1 ? () => setState(() => times.remove(s)) : null),
-          ActionChip(avatar: const Icon(Icons.add_rounded, size: 16), label: const Text('Add time'), onPressed: _addTime),
+          ActionChip(avatar: const Icon(Icons.add_rounded, size: 16), label: const Text('Tambah jam'), onPressed: _addTime),
         ]),
         gap(10),
         OutlinedButton.icon(
@@ -400,21 +374,21 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
             if (d != null) setState(() => day = d);
           },
           icon: const Icon(Icons.calendar_today_rounded, size: 18),
-          label: Text('Start date: ${DateFormat('d MMM y', 'en').format(day)}'),
+          label: Text('Mulai: ${DateFormat('d MMM y', 'id').format(day)}'),
         ),
       ],
       if (meds.isNotEmpty) ...[
         gap(12),
-        const Text('Deduct supply from:'),
+        const Text('Potong stok dari:'),
         Wrap(spacing: 8, runSpacing: 4, children: [
-          ChoiceChip(label: const Text('None'), selected: supplyId == null, onSelected: (_) => setState(() => supplyId = null)),
+          ChoiceChip(label: const Text('Tanpa stok'), selected: supplyId == null, onSelected: (_) => setState(() => supplyId = null)),
           for (final s in meds) ChoiceChip(label: Text(s.name), selected: supplyId == s.id, onSelected: (_) => setState(() => supplyId = s.id)),
         ]),
       ],
       gap(20),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: const Text('Delete')),
-        Expanded(child: pillButton(editing ? 'Save Changes' : 'Save Therapy', _save)),
+        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: const Text('Hapus')),
+        Expanded(child: pillButton(editing ? 'Simpan perubahan' : 'Simpan terapi', _save)),
       ]),
     ]);
   }
