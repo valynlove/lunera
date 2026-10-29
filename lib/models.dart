@@ -112,7 +112,7 @@ class Therapy {
 
   factory Therapy.from(String id, Map<String, dynamic> m) => Therapy(
         id: id,
-        hormoneId: m['hormoneId'] ?? 'estradiol',
+        hormoneId: m['hormoneId'] ?? 'other',
         name: m['name'] ?? '',
         dose: (m['dose'] as num).toDouble(),
         doseUnit: m['doseUnit'] ?? 'mg',
@@ -122,11 +122,11 @@ class Therapy {
         route: m['route'] ?? 'inj',
         pk: m['pk'],
         kind: m['kind'] ?? 'interval',
-        weekdays: [for (final x in (m['weekdays'] as List? ?? const [])) (x as num).toInt()],
+        weekdays: m['weekdays'] is List ? [for (final x in m['weekdays'] as List) (x as num).toInt()] : const <int>[],
         monthDay: (m['monthDay'] as num?)?.toInt() ?? 1,
-        times: [for (final x in (m['times'] as List? ?? const ['09:00'])) x as String],
+        times: m['times'] is List ? [for (final x in m['times'] as List) x as String] : const ['09:00'],
         injType: m['injType'],
-        rolling: m['rolling'] ?? false,
+        rolling: m['rolling'] ?? ((m['kind'] ?? 'interval') == 'interval' && ((m['everyDays'] as num?)?.toInt() ?? 1) > 1),
       );
 }
 
@@ -255,36 +255,42 @@ class Supply {
       dosePerUnit: (m['dosePerUnit'] as num?)?.toDouble());
 }
 
-/// Catatan Jurnal Mood & Perubahan Tubuh
+/// Suasana hati untuk jurnal: kunci -> (label, ikon).
+const moods = <String, (String, IconData)>{
+  'happy': ('Senang', Icons.sentiment_very_satisfied_rounded),
+  'calm': ('Tenang', Icons.sentiment_satisfied_rounded),
+  'neutral': ('Biasa', Icons.sentiment_neutral_rounded),
+  'low': ('Murung', Icons.sentiment_dissatisfied_rounded),
+  'anxious': ('Cemas', Icons.sentiment_very_dissatisfied_rounded),
+};
+
+const bodyAreas = ['Kulit', 'Payudara', 'Bentuk tubuh', 'Rambut', 'Energi', 'Tidur'];
+
+/// Satu entri jurnal: suasana hati, perubahan tubuh per bagian, dan/atau catatan bebas.
 class JournalEntry {
-  const JournalEntry({
-    required this.id,
-    required this.at,
-    required this.type, // 'mood', 'body', 'notes'
-    required this.title,
-    required this.note,
-    this.moodEmoji = '😊',
-  });
-  final String id, type, title, note, moodEmoji;
+  const JournalEntry({required this.id, required this.at, this.mood, this.body = const {}, this.text});
+  final String id;
   final DateTime at;
+  final String? mood, text;
+  final Map<String, String> body;
+  bool get hasMood => mood != null;
+  bool get hasBody => body.isNotEmpty;
+  bool get hasText => text != null && text!.isNotEmpty;
 
-  Map<String, dynamic> toMap() => {
-        'at': _t(at),
-        'type': type,
-        'title': title,
-        'note': note,
-        'moodEmoji': moodEmoji,
-      };
-
+  Map<String, dynamic> toMap() => {'at': _t(at), 'mood': mood, 'body': body, 'text': text};
   factory JournalEntry.from(String id, Map<String, dynamic> m) => JournalEntry(
         id: id,
-        at: m['at'] == null ? DateTime.now() : _d(m['at']),
-        type: m['type'] ?? 'mood',
-        title: m['title'] ?? '',
-        note: m['note'] ?? '',
-        moodEmoji: m['moodEmoji'] ?? '😊',
+        at: _d(m['at']),
+        mood: m['mood'],
+        body: m['body'] is Map
+            ? {for (final e in (m['body'] as Map).entries) e.key as String: e.value as String}
+            : const <String, String>{},
+        text: m['text'],
       );
 }
+
+/// Skor suasana hati untuk menghitung pola (1 terendah, 5 tertinggi).
+const moodScore = <String, double>{'happy': 5, 'calm': 4, 'neutral': 3, 'low': 2, 'anxious': 1};
 
 /// Pengaturan yang ikut tersinkron antar perangkat.
 class Prefs {

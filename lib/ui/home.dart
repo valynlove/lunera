@@ -9,6 +9,7 @@ import '../repo.dart';
 import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
+import 'journal.dart';
 import 'sheets.dart';
 
 class HomePage extends ConsumerWidget {
@@ -59,6 +60,7 @@ class HomePage extends ConsumerWidget {
       ]),
       gap(16),
       AlertsCard(supplies: supplies),
+      const MoodQuickCard(),
       if (ths.isEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 80),

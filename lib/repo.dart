@@ -25,7 +25,7 @@ const _wait = Duration(seconds: 10);
 class Repo {
   Repo(this.uid);
   final String uid;
-  static const _cols = ['therapies', 'logs', 'labs', 'supplies', 'targets', 'prefs', 'journals'];
+  static const _cols = ['therapies', 'logs', 'labs', 'supplies', 'targets', 'prefs', 'journal'];
   CollectionReference<Map<String, dynamic>> _c(String n) => FirebaseFirestore.instance.collection('users/$uid/$n');
 
   Stream<List<T>> _watch<T>(String n, T Function(String, Map<String, dynamic>) f) =>
@@ -35,7 +35,7 @@ class Repo {
   Stream<List<DoseLog>> logs() => _watch('logs', DoseLog.from);
   Stream<List<Lab>> labs() => _watch('labs', Lab.from);
   Stream<List<Supply>> supplies() => _watch('supplies', Supply.from);
-  Stream<List<JournalEntry>> journals() => _watch('journals', JournalEntry.from);
+  Stream<List<JournalEntry>> journal() => _watch('journal', JournalEntry.from);
   Stream<Map<String, List<double>>> targets() => _c('targets').snapshots().map((s) => {
         for (final d in s.docs) d.id: [(d['low'] as num).toDouble(), (d['high'] as num).toDouble()]
       });
@@ -44,16 +44,16 @@ class Repo {
   Future<void> addTherapy(Therapy t) => _c('therapies').add(t.toMap());
   Future<void> addLab(Lab l) => _c('labs').add(l.toMap());
   Future<void> addSupply(Supply s) => _c('supplies').add(s.toMap());
-  Future<void> addJournal(JournalEntry j) => _c('journals').add(j.toMap());
-  Future<void> deleteJournal(String id) => _c('journals').doc(id).delete();
   Future<void> setTarget(String h, double lo, double hi) => _c('targets').doc(h).set({'low': lo, 'high': hi});
   Future<void> adjustSupply(String id, double delta) =>
       _c('supplies').doc(id).update({'qty': FieldValue.increment(delta)});
-
   Future<void> updateTherapy(Therapy t) => _c('therapies').doc(t.id).set(t.toMap());
   Future<void> deleteTherapy(String id) => _c('therapies').doc(id).delete();
   Future<void> updateSupply(Supply s) => _c('supplies').doc(s.id).set(s.toMap());
   Future<void> deleteSupply(String id) => _c('supplies').doc(id).delete();
+  Future<void> addJournal(JournalEntry e) => _c('journal').add(e.toMap());
+  Future<void> updateJournal(JournalEntry e) => _c('journal').doc(e.id).set(e.toMap());
+  Future<void> deleteJournal(String id) => _c('journal').doc(id).delete();
   Future<void> updateLab(Lab l) => _c('labs').doc(l.id).set(l.toMap());
   Future<void> deleteLab(String id) => _c('labs').doc(id).delete();
 
@@ -220,7 +220,7 @@ final therapiesProvider = StreamProvider<List<Therapy>>((r) => r.watch(repoProvi
 final logsProvider = StreamProvider<List<DoseLog>>((r) => r.watch(repoProvider)?.logs() ?? Stream.value(<DoseLog>[]));
 final labsProvider = StreamProvider<List<Lab>>((r) => r.watch(repoProvider)?.labs() ?? Stream.value(<Lab>[]));
 final suppliesProvider = StreamProvider<List<Supply>>((r) => r.watch(repoProvider)?.supplies() ?? Stream.value(<Supply>[]));
-final journalsProvider = StreamProvider<List<JournalEntry>>((r) => r.watch(repoProvider)?.journals() ?? Stream.value(<JournalEntry>[]));
+final journalProvider = StreamProvider<List<JournalEntry>>((r) => r.watch(repoProvider)?.journal() ?? Stream.value([]));
 final targetsProvider =
     StreamProvider<Map<String, List<double>>>((r) => r.watch(repoProvider)?.targets() ?? Stream.value(<String, List<double>>{}));
 final backupsProvider =

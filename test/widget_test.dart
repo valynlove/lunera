@@ -55,7 +55,32 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.1.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.2.0'));
+    });
+
+    test('JournalEntry serialization and mood scores', () {
+      final now = DateTime(2026, 10, 29, 12, 0);
+      final entry = JournalEntry(
+        id: 'j1',
+        at: now,
+        mood: 'happy',
+        body: {'Kulit': 'Lebih halus', 'Energi': 'Tinggi'},
+        text: 'Hari yang sangat menyenangkan',
+      );
+
+      expect(entry.hasMood, isTrue);
+      expect(entry.hasBody, isTrue);
+      expect(entry.hasText, isTrue);
+      expect(moodScore['happy'], equals(5.0));
+      expect(moods.containsKey('happy'), isTrue);
+      expect(bodyAreas.contains('Kulit'), isTrue);
+
+      final map = entry.toMap();
+      final reconstructed = JournalEntry.from('j1', map);
+      expect(reconstructed.id, equals('j1'));
+      expect(reconstructed.mood, equals('happy'));
+      expect(reconstructed.body['Kulit'], equals('Lebih halus'));
+      expect(reconstructed.text, equals('Hari yang sangat menyenangkan'));
     });
   });
 }

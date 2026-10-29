@@ -4,6 +4,28 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-10-29
+
+### Added
+- **Refreshed High-Precision Moon Orbital Emblem:**
+  - Regenerated all Android launcher mipmaps (`mdpi` through `xxxhdpi`), Web progressive web app icons & favicon, and Docs showcase brand assets from 1024x1024 high-resolution artwork.
+- **Interactive Body Changes Visualizer (`lib/ui/body.dart`):**
+  - Anatomical body silhouette with interactive callouts for hair, breast development, skin, and body shape.
+  - Category-based observation timelines tracking physical changes and transition progress over time.
+- **Insights & Cycle Correlation Engine (`lib/ui/insights.dart`):**
+  - 30-day dose adherence metrics measuring taken, skipped, and overdue medication slots.
+  - Emotional distribution analysis across 5 mood states (*Senang, Tenang, Biasa, Murung, Cemas*).
+  - Algorithmic hormone cycle correlation (`moodByCycleDay`) highlighting emotional trends relative to dosage intervals.
+- **Comprehensive Mood Integration:**
+  - Added `MoodQuickCard` on the Home screen for quick 1-tap daily mood check-ins.
+  - Placed interactive mood spots and tooltips directly on pharmacokinetic level charts in `lib/ui/levels.dart`.
+  - Integrated 3rd tab (`Jurnal`) in the Calendar view (`lib/ui/calendar.dart`) with filterable category chips (*Semua, Suasana, Tubuh, Catatan*).
+- **Model & Architecture Enhancements:**
+  - Upgraded `JournalEntry` schema with structured per-area observations (`bodyAreas`), mood ratings, and numeric scoring (`moodScore`).
+  - Seamlessly harmonized new features with biometrics, exit warning confirmations (`PopScope`), and in-app update checker.
+
+---
+
 ## [1.1.0] - 2026-10-29
 
 ### Added

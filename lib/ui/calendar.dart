@@ -7,6 +7,7 @@ import '../schedule.dart';
 import '../theme.dart';
 import 'history.dart';
 import 'home.dart';
+import 'journal.dart';
 import 'sheets.dart';
 
 /// Tab Kalender: jadwal per hari (strip minggu) dan riwayat.
@@ -87,10 +88,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Kalender', style: display(36)),
           gap(14),
-          PillTabs<int>(items: const [(0, 'Jadwal'), (1, 'Riwayat')], value: view, onChanged: (v) => setState(() => view = v)),
+          PillTabs<int>(items: const [(0, 'Jadwal'), (1, 'Riwayat'), (2, 'Jurnal')], value: view, onChanged: (v) => setState(() => view = v)),
         ]),
       ),
-      Expanded(child: view == 0 ? agenda : const HistoryPage(embedded: true)),
+      Expanded(child: view == 0 ? agenda : (view == 1 ? const HistoryPage(embedded: true) : const JournalView())),
     ]);
   }
 }

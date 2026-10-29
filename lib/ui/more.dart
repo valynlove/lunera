@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import 'auth.dart';
+import 'body.dart';
 import 'data_page.dart';
-import 'journal_page.dart';
+import 'insights.dart';
 import 'security_page.dart';
 import 'settings_page.dart';
 
@@ -53,8 +54,9 @@ class MorePage extends ConsumerWidget {
         decoration: cardBox(context),
         child: Column(children: [
           tile(Icons.tune_rounded, 'Pengaturan', () => go(const SettingsPage()), sub: 'Tampilan, satuan, lokasi suntik, pengingat'),
+          tile(Icons.insights_rounded, 'Wawasan', () => go(const InsightsPage()), sub: 'Kepatuhan dan pola suasana hati'),
+          tile(Icons.accessibility_new_rounded, 'Tubuh & perubahan', () => go(const BodyPage()), sub: 'Garis waktu dari jurnalmu'),
           tile(Icons.lock_outline_rounded, 'Keamanan', () => go(const SecurityPage()), sub: 'Kunci PIN dan biometrik'),
-          tile(Icons.auto_stories_rounded, 'Jurnal & Catatan', () => go(const JournalPage()), sub: 'Catat mood dan pengamatan harian'),
           tile(Icons.import_export_rounded, 'Impor, ekspor, cadangan', () => go(const DataPage())),
           tile(Icons.system_update_rounded, 'Periksa Pembaruan', () => UpdateCheckerService.checkAndPromptUpdate(context), sub: 'Versi ${UpdateCheckerService.currentVersion}'),
           tile(Icons.info_outline_rounded, 'Tentang $appName', () {

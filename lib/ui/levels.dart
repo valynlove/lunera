@@ -7,6 +7,8 @@ import '../models.dart';
 import '../repo.dart';
 import '../sim.dart';
 import '../theme.dart';
+import 'insights.dart';
+import 'journal.dart' show moodColor;
 
 String _date(DateTime d) => DateFormat('d MMM y', 'id').format(d);
 
@@ -25,6 +27,12 @@ class LevelsPage extends ConsumerWidget {
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
         Expanded(child: Text('Level', style: display(40))),
+        IconButton.filledTonal(
+          tooltip: 'Wawasan',
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InsightsPage())),
+          icon: const Icon(Icons.insights_rounded),
+        ),
+        const SizedBox(width: 8),
         pillButton('Hasil lab', () => showSheet(context, const LabSheet()), icon: Icons.add_rounded),
       ]),
       gap(18),
@@ -128,6 +136,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
   int? days;
   int off = 0; // geser jendela ke belakang, kelipatan lebar jendela
   bool cal = false;
+  bool showMood = true; // penanda suasana hati di bawah grafik
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +191,11 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     final ys = <double>[...sim.map((s) => s.y), ...dots.map((s) => s.y), ...?bandD];
     final top = (ys.isEmpty ? 10.0 : ys.reduce(math.max)) * 1.15 + 1;
     final nowX = (now.difference(from).inMinutes / 1440).clamp(0.0, total).toDouble();
+    final journal = ref.watch(journalProvider).value ?? <JournalEntry>[];
+    final moodEntries = [for (final e in journal) if (e.mood != null && !e.at.isBefore(from) && !e.at.isAfter(to)) e]..sort((a, b) => a.at.compareTo(b.at));
+    final moodSpots = [for (final e in moodEntries) FlSpot(e.at.difference(from).inMinutes / 1440, top * .05)];
+    final drawMood = showMood && moodSpots.isNotEmpty;
+    final moodBar = drawMood ? (sim.isNotEmpty ? 1 : 0) + (dots.isNotEmpty ? 1 : 0) : -1;
 
     final chart = LineChart(LineChartData(
       minX: 0,
@@ -209,6 +223,17 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
       rangeAnnotations: bandD == null
           ? null
           : RangeAnnotations(horizontalRangeAnnotations: [HorizontalRangeAnnotation(y1: bandD[0], y2: bandD[1], color: C.lagoon.withValues(alpha: .14))]),
+      lineTouchData: LineTouchData(
+        touchTooltipData: LineTouchTooltipData(
+          getTooltipItems: (touched) => [
+            for (final s in touched)
+              LineTooltipItem(
+                s.barIndex == moodBar ? (moods[moodEntries[s.spotIndex].mood]?.$1 ?? '') : fmt(s.y),
+                const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              ),
+          ],
+        ),
+      ),
       extraLinesData: ExtraLinesData(verticalLines: [
         VerticalLine(x: nowX, color: fg.withValues(alpha: .35), strokeWidth: 2, dashArray: [4, 4]),
       ]),
@@ -229,6 +254,13 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             color: C.peony,
             barWidth: hasSim ? 0 : 4,
             dotData: FlDotData(getDotPainter: (s, pc, b, i) => FlDotCirclePainter(radius: 6, color: surface, strokeWidth: 4, strokeColor: C.peony)),
+          ),
+        if (drawMood)
+          LineChartBarData(
+            spots: moodSpots,
+            color: Colors.transparent,
+            barWidth: 0,
+            dotData: FlDotData(getDotPainter: (s, pc, b, i) => FlDotCirclePainter(radius: 5, color: moodColor(moodEntries[i].mood), strokeWidth: 0)),
           ),
       ],
     ));
@@ -271,9 +303,14 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
           off = 0;
         }),
       ),
-      if (hasSim && nCal > 0) ...[
+      if ((hasSim && nCal > 0) || moodEntries.isNotEmpty) ...[
         gap(8),
-        FilterChip(label: Text('Sesuaikan ke hasil lab ($nCal)'), selected: cal, onSelected: (v) => setState(() => cal = v)),
+        Wrap(spacing: 8, runSpacing: 4, children: [
+          if (hasSim && nCal > 0)
+            FilterChip(label: Text('Sesuaikan ke hasil lab ($nCal)'), selected: cal, onSelected: (v) => setState(() => cal = v)),
+          if (moodEntries.isNotEmpty)
+            FilterChip(avatar: const Icon(Icons.mood_rounded, size: 16), label: const Text('Suasana hati'), selected: showMood, onSelected: (v) => setState(() => showMood = v)),
+        ]),
       ],
       if (hasSim) ...[
         gap(10),
@@ -286,6 +323,17 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         gap(6),
         Text('Perkiraan memakai model rata-rata, bukan hasil lab. Level tiap orang berbeda, dan keputusan dosis tetap bersama dokter.',
             style: theme.textTheme.bodySmall),
+      ],
+      if (drawMood) ...[
+        gap(8),
+        Wrap(spacing: 12, runSpacing: 4, children: [
+          for (final m in moods.entries)
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.circle, size: 10, color: moodColor(m.key)),
+              const SizedBox(width: 4),
+              Text(m.value.$1, style: theme.textTheme.bodySmall),
+            ]),
+        ]),
       ],
     ]);
   }
