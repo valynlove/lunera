@@ -1,6 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
+import 'package:lunera/profile.dart';
 import 'package:lunera/sim.dart';
 import 'package:lunera/update_checker.dart';
 
@@ -55,7 +57,21 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.2.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.3.0'));
+    });
+
+    test('ProfileState model initialization', () {
+      const emptyState = ProfileState();
+      expect(emptyState.nickname, isNull);
+      expect(emptyState.photo, isNull);
+
+      final state = ProfileState(
+        nickname: 'Lunaria',
+        photo: Uint8List.fromList([1, 2, 3]),
+      );
+      expect(state.nickname, equals('Lunaria'));
+      expect(state.photo, isNotNull);
+      expect(state.photo!.length, equals(3));
     });
 
     test('JournalEntry serialization and mood scores', () {

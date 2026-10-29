@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../profile.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import 'auth.dart';
 import 'body.dart';
 import 'data_page.dart';
 import 'insights.dart';
+import 'profile_page.dart';
 import 'security_page.dart';
 import 'settings_page.dart';
 
@@ -16,7 +18,8 @@ class MorePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = FirebaseAuth.instance.currentUser;
-    final name = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
+    final username = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
+    final displayName = ref.watch(displayNameProvider);
     final fg = Theme.of(context).colorScheme.onSurface;
 
     Widget tile(IconData icon, String title, VoidCallback onTap, {String? sub}) => ListTile(
@@ -31,28 +34,32 @@ class MorePage extends ConsumerWidget {
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Text('Lainnya', style: display(36)),
       gap(18),
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: cardBox(context),
-        child: Row(children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: C.peony,
-            child: Text((name ?? appName).substring(0, 1).toUpperCase(), style: display(26, color: Colors.white)),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name == null ? appName : '@$name', style: display(22)),
-              if (user?.email != null) Text(user!.email!, style: Theme.of(context).textTheme.bodySmall),
-            ]),
-          ),
-        ]),
+      InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => go(const ProfilePage()),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: cardBox(context),
+          child: Row(children: [
+            const UserAvatar(size: 60),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(displayName ?? appName, style: display(22)),
+                if (username != null)
+                  Text('@$username', style: TextStyle(color: fg.withValues(alpha: 0.7), fontWeight: FontWeight.w600)),
+                if (user?.email != null) Text(user!.email!, style: Theme.of(context).textTheme.bodySmall),
+              ]),
+            ),
+            Icon(Icons.chevron_right_rounded, color: fg.withValues(alpha: .5)),
+          ]),
+        ),
       ),
       gap(16),
       Container(
         decoration: cardBox(context),
         child: Column(children: [
+          tile(Icons.person_outline_rounded, 'Profil Akun', () => go(const ProfilePage()), sub: 'Ubah foto profil dan nama panggilan'),
           tile(Icons.tune_rounded, 'Pengaturan', () => go(const SettingsPage()), sub: 'Tampilan, satuan, lokasi suntik, pengingat'),
           tile(Icons.insights_rounded, 'Wawasan', () => go(const InsightsPage()), sub: 'Kepatuhan dan pola suasana hati'),
           tile(Icons.accessibility_new_rounded, 'Tubuh & perubahan', () => go(const BodyPage()), sub: 'Garis waktu dari jurnalmu'),

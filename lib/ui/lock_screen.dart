@@ -38,7 +38,8 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
     final st = Lock.instance.state.value;
     if (s == AppLifecycleState.paused) leftAt = DateTime.now();
     if (s == AppLifecycleState.resumed && st.enabled && leftAt != null && !locked) {
-      if (DateTime.now().difference(leftAt!) >= Duration(minutes: st.delayMin)) setState(() => locked = true);
+      final timeout = st.delayMin == 0 ? const Duration(seconds: 3) : Duration(minutes: st.delayMin);
+      if (DateTime.now().difference(leftAt!) >= timeout) setState(() => locked = true);
     }
   }
 

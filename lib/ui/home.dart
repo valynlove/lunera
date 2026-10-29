@@ -1,15 +1,16 @@
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models.dart';
+import '../profile.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import 'journal.dart';
+import 'profile_page.dart';
 import 'sheets.dart';
 
 class HomePage extends ConsumerWidget {
@@ -35,8 +36,7 @@ class HomePage extends ConsumerWidget {
             for (final s in xs) SlotTile(s: s, logs: logs, supplies: supplies, prefs: prefs),
           ]);
 
-    final user = FirebaseAuth.instance.currentUser;
-    final name = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
+    final displayName = ref.watch(displayNameProvider);
     final h = DateTime.now().hour;
     final greet = h < 11 ? 'Selamat pagi' : (h < 15 ? 'Selamat siang' : (h < 19 ? 'Selamat sore' : 'Selamat malam'));
 
@@ -46,16 +46,16 @@ class HomePage extends ConsumerWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('$greet,', style: Theme.of(context).textTheme.bodyLarge),
             gap(2),
-            Text(name ?? appName, style: display(30)),
+            Text(displayName ?? appName, style: display(30)),
             gap(4),
             Text(DateFormat('EEEE, d MMMM y', 'id').format(DateTime.now()), style: Theme.of(context).textTheme.bodySmall),
           ]),
         ),
         IconButton.filledTonal(tooltip: 'Tambah terapi', onPressed: () => showSheet(context, TherapySheet(supplies: supplies)), icon: const Icon(Icons.add_rounded)),
-        const SizedBox(width: 6),
-        GestureDetector(
-          onTap: () => ref.read(tabProvider.notifier).state = 4,
-          child: CircleAvatar(radius: 22, backgroundColor: C.peony, child: Text((name ?? appName).substring(0, 1).toUpperCase(), style: display(18, color: Colors.white))),
+        const SizedBox(width: 8),
+        UserAvatar(
+          size: 44,
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfilePage())),
         ),
       ]),
       gap(16),

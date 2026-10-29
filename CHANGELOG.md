@@ -4,6 +4,23 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-29
+
+### Added
+- **Dedicated Profile Management & Avatar Customization (`lib/profile.dart` & `lib/ui/profile_page.dart`):**
+  - Integrated customizable **Nickname** and **Profile Photo** avatar matching the *Wall o' Pay* experience.
+  - Interactive camera button overlay allowing photo selection from gallery (`image_picker`) with desktop file dialog fallback (`file_selector`).
+  - Automatic on-device caching via `shared_preferences` and real-time cloud synchronization to Firestore (`users/$uid/meta/profile`).
+  - Background cloud restoration so user profile and avatar automatically sync when logging in across multiple devices.
+- **Enhanced Home & More Navigation:**
+  - Dynamic personalized greeting in `lib/ui/home.dart` prioritizing Nickname over username/email.
+  - Replaced static avatar placeholder with interactive `UserAvatar` widget in both Home header and More dashboard.
+  - Added dedicated Profile Card and menu action in `lib/ui/more.dart` for 1-tap navigation to profile customization.
+- **Biometric Security Grace Period:**
+  - Preserved strict 3-second grace window when opening system file/photo pickers to avoid unintentional lock triggers.
+
+---
+
 ## [1.2.0] - 2026-10-29
 
 ### Added

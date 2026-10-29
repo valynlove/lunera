@@ -2,9 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'lock.dart';
 import 'notifications.dart';
+import 'profile.dart';
 import 'repo.dart';
 import 'theme.dart';
 import 'ui/auth.dart';
@@ -21,7 +23,13 @@ Future<void> main() async {
     debugPrint('Notifikasi tidak aktif: $e');
   }
   await Lock.instance.load();
-  runApp(const ProviderScope(child: LuneraApp()));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+    ],
+    child: const LuneraApp(),
+  ));
 }
 
 class LuneraApp extends ConsumerWidget {
