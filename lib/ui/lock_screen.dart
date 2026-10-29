@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n.dart';
 import '../lock.dart';
 import '../theme.dart';
 import 'auth.dart';
@@ -50,13 +51,12 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
       ]);
 }
 
-/// Papan angka dengan penanda 6 titik.
+/// Papan angka dengan penanda 6 titik (PIN only, tanpa biometrik).
 class PinPad extends StatelessWidget {
-  const PinPad({super.key, required this.value, required this.onChanged, this.length = 6, this.onBio});
+  const PinPad({super.key, required this.value, required this.onChanged, this.length = 6});
   final String value;
   final ValueChanged<String> onChanged;
   final int length;
-  final VoidCallback? onBio;
 
   Widget _key(Widget child, VoidCallback? tap) => Padding(
         padding: const EdgeInsets.all(7),
@@ -87,7 +87,7 @@ class PinPad extends StatelessWidget {
         gap(24),
         for (final row in const [[1, 2, 3], [4, 5, 6], [7, 8, 9]]) Row(mainAxisSize: MainAxisSize.min, children: [for (final d in row) _digit(d)]),
         Row(mainAxisSize: MainAxisSize.min, children: [
-          _key(const Icon(Icons.fingerprint_rounded, color: Colors.white), onBio),
+          const SizedBox(width: 72, height: 72),
           _digit(0),
           _key(const Icon(Icons.backspace_outlined, color: Colors.white), value.isEmpty ? null : () => onChanged(value.substring(0, value.length - 1))),
         ]),
@@ -107,19 +107,9 @@ class _LockScreenState extends State<LockScreen> {
   int fails = 0;
   DateTime? until;
 
-  @override
-  void initState() {
-    super.initState();
-    if (Lock.instance.state.value.bio) WidgetsBinding.instance.addPostFrameCallback((_) => _bio());
-  }
-
-  Future<void> _bio() async {
-    if (await Lock.instance.authBio() && mounted) widget.onUnlock();
-  }
-
   void _changed(String v) {
     if (until != null && DateTime.now().isBefore(until!)) {
-      setState(() => msg = 'Tunggu sebentar sebelum mencoba lagi.');
+      setState(() => msg = context.tr('Please wait before trying again.'));
       return;
     }
     setState(() {
@@ -134,17 +124,17 @@ class _LockScreenState extends State<LockScreen> {
     fails++;
     setState(() {
       pin = '';
-      msg = 'PIN salah.';
+      msg = context.tr('Incorrect PIN. Try again.');
       if (fails >= 5) {
         until = DateTime.now().add(const Duration(seconds: 30));
         fails = 0;
-        msg = 'Terlalu banyak percobaan. Coba lagi dalam 30 detik.';
+        msg = context.tr('Please wait before trying again.');
       }
     });
   }
 
   Future<void> _forgot() async {
-    if (!await confirm(context, 'Keluar dari akun dan matikan kunci? Kamu perlu masuk lagi dengan kata sandi.', ok: 'Keluar')) return;
+    if (!await confirm(context, context.tr('Sign out'), ok: context.tr('Exit'))) return;
     await Lock.instance.disable();
     await signOutAll();
   }
@@ -162,11 +152,11 @@ class _LockScreenState extends State<LockScreen> {
                     gap(10),
                     Text(appName, style: wordmark(30, color: Colors.white)),
                     gap(26),
-                    Text('Masukkan PIN', style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
+                    Text(context.tr('Enter your 6-digit PIN'), style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
                     gap(18),
-                    PinPad(value: pin, onChanged: _changed, onBio: Lock.instance.state.value.bio ? _bio : null),
+                    PinPad(value: pin, onChanged: _changed),
                     SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
-                    TextButton(onPressed: _forgot, child: const Text('Lupa PIN?', style: TextStyle(color: Colors.white70))),
+                    TextButton(onPressed: _forgot, child: const Text('Forgot PIN?', style: TextStyle(color: Colors.white70))),
                   ]),
                 ),
               ),
@@ -200,7 +190,7 @@ class _PinFlowState extends State<_PinFlow> {
       } else {
         setState(() {
           pin = '';
-          msg = 'PIN salah.';
+          msg = context.tr('Incorrect PIN. Try again.');
         });
       }
     } else if (first == null) {
@@ -214,7 +204,7 @@ class _PinFlowState extends State<_PinFlow> {
       setState(() {
         first = null;
         pin = '';
-        msg = 'PIN tidak cocok. Ulangi dari awal.';
+        msg = context.tr('PIN does not match. Try again.');
       });
     }
   }
@@ -231,7 +221,7 @@ class _PinFlowState extends State<_PinFlow> {
                   child: Center(
                     child: SingleChildScrollView(
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text(widget.create ? (first == null ? 'Buat PIN 6 angka' : 'Ulangi PIN') : widget.title, style: display(26, color: Colors.white)),
+                        Text(widget.create ? (first == null ? context.tr('Create 6-digit PIN') : context.tr('Confirm 6-digit PIN')) : widget.title, style: display(26, color: Colors.white)),
                         gap(24),
                         PinPad(value: pin, onChanged: _changed),
                         SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
@@ -247,10 +237,9 @@ class _PinFlowState extends State<_PinFlow> {
 }
 
 /// Minta PIN yang berlaku; true jika benar.
-Future<bool> askPin(BuildContext c, {String title = 'Masukkan PIN'}) async =>
-    await Navigator.of(c).push<bool>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => _PinFlow(create: false, title: title))) ?? false;
+Future<bool> askPin(BuildContext c, {String? title}) async =>
+    await Navigator.of(c).push<bool>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => _PinFlow(create: false, title: title ?? c.tr('Enter your 6-digit PIN')))) ?? false;
 
 /// PIN baru (dua kali ketik); null jika dibatalkan.
 Future<String?> createPin(BuildContext c) =>
     Navigator.of(c).push<String>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => const _PinFlow(create: true, title: '')));
-

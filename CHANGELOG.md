@@ -4,6 +4,21 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-29
+
+### Added
+- **Cloud-Synchronized PIN Security Architecture:**
+  - Streamlined security to focus on 6-digit PIN lock with salted SHA-256 cryptographic hashing.
+  - PIN credentials automatically sync with your account via Cloud Firestore (`users/$uid/meta/security`).
+  - Seamless multi-device support: logging in with the same account on a second device immediately restores the existing PIN without requiring re-setup.
+  - Local security cache is securely cleared upon account sign-out.
+- **English Default Localization (`lib/l10n.dart`):**
+  - Set **English** as the primary default display language across the entire application.
+  - Added language selector in **Settings > Appearance > Language / Bahasa** with full support for **Bahasa Indonesia**.
+  - Integrated `flutter_localizations` with dynamic runtime switching across date formatters and interface elements.
+
+---
+
 ## [1.4.0] - 2026-10-29
 
 ### Added

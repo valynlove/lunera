@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../profile.dart';
 import '../repo.dart';
@@ -38,7 +39,8 @@ class HomePage extends ConsumerWidget {
 
     final displayName = ref.watch(displayNameProvider);
     final h = DateTime.now().hour;
-    final greet = h < 11 ? 'Selamat pagi' : (h < 15 ? 'Selamat siang' : (h < 19 ? 'Selamat sore' : 'Selamat malam'));
+    final greetKey = h < 11 ? 'Good morning' : (h < 15 ? 'Good afternoon' : (h < 19 ? 'Good evening' : 'Good night'));
+    final greet = context.tr(greetKey);
 
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
@@ -48,10 +50,10 @@ class HomePage extends ConsumerWidget {
             gap(2),
             Text(displayName ?? appName, style: display(30)),
             gap(4),
-            Text(DateFormat('EEEE, d MMMM y', 'id').format(DateTime.now()), style: Theme.of(context).textTheme.bodySmall),
+            Text(DateFormat('EEEE, d MMMM y', AppLocale.code).format(DateTime.now()), style: Theme.of(context).textTheme.bodySmall),
           ]),
         ),
-        IconButton.filledTonal(tooltip: 'Tambah terapi', onPressed: () => showSheet(context, TherapySheet(supplies: supplies)), icon: const Icon(Icons.add_rounded)),
+        IconButton.filledTonal(tooltip: context.tr('Add therapy'), onPressed: () => showSheet(context, TherapySheet(supplies: supplies)), icon: const Icon(Icons.add_rounded)),
         const SizedBox(width: 8),
         UserAvatar(
           size: 44,

@@ -65,6 +65,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   onSelected: (_) => _save(p.copy(accent: e.key)),
                 ),
             ]),
+            gap(8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.language_rounded),
+              title: const Text('Language / Bahasa'),
+              subtitle: Text(p.locale == 'id' ? 'Bahasa Indonesia' : 'English (Default)'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () async {
+                final chosen = await showDialog<String>(
+                  context: context,
+                  builder: (ctx) => SimpleDialog(
+                    title: const Text('Language / Bahasa'),
+                    children: [
+                      SimpleDialogOption(
+                        onPressed: () => Navigator.pop(ctx, 'en'),
+                        child: Row(children: [
+                          Icon(p.locale == 'en' ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded, color: C.peony),
+                          const SizedBox(width: 12),
+                          const Text('English (Default)'),
+                        ]),
+                      ),
+                      SimpleDialogOption(
+                        onPressed: () => Navigator.pop(ctx, 'id'),
+                        child: Row(children: [
+                          Icon(p.locale == 'id' ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded, color: C.peony),
+                          const SizedBox(width: 12),
+                          const Text('Bahasa Indonesia'),
+                        ]),
+                      ),
+                    ],
+                  ),
+                );
+                if (chosen != null) _save(p.copy(locale: chosen));
+              },
+            ),
           ]),
           _card('Pengingat', [
             SwitchListTile(

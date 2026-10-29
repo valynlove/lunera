@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n.dart';
+import '../lock.dart';
 import '../notifications.dart';
 import '../repo.dart';
 import '../theme.dart';
@@ -21,17 +23,21 @@ class Shell extends ConsumerStatefulWidget {
 
 class _ShellState extends ConsumerState<Shell> {
   static const _items = [
-    (Icons.home_rounded, Icons.home_outlined, 'Beranda'),
-    (Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'Kalender'),
-    (Icons.show_chart_rounded, Icons.show_chart_rounded, 'Level'),
-    (Icons.inventory_2_rounded, Icons.inventory_2_outlined, 'Stok'),
-    (Icons.grid_view_rounded, Icons.grid_view_outlined, 'Lainnya'),
+    (Icons.home_rounded, Icons.home_outlined, 'Home'),
+    (Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'Calendar'),
+    (Icons.show_chart_rounded, Icons.show_chart_rounded, 'Levels'),
+    (Icons.inventory_2_rounded, Icons.inventory_2_outlined, 'Supplies'),
+    (Icons.grid_view_rounded, Icons.grid_view_outlined, 'More'),
   ];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final uid = ref.read(userProvider).value?.uid;
+      if (uid != null) {
+        Lock.instance.syncWithCloud(uid);
+      }
       if (AppNotifier.instance.supported) {
         final prefs = ref.read(prefsProvider).value;
         if (prefs == null || prefs.notify) {
@@ -66,12 +72,12 @@ class _ShellState extends ConsumerState<Shell> {
           ),
         ),
         title: Text(
-          'Keluar dari Lunera?',
+          context.tr('Exit {name}?', {'name': appName}),
           textAlign: TextAlign.center,
           style: display(20, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
         ),
         content: Text(
-          'Apakah kamu yakin ingin keluar dari aplikasi?',
+          context.tr('Are you sure you want to exit the application?'),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -88,7 +94,7 @@ class _ShellState extends ConsumerState<Shell> {
               side: BorderSide(color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.2)),
             ),
             child: Text(
-              'Batal',
+              context.tr('Cancel'),
               style: TextStyle(
                 color: dark ? Colors.white70 : C.midnight,
                 fontWeight: FontWeight.w600,
@@ -103,9 +109,9 @@ class _ShellState extends ConsumerState<Shell> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
             ),
-            child: const Text(
-              'Keluar',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            child: Text(
+              context.tr('Exit'),
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -190,7 +196,7 @@ class _ShellState extends ConsumerState<Shell> {
                             ),
                             gap(2),
                             Text(
-                              _items[k].$3,
+                              context.tr(_items[k].$3),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: i == k ? FontWeight.w700 : FontWeight.w500,

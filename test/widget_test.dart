@@ -52,20 +52,22 @@ void main() {
     test('AppLockState default values', () {
       const state = AppLockState();
       expect(state.enabled, isFalse);
-      expect(state.bio, isFalse);
       expect(state.delayMin, equals(1));
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.4.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.5.0'));
     });
 
-    test('Prefs widgetHide configuration', () {
+    test('Prefs widgetHide and locale configuration', () {
       const prefs = Prefs();
       expect(prefs.widgetHide, isFalse);
-      final updated = prefs.copy(widgetHide: true);
+      expect(prefs.locale, equals('en'));
+      final updated = prefs.copy(widgetHide: true, locale: 'id');
       expect(updated.widgetHide, isTrue);
+      expect(updated.locale, equals('id'));
       expect(updated.toMap()['widgetHide'], isTrue);
+      expect(updated.toMap()['locale'], equals('id'));
     });
 
     test('ProfileState model initialization', () {

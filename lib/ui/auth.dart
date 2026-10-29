@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../lock.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../widget_sync.dart';
@@ -33,6 +34,7 @@ String authError(Object e) {
 Future<void> signOutAll() async {
   await AppNotifier.instance.cancelAll();
   await WidgetSync.clear();
+  await Lock.instance.clearLocal();
   await FirebaseAuth.instance.signOut();
 }
 
@@ -48,7 +50,10 @@ Future<void> signIn(String id, String pass) async {
   if (id.trim().isEmpty || pass.isEmpty) throw const FormatException('Isi username/email dan kata sandi.');
   final email = await _emailFor(id);
   if (email == null) throw const FormatException('Username/email atau kata sandi salah.');
-  await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
+  final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
+  if (cred.user != null) {
+    await Lock.instance.syncWithCloud(cred.user!.uid);
+  }
 }
 
 /// Kirim email atur ulang kata sandi. Hasilnya sengaja sama, ada atau tidaknya akun,
@@ -77,6 +82,7 @@ Future<void> signUp(String username, String email, String pass) async {
   try {
     await db.doc('usernames/$name').set({'uid': cred.user!.uid, 'email': mail});
     await cred.user!.updateDisplayName(name);
+    await Lock.instance.syncWithCloud(cred.user!.uid);
   } on FirebaseException catch (e) {
     await cred.user!.delete();
     throw FormatException(e.code == 'permission-denied' ? 'Username sudah dipakai.' : 'Gagal menyimpan username: ${e.message}');

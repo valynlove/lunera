@@ -1,30 +1,34 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'theme.dart';
 
 class AppLockState {
-  const AppLockState({this.enabled = false, this.bio = false, this.delayMin = 1});
-  final bool enabled, bio;
-  final int delayMin; // kunci lagi setelah ditinggalkan sekian menit (0 = segera)
+  const AppLockState({this.enabled = false, this.delayMin = 1});
+  final bool enabled;
+  final int delayMin; // auto-lock timeout in minutes (0 = immediately / 3s grace)
 }
 
-/// Kunci aplikasi. Disimpan per perangkat (bukan tersinkron), supaya PIN di HP
-/// tidak mengunci Chrome atau perangkat lain.
+/// Kunci aplikasi dengan PIN.
+/// Disimpan di perangkat (offline-first) dan otomatis tersinkronkan dengan akun di Cloud Firestore
+/// sehingga pengguna tidak perlu mengatur ulang PIN di perangkat baru.
 class Lock {
   Lock._();
   static final instance = Lock._();
 
   final state = ValueNotifier<AppLockState>(const AppLockState());
-  final _auth = LocalAuthentication();
   SharedPreferences? _p;
 
   Future<void> load() async {
     _p = await SharedPreferences.getInstance();
     _emit();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      syncWithCloud(uid);
+    }
   }
 
   void _emit() {
@@ -32,61 +36,154 @@ class Lock {
     if (p == null) return;
     state.value = AppLockState(
       enabled: p.getString('lock.hash') != null,
-      bio: p.getBool('lock.bio') ?? false,
       delayMin: p.getInt('lock.delay') ?? 1,
     );
   }
 
   String _hash(String pin, String salt) => sha256.convert(utf8.encode('$salt:$pin')).toString();
 
+  DocumentReference<Map<String, dynamic>> _doc(String uid) =>
+      FirebaseFirestore.instance.collection('users').doc(uid).collection('meta').doc('security');
+
+  /// Atur PIN baru (6 digit).
   Future<void> setPin(String pin) async {
     final salt = base64Url.encode(List<int>.generate(16, (_) => Random.secure().nextInt(256)));
+    final hash = _hash(pin, salt);
+    final now = DateTime.now().millisecondsSinceEpoch;
     await _p!.setString('lock.salt', salt);
-    await _p!.setString('lock.hash', _hash(pin, salt));
+    await _p!.setString('lock.hash', hash);
+    await _p!.setInt('lock.updatedAt', now);
     _emit();
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await _doc(uid).set({
+          'hash': hash,
+          'salt': salt,
+          'delay': _p!.getInt('lock.delay') ?? 1,
+          'updatedAt': now,
+        });
+      } catch (e) {
+        debugPrint('Failed to sync PIN to cloud: $e');
+      }
+    }
   }
 
+  /// Verifikasi PIN yang diketik.
   bool verify(String pin) {
     final salt = _p?.getString('lock.salt'), h = _p?.getString('lock.hash');
     return salt != null && h != null && _hash(pin, salt) == h;
   }
 
+  /// Nonaktifkan penguncian PIN.
   Future<void> disable() async {
-    for (final k in const ['lock.salt', 'lock.hash', 'lock.bio']) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    for (final k in const ['lock.salt', 'lock.hash']) {
+      await _p?.remove(k);
+    }
+    await _p?.setInt('lock.updatedAt', now);
+    _emit();
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await _doc(uid).set({
+          'hash': null,
+          'salt': null,
+          'delay': _p?.getInt('lock.delay') ?? 1,
+          'updatedAt': now,
+        });
+      } catch (e) {
+        debugPrint('Failed to sync PIN disable to cloud: $e');
+      }
+    }
+  }
+
+  /// Ubah jeda waktu penguncian otomatis (menit).
+  Future<void> setDelay(int minutes) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await _p?.setInt('lock.delay', minutes);
+    await _p?.setInt('lock.updatedAt', now);
+    _emit();
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await _doc(uid).set({
+          'hash': _p?.getString('lock.hash'),
+          'salt': _p?.getString('lock.salt'),
+          'delay': minutes,
+          'updatedAt': now,
+        }, SetOptions(merge: true));
+      } catch (e) {
+        debugPrint('Failed to sync PIN delay to cloud: $e');
+      }
+    }
+  }
+
+  /// Sinkronkan status PIN dengan Cloud Firestore (dipanggil saat login atau buka app).
+  Future<void> syncWithCloud(String uid) async {
+    try {
+      final snap = await _doc(uid).get().timeout(const Duration(seconds: 15));
+      final data = snap.data();
+      if (data == null) {
+        // Jika di remote belum ada tapi di lokal sudah ada PIN, upload ke remote
+        final localHash = _p?.getString('lock.hash');
+        final localSalt = _p?.getString('lock.salt');
+        if (localHash != null && localSalt != null) {
+          final now = _p?.getInt('lock.updatedAt') ?? DateTime.now().millisecondsSinceEpoch;
+          await _doc(uid).set({
+            'hash': localHash,
+            'salt': localSalt,
+            'delay': _p?.getInt('lock.delay') ?? 1,
+            'updatedAt': now,
+          });
+        }
+        return;
+      }
+
+      final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
+      final localAt = _p?.getInt('lock.updatedAt') ?? 0;
+
+      // Jika remote lebih baru atau sama, terapkan ke lokal
+      if (remoteAt >= localAt) {
+        final remoteHash = data['hash'] as String?;
+        final remoteSalt = data['salt'] as String?;
+        final remoteDelay = (data['delay'] as num?)?.toInt() ?? 1;
+
+        if (remoteHash != null && remoteSalt != null) {
+          await _p?.setString('lock.hash', remoteHash);
+          await _p?.setString('lock.salt', remoteSalt);
+          await _p?.setInt('lock.delay', remoteDelay);
+        } else {
+          await _p?.remove('lock.hash');
+          await _p?.remove('lock.salt');
+          await _p?.setInt('lock.delay', remoteDelay);
+        }
+        await _p?.setInt('lock.updatedAt', remoteAt);
+        _emit();
+      } else {
+        // Jika lokal lebih baru, upload ke remote
+        final localHash = _p?.getString('lock.hash');
+        final localSalt = _p?.getString('lock.salt');
+        await _doc(uid).set({
+          'hash': localHash,
+          'salt': localSalt,
+          'delay': _p?.getInt('lock.delay') ?? 1,
+          'updatedAt': localAt,
+        });
+      }
+    } catch (e) {
+      debugPrint('PIN sync error: $e');
+    }
+  }
+
+  /// Bersihkan data PIN lokal saat keluar akun
+  Future<void> clearLocal() async {
+    for (final k in const ['lock.salt', 'lock.hash', 'lock.delay', 'lock.updatedAt']) {
       await _p?.remove(k);
     }
     _emit();
   }
-
-  Future<void> setBio(bool v) async {
-    await _p?.setBool('lock.bio', v);
-    _emit();
-  }
-
-  Future<void> setDelay(int minutes) async {
-    await _p?.setInt('lock.delay', minutes);
-    _emit();
-  }
-
-  Future<bool> bioAvailable() async {
-    if (kIsWeb) return false;
-    try {
-      return await _auth.canCheckBiometrics && await _auth.isDeviceSupported();
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Gagal (termasuk belum disiapkan di Android) dianggap tidak lolos; PIN tetap bisa dipakai.
-  Future<bool> authBio() async {
-    try {
-      return await _auth.authenticate(
-        localizedReason: 'Buka $appName',
-        options: const AuthenticationOptions(biometricOnly: true, stickyAuth: true),
-      );
-    } catch (_) {
-      return false;
-    }
-  }
 }
-

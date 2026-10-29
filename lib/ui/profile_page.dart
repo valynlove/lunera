@@ -2,6 +2,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../l10n.dart';
 import '../profile.dart';
 import '../repo.dart';
 import '../theme.dart';
@@ -49,7 +50,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (picked != null) {
         final bytes = await picked.readAsBytes();
         await ref.read(profileProvider.notifier).setPhoto(bytes);
-        _toast('Foto profil berhasil diperbarui.');
+        if (!mounted) return;
+        _toast(context.tr('Profile photo updated.'));
         return;
       }
     } catch (_) {
@@ -60,29 +62,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         if (file != null) {
           final bytes = await file.readAsBytes();
           await ref.read(profileProvider.notifier).setPhoto(bytes);
-          _toast('Foto profil berhasil diperbarui.');
+          if (!mounted) return;
+          _toast(context.tr('Profile photo updated.'));
         }
       } catch (e) {
-        _toast('Gagal memilih foto: $e');
+        if (mounted) _toast('Failed to pick photo: $e');
       }
     }
   }
 
   Future<void> _removePhoto() async {
-    final confirmed = await confirm(context, 'Hapus foto profil saat ini?');
+    final confirmed = await confirm(context, context.tr('Remove profile photo?'));
     if (!confirmed || !mounted) return;
     await ref.read(profileProvider.notifier).setPhoto(null);
-    _toast('Foto profil dihapus.');
+    if (!mounted) return;
+    _toast(context.tr('Profile photo removed.'));
   }
 
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
       await ref.read(profileProvider.notifier).setNickname(_nicknameController.text);
-      _toast('Profil berhasil disimpan.');
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+      _toast(context.tr('Profile saved.'));
+      Navigator.pop(context);
     } catch (e) {
-      _toast('Gagal menyimpan profil: $e');
+      if (mounted) _toast('Failed to save profile: $e');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -98,7 +103,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profil', style: display(22)),
+        title: Text(context.tr('Profile'), style: display(22)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -141,14 +146,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               TextButton.icon(
                 onPressed: _pickPhoto,
                 icon: const Icon(Icons.image_outlined, size: 18),
-                label: const Text('Ganti foto'),
+                label: Text(context.tr('Change photo')),
               ),
               if (hasPhoto) ...[
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: _removePhoto,
                   icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
-                  label: const Text('Hapus foto', style: TextStyle(color: Colors.redAccent)),
+                  label: Text(context.tr('Remove photo'), style: const TextStyle(color: Colors.redAccent)),
                 ),
               ],
             ],
@@ -164,11 +169,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   controller: _nicknameController,
                   textCapitalization: TextCapitalization.words,
                   maxLength: 30,
-                  decoration: const InputDecoration(
-                    labelText: 'Nama Panggilan (Nickname)',
-                    hintText: 'Contoh: Lunaria',
-                    helperText: 'Ditampilkan pada salam Beranda dan kartu profil.',
-                    prefixIcon: Icon(Icons.badge_outlined),
+                  decoration: InputDecoration(
+                    labelText: context.tr('Nickname'),
+                    hintText: 'e.g. Lunaria',
+                    helperText: context.tr('Shown in greetings on the Home screen and profile card.'),
+                    prefixIcon: const Icon(Icons.badge_outlined),
                   ),
                 ),
                 gap(16),
@@ -177,18 +182,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.alternate_email_rounded, color: C.peony),
                     title: Text('@$username', style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: const Text('Username akun'),
+                    subtitle: Text(context.tr('Account username')),
                   ),
                 if (user?.email != null)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.mail_outline_rounded, color: C.peony),
                     title: Text(user!.email!, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Email terdaftar'),
+                    subtitle: Text(context.tr('Registered email')),
                   ),
                 gap(8),
                 Text(
-                  'Username dan email digunakan untuk otentikasi login dan tidak dapat diubah.',
+                  context.tr('Username and email are used for login authentication and cannot be changed.'),
                   style: theme.textTheme.bodySmall?.copyWith(color: fg.withValues(alpha: 0.6)),
                 ),
               ],
@@ -196,7 +201,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
           gap(24),
           pillButton(
-            _saving ? 'Menyimpan...' : 'Simpan Profil',
+            _saving ? '...' : context.tr('Save Profile'),
             _saving ? () {} : _save,
             icon: Icons.check_circle_outline_rounded,
           ),

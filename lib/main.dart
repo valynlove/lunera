@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
+import 'l10n.dart';
 import 'lock.dart';
 import 'notifications.dart';
 import 'profile.dart';
@@ -15,6 +17,7 @@ import 'ui/shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('en');
   await initializeDateFormatting('id');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   try {
@@ -37,11 +40,21 @@ class LuneraApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(prefsProvider.select((p) => p.value?.theme ?? 'system'));
+    final localeCode = ref.watch(prefsProvider.select((p) => p.value?.locale ?? 'en'));
+    AppLocale.code = localeCode;
     applyAccent(ref.watch(prefsProvider.select((p) => p.value?.accent ?? 'lunera')));
     return MaterialApp(
       title: appName,
       builder: appBackdrop,
       debugShowCheckedModeBanner: false,
+      locale: Locale(localeCode),
+      supportedLocales: AppLocale.supported,
+      localizationsDelegates: const [
+        AppStrings.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
       themeMode: switch (mode) {

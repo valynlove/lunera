@@ -303,10 +303,12 @@ class Prefs {
     this.accent = 'lunera',
     this.notify = true,
     this.widgetHide = false,
+    this.locale = 'en',
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
   final bool widgetHide; // widget hanya menampilkan nama aplikasi
+  final String locale; // 'en' (default) atau 'id'
   final String theme; // system | light | dark
   final Map<String, String> units; // id hormon -> satuan tampilan
   final List<String> places;
@@ -318,7 +320,18 @@ class Prefs {
     return u != null && p.units.containsKey(u) ? u : p.base;
   }
 
-  Prefs copy({String? theme, Map<String, String>? units, List<String>? places, bool? hrtCounter, int? dayStart, String? accent, bool? notify, bool? widgetHide}) => Prefs(
+  Prefs copy({
+    String? theme,
+    Map<String, String>? units,
+    List<String>? places,
+    bool? hrtCounter,
+    int? dayStart,
+    String? accent,
+    bool? notify,
+    bool? widgetHide,
+    String? locale,
+  }) =>
+      Prefs(
         theme: theme ?? this.theme,
         units: units ?? this.units,
         places: places ?? this.places,
@@ -327,10 +340,20 @@ class Prefs {
         accent: accent ?? this.accent,
         notify: notify ?? this.notify,
         widgetHide: widgetHide ?? this.widgetHide,
+        locale: locale ?? this.locale,
       );
 
-  Map<String, dynamic> toMap() =>
-      {'theme': theme, 'units': units, 'places': places, 'hrtCounter': hrtCounter, 'dayStart': dayStart, 'accent': accent, 'notify': notify, 'widgetHide': widgetHide};
+  Map<String, dynamic> toMap() => {
+        'theme': theme,
+        'units': units,
+        'places': places,
+        'hrtCounter': hrtCounter,
+        'dayStart': dayStart,
+        'accent': accent,
+        'notify': notify,
+        'widgetHide': widgetHide,
+        'locale': locale,
+      };
 
   factory Prefs.from(Map<String, dynamic> m) => Prefs(
         theme: m['theme'] ?? 'system',
@@ -345,6 +368,7 @@ class Prefs {
         accent: m['accent'] ?? 'lunera',
         notify: m['notify'] ?? true,
         widgetHide: m['widgetHide'] ?? false,
+        locale: m['locale'] ?? 'en',
       );
 }
 
