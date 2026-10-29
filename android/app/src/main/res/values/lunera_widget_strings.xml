@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_hrt_label">Lunera: lama terapi</string>
+    <string name="widget_hrt_desc">Berapa lama kamu menjalani terapi</string>
+    <string name="widget_schedule_label">Lunera: jadwal</string>
+    <string name="widget_schedule_desc">Jadwal dosis berikutnya</string>
+    <string name="widget_schedule_header">Jadwal</string>
+    <string name="widget_schedule_empty">Belum ada jadwal</string>
+    <string name="widget_level_label">Lunera: level</string>
+    <string name="widget_level_desc">Grafik perkiraan level hormon</string>
+</resources>

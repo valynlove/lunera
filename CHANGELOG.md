@@ -4,6 +4,20 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-29
+
+### Added
+- **Native Android Home Screen Widgets (`home_widget`):**
+  - Integrated 3 native Android AppWidgets accessible directly from the home screen:
+    - **Lama Terapi (HRT Counter):** Displays continuous transition duration (years, months, days) and total taken dose tally.
+    - **Jadwal Dosis (Schedule):** Real-time list of the next 3 upcoming or overdue doses with scheduled timestamps, dose units, and recommended injection rotation sites.
+    - **Level Hormon (Level Chart):** Crisp pharmacokinetic level simulation curve rendered off-screen with custom painters, displaying current estimated levels and lab result markers.
+  - Automated background synchronizer (`lib/widget_sync.dart`) updating home screen widgets whenever doses are logged, therapies modified, or lab results added.
+  - Added privacy switch in **Pengaturan > Widget Layar Utama > Sembunyikan detail di widget** to mask medical data when the phone is viewed by others.
+  - Integrated clean cache clearing upon user sign-out (`WidgetSync.clear()`).
+
+---
+
 ## [1.3.0] - 2026-10-29
 
 ### Added

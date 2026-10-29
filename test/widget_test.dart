@@ -57,7 +57,15 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.3.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.4.0'));
+    });
+
+    test('Prefs widgetHide configuration', () {
+      const prefs = Prefs();
+      expect(prefs.widgetHide, isFalse);
+      final updated = prefs.copy(widgetHide: true);
+      expect(updated.widgetHide, isTrue);
+      expect(updated.toMap()['widgetHide'], isTrue);
     });
 
     test('ProfileState model initialization', () {

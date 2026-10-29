@@ -147,6 +147,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               },
             ),
           ]),
+          _card('Widget layar utama', [
+            const Text('Tahan layar utama, pilih Widget, lalu cari Lunera: tersedia widget lama terapi, jadwal, dan grafik level.'),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Sembunyikan detail di widget'),
+              subtitle: const Text('Widget hanya menampilkan nama aplikasi. Berguna jika layar utamamu terlihat orang lain.'),
+              value: p.widgetHide,
+              onChanged: (v) => _save(p.copy(widgetHide: v)),
+            ),
+          ]),
           _card('Pembaruan Aplikasi', [
             const Text('Versi ${UpdateCheckerService.currentVersion}'),
             gap(8),

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../notifications.dart';
 import '../theme.dart';
+import '../widget_sync.dart';
 
 final _nameRe = RegExp(r'^[a-z0-9_.]{3,20}$');
 
@@ -31,6 +32,7 @@ String authError(Object e) {
 /// Keluar dan batalkan semua pengingat di perangkat ini.
 Future<void> signOutAll() async {
   await AppNotifier.instance.cancelAll();
+  await WidgetSync.clear();
   await FirebaseAuth.instance.signOut();
 }
 

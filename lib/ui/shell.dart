@@ -5,6 +5,7 @@ import '../notifications.dart';
 import '../repo.dart';
 import '../theme.dart';
 import '../update_checker.dart';
+import '../widget_sync.dart';
 import 'calendar.dart';
 import 'home.dart';
 import 'levels.dart';
@@ -116,6 +117,7 @@ class _ShellState extends ConsumerState<Shell> {
   @override
   Widget build(BuildContext context) {
     ref.watch(notifySyncProvider); // jadwalkan ulang pengingat saat data berubah
+    ref.watch(widgetSyncProvider); // perbarui widget layar utama
     final i = ref.watch(tabProvider);
     final theme = Theme.of(context), dark = theme.brightness == Brightness.dark;
     final fg = theme.colorScheme.onSurface;
