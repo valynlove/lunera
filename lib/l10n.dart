@@ -57,6 +57,10 @@ String trG(String key, [Map<String, Object?>? args]) =>
 
 /// Indonesian translation dictionary (English key -> Indonesian translation).
 const Map<String, String> _id = {
+  // Brand & Taglines
+  'Every Phase, Your Own.': 'Setiap fase, milikmu.',
+  'Every phase,\nyour own.': 'Setiap fase,\nmilikmu.',
+
   // Navigation & Shell
   'Home': 'Beranda',
   'Calendar': 'Kalender',
@@ -178,3 +182,4 @@ const Map<String, String> _id = {
   'Registered email': 'Email terdaftar',
   'Username and email are used for login authentication and cannot be changed.': 'Username dan email digunakan untuk otentikasi login dan tidak dapat diubah.',
 };
+

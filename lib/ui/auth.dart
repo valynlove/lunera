@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n.dart';
 import '../lock.dart';
 import '../notifications.dart';
 import '../theme.dart';
@@ -134,7 +135,8 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) => Theme(
         data: buildTheme(Brightness.dark),
         child: Scaffold(
-          body: NightScene(
+          body: LakeScene(
+            moon: false,
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 110),
@@ -144,7 +146,7 @@ class WelcomePage extends StatelessWidget {
                   gap(18),
                   Text(appName, style: wordmark(48, color: Colors.white)),
                   gap(12),
-                  Text(tagline, style: TextStyle(color: Colors.white.withValues(alpha: .85), fontSize: 17)),
+                  Text(context.tr(tagline), style: TextStyle(color: Colors.white.withValues(alpha: .85), fontSize: 17)),
                   const Spacer(flex: 3),
                   SizedBox(
                     width: double.infinity,

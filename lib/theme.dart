@@ -154,6 +154,19 @@ class _MoonPainter extends CustomPainter {
     canvas.save();
     canvas.scale(size.width / 48);
     final paint = Paint()..color = const Color(0xFFE7E3FF);
+    final ring = Paint()
+      ..color = const Color(0xFFE7E3FF).withValues(alpha: .85)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.3
+      ..strokeCap = StrokeCap.round;
+    final orbit = Rect.fromCenter(center: Offset.zero, width: 44, height: 12);
+    // cincin orbit: setengah belakang digambar sebelum bulan, setengah depan sesudahnya
+    canvas.save();
+    canvas.translate(24, 27);
+    canvas.rotate(-0.3);
+    canvas.drawArc(orbit, math.pi, math.pi, false, ring);
+    canvas.restore();
+
     final moon = Path.combine(
       PathOperation.difference,
       Path()..addOval(Rect.fromCircle(center: const Offset(24, 24), radius: 16)),
@@ -171,6 +184,12 @@ class _MoonPainter extends CustomPainter {
       ..lineTo(36.4, 10.4)
       ..close();
     canvas.drawPath(star, paint);
+
+    canvas.save();
+    canvas.translate(24, 27);
+    canvas.rotate(-0.3);
+    canvas.drawArc(orbit, 0, math.pi, false, ring);
+    canvas.restore();
     canvas.restore();
   }
 
@@ -252,3 +271,128 @@ Future<bool> confirm(BuildContext c, String text, {String ok = 'Hapus'}) async =
       ),
     )) ??
     false;
+
+/// Pemandangan danau di malam hari (layar pembuka): langit, bulan sabit, pegunungan,
+/// dan danau yang memantulkan cahaya cakrawala. [moon] false jika bulan digambar di tempat lain.
+class LakeScene extends StatelessWidget {
+  const LakeScene({super.key, required this.child, this.moon = true});
+  final Widget child;
+  final bool moon;
+  @override
+  Widget build(BuildContext context) => Stack(fit: StackFit.expand, children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0F0E33),
+                Color(0xFF25225A),
+                Color(0xFF4B3C86),
+                Color(0xFF8E6AA8),
+                Color(0xFFD79AB8),
+                Color(0xFF3A2E72),
+                Color(0xFF14123A),
+              ],
+              stops: [0, .35, .55, .68, .72, .8, 1],
+            ),
+          ),
+        ),
+        CustomPaint(painter: _LakePainter(moon)),
+        child,
+      ]);
+}
+
+class _LakePainter extends CustomPainter {
+  _LakePainter(this.moon);
+  final bool moon;
+
+  static const List<List<List<double>>> _far = [
+    [[0, .60], [.12, .63], [.22, .665], [.34, .70], [.46, .72]],
+    [[.56, .72], [.68, .68], [.80, .64], [.90, .62], [1, .60]],
+  ];
+  static const List<List<List<double>>> _near = [
+    [[0, .665], [.10, .69], [.20, .71], [.30, .72]],
+    [[.66, .72], [.78, .70], [.90, .68], [1, .66]],
+  ];
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final w = s.width, h = s.height, horizon = h * .72;
+    final rnd = math.Random(11);
+    for (var i = 0; i < 45; i++) {
+      canvas.drawCircle(
+        Offset(rnd.nextDouble() * w, rnd.nextDouble() * h * .5),
+        .5 + rnd.nextDouble() * 1.1,
+        Paint()..color = Colors.white.withValues(alpha: .3 + rnd.nextDouble() * .6),
+      );
+    }
+
+    if (moon) {
+      final c = Offset(w * .46, h * .17), r = w * .075;
+      final crescent = Path.combine(
+        PathOperation.difference,
+        Path()..addOval(Rect.fromCircle(center: c, radius: r)),
+        Path()..addOval(Rect.fromCircle(center: c.translate(r * .55, -r * .2), radius: r * .88)),
+      );
+      canvas.drawPath(
+        crescent,
+        Paint()
+          ..color = const Color(0xFFF3E9E4).withValues(alpha: .55)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+      );
+      canvas.drawPath(crescent, Paint()..color = const Color(0xFFF3E9E4));
+    }
+
+    Path ridge(List<List<double>> pts) {
+      final p = Path()..moveTo(pts.first[0] * w, horizon);
+      for (final q in pts) {
+        p.lineTo(q[0] * w, q[1] * h);
+      }
+      return p..lineTo(pts.last[0] * w, horizon)..close();
+    }
+
+    void draw(List<List<List<double>>> layers, Color color) {
+      for (final l in layers) {
+        canvas.drawPath(ridge(l), Paint()..color = color);
+      }
+    }
+
+    draw(_far, const Color(0xFF3B2F73));
+    draw(_near, const Color(0xFF1A1844));
+
+    // pantulan cahaya cakrawala di danau
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(w * .5, horizon + h * .05), width: w * .5, height: h * .1),
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0x66E7A9C4), Color(0x00E7A9C4)],
+        ).createShader(
+          Rect.fromCenter(center: Offset(w * .5, horizon + h * .05), width: w * .5, height: h * .1),
+        ),
+    );
+    // pantulan pegunungan (dicerminkan terhadap cakrawala)
+    canvas.save();
+    canvas.translate(0, horizon * 2);
+    canvas.scale(1, -1);
+    for (final l in _far) {
+      canvas.drawPath(ridge(l), Paint()..color = const Color(0xFF3B2F73).withValues(alpha: .35));
+    }
+    for (final l in _near) {
+      canvas.drawPath(ridge(l), Paint()..color = const Color(0xFF1A1844).withValues(alpha: .5));
+    }
+    canvas.restore();
+    // riak air
+    final ripple = Paint()
+      ..color = Colors.white.withValues(alpha: .07)
+      ..strokeWidth = 1;
+    for (var i = 0; i < 26; i++) {
+      final y = horizon + 6 + rnd.nextDouble() * (h - horizon - 12);
+      final x = rnd.nextDouble() * w * .8, len = w * (.08 + rnd.nextDouble() * .22);
+      canvas.drawLine(Offset(x, y), Offset(x + len, y), ripple);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LakePainter o) => o.moon != moon;
+}

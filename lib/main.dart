@@ -14,6 +14,7 @@ import 'theme.dart';
 import 'ui/auth.dart';
 import 'ui/lock_screen.dart';
 import 'ui/shell.dart';
+import 'ui/splash.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +63,37 @@ class LuneraApp extends ConsumerWidget {
         'dark' => ThemeMode.dark,
         _ => ThemeMode.system,
       },
-      home: const AuthGate(),
+      home: const AppRoot(),
+    );
+  }
+}
+
+/// Menampilkan layar pembuka sampai status masuk diketahui dan jeda minimalnya lewat.
+class AppRoot extends ConsumerStatefulWidget {
+  const AppRoot({super.key});
+  @override
+  ConsumerState<AppRoot> createState() => _AppRootState();
+}
+
+class _AppRootState extends ConsumerState<AppRoot> {
+  bool minDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 2400), () {
+      if (mounted) setState(() => minDone = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loading = ref.watch(userProvider.select((u) => u.isLoading));
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: minDone && !loading
+          ? const AuthGate(key: ValueKey('gate'))
+          : const SplashPage(key: ValueKey('splash')),
     );
   }
 }

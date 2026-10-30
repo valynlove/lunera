@@ -56,7 +56,7 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.5.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.6.0'));
     });
 
     test('Prefs widgetHide and locale configuration', () {

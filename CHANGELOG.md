@@ -4,6 +4,21 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-30
+
+### Added
+- **In-App Animated Lake Splash Screen (`SplashPage` & `AppRoot`):**
+  - Atmospheric nighttime lake landscape with starry skies, mountain ranges, illuminated crescent moon, and water horizon reflections.
+  - Multi-stage entrance animation: background scenery fade, tagline slide & fade (`GoogleFonts.cormorantGaramond`), subtle divider rule, and brand logo mark.
+  - Smooth 500ms `AnimatedSwitcher` transition between splash screen and authentication gate once auth status is resolved (minimum 2.4s display).
+  - Full localization support for both English (*"Every phase, your own."*) and Indonesian (*"Setiap fase, milikmu."*).
+- **Celestial Orbit Ring Moon Icon (`_MoonPainter`):**
+  - Enhanced vector moon logo with an elliptical orbital ring seamlessly rendered in front of and behind the crescent moon.
+- **Lake Landscape Scenery Component (`LakeScene`):**
+  - Integrated `LakeScene` with customizable moon rendering in `theme.dart`, replacing `NightScene` in `WelcomePage` for visual continuity.
+
+---
+
 ## [1.5.0] - 2026-10-29
 
 ### Added
