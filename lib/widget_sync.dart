@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'l10n.dart';
 import 'models.dart';
 import 'repo.dart';
 import 'schedule.dart';
@@ -115,13 +116,16 @@ class WidgetSync {
     final ys = <double>[...sim.map((s) => s.y), ...dots.map((d) => d.dy), ...?band];
     final top = (ys.isEmpty ? 10.0 : ys.reduce(math.max)) * 1.15 + 1;
 
+    final isId = AppLocale.code == 'id';
     String value = '', note = '';
     if (intakes.isNotEmpty) {
       value = '${fmt((levelAt(intakes, now) / f).roundToDouble())} $unit';
-      note = 'Perkiraan dari catatan dosis, titik = hasil lab';
+      note = isId ? 'Perkiraan dari catatan dosis, titik = hasil lab' : 'Estimated from doses, dots = lab results';
     } else if (hl.isNotEmpty) {
       value = '${fmt(hl.last.base / f)} $unit';
-      note = 'Hasil lab ${DateFormat('d MMM y', 'id').format(hl.last.at)}';
+      note = isId
+          ? 'Hasil lab ${DateFormat('d MMM y', 'id').format(hl.last.at)}'
+          : 'Lab result ${DateFormat('d MMM y', 'en').format(hl.last.at)}';
     }
     await HomeWidget.saveWidgetData<String>('lvl_title', p.name);
     await HomeWidget.saveWidgetData<String>('lvl_value', value);

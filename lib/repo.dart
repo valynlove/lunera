@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'l10n.dart';
 import 'models.dart';
 
 Object? _enc(dynamic o) {
@@ -90,15 +91,16 @@ class Repo {
   Future<void> addDemo() {
     final b = FirebaseFirestore.instance.batch();
     final n = DateTime.now();
+    final isId = AppLocale.code == 'id';
     DateTime ago(int d, [int h = 20]) => DateTime(n.year, n.month, n.day - d, h);
     b.set(_c('supplies').doc('demo_vial'),
-        Supply(id: '', name: 'Estradiol valerat 40 mg/mL (contoh)', qty: 8, initial: 10, perDose: 0.1, unitLabel: 'mL', dosePerUnit: 40, expiry: DateTime(n.year + 1, n.month, n.day)).toMap());
-    b.set(_c('supplies').doc('demo_syringe'), const Supply(id: '', name: 'Spuit (contoh)', qty: 12, initial: 20, kind: 'generic', gtype: 'syringe').toMap());
-    b.set(_c('supplies').doc('demo_wipe'), const Supply(id: '', name: 'Tisu alkohol (contoh)', qty: 3, initial: 50, kind: 'generic', gtype: 'wipe').toMap());
+        Supply(id: '', name: isId ? 'Estradiol valerat 40 mg/mL (contoh)' : 'Estradiol valerate 40 mg/mL (sample)', qty: 8, initial: 10, perDose: 0.1, unitLabel: 'mL', dosePerUnit: 40, expiry: DateTime(n.year + 1, n.month, n.day)).toMap());
+    b.set(_c('supplies').doc('demo_syringe'), Supply(id: '', name: isId ? 'Spuit (contoh)' : 'Syringe (sample)', qty: 12, initial: 20, kind: 'generic', gtype: 'syringe').toMap());
+    b.set(_c('supplies').doc('demo_wipe'), Supply(id: '', name: isId ? 'Tisu alkohol (contoh)' : 'Alcohol wipe (sample)', qty: 3, initial: 50, kind: 'generic', gtype: 'wipe').toMap());
     b.set(_c('therapies').doc('demo_inj'),
-        Therapy(id: '', hormoneId: 'estradiol', name: 'Estradiol valerat (contoh)', dose: 4, doseUnit: 'mg', start: ago(35, 0), everyDays: 7, supplyId: 'demo_vial', route: 'inj', pk: 'e2_valerate', rolling: true, injType: 'im', times: const ['20:00']).toMap());
+        Therapy(id: '', hormoneId: 'estradiol', name: isId ? 'Estradiol valerat (contoh)' : 'Estradiol valerate (sample)', dose: 4, doseUnit: 'mg', start: ago(35, 0), everyDays: 7, supplyId: 'demo_vial', route: 'inj', pk: 'e2_valerate', rolling: true, injType: 'im', times: const ['20:00']).toMap());
     b.set(_c('therapies').doc('demo_pill'),
-        Therapy(id: '', hormoneId: 'other', name: 'Spironolakton (contoh)', dose: 50, doseUnit: 'mg', start: ago(35, 0), route: 'oral', times: const ['09:00']).toMap());
+        Therapy(id: '', hormoneId: 'other', name: isId ? 'Spironolakton (contoh)' : 'Spironolactone (sample)', dose: 50, doseUnit: 'mg', start: ago(35, 0), route: 'oral', times: const ['09:00']).toMap());
     for (var i = 0; i < 5; i++) {
       b.set(_c('logs').doc('demo_log$i'),
           DoseLog(id: '', therapyId: 'demo_inj', at: ago(35 - 7 * i), places: [defaultPlaces[i % defaultPlaces.length]], dose: 4, injType: 'im').toMap());

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
@@ -44,7 +45,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           behavior: HitTestBehavior.opaque,
           onTap: () => setState(() => sel = d),
           child: Column(children: [
-            Text(DateFormat('E', 'id').format(d), style: TextStyle(fontSize: 12, color: fg.withValues(alpha: .6))),
+            Text(DateFormat('E', AppLocale.code).format(d), style: TextStyle(fontSize: 12, color: fg.withValues(alpha: .6))),
             gap(6),
             Container(
               width: 40,
@@ -67,28 +68,28 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final agenda = ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
       Row(children: [
         IconButton(onPressed: () => setState(() => sel = DateTime(sel.year, sel.month, sel.day - 7)), icon: const Icon(Icons.chevron_left_rounded)),
-        Expanded(child: Center(child: Text(DateFormat('MMMM y', 'id').format(sel), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)))),
+        Expanded(child: Center(child: Text(DateFormat('MMMM y', AppLocale.code).format(sel), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)))),
         IconButton(onPressed: () => setState(() => sel = DateTime(sel.year, sel.month, sel.day + 7)), icon: const Icon(Icons.chevron_right_rounded)),
       ]),
       gap(4),
       Row(children: [for (var i = 0; i < 7; i++) dayCell(DateTime(monday.year, monday.month, monday.day + i))]),
       gap(18),
-      Text(DateFormat('EEEE, d MMMM', 'id').format(sel), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+      Text(DateFormat('EEEE, d MMMM', AppLocale.code).format(sel), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
       gap(10),
       for (final s in pending) SlotTile(s: s, logs: logs, supplies: supplies, prefs: prefs),
       for (final l in done) LogTile(l: l, t: byId[l.therapyId], supplies: supplies, prefs: prefs),
-      if (pending.isEmpty && done.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Center(child: Text('Tidak ada jadwal di hari ini.'))),
+      if (pending.isEmpty && done.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 24), child: Center(child: Text(context.tr('No schedule for this day.')))),
       gap(10),
-      pillButton('Tambah jadwal', () => showSheet(context, TherapySheet(supplies: supplies)), icon: Icons.add_rounded),
+      pillButton(context.tr('Add schedule'), () => showSheet(context, TherapySheet(supplies: supplies)), icon: Icons.add_rounded),
     ]);
 
     return Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Kalender', style: display(36)),
+          Text(context.tr('Calendar'), style: display(36)),
           gap(14),
-          PillTabs<int>(items: const [(0, 'Jadwal'), (1, 'Riwayat'), (2, 'Jurnal')], value: view, onChanged: (v) => setState(() => view = v)),
+          PillTabs<int>(items: [(0, context.tr('Schedule')), (1, context.tr('History')), (2, context.tr('Journal'))], value: view, onChanged: (v) => setState(() => view = v)),
         ]),
       ),
       Expanded(child: view == 0 ? agenda : (view == 1 ? const HistoryPage(embedded: true) : const JournalView())),

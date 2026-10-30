@@ -57,12 +57,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.8.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.9.0'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.8.0'));
+      expect(AppChangelog.releases.first.version, equals('1.9.0'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -98,7 +98,7 @@ void main() {
         id: 'j1',
         at: now,
         mood: 'happy',
-        body: {'Kulit': 'Lebih halus', 'Energi': 'Tinggi'},
+        body: {'Skin': 'Smoother', 'Energy': 'High'},
         text: 'Hari yang sangat menyenangkan',
       );
 
@@ -107,13 +107,13 @@ void main() {
       expect(entry.hasText, isTrue);
       expect(moodScore['happy'], equals(5.0));
       expect(moods.containsKey('happy'), isTrue);
-      expect(bodyAreas.contains('Kulit'), isTrue);
+      expect(bodyAreas.contains('Skin'), isTrue);
 
       final map = entry.toMap();
       final reconstructed = JournalEntry.from('j1', map);
       expect(reconstructed.id, equals('j1'));
       expect(reconstructed.mood, equals('happy'));
-      expect(reconstructed.body['Kulit'], equals('Lebih halus'));
+      expect(reconstructed.body['Skin'], equals('Smoother'));
       expect(reconstructed.text, equals('Hari yang sangat menyenangkan'));
     });
   });

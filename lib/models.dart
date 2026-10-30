@@ -35,24 +35,24 @@ class AdminRoute {
 }
 
 const routes = <AdminRoute>[
-  AdminRoute('inj', 'Suntik', Icons.vaccines_rounded, places: true),
+  AdminRoute('inj', 'Injection', Icons.vaccines_rounded, places: true),
   AdminRoute('oral', 'Oral', Icons.medication_rounded),
   AdminRoute('sublingual', 'Sublingual', Icons.medication_liquid_rounded),
   AdminRoute('patch', 'Patch', Icons.sticky_note_2_rounded, places: true),
   AdminRoute('gel', 'Gel', Icons.sanitizer_rounded),
-  AdminRoute('implant', 'Implan', Icons.push_pin_rounded),
-  AdminRoute('supp', 'Supositoria', Icons.medication_rounded),
-  AdminRoute('spray', 'Semprot', Icons.water_drop_rounded),
-  AdminRoute('drops', 'Tetes', Icons.opacity_rounded),
+  AdminRoute('implant', 'Implant', Icons.push_pin_rounded),
+  AdminRoute('supp', 'Suppository', Icons.medication_rounded),
+  AdminRoute('spray', 'Spray', Icons.water_drop_rounded),
+  AdminRoute('drops', 'Drops', Icons.opacity_rounded),
 ];
 AdminRoute routeOf(String id) => routes.firstWhere((r) => r.id == id, orElse: () => routes.first);
 
 const genericTypes = <String, (String, IconData)>{
-  'syringe': ('Spuit', Icons.vaccines_rounded),
-  'wipe': ('Tisu alkohol', Icons.cleaning_services_rounded),
-  'needle': ('Jarum', Icons.push_pin_rounded),
-  'gloves': ('Sarung tangan', Icons.back_hand_rounded),
-  'bandage': ('Plester', Icons.healing_rounded),
+  'syringe': ('Syringe', Icons.vaccines_rounded),
+  'wipe': ('Alcohol wipe', Icons.cleaning_services_rounded),
+  'needle': ('Needle', Icons.push_pin_rounded),
+  'gloves': ('Gloves', Icons.back_hand_rounded),
+  'bandage': ('Bandage', Icons.healing_rounded),
 };
 
 const defaultPlaces = ['Paha kiri', 'Paha kanan', 'Bokong kiri', 'Bokong kanan'];
@@ -257,14 +257,14 @@ class Supply {
 
 /// Suasana hati untuk jurnal: kunci -> (label, ikon).
 const moods = <String, (String, IconData)>{
-  'happy': ('Senang', Icons.sentiment_very_satisfied_rounded),
-  'calm': ('Tenang', Icons.sentiment_satisfied_rounded),
-  'neutral': ('Biasa', Icons.sentiment_neutral_rounded),
-  'low': ('Murung', Icons.sentiment_dissatisfied_rounded),
-  'anxious': ('Cemas', Icons.sentiment_very_dissatisfied_rounded),
+  'happy': ('Happy', Icons.sentiment_very_satisfied_rounded),
+  'calm': ('Calm', Icons.sentiment_satisfied_rounded),
+  'neutral': ('Neutral', Icons.sentiment_neutral_rounded),
+  'low': ('Low', Icons.sentiment_dissatisfied_rounded),
+  'anxious': ('Anxious', Icons.sentiment_very_dissatisfied_rounded),
 };
 
-const bodyAreas = ['Kulit', 'Payudara', 'Bentuk tubuh', 'Rambut', 'Energi', 'Tidur'];
+const bodyAreas = ['Skin', 'Breasts', 'Body shape', 'Hair', 'Energy', 'Sleep'];
 
 /// Satu entri jurnal: suasana hati, perubahan tubuh per bagian, dan/atau catatan bebas.
 class JournalEntry {

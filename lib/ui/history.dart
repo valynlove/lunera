@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
@@ -19,7 +20,7 @@ class LogTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hhmm = DateFormat('HH:mm').format(l.at);
     final detail = l.skipped
-        ? 'Dilewati, jadwal $hhmm'
+        ? context.tr('Skipped, scheduled {time}', {'time': hhmm})
         : [
             hhmm,
             '${fmt(l.dose ?? t?.dose ?? 0)} ${t?.doseUnit ?? ''}'.trim(),
@@ -32,16 +33,16 @@ class LogTile extends ConsumerWidget {
       child: ListTile(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         leading: Icon(l.skipped ? Icons.skip_next_rounded : (t?.adm.icon ?? Icons.medication_rounded), color: l.skipped ? fg.withValues(alpha: .45) : C.lagoon),
-        title: Text(t?.name ?? 'Terapi dihapus', style: TextStyle(fontWeight: FontWeight.w700, color: l.skipped ? fg.withValues(alpha: .55) : null)),
+        title: Text(t?.name ?? context.tr('Therapy deleted'), style: TextStyle(fontWeight: FontWeight.w700, color: l.skipped ? fg.withValues(alpha: .55) : null)),
         subtitle: Text(l.note == null ? detail : '$detail\n${l.note}'),
         isThreeLine: l.note != null,
         onTap: () async {
           final ids = {for (final s in supplies) s.id};
           if (l.skipped) {
-            if (await confirm(context, 'Batalkan "lewati" untuk dosis ini?', ok: 'Batalkan') && context.mounted) ref.read(repoProvider)?.deleteLog(l, ids);
+            if (await confirm(context, context.tr('Undo skip for this dose?'), ok: 'Undo') && context.mounted) ref.read(repoProvider)?.deleteLog(l, ids);
           } else if (t != null) {
             showSheet(context, DoseSheet(t: t!, edit: l, supplies: supplies, prefs: prefs));
-          } else if (await confirm(context, 'Terapi untuk catatan ini sudah dihapus. Hapus catatannya?') && context.mounted) {
+          } else if (await confirm(context, context.tr('Therapy for this log has been deleted. Delete log?')) && context.mounted) {
             ref.read(repoProvider)?.deleteLog(l, ids);
           }
         },
@@ -78,18 +79,18 @@ class HistoryPage extends ConsumerWidget {
         day = l.at;
         rows.add(Padding(
           padding: const EdgeInsets.fromLTRB(4, 14, 0, 8),
-          child: Text(DateFormat('EEEE, d MMMM y', 'id').format(l.at), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+          child: Text(DateFormat('EEEE, d MMMM y', AppLocale.code).format(l.at), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
         ));
       }
       rows.add(LogTile(l: l, t: byId[l.therapyId], supplies: supplies, prefs: prefs));
     }
 
-    final add = pillButton('Catat', () => _add(context, ths, supplies, prefs, logs), icon: Icons.add_rounded);
+    final add = pillButton(context.tr('Log'), () => _add(context, ths, supplies, prefs, logs), icon: Icons.add_rounded);
     return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
       if (embedded)
         Align(alignment: Alignment.centerRight, child: add)
       else
-        Row(children: [Expanded(child: Text('Riwayat', style: display(40))), add]),
+        Row(children: [Expanded(child: Text(context.tr('History'), style: display(40))), add]),
       gap(14),
       if (prefs.hrtCounter && starts.isNotEmpty)
         Container(
@@ -102,12 +103,12 @@ class HistoryPage extends ConsumerWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(hrtDuration(starts.first, DateTime.now()), style: display(24)),
                 gap(6),
-                Text('${taken.length} dosis tercatat'),
+                Text(context.tr('{count} doses logged', {'count': taken.length})),
               ]),
             ),
           ]),
         ),
-      if (logs.isEmpty) const Padding(padding: EdgeInsets.only(top: 40), child: Text('Belum ada catatan. Dosis yang kamu catat muncul di sini.')),
+      if (logs.isEmpty) Padding(padding: const EdgeInsets.only(top: 40), child: Text(context.tr('No logs yet. Doses you record appear here.'))),
       ...rows,
     ]);
   }
@@ -118,7 +119,7 @@ class _Pick extends StatelessWidget {
   final List<Therapy> ths;
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Terapi mana?', style: display(28)),
+        Text(context.tr('Which therapy?'), style: display(28)),
         gap(16),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final t in ths) ActionChip(avatar: Icon(t.adm.icon, size: 16), label: Text(t.name), onPressed: () => Navigator.pop(context, t)),

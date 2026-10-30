@@ -4,6 +4,30 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-10-31
+
+### Added
+- **Web Showcase Celestial Panorama Banner (`docs/index.html` & `docs/style.css`):**
+  - Integrated a panoramic banner showcase presenting the brand identity, core therapeutic pillars, and nocturnal lake landscape.
+  - Locked the web landing page to the app's unified **Celestial Midnight & Pastel** signature aesthetic (`#0B0D21` canvas, `#16193E` velvet midnight cards, and pastel accent palette), removing generic light mode toggles.
+
+### Fixed
+- **Comprehensive Bilingual Localization Audit & Leak Elimination:**
+  - Audited the entire Flutter codebase to eradicate all language leakages (*misslanguage*) between English (default) and Indonesian across all screens:
+    - **Home Screen (`lib/ui/home.dart`)**: Localized therapy status indicators ("Overdue", "Today", "Next 7 days", "Done", "Day off", relative overdue/remaining counters, and alert cards).
+    - **Calendar & Schedule (`lib/ui/calendar.dart`)**: Dynamic date header formatting respecting `AppLocale.code` and localized tab navigation.
+    - **Levels & Simulation (`lib/ui/levels.dart`)**: Localized target band indicators ("In range", "Below target", "Above target"), target configuration dialogs, and timeline ranges.
+    - **Physical Journal & Mood (`lib/ui/journal.dart` & `lib/ui/body.dart`)**: Fully localized filter tabs, quick mood check-in banners, body transition cards, and note prompts.
+    - **Supplies & Inventory (`lib/ui/supplies.dart`)**: Localized supply cards, generic types (Syringe, Alcohol wipe, Needle, Gloves, Bandage), refill warnings, and modal sheets.
+    - **History & Logging (`lib/ui/history.dart` & `lib/ui/sheets.dart`)**: Localized administration route options, time selectors, confirmation alerts, and undo actions.
+    - **Data & Security (`lib/ui/data_page.dart` & `lib/ui/auth.dart`)**: Bilingual error toasts, Firebase Auth feedback messages, and import/export prompts.
+- **Dynamic Date & Locale Parsing:**
+  - Eliminated static `'id'` locale parameters in `DateFormat` calls across `calendar.dart`, `levels.dart`, `journal.dart`, and `history.dart` in favor of dynamic `AppLocale.code`.
+- **System Notifications & Android Widget Sync:**
+  - Dynamic bilingual notification scheduling and home screen widget summaries reflecting active user language preferences.
+
+---
+
 ## [1.8.0] - 2026-10-31
 
 ### Added

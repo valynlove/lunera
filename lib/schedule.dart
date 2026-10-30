@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'l10n.dart';
 import 'models.dart';
 
 String two(int n) => n.toString().padLeft(2, '0');
@@ -14,21 +15,30 @@ String slotKey(DateTime at) => '${at.year}-${two(at.month)}-${two(at.day)} ${two
 /// "Hari ini" menurut pengaturan awal hari (mis. 04:00: pukul 02:00 masih dihitung kemarin).
 DateTime logicalToday(Prefs p) => DateUtils.dateOnly(DateTime.now().subtract(Duration(minutes: p.dayStart)));
 
-const _dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+const _dayNamesEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const _dayNamesId = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 String scheduleText(Therapy t) {
   final n = t.times.length;
+  final isId = AppLocale.code == 'id';
+  final dayNames = isId ? _dayNamesId : _dayNamesEn;
   switch (t.kind) {
     case 'weekly':
       final d = [...t.weekdays]..sort();
-      return 'Tiap ${d.map((x) => _dayNames[x - 1]).join(', ')}';
+      final days = d.map((x) => dayNames[x - 1]).join(', ');
+      return isId ? 'Tiap $days' : 'Every $days';
     case 'monthly':
-      return 'Tiap tanggal ${t.monthDay}';
+      return isId ? 'Tiap tanggal ${t.monthDay}' : 'Every month day ${t.monthDay}';
     case 'asneeded':
-      return 'Saat perlu';
+      return isId ? 'Saat perlu' : 'As needed';
     default:
-      if (t.everyDays == 1) return n > 1 ? 'Setiap hari, $n kali' : 'Setiap hari';
-      return 'Tiap ${t.everyDays} hari';
+      if (t.everyDays == 1) {
+        if (isId) {
+          return n > 1 ? 'Setiap hari, $n kali' : 'Setiap hari';
+        }
+        return n > 1 ? 'Every day, $n times' : 'Every day';
+      }
+      return isId ? 'Tiap ${t.everyDays} hari' : 'Every ${t.everyDays} days';
   }
 }
 
@@ -141,6 +151,10 @@ String hrtDuration(DateTime from, DateTime to) {
     y -= 1;
     m += 12;
   }
-  final parts = [if (y > 0) '$y tahun', if (m > 0) '$m bulan', if (d > 0 || (y == 0 && m == 0)) '$d hari'];
+  final isId = AppLocale.code == 'id';
+  final yStr = isId ? '$y tahun' : (y == 1 ? '1 year' : '$y years');
+  final mStr = isId ? '$m bulan' : (m == 1 ? '1 month' : '$m months');
+  final dStr = isId ? '$d hari' : (d == 1 ? '1 day' : '$d days');
+  final parts = [if (y > 0) yStr, if (m > 0) mStr, if (d > 0 || (y == 0 && m == 0)) dStr];
   return parts.join(' ');
 }

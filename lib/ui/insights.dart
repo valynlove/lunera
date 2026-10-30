@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
@@ -81,10 +82,14 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
     if (used >= 6 && solid.length >= 2) {
       final hi = solid.reduce((a, b) => b.$3! > a.$3! ? b : a), lo = solid.reduce((a, b) => b.$3! < a.$3! ? b : a);
       if (hi.$1 != lo.$1 && (hi.$3! - lo.$3!) >= .5) {
-        insight = 'Suasana hatimu cenderung paling baik di hari ke-${hi.$1} setelah dosis (rata-rata ${hi.$3!.toStringAsFixed(1)}) '
-            'dan paling rendah di hari ke-${lo.$1} (${lo.$3!.toStringAsFixed(1)}).';
+        insight = context.tr('Your mood tends to be highest on day {hi} after dosing (avg {hiAvg}) and lowest on day {lo} (avg {loAvg}).', {
+          'hi': hi.$1,
+          'hiAvg': hi.$3!.toStringAsFixed(1),
+          'lo': lo.$1,
+          'loAvg': lo.$3!.toStringAsFixed(1),
+        });
       } else {
-        insight = 'Suasana hatimu relatif stabil sepanjang siklus.';
+        insight = context.tr('Your mood is relatively stable across your cycle.');
       }
     }
 
@@ -122,7 +127,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
               getTooltipItem: (g, gi, rod, ri) {
                 final b = bs[g.x];
                 return BarTooltipItem(
-                  b.$3 == null ? 'Hari ${b.$1}: belum ada data' : 'Hari ${b.$1}: ${b.$3!.toStringAsFixed(1)} (${b.$2} entri)',
+                  b.$3 == null ? context.tr('Day {day}: no data', {'day': b.$1}) : context.tr('Day {day}: {score} ({count} entries)', {'day': b.$1, 'score': b.$3!.toStringAsFixed(1), 'count': b.$2}),
                   const TextStyle(color: Colors.white, fontSize: 12),
                 );
               },
@@ -148,29 +153,29 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-            Expanded(child: Text('Wawasan', style: display(32))),
+            Expanded(child: Text(context.tr('Insights'), style: display(32))),
           ]),
           gap(16),
-          _card('30 hari terakhir', [
+          _card(context.tr('Last 30 days'), [
             if (total == 0)
-              const Text('Belum cukup data. Catat dosis dan jurnalmu beberapa hari untuk melihat ringkasan.')
+              Text(context.tr('Not enough data yet. Log your doses and journal for a few days to see a summary.'))
             else ...[
               Text.rich(TextSpan(text: '${(taken / total * 100).round()}%', style: display(44), children: [
-                TextSpan(text: ' dosis tercatat', style: theme.textTheme.bodyMedium),
+                TextSpan(text: ' ${context.tr('doses logged')}', style: theme.textTheme.bodyMedium),
               ])),
               gap(10),
               Wrap(spacing: 8, runSpacing: 4, children: [
-                Chip(label: Text('$taken diminum'), side: BorderSide.none, backgroundColor: C.lagoon.withValues(alpha: .16)),
-                Chip(label: Text('$skipped dilewati'), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07)),
-                Chip(label: Text('$missed terlewat'), side: BorderSide.none, backgroundColor: C.amber.withValues(alpha: .18)),
+                Chip(label: Text(context.tr('{n} taken', {'n': taken})), side: BorderSide.none, backgroundColor: C.lagoon.withValues(alpha: .16)),
+                Chip(label: Text(context.tr('{n} skipped', {'n': skipped})), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07)),
+                Chip(label: Text(context.tr('{n} missed', {'n': missed})), side: BorderSide.none, backgroundColor: C.amber.withValues(alpha: .18)),
               ]),
               gap(4),
-              Text('Perkiraan dari jadwal tetap. Dosis "saat perlu" tidak dihitung.', style: theme.textTheme.bodySmall),
+              Text(context.tr('Estimated from fixed schedules. As-needed doses are not counted.'), style: theme.textTheme.bodySmall),
             ],
           ]),
-          _card('Suasana hati 30 hari', [
+          _card(context.tr('30-day mood'), [
             if (moods30.isEmpty)
-              const Text('Belum ada entri suasana hati. Catat dari kartu di beranda.')
+              Text(context.tr('No mood entries yet. Log from the home card.'))
             else
               for (final m in moods.entries)
                 Padding(
@@ -178,7 +183,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   child: Row(children: [
                     Icon(m.value.$2, size: 20, color: moodColor(m.key)),
                     const SizedBox(width: 10),
-                    SizedBox(width: 56, child: Text(m.value.$1, style: theme.textTheme.bodySmall)),
+                    SizedBox(width: 56, child: Text(context.tr(m.value.$1), style: theme.textTheme.bodySmall)),
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(6),
@@ -195,27 +200,27 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   ]),
                 ),
           ]),
-          _card('Suasana hati sepanjang siklus', [
+          _card(context.tr('Mood across cycle'), [
             if (sel == null)
-              const Text('Butuh terapi dengan jadwal berulang (selang 2 hari atau lebih).')
+              Text(context.tr('Requires a recurring schedule therapy (every 2+ days).'))
             else ...[
               if (cyclic.length > 1)
                 Wrap(spacing: 8, runSpacing: 4, children: [
                   for (final t in cyclic) ChoiceChip(label: Text(t.name), selected: t.id == sel.id, onSelected: (_) => setState(() => therapyId = t.id)),
                 ]),
               if (cyclic.length > 1) gap(10),
-              Text('Rata-rata menurut hari sejak dosis terakhir (hari 0 = hari dosis).', style: theme.textTheme.bodySmall),
+              Text(context.tr('Average by days since last dose (day 0 = dose day).'), style: theme.textTheme.bodySmall),
               gap(8),
               if (buckets.isEmpty)
-                const Text('Belum ada dosis tercatat untuk terapi ini.')
+                Text(context.tr('No recorded doses for this therapy yet.'))
               else ...[
                 chart(buckets),
                 gap(6),
-                Text('Skala: 1 cemas, 2 murung, 3 biasa, 4 tenang, 5 senang.', style: theme.textTheme.bodySmall),
+                Text(context.tr('Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.'), style: theme.textTheme.bodySmall),
                 gap(10),
-                Text(insight ?? 'Butuh sedikitnya 6 entri suasana hati setelah dosis tercatat, dan 2 entri di tiap hari yang dibandingkan. Saat ini ada $used entri.'),
+                Text(insight ?? context.tr('Requires at least 6 mood entries after doses, and 2 per compared day. Currently {used} entries.', {'used': used})),
                 gap(8),
-                Text('Ini pola dari catatanmu sendiri, bukan sebab-akibat. Banyak hal lain memengaruhi suasana hati.', style: theme.textTheme.bodySmall),
+                Text(context.tr('This reflects your own recorded patterns, not causation. Many factors influence mood.'), style: theme.textTheme.bodySmall),
               ],
             ],
           ]),

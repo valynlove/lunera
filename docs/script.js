@@ -1,22 +1,15 @@
 /**
  * Lunera - Landing Page Interactive Logic
- * Concept inspired by Wall o' Pay & adapted for Lunera
+ * Signature Celestial Midnight & Pastel Theme
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "1.8.0";
+const APP_VERSION = "1.9.0";
 
-// Theme Switcher (Dark Mode by default for Lunera's Midnight Theme)
-function toggleTheme() {
-  const current = document.documentElement.getAttribute("data-theme");
-  const next = current === "light" ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", next);
-  
-  const themeBtn = document.getElementById("theme-btn");
-  if (themeBtn) {
-    themeBtn.textContent = next === "dark" ? "☀️" : "🌙";
-  }
-  localStorage.setItem("lunera_theme", next);
+// Unified Signature Theme - Permanent Dark Celestial Midnight Palette
+function lockSignatureTheme() {
+  document.documentElement.setAttribute("data-theme", "dark");
+  localStorage.setItem("lunera_theme", "dark");
 }
 
 // Showcase Tabs Data
@@ -142,14 +135,8 @@ function fetchLatestReleaseVersion() {
 
 // Init on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
-  // Theme init - Default to dark mode for Lunera's signature Midnight palette
-  const savedTheme = localStorage.getItem("lunera_theme") || "dark";
-  document.documentElement.setAttribute("data-theme", savedTheme);
-  const themeBtn = document.getElementById("theme-btn");
-  if (themeBtn) {
-    themeBtn.textContent = savedTheme === "dark" ? "☀️" : "🌙";
-    themeBtn.addEventListener("click", toggleTheme);
-  }
+  // Lock to Lunera's signature Midnight & Pastel palette
+  lockSignatureTheme();
 
   setupShowcaseTabs();
   setupMobileNav();

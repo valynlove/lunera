@@ -41,10 +41,32 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.8.0',
+      version: '1.9.0',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Comprehensive bilingual localization audit across all screens, eliminating language leakage between English and Indonesian.',
+          textId: 'Audit lokalisasi dwibahasa menyeluruh di seluruh layar, memperbaiki kebocoran bahasa antara Bahasa Inggris dan Bahasa Indonesia.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Dynamic date & time formatting respecting active app locale instead of hardcoded locale formats in Calendar and Levels.',
+          textId: 'Format tanggal dan waktu dinamis yang mengikuti bahasa aktif aplikasi tanpa memaksakan format lokal statis di Kalender dan Level.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Web Landing Page enhanced with celestial panoramic banner and locked into the unified Celestial Midnight & Pastel theme.',
+          textId: 'Pembaruan Landing Page web dengan banner panorama celestial baru dan penguncian tema terpadu Celestial Midnight & Pastel.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.8.0',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,

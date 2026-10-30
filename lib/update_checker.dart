@@ -44,7 +44,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.8.0';
+  static const currentVersion = '1.9.0';
 
   static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
 

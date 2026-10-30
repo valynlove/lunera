@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../sim.dart';
@@ -10,7 +11,7 @@ import '../theme.dart';
 import 'insights.dart';
 import 'journal.dart' show moodColor;
 
-String _date(DateTime d) => DateFormat('d MMM y', 'id').format(d);
+String _date(DateTime d) => DateFormat('d MMM y', AppLocale.code).format(d);
 
 class LevelsPage extends ConsumerWidget {
   const LevelsPage({super.key});
@@ -26,19 +27,19 @@ class LevelsPage extends ConsumerWidget {
     }
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
-        Expanded(child: Text('Level', style: display(40))),
+        Expanded(child: Text(context.tr('Levels'), style: display(40))),
         IconButton.filledTonal(
-          tooltip: 'Wawasan',
+          tooltip: context.tr('Insights'),
           onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InsightsPage())),
           icon: const Icon(Icons.insights_rounded),
         ),
         const SizedBox(width: 8),
-        pillButton('Hasil lab', () => showSheet(context, const LabSheet()), icon: Icons.add_rounded),
+        pillButton(context.tr('Lab results'), () => showSheet(context, const LabSheet()), icon: Icons.add_rounded),
       ]),
       gap(18),
       for (final h in simIds) Padding(padding: const EdgeInsets.only(bottom: 14), child: LevelPanel(h, compact: true)),
       if (byH.isEmpty && simIds.isEmpty)
-        const Padding(padding: EdgeInsets.only(top: 40), child: Text('Belum ada data. Catat dosis atau tambahkan hasil tes darah pertamamu.')),
+        Padding(padding: const EdgeInsets.only(top: 40), child: Text(context.tr('No data yet. Log doses or add your first blood test result.'))),
       for (final e in byH.entries) _LevelCard(hormoneId: e.key, labs: e.value),
     ]);
   }
@@ -82,7 +83,7 @@ class _LevelCard extends ConsumerWidget {
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(color: color.withValues(alpha: .18), borderRadius: BorderRadius.circular(999)),
-        child: Text(inRange ? 'Dalam rentang' : (last.base < band[0] ? 'Di bawah target' : 'Di atas target'),
+        child: Text(inRange ? context.tr('In range') : (last.base < band[0] ? context.tr('Below target') : context.tr('Above target')),
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: dark ? color : Color.lerp(color, C.ink, .5))),
       );
     }
@@ -101,14 +102,14 @@ class _LevelCard extends ConsumerWidget {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(p.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  Text('Hasil lab, ${_date(last.at)}', style: Theme.of(context).textTheme.bodySmall),
+                  Text('${context.tr('Lab result')}, ${_date(last.at)}', style: Theme.of(context).textTheme.bodySmall),
                   gap(14),
                   Text.rich(TextSpan(text: fmt(last.base / f), style: display(44), children: [
                     TextSpan(text: ' $u', style: Theme.of(context).textTheme.bodyMedium),
                   ])),
                   if (delta != null) ...[
                     gap(6),
-                    Text('${delta >= 0 ? '↑' : '↓'} ${delta.abs().toStringAsFixed(0)}% dari tes sebelumnya', style: Theme.of(context).textTheme.bodySmall),
+                    Text('${delta >= 0 ? '↑' : '↓'} ${delta.abs().toStringAsFixed(0)}% ${context.tr('from previous test')}', style: Theme.of(context).textTheme.bodySmall),
                   ],
                   if (status != null) status,
                 ]),
@@ -161,9 +162,9 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
 
     if (!hasSim && labs.isEmpty) {
       return box([
-        Text('Perkiraan ${p.name}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        Text(context.tr('Estimated {name}', {'name': p.name}), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         gap(8),
-        const Text('Catat dosis pertamamu di tab Beranda untuk melihat perkiraan level.'),
+        Text(context.tr('Log your first dose on Home tab to see level estimates.')),
       ]);
     }
 
@@ -215,7 +216,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             interval: math.max(total / 4, 1),
             getTitlesWidget: (v, m) => Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(DateFormat('d MMM', 'id').format(from.add(Duration(minutes: (v * 1440).round()))), style: const TextStyle(fontSize: 11)),
+              child: Text(DateFormat('d MMM', AppLocale.code).format(from.add(Duration(minutes: (v * 1440).round()))), style: const TextStyle(fontSize: 11)),
             ),
           ),
         ),
@@ -274,17 +275,17 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     final est = hasSim ? levelAt(intakes, now) * scale / f : null;
     return box([
       Row(children: [
-        Expanded(child: Text(hasSim ? 'Perkiraan ${p.name}' : p.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
+        Expanded(child: Text(hasSim ? context.tr('Estimated {name}', {'name': p.name}) : p.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
         if (widget.compact)
           IconButton(
-            tooltip: 'Buka detail',
+            tooltip: context.tr('Open details'),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => HormonePage(widget.hormoneId))),
             icon: const Icon(Icons.open_in_full_rounded, size: 20),
           ),
       ]),
       if (est != null) ...[
         Text.rich(TextSpan(text: fmt(est.roundToDouble()), style: display(44), children: [
-          TextSpan(text: ' $u saat ini', style: theme.textTheme.bodyMedium),
+          TextSpan(text: ' $u ${context.tr('current')}', style: theme.textTheme.bodyMedium),
         ])),
         gap(12),
       ],
@@ -292,7 +293,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         Row(children: [
           IconButton(onPressed: () => setState(() => off++), icon: const Icon(Icons.chevron_left_rounded)),
           Expanded(
-            child: Center(child: Text('${DateFormat('d MMM', 'id').format(from)} sampai ${_date(to)}', style: theme.textTheme.bodySmall)),
+            child: Center(child: Text('${DateFormat('d MMM', AppLocale.code).format(from)} - ${_date(to)}', style: theme.textTheme.bodySmall)),
           ),
           IconButton(onPressed: off > 0 ? () => setState(() => off--) : null, icon: const Icon(Icons.chevron_right_rounded)),
         ]),
@@ -301,7 +302,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
       PillTabs<int>(
         items: [
           for (final w in [7, 30, 90, 180, 365, if (!hasSim && labs.isNotEmpty) 0])
-            (w, switch (w) { 0 => 'Semua', 7 => '1 mgg', 30 => '1 bln', 90 => '3 bln', 180 => '6 bln', _ => '1 thn' }),
+            (w, switch (w) { 0 => context.tr('All'), 7 => '1 ${context.tr('wk')}', 30 => '1 ${context.tr('mo')}', 90 => '3 ${context.tr('mo')}', 180 => '6 ${context.tr('mo')}', _ => '1 ${context.tr('yr')}' }),
         ],
         value: d,
         onChanged: (w) => setState(() {
@@ -313,21 +314,21 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         gap(8),
         Wrap(spacing: 8, runSpacing: 4, children: [
           if (hasSim && nCal > 0)
-            FilterChip(label: Text('Sesuaikan ke hasil lab ($nCal)'), selected: cal, onSelected: (v) => setState(() => cal = v)),
+            FilterChip(label: Text(context.tr('Adjust to lab results ({n})', {'n': nCal})), selected: cal, onSelected: (v) => setState(() => cal = v)),
           if (moodEntries.isNotEmpty)
-            FilterChip(avatar: const Icon(Icons.mood_rounded, size: 16), label: const Text('Suasana hati'), selected: showMood, onSelected: (v) => setState(() => showMood = v)),
+            FilterChip(avatar: const Icon(Icons.mood_rounded, size: 16), label: Text(context.tr('Mood')), selected: showMood, onSelected: (v) => setState(() => showMood = v)),
         ]),
       ],
       if (hasSim) ...[
         gap(10),
         Row(children: [
           Icon(Icons.horizontal_rule_rounded, size: 18, color: C.lagoon),
-          const Text(' perkiraan   '),
+          Text(' ${context.tr('estimated')}   '),
           Icon(Icons.circle_outlined, size: 12, color: C.peony),
-          const Text(' hasil lab'),
+          Text(' ${context.tr('lab result')}'),
         ]),
         gap(6),
-        Text('Perkiraan memakai model rata-rata, bukan hasil lab. Level tiap orang berbeda, dan keputusan dosis tetap bersama dokter.',
+        Text(context.tr('Estimates use an average population model, not lab results. Individual levels vary; always consult your physician for dosage decisions.'),
             style: theme.textTheme.bodySmall),
       ],
       if (drawMood) ...[
@@ -362,10 +363,10 @@ class HormonePage extends ConsumerWidget {
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
             Expanded(child: Text(p.name, style: display(32))),
-            IconButton.filledTonal(tooltip: 'Atur target', onPressed: () => _target(context, ref, p, u, band), icon: const Icon(Icons.flag_rounded)),
+            IconButton.filledTonal(tooltip: context.tr('Set target'), onPressed: () => _target(context, ref, p, u, band), icon: const Icon(Icons.flag_rounded)),
           ]),
           gap(8),
-          Text('Grafik dalam $u (ubah di Pengaturan). Area hijau adalah target yang kamu atur sendiri bersama dokter.', style: Theme.of(context).textTheme.bodySmall),
+          Text(context.tr('Chart in {unit} (change in Settings). Shaded area is your custom target agreed with doctor.', {'unit': u}), style: Theme.of(context).textTheme.bodySmall),
           gap(16),
           LevelPanel(hormoneId),
           gap(16),
@@ -389,15 +390,15 @@ class HormonePage extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: c,
       builder: (d) => AlertDialog(
-        title: Text('Target ${p.name} ($u)'),
+        title: Text(c.tr('Target {name} ({unit})', {'name': p.name, 'unit': u})),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: lo, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Batas bawah')),
+          TextField(controller: lo, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: c.tr('Lower limit'))),
           gap(8),
-          TextField(controller: hi, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Batas atas')),
+          TextField(controller: hi, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: c.tr('Upper limit'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Batal')),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: const Text('Simpan target')),
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(c.tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(c.tr('Save target'))),
         ],
       ),
     );
@@ -441,7 +442,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
         unit = null;
         value.clear();
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$saved tersimpan. Isi hormon berikutnya.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('{saved} saved. Enter next hormone.', {'saved': saved}))));
     } else {
       Navigator.pop(context);
     }
@@ -452,7 +453,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
     final u = unit ?? h.base;
     final editing = widget.initial != null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? 'Ubah hasil lab' : 'Hasil lab baru', style: display(28)),
+      Text(editing ? context.tr('Edit lab result') : context.tr('New lab result'), style: display(28)),
       gap(16),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final p in presets)
@@ -468,7 +469,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           ),
       ]),
       gap(12),
-      TextField(controller: value, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Nilai')),
+      TextField(controller: value, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: context.tr('Value'))),
       gap(8),
       Wrap(spacing: 8, children: [
         for (final k in h.units.keys) ChoiceChip(label: Text(k), selected: u == k, onSelected: (_) => setState(() => unit = k)),
@@ -480,25 +481,25 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           if (d != null) setState(() => at = d);
         },
         icon: const Icon(Icons.calendar_today_rounded, size: 18),
-        label: Text('Tanggal tes: ${_date(at)}'),
+        label: Text('${context.tr('Test date')}: ${_date(at)}'),
       ),
       gap(10),
-      TextField(controller: note, decoration: const InputDecoration(labelText: 'Catatan (opsional)')),
+      TextField(controller: note, decoration: InputDecoration(labelText: context.tr('Notes (optional)'))),
       gap(20),
       Row(children: [
         if (editing)
           TextButton.icon(
             onPressed: () async {
-              if (!await confirm(context, 'Hapus hasil lab ini?') || !context.mounted) return;
+              if (!await confirm(context, context.tr('Delete this lab result?')) || !context.mounted) return;
               ref.read(repoProvider)?.deleteLab(widget.initial!.id);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.delete_outline_rounded),
-            label: const Text('Hapus'),
+            label: Text(context.tr('Delete')),
           ),
-        Expanded(child: pillButton(editing ? 'Simpan perubahan' : 'Simpan', () => _save())),
+        Expanded(child: pillButton(editing ? context.tr('Save changes') : context.tr('Save'), () => _save())),
       ]),
-      if (!editing) Center(child: TextButton(onPressed: () => _save(again: true), child: const Text('Simpan dan tambah hormon lain'))),
+      if (!editing) Center(child: TextButton(onPressed: () => _save(again: true), child: Text(context.tr('Save and add another hormone')))),
     ]);
   }
 }

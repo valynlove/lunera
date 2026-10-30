@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
@@ -17,13 +18,13 @@ class SuppliesPage extends ConsumerWidget {
         child: Text(s, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)));
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
-        Expanded(child: Text('Stok', style: display(40))),
-        pillButton('Tambah', () => showSheet(context, const SupplySheet()), icon: Icons.add_rounded),
+        Expanded(child: Text(context.tr('Supplies'), style: display(40))),
+        pillButton(context.tr('Add'), () => showSheet(context, const SupplySheet()), icon: Icons.add_rounded),
       ]),
       gap(18),
-      if (items.isEmpty) const Padding(padding: EdgeInsets.only(top: 40), child: Text('Belum ada stok. Catat obat, spuit, jarum, dan perlengkapan lainnya di sini.')),
-      if (meds.isNotEmpty) ...[head('Obat'), for (final s in meds) _MedCard(s)],
-      if (gens.isNotEmpty) ...[gap(8), head('Perlengkapan'), for (final s in gens) _GenericCard(s)],
+      if (items.isEmpty) Padding(padding: const EdgeInsets.only(top: 40), child: Text(context.tr('No supplies yet. Track medications, syringes, needles, and other items here.'))),
+      if (meds.isNotEmpty) ...[head(context.tr('Medications')), for (final s in meds) _MedCard(s)],
+      if (gens.isNotEmpty) ...[gap(8), head(context.tr('Supplies & Tools')), for (final s in gens) _GenericCard(s)],
     ]);
   }
 }
@@ -65,9 +66,9 @@ class _MedCard extends ConsumerWidget {
                 ),
               ),
               gap(10),
-              Text(low ? '${s.doses} dosis tersisa, segera isi ulang' : '${s.doses} dosis tersisa'),
+              Text(low ? context.tr('{doses} doses left, refill soon', {'doses': s.doses}) : context.tr('{doses} doses left', {'doses': s.doses})),
               if (s.expiry != null)
-                Text('${expired ? 'Kedaluwarsa sejak' : 'Kedaluwarsa'} ${DateFormat('d MMM y', 'id').format(s.expiry!)}',
+                Text('${expired ? context.tr('Expired since') : context.tr('Expires')} ${DateFormat('d MMM y', AppLocale.code).format(s.expiry!)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: expired ? C.peony : null)),
             ]),
           ),
@@ -166,7 +167,7 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
   }
 
   Future<void> _delete() async {
-    if (!await confirm(context, 'Hapus stok ini?') || !mounted) return;
+    if (!await confirm(context, context.tr('Delete this supply item?')) || !mounted) return;
     ref.read(repoProvider)?.deleteSupply(widget.initial!.id);
     Navigator.pop(context);
   }
@@ -175,38 +176,38 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
   Widget build(BuildContext context) {
     final editing = widget.initial != null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? 'Ubah stok' : 'Stok baru', style: display(28)),
+      Text(editing ? context.tr('Edit supply') : context.tr('New supply'), style: display(28)),
       gap(16),
       if (!editing)
         Wrap(spacing: 8, children: [
-          ChoiceChip(label: const Text('Obat'), selected: !generic, onSelected: (_) => setState(() => generic = false)),
-          ChoiceChip(label: const Text('Perlengkapan'), selected: generic, onSelected: (_) => setState(() => generic = true)),
+          ChoiceChip(label: Text(context.tr('Medication')), selected: !generic, onSelected: (_) => setState(() => generic = false)),
+          ChoiceChip(label: Text(context.tr('Supplies')), selected: generic, onSelected: (_) => setState(() => generic = true)),
         ]),
       gap(12),
       if (generic) ...[
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final e in genericTypes.entries)
-            ChoiceChip(avatar: Icon(e.value.$2, size: 16), label: Text(e.value.$1), selected: gtype == e.key, onSelected: (_) => setState(() => gtype = e.key)),
+            ChoiceChip(avatar: Icon(e.value.$2, size: 16), label: Text(context.tr(e.value.$1)), selected: gtype == e.key, onSelected: (_) => setState(() => gtype = e.key)),
         ]),
         gap(10),
-        TextField(controller: name, decoration: const InputDecoration(labelText: 'Nama (opsional)')),
+        TextField(controller: name, decoration: InputDecoration(labelText: context.tr('Name (optional)'))),
         gap(10),
-        TextField(controller: qty, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Jumlah')),
+        TextField(controller: qty, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: context.tr('Quantity'))),
       ] else ...[
-        TextField(controller: name, decoration: const InputDecoration(labelText: 'Nama (mis. Estradiol valerat 40 mg/mL)')),
+        TextField(controller: name, decoration: InputDecoration(labelText: context.tr('Name (e.g. Estradiol valerate 40 mg/mL)'))),
         gap(10),
         Row(children: [
-          Expanded(child: TextField(controller: qty, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Jumlah'))),
+          Expanded(child: TextField(controller: qty, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: context.tr('Quantity')))),
           const SizedBox(width: 10),
-          Expanded(child: TextField(controller: label, decoration: const InputDecoration(labelText: 'Satuan (vial, mL, pil)'))),
+          Expanded(child: TextField(controller: label, decoration: InputDecoration(labelText: context.tr('Unit (vial, mL, pill)')))),
         ]),
         gap(10),
-        TextField(controller: per, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Terpakai per dosis (satuan di atas)')),
+        TextField(controller: per, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: context.tr('Used per dose (unit above)'))),
         gap(10),
         TextField(
           controller: dpu,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(labelText: 'Kadar: mg per satuan (opsional)', helperText: 'Mis. 40 untuk 40 mg/mL. Jika diisi, pemakaian dihitung dari dosis (mg).'),
+          decoration: InputDecoration(labelText: context.tr('Concentration: mg per unit (optional)'), helperText: context.tr('E.g. 40 for 40 mg/mL. If set, usage is calculated from dose (mg).')),
         ),
         gap(10),
         OutlinedButton.icon(
@@ -215,13 +216,13 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
             if (d != null) setState(() => expiry = d);
           },
           icon: const Icon(Icons.event_rounded, size: 18),
-          label: Text(expiry == null ? 'Tanggal kedaluwarsa (opsional)' : DateFormat('d MMM y', 'id').format(expiry!)),
+          label: Text(expiry == null ? context.tr('Expiry date (optional)') : DateFormat('d MMM y', AppLocale.code).format(expiry!)),
         ),
       ],
       gap(20),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: const Text('Hapus')),
-        Expanded(child: pillButton(editing ? 'Simpan perubahan' : 'Simpan stok', _save)),
+        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: Text(context.tr('Delete'))),
+        Expanded(child: pillButton(editing ? context.tr('Save changes') : context.tr('Save supply'), _save)),
       ]),
     ]);
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
@@ -14,7 +15,7 @@ class BodyPage extends ConsumerStatefulWidget {
 }
 
 // Bagian yang digambar pada siluet, urut dari atas, beserta posisi label (pecahan tinggi).
-const _onBody = [('Rambut', .06), ('Payudara', .22), ('Kulit', .38), ('Bentuk tubuh', .54)];
+const _onBody = [('Hair', .06), ('Breasts', .22), ('Skin', .38), ('Body shape', .54)];
 
 class _BodyPageState extends ConsumerState<BodyPage> {
   int tab = 0;
@@ -31,7 +32,7 @@ class _BodyPageState extends ConsumerState<BodyPage> {
       }
     }
     final fg = Theme.of(context).colorScheme.onSurface;
-    final fmtDate = DateFormat('d MMM y', 'id');
+    final fmtDate = DateFormat('d MMM y', AppLocale.code);
 
     Widget callout(String name, double fy, double w, double h) {
       final l = latest[name];
@@ -49,8 +50,8 @@ class _BodyPageState extends ConsumerState<BodyPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(color: C.peony.withValues(alpha: .10), borderRadius: BorderRadius.circular(16)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-              Text(l?.$1 ?? 'Belum ada catatan', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: fg.withValues(alpha: .65))),
+              Text(context.tr(name), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              Text(l?.$1 ?? context.tr('No notes yet'), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: fg.withValues(alpha: .65))),
             ]),
           ),
         ),
@@ -68,8 +69,8 @@ class _BodyPageState extends ConsumerState<BodyPage> {
             area = name;
             tab = 1;
           }),
-          title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-          subtitle: Text(l == null ? 'Belum ada catatan' : '${l.$1}\n${fmtDate.format(l.$2)}'),
+          title: Text(context.tr(name), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(l == null ? context.tr('No notes yet') : '${l.$1}\n${fmtDate.format(l.$2)}'),
           isThreeLine: l != null,
           trailing: Icon(Icons.chevron_right_rounded, color: fg.withValues(alpha: .5)),
         ),
@@ -93,26 +94,26 @@ class _BodyPageState extends ConsumerState<BodyPage> {
         }),
       ),
       gap(12),
-      otherRow('Energi'),
-      otherRow('Tidur'),
+      otherRow('Energy'),
+      otherRow('Sleep'),
       gap(4),
       Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: C.peony.withValues(alpha: .08), borderRadius: BorderRadius.circular(20)),
-        child: const Text('Perubahan butuh waktu. Catat apa adanya, lalu bandingkan lagi beberapa minggu kemudian.'),
+        child: Text(context.tr('Changes take time. Record what you observe, then compare again weeks later.')),
       ),
     ]);
 
     final items = [for (final e in withBody) if (e.body.containsKey(area)) (e.at, e.body[area]!)];
     final detail = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Wrap(spacing: 8, runSpacing: 4, children: [
-        for (final a in bodyAreas) ChoiceChip(label: Text(a), selected: area == a, onSelected: (_) => setState(() => area = a)),
+        for (final a in bodyAreas) ChoiceChip(label: Text(context.tr(a)), selected: area == a, onSelected: (_) => setState(() => area = a)),
       ]),
       gap(14),
       if (items.isEmpty)
-        Text('Belum ada catatan untuk $area. Tambahkan lewat tombol "Catat perubahan".')
+        Text(context.tr('No notes yet for {area}. Add them using "Log changes".', {'area': context.tr(area)}))
       else ...[
-        Text('${items.length} catatan, pertama pada ${fmtDate.format(items.last.$1)}', style: Theme.of(context).textTheme.bodySmall),
+        Text(context.tr('{count} notes, first on {date}', {'count': items.length, 'date': fmtDate.format(items.last.$1)}), style: Theme.of(context).textTheme.bodySmall),
         gap(10),
         for (final it in items)
           Container(
@@ -133,14 +134,14 @@ class _BodyPageState extends ConsumerState<BodyPage> {
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-            Expanded(child: Text('Tubuh & perubahan', style: display(28))),
+            Expanded(child: Text(context.tr('Body & Changes'), style: display(28))),
           ]),
           gap(12),
-          PillTabs<int>(items: const [(0, 'Ringkasan'), (1, 'Detail')], value: tab, onChanged: (v) => setState(() => tab = v)),
+          PillTabs<int>(items: [(0, context.tr('Overview')), (1, context.tr('Details'))], value: tab, onChanged: (v) => setState(() => tab = v)),
           gap(16),
           if (tab == 0) overview else detail,
           gap(16),
-          pillButton('Catat perubahan', () => showSheet(context, const JournalSheet()), icon: Icons.add_rounded),
+          pillButton(context.tr('Log changes'), () => showSheet(context, const JournalSheet()), icon: Icons.add_rounded),
         ]),
       ),
     );

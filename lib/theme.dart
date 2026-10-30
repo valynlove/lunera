@@ -1,9 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'l10n.dart';
 
 const appName = 'Lunera';
-const tagline = 'Setiap fase, milikmu.';
+const tagline = 'Every Phase, Your Own.';
 
 class C {
   static const ink = Color(0xFF1E1B4B);
@@ -297,14 +298,14 @@ Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
 
 Widget gap(double h) => SizedBox(height: h);
 
-Future<bool> confirm(BuildContext c, String text, {String ok = 'Hapus'}) async =>
+Future<bool> confirm(BuildContext c, String text, {String ok = 'Delete'}) async =>
     (await showDialog<bool>(
       context: c,
       builder: (d) => AlertDialog(
         content: Text(text),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Batal')),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(ok)),
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(c.tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(c.tr(ok))),
         ],
       ),
     )) ??

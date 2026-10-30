@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+import 'l10n.dart';
 import 'models.dart';
 import 'repo.dart';
 import 'schedule.dart';
@@ -95,17 +96,25 @@ class AppNotifier {
 
   int _id(Therapy t, DateTime at) => '${t.id}|${slotKey(at)}'.hashCode & 0x7fffffff;
 
-  String _verb(Therapy t) => switch (t.route) {
-        'inj' => 'Waktunya suntik',
-        'oral' || 'sublingual' || 'supp' => 'Waktunya minum obat',
-        'patch' => 'Waktunya ganti patch',
-        _ => 'Waktunya pakai obat',
-      };
+  String _verb(Therapy t) {
+    final isId = AppLocale.code == 'id';
+    return switch (t.route) {
+      'inj' => isId ? 'Waktunya suntik' : 'Time for injection',
+      'oral' || 'sublingual' || 'supp' => isId ? 'Waktunya minum obat' : 'Time to take medicine',
+      'patch' => isId ? 'Waktunya ganti patch' : 'Time to change patch',
+      _ => isId ? 'Waktunya pakai obat' : 'Time to take medication',
+    };
+  }
 
   Future<void> test() async {
     if (!supported) return;
     await init();
-    await _plugin.show(id: 1, title: 'Lunera', body: 'Notifikasi pengingat berfungsi.', notificationDetails: _details);
+    await _plugin.show(
+      id: 1,
+      title: 'Lunera',
+      body: AppLocale.code == 'id' ? 'Notifikasi pengingat berfungsi.' : 'Reminder notifications are working.',
+      notificationDetails: _details,
+    );
   }
 
   Future<void> cancelAll() async {
@@ -130,6 +139,7 @@ class AppNotifier {
     final now = DateTime.now();
     final mode = await _canExact() ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle;
     final desc = [...logs]..sort((a, b) => b.at.compareTo(a.at));
+    final isId = AppLocale.code == 'id';
     final slots = [
       for (final s in buildSlots(ths, logs, prefs, back: 0, ahead: 21))
         if (s.pending && s.at.isAfter(now)) s,
@@ -137,10 +147,11 @@ class AppNotifier {
     for (final s in slots.take(60)) {
       final t = s.t;
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
+      final locText = place.isEmpty ? '' : (isId ? ', lokasi: $place' : ', site: $place');
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
         title: '${_verb(t)}: ${t.name}',
-        body: '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', lokasi: $place'}',
+        body: '${fmt(t.dose)} ${t.doseUnit}$locText',
         scheduledDate: tz.TZDateTime.from(s.at, tz.local),
         notificationDetails: _details,
         androidScheduleMode: mode,
@@ -160,8 +171,11 @@ class AppNotifier {
     for (final s in supplies) {
       if (s.low && !s.expired) {
         for (var d = 0; d < 3; d++) {
-          await at9(DateTime(firstMorning.year, firstMorning.month, firstMorning.day + d, 9), 'low|${s.id}|$d', 'Stok hampir habis',
-              s.generic ? '${s.name}: tinggal ${fmt(s.qty)}' : '${s.name}: ${s.doses} dosis tersisa');
+          final title = isId ? 'Stok hampir habis' : 'Low supply alert';
+          final body = s.generic
+              ? (isId ? '${s.name}: tinggal ${fmt(s.qty)}' : '${s.name}: ${fmt(s.qty)} left')
+              : (isId ? '${s.name}: ${s.doses} dosis tersisa' : '${s.name}: ${s.doses} doses left');
+          await at9(DateTime(firstMorning.year, firstMorning.month, firstMorning.day + d, 9), 'low|${s.id}|$d', title, body);
         }
       }
       final e = s.expiry;
@@ -169,7 +183,13 @@ class AppNotifier {
         for (final lead in const [14, 3, 0]) {
           final at = DateTime(e.year, e.month, e.day - lead, 9);
           if (!at.isAfter(now)) continue;
-          await at9(at, 'exp|${s.id}|$lead', lead == 0 ? 'Obat kedaluwarsa hari ini' : 'Obat segera kedaluwarsa', lead == 0 ? s.name : '${s.name}: $lead hari lagi');
+          final title = lead == 0
+              ? (isId ? 'Obat kedaluwarsa hari ini' : 'Medicine expired today')
+              : (isId ? 'Obat segera kedaluwarsa' : 'Medicine expiring soon');
+          final body = lead == 0
+              ? s.name
+              : (isId ? '${s.name}: $lead hari lagi' : '${s.name}: $lead days left');
+          await at9(at, 'exp|${s.id}|$lead', title, body);
         }
       }
     }

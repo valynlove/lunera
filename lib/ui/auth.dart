@@ -10,25 +10,25 @@ import '../widget_sync.dart';
 final _nameRe = RegExp(r'^[a-z0-9_.]{3,20}$');
 
 String authError(Object e) {
-  if (e is FormatException) return e.message;
+  if (e is FormatException) return trG(e.message);
   if (e is FirebaseAuthException) {
     return switch (e.code) {
       'invalid-credential' || 'wrong-password' || 'user-not-found' || 'invalid-login-credentials' =>
-        'Username/email atau kata sandi salah.',
-      'email-already-in-use' => 'Email ini sudah terdaftar. Coba masuk.',
-      'weak-password' => 'Kata sandi terlalu lemah (minimal 6 karakter).',
-      'invalid-email' => 'Format email tidak valid.',
-      'network-request-failed' => 'Tidak ada koneksi internet.',
-      'too-many-requests' => 'Terlalu banyak percobaan. Coba lagi nanti.',
+        trG('Incorrect username/email or password.'),
+      'email-already-in-use' => trG('This email is already in use. Try signing in.'),
+      'weak-password' => trG('Password is too weak (minimum 6 characters).'),
+      'invalid-email' => trG('Invalid email format.'),
+      'network-request-failed' => trG('No internet connection.'),
+      'too-many-requests' => trG('Too many attempts. Please try again later.'),
       _ => e.message ?? e.code,
     };
   }
   if (e is FirebaseException) {
     return e.code == 'permission-denied'
-        ? 'Aturan Firestore belum diperbarui. Tempel isi firestore.rules lalu Publish.'
+        ? trG('Firestore rules not updated. Paste firestore.rules and Publish.')
         : (e.message ?? e.code);
   }
-  return 'Terjadi kesalahan: $e';
+  return '${trG('An error occurred')}: $e';
 }
 
 /// Keluar dan batalkan semua pengingat di perangkat ini.
@@ -48,9 +48,9 @@ Future<String?> _emailFor(String id) async {
 
 /// [id] boleh username atau email.
 Future<void> signIn(String id, String pass) async {
-  if (id.trim().isEmpty || pass.isEmpty) throw const FormatException('Isi username/email dan kata sandi.');
+  if (id.trim().isEmpty || pass.isEmpty) throw const FormatException('Fill in username/email and password.');
   final email = await _emailFor(id);
-  if (email == null) throw const FormatException('Username/email atau kata sandi salah.');
+  if (email == null) throw const FormatException('Incorrect username/email or password.');
   final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
   if (cred.user != null) {
     await Lock.instance.syncWithCloud(cred.user!.uid);
@@ -60,7 +60,7 @@ Future<void> signIn(String id, String pass) async {
 /// Kirim email atur ulang kata sandi. Hasilnya sengaja sama, ada atau tidaknya akun,
 /// supaya tidak membocorkan siapa saja yang terdaftar.
 Future<void> resetPassword(String id) async {
-  if (id.trim().isEmpty) throw const FormatException('Isi username atau email.');
+  if (id.trim().isEmpty) throw const FormatException('Fill in username or email.');
   final email = await _emailFor(id);
   if (email == null) return;
   try {
@@ -74,11 +74,11 @@ Future<void> signUp(String username, String email, String pass) async {
   final name = username.trim().toLowerCase();
   final mail = email.trim().toLowerCase();
   if (!_nameRe.hasMatch(name)) {
-    throw const FormatException('Username 3 sampai 20 karakter: huruf kecil, angka, titik, atau garis bawah.');
+    throw const FormatException('Username must be 3-20 characters: lowercase letters, numbers, dots, or underscores.');
   }
-  if (!mail.contains('@')) throw const FormatException('Format email tidak valid.');
+  if (!mail.contains('@')) throw const FormatException('Invalid email format.');
   final db = FirebaseFirestore.instance;
-  if ((await db.doc('usernames/$name').get()).exists) throw const FormatException('Username sudah dipakai.');
+  if ((await db.doc('usernames/$name').get()).exists) throw const FormatException('Username is already taken.');
   final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: mail, password: pass);
   try {
     await db.doc('usernames/$name').set({'uid': cred.user!.uid, 'email': mail});
@@ -86,7 +86,7 @@ Future<void> signUp(String username, String email, String pass) async {
     await Lock.instance.syncWithCloud(cred.user!.uid);
   } on FirebaseException catch (e) {
     await cred.user!.delete();
-    throw FormatException(e.code == 'permission-denied' ? 'Username sudah dipakai.' : 'Gagal menyimpan username: ${e.message}');
+    throw FormatException(e.code == 'permission-denied' ? 'Username is already taken.' : 'Failed to save username: ${e.message}');
   }
 }
 
@@ -150,12 +150,12 @@ class WelcomePage extends StatelessWidget {
                   const Spacer(flex: 3),
                   SizedBox(
                     width: double.infinity,
-                    child: pillButton('Mulai', () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpPage()))),
+                    child: pillButton(context.tr('Get Started'), () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpPage()))),
                   ),
                   gap(8),
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Text('Sudah punya akun?', style: TextStyle(color: Colors.white.withValues(alpha: .85))),
-                    TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignInPage())), child: const Text('Masuk')),
+                    Text(context.tr('Already have an account?'), style: TextStyle(color: Colors.white.withValues(alpha: .85))),
+                    TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignInPage())), child: Text(context.tr('Sign in'))),
                   ]),
                 ]),
               ),
@@ -182,7 +182,7 @@ class _PassFieldState extends State<_PassField> {
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => widget.onSubmit?.call(),
         decoration: InputDecoration(
-          labelText: 'Kata sandi',
+          labelText: context.tr('Password'),
           suffixIcon: IconButton(
             onPressed: () => setState(() => hide = !hide),
             icon: Icon(hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
@@ -219,22 +219,22 @@ class _SignInState extends State<SignInPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: const Text('Atur ulang kata sandi'),
+        title: Text(context.tr('Reset password')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Kami kirim tautan atur ulang ke email akunmu.'),
+          Text(context.tr('We will send a reset link to your account email.')),
           gap(12),
-          TextField(controller: c, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Username atau email')),
+          TextField(controller: c, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(labelText: context.tr('Username or email'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('Batal')),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: const Text('Kirim tautan')),
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(context.tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(context.tr('Send link'))),
         ],
       ),
     );
     if (ok != true) return;
     try {
       await resetPassword(c.text);
-      if (mounted) _toast(context, 'Jika akunnya ada, tautan atur ulang sudah dikirim ke emailnya. Cek juga folder spam.');
+      if (mounted) _toast(context, context.tr('If the account exists, a reset link was sent to its email. Check spam folder as well.'));
     } catch (e) {
       if (mounted) _toast(context, authError(e));
     }
@@ -243,26 +243,26 @@ class _SignInState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) => _AuthShell(
         back: true,
-        title: 'Selamat datang kembali',
-        subtitle: 'Masuk untuk melanjutkan ritme terapimu.',
+        title: context.tr('Welcome back'),
+        subtitle: context.tr('Sign in to continue your therapy rhythm.'),
         children: [
           TextField(
             controller: _id,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Username atau email'),
+            decoration: InputDecoration(labelText: context.tr('Username or email')),
           ),
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
-          Align(alignment: Alignment.centerRight, child: TextButton(onPressed: _forgot, child: const Text('Lupa kata sandi?'))),
+          Align(alignment: Alignment.centerRight, child: TextButton(onPressed: _forgot, child: Text(context.tr('Forgot password?')))),
           gap(8),
-          pillButton(_busy ? 'Memproses...' : 'Masuk', _go),
+          pillButton(_busy ? context.tr('Processing...') : context.tr('Sign in'), _go),
           gap(8),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text('Belum punya akun?'),
+            Text(context.tr("Don't have an account?")),
             TextButton(
               onPressed: _busy ? null : () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignUpPage())),
-              child: const Text('Daftar'),
+              child: Text(context.tr('Sign up')),
             ),
           ]),
         ],
@@ -294,31 +294,31 @@ class _SignUpState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) => _AuthShell(
         back: true,
-        title: 'Buat akun',
-        subtitle: 'Username dipakai untuk masuk, email untuk pemulihan akun.',
+        title: context.tr('Create account'),
+        subtitle: context.tr('Username is used to sign in, email for account recovery.'),
         children: [
           TextField(
             controller: _u,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Username', prefixText: '@', helperText: 'Huruf kecil, angka, titik, garis bawah (3 sampai 20)'),
+            decoration: InputDecoration(labelText: context.tr('Username'), prefixText: '@', helperText: context.tr('Lowercase letters, numbers, dots, underscores (3-20)')),
           ),
           gap(12),
           TextField(
             controller: _e,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: InputDecoration(labelText: context.tr('Email')),
           ),
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
           gap(20),
-          pillButton(_busy ? 'Memproses...' : 'Daftar', _go),
+          pillButton(_busy ? context.tr('Processing...') : context.tr('Sign up'), _go),
           gap(8),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text('Sudah punya akun?'),
+            Text(context.tr('Already have an account?')),
             TextButton(
               onPressed: _busy ? null : () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignInPage())),
-              child: const Text('Masuk'),
+              child: Text(context.tr('Sign in')),
             ),
           ]),
         ],

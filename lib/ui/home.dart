@@ -67,19 +67,19 @@ class HomePage extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(top: 80),
           child: Column(children: [
-            Text('Belum ada terapi', style: display(32)),
+            Text(context.tr('No therapies yet'), style: display(32)),
             gap(10),
-            const Text('Tambahkan obat pertamamu untuk mulai menghitung jadwal.'),
+            Text(context.tr('Add your first medicine to calculate schedules.')),
             gap(20),
-            pillButton('Tambah terapi', () => showSheet(context, TherapySheet(supplies: supplies)), icon: Icons.add_rounded),
+            pillButton(context.tr('Add therapy'), () => showSheet(context, TherapySheet(supplies: supplies)), icon: Icons.add_rounded),
           ]),
         )
       else ...[
         for (final t in ths) DoseCard(t: t, slots: slots, logs: logs, supplies: supplies, prefs: prefs),
         WeekCard(ths: ths, logs: logs),
-        section('Terlewat', overdue),
-        section('Hari ini', todays),
-        section('7 hari ke depan', upcoming),
+        section(context.tr('Overdue'), overdue),
+        section(context.tr('Today'), todays),
+        section(context.tr('Next 7 days'), upcoming),
       ],
     ]);
   }
@@ -114,7 +114,7 @@ class DoseCard extends ConsumerWidget {
       center = [
         Text(last == null ? '-' : '$since', style: display(88)),
         gap(6),
-        Text(last == null ? 'belum ada catatan' : 'hari sejak dosis terakhir'),
+        Text(last == null ? context.tr('no logs yet') : context.tr('days since last dose')),
       ];
     } else if (t.daily) {
       final td = [for (final s in mine) if (sameDay(s.at, today)) s];
@@ -122,24 +122,24 @@ class DoseCard extends ConsumerWidget {
       final nextToday = td.where((s) => s.pending).firstOrNull;
       painter = HourDialPainter({for (final s in td) s.at.hour: s.status}, idle);
       center = td.isEmpty
-          ? [Text('Libur', style: display(48))]
+          ? [Text(context.tr('Day off'), style: display(48))]
           : nextToday == null
-              ? [Text('Selesai', style: display(48)), gap(6), Text('$done dari ${td.length} dosis hari ini')]
+              ? [Text(context.tr('Done'), style: display(48)), gap(6), Text(context.tr('{done} of {total} doses today', {'done': done, 'total': td.length}))]
               : [
                   Text(hhmm.format(nextToday.at), style: display(64, color: nextToday.status == 'late' ? C.peony : null)),
                   gap(6),
-                  Text('berikutnya, $done dari ${td.length} selesai'),
+                  Text(context.tr('next, {done} of {total} done', {'done': done, 'total': td.length})),
                 ];
     } else {
       final cycle = cycleOf(t), n = cycle.clamp(4, 60);
       final elapsed = isLate ? n : (cycle - left).clamp(0, n);
       painter = DialPainter(n, elapsed, idle);
       center = left == 0
-          ? [Text('Hari ini', style: display(48)), gap(6), Text(next == null ? '' : 'pukul ${hhmm.format(next.at)}')]
+          ? [Text(context.tr('Today'), style: display(48)), gap(6), Text(next == null ? '' : context.tr('at {time}', {'time': hhmm.format(next.at)}))]
           : [
               Text('${left.abs()}', style: display(88, color: isLate ? C.peony : null)),
               gap(6),
-              Text(isLate ? 'hari terlambat' : 'hari lagi'),
+              Text(isLate ? (left.abs() == 1 ? context.tr('day overdue') : context.tr('days overdue')) : (left.abs() == 1 ? context.tr('day left') : context.tr('days left'))),
             ];
     }
 
@@ -156,7 +156,7 @@ class DoseCard extends ConsumerWidget {
           const SizedBox(width: 48),
           Expanded(child: Center(child: Text(t.name, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)))),
           IconButton(
-            tooltip: 'Ubah terapi',
+            tooltip: context.tr('Edit therapy'),
             onPressed: () => showSheet(context, TherapySheet(supplies: supplies, initial: t)),
             icon: const Icon(Icons.edit_outlined, size: 20),
           ),
@@ -174,15 +174,15 @@ class DoseCard extends ConsumerWidget {
         Wrap(spacing: 8, runSpacing: 4, alignment: WrapAlignment.center, children: [
           chip('${fmt(t.dose)} ${t.doseUnit}', t.adm.icon),
           chip(scheduleText(t), Icons.event_repeat_rounded),
-          if (t.adm.places && place.isNotEmpty) chip('berikutnya: $place', Icons.my_location_rounded),
+          if (t.adm.places && place.isNotEmpty) chip(context.tr('next: {place}', {'place': place}), Icons.my_location_rounded),
         ]),
         gap(18),
         pillButton(
-          t.route == 'inj' ? 'Catat suntikan' : 'Catat dosis',
+          t.route == 'inj' ? context.tr('Log injection') : context.tr('Log dose'),
           () => showSheet(context, DoseSheet(t: t, slot: next, supplies: supplies, prefs: prefs, suggested: place)),
           icon: Icons.check_rounded,
         ),
-        if (next != null && !t.asNeeded) TextButton(onPressed: () => skipSlot(context, ref, next), child: const Text('Lewati dosis ini')),
+        if (next != null && !t.asNeeded) TextButton(onPressed: () => skipSlot(context, ref, next), child: Text(context.tr('Skip this dose'))),
       ]),
     );
   }
@@ -190,7 +190,7 @@ class DoseCard extends ConsumerWidget {
 
 /// Tandai satu jadwal sebagai sengaja dilewati.
 Future<void> skipSlot(BuildContext context, WidgetRef ref, Slot s) async {
-  if (!await confirm(context, 'Lewati dosis ini? Dosis tidak dihitung sebagai sudah diminum dan pengingatnya berhenti.', ok: 'Lewati')) return;
+  if (!await confirm(context, context.tr('Skip this dose? It will not be counted as taken and its reminders will stop.'), ok: 'Skip')) return;
   ref.read(repoProvider)?.logDose(DoseLog(id: '', therapyId: s.t.id, at: s.at, skipped: true, slot: slotKey(s.at)));
 }
 
@@ -261,7 +261,7 @@ class SlotTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = s.t, fg = Theme.of(context).colorScheme.onSurface;
     final late = s.status == 'overdue' || s.status == 'late';
-    final label = sameDay(s.at, logicalToday(prefs)) ? DateFormat('HH:mm').format(s.at) : DateFormat('EEE d MMM, HH:mm', 'id').format(s.at);
+    final label = sameDay(s.at, logicalToday(prefs)) ? DateFormat('HH:mm').format(s.at) : DateFormat('EEE d MMM, HH:mm', AppLocale.code).format(s.at);
     void open() => showSheet(
         context,
         DoseSheet(
@@ -273,7 +273,7 @@ class SlotTile extends ConsumerWidget {
           suggested: suggestPlace(prefs, logs, t.id),
         ));
     Future<void> undoSkip() async {
-      if (await confirm(context, 'Batalkan "lewati" untuk dosis ini?', ok: 'Batalkan')) ref.read(repoProvider)?.deleteLog(s.log!, {});
+      if (await confirm(context, context.tr('Undo skip for this dose?'), ok: 'Undo')) ref.read(repoProvider)?.deleteLog(s.log!, {});
     }
 
     return Container(
@@ -286,14 +286,14 @@ class SlotTile extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         leading: Icon(s.skipped ? Icons.skip_next_rounded : t.adm.icon, color: s.taken ? C.lagoon : (s.skipped ? fg.withValues(alpha: .45) : (late ? C.peony : fg))),
         title: Text(t.name, style: TextStyle(fontWeight: FontWeight.w700, color: s.skipped ? fg.withValues(alpha: .55) : null)),
-        subtitle: Text(s.skipped ? 'Dilewati, jadwal $label' : '$label, ${fmt(t.dose)} ${t.doseUnit}'),
+        subtitle: Text(s.skipped ? context.tr('Skipped, scheduled {time}', {'time': label}) : '$label, ${fmt(t.dose)} ${t.doseUnit}'),
         trailing: s.taken
             ? Icon(Icons.check_circle_rounded, color: C.lagoon)
             : s.skipped
                 ? null
                 : Row(mainAxisSize: MainAxisSize.min, children: [
-                    IconButton(tooltip: 'Lewati', onPressed: () => skipSlot(context, ref, s), icon: const Icon(Icons.skip_next_rounded)),
-                    FilledButton.tonal(onPressed: open, child: const Text('Catat')),
+                    IconButton(tooltip: context.tr('Skip'), onPressed: () => skipSlot(context, ref, s), icon: const Icon(Icons.skip_next_rounded)),
+                    FilledButton.tonal(onPressed: open, child: Text(context.tr('Log'))),
                   ]),
       ),
     );
@@ -309,12 +309,12 @@ class AlertsCard extends ConsumerWidget {
     final alerts = <(IconData, String)>[];
     for (final s in supplies) {
       if (s.expired) {
-        alerts.add((Icons.error_outline_rounded, '${s.name} sudah kedaluwarsa'));
+        alerts.add((Icons.error_outline_rounded, context.tr('{name} has expired', {'name': s.name})));
         continue;
       }
-      if (s.low) alerts.add((Icons.inventory_2_outlined, s.generic ? '${s.name} tinggal ${fmt(s.qty)}' : '${s.name} tinggal ${s.doses} dosis'));
+      if (s.low) alerts.add((Icons.inventory_2_outlined, s.generic ? context.tr('{name}: {qty} left', {'name': s.name, 'qty': fmt(s.qty)}) : context.tr('{name}: {doses} doses left', {'name': s.name, 'doses': s.doses})));
       final d = s.daysToExpiry;
-      if (d != null && d <= 30) alerts.add((Icons.event_busy_outlined, '${s.name} kedaluwarsa dalam $d hari'));
+      if (d != null && d <= 30) alerts.add((Icons.event_busy_outlined, context.tr('{name} expires in {days} days', {'name': s.name, 'days': d})));
     }
     if (alerts.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -328,7 +328,7 @@ class AlertsCard extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: cardBox(context, radius: 24).copyWith(border: Border.all(color: C.amber.withValues(alpha: .6))),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Perlu perhatian', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+              Text(context.tr('Needs attention'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
               gap(8),
               for (final a in alerts.take(4))
                 Padding(
@@ -361,8 +361,8 @@ class WeekCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       decoration: cardBox(context, radius: 28),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Minggu ini', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-        Text('Perkiraan estradiol, ${fmt(levelAt(intakes, now).roundToDouble())} pg/mL sekarang', style: Theme.of(context).textTheme.bodySmall),
+        Text(context.tr('This week'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+        Text(context.tr('Estimated estradiol, {level} pg/mL now', {'level': fmt(levelAt(intakes, now).roundToDouble())}), style: Theme.of(context).textTheme.bodySmall),
         gap(8),
         SizedBox(
           height: 90,
