@@ -9,21 +9,32 @@ class C {
   static const ink = Color(0xFF1E1B4B);
   static const mist = Color(0xFFF4F3FD);
   static const amber = Color(0xFFF0B541);
-  static const deep = Color(0xFF12112F);
-  static const deepCard = Color(0xFF1C1B45);
-  static const midnight = Color(0xFF0F122B);
+  static const deep = Color(0xFF0F122B);
+  static const deepCard = Color(0xFF16193E); // Velvet Midnight Surface
+  static const midnight = Color(0xFF0B0D21); // Atmospheric Canvas
   static const lavender = Color(0xFFA997FF);
 
-  static Color lagoon = const Color(0xFF34B08F); // aksen kedua (mint): selesai, perkiraan
-  static Color peony = const Color(0xFF6B5CE0); // aksen utama (violet): tombol, hari ini
+  static Color lagoon = const Color(0xFFA7F3D0); // aksen kedua (pastel mint)
+  static Color peony = const Color(0xFF7C6EE6); // aksen utama (celestial violet)
 }
 
-/// (nama, aksen kedua, aksen utama)
+/// Palet sentuhan pastel surgawi (Celestial Pastel) khas Lunera.
+class Pastel {
+  static const lilac = Color(0xFFD8B4FE); // Moonlight Lilac: countdown, highlights, rilis aktif
+  static const rose = Color(0xFFFBCFE8); // Rose Quartz: suasana hati hangat, transisi tubuh
+  static const mint = Color(0xFFA7F3D0); // Sage Cloud Mint: dosis selesai, kepatuhan, stok aman
+  static const sky = Color(0xFFBAE6FD); // Periwinkle Twilight: ketenangan, kurva PK, titik lab
+  static const butter = Color(0xFFFEF08A); // Warm Butter Glow: pengingat stok, perhatian lembut
+  static const mist = Color(0xFFECE7FA); // Teks kontras lembut di atas permukaan gelap
+  static const glow = Color(0x33D8B4FE); // Efek pendaran lembut
+}
+
+/// (nama, aksen kedua / pastel, aksen utama)
 const accents = <String, (String, Color, Color)>{
-  'lunera': ('Violet dan mint', Color(0xFF34B08F), Color(0xFF6B5CE0)),
-  'lagoon': ('Teal dan peony', Color(0xFF1E9E9A), Color(0xFFE8628C)),
-  'ocean': ('Biru dan jingga', Color(0xFF2F7FD6), Color(0xFFF08A3C)),
-  'forest': ('Hijau dan koral', Color(0xFF3E9B5F), Color(0xFFE5675A)),
+  'lunera': ('Celestial Lilac & Mint', Color(0xFFA7F3D0), Color(0xFF7C6EE6)),
+  'rose': ('Rose Quartz & Peony', Color(0xFFFBCFE8), Color(0xFFD946EF)),
+  'lagoon': ('Lagoon Mint & Sky', Color(0xFFBAE6FD), Color(0xFF0D9488)),
+  'solstice': ('Solstice Sunset & Gold', Color(0xFFFEF08A), Color(0xFFEA580C)),
 };
 
 void applyAccent(String id) {
@@ -43,12 +54,21 @@ TextStyle display(double size, {Color? color, FontWeight? weight}) => GoogleFont
 TextStyle wordmark(double size, {Color? color}) =>
     GoogleFonts.jost(fontSize: size, fontWeight: FontWeight.w300, letterSpacing: size * .14, height: 1, color: color);
 
-ThemeData buildTheme(Brightness b) {
-  final dark = b == Brightness.dark;
-  final fg = dark ? const Color(0xFFECEAFF) : C.ink;
-  final scheme = ColorScheme.fromSeed(seedColor: C.peony, brightness: b)
-      .copyWith(primary: C.peony, secondary: C.lagoon, surface: dark ? C.deepCard : Colors.white, onSurface: fg);
-  final base = ThemeData(useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: Colors.transparent);
+ThemeData buildTheme([Brightness b = Brightness.dark]) {
+  const fg = Pastel.mist;
+  final scheme = ColorScheme.fromSeed(seedColor: C.peony, brightness: Brightness.dark).copyWith(
+    primary: C.peony,
+    secondary: C.lagoon,
+    surface: C.deepCard,
+    onSurface: fg,
+    outlineVariant: Colors.white.withValues(alpha: .08),
+  );
+  final base = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: scheme,
+    scaffoldBackgroundColor: Colors.transparent,
+  );
   return base.copyWith(
     textTheme: GoogleFonts.figtreeTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
     inputDecorationTheme: InputDecorationTheme(
@@ -63,29 +83,37 @@ ThemeData buildTheme(Brightness b) {
   );
 }
 
-/// Latar gradien seluruh aplikasi (malam di mode gelap, kabut lavender di mode terang).
+/// Latar gradien seluruh aplikasi (Atmospheric Midnight Canvas).
 Widget appBackdrop(BuildContext context, Widget? child) {
-  final dark = Theme.of(context).brightness == Brightness.dark;
   return DecoratedBox(
-    decoration: BoxDecoration(
+    decoration: const BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: dark ? const [Color(0xFF1B1A4B), Color(0xFF0F0E2A)] : const [Color(0xFFF6F5FF), Color(0xFFE9E7F9)],
+        colors: [Color(0xFF151838), Color(0xFF0B0D21)],
       ),
     ),
     child: child,
   );
 }
 
-/// Kartu: tepi tipis di mode gelap, bayangan lembut ungu di mode terang.
-BoxDecoration cardBox(BuildContext c, {double radius = 28}) {
-  final t = Theme.of(c), dark = t.brightness == Brightness.dark;
+/// Kartu: permukaan beludru malam dengan tepian bias rembulan dan bayangan halus.
+BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = false}) {
+  final t = Theme.of(c);
   return BoxDecoration(
     color: t.colorScheme.surface,
     borderRadius: BorderRadius.circular(radius),
-    border: dark ? Border.all(color: Colors.white.withValues(alpha: .07)) : null,
-    boxShadow: dark ? null : [BoxShadow(color: const Color(0xFF6B5CE0).withValues(alpha: .08), blurRadius: 24, offset: const Offset(0, 8))],
+    border: Border.all(
+      color: highlight ? Pastel.lilac.withValues(alpha: .35) : Colors.white.withValues(alpha: .08),
+      width: highlight ? 1.2 : 1.0,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: (highlight ? C.peony : Colors.black).withValues(alpha: highlight ? .14 : .22),
+        blurRadius: highlight ? 24 : 16,
+        offset: const Offset(0, 4),
+      ),
+    ],
   );
 }
 
@@ -146,6 +174,16 @@ class MoonLogo extends StatelessWidget {
   final double size;
   @override
   Widget build(BuildContext context) => SizedBox(width: size, height: size, child: CustomPaint(painter: _MoonPainter()));
+}
+
+class MoonLogoSmall extends StatelessWidget {
+  const MoonLogoSmall({super.key});
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(color: C.deep, borderRadius: BorderRadius.circular(12)),
+        child: const MoonLogo(size: 28),
+      );
 }
 
 class _MoonPainter extends CustomPainter {

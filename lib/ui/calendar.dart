@@ -53,12 +53,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: selected ? C.peony : null,
-                border: !selected && isToday ? Border.all(color: C.peony, width: 1.5) : null,
+                border: !selected && isToday ? Border.all(color: Pastel.lilac, width: 1.5) : null,
               ),
               child: Text('${d.day}', style: TextStyle(fontWeight: FontWeight.w700, color: selected ? Colors.white : fg)),
             ),
             gap(4),
-            Icon(Icons.circle, size: 6, color: has(d) ? C.lagoon : Colors.transparent),
+            Icon(Icons.circle, size: 6, color: has(d) ? Pastel.mint : Colors.transparent),
           ]),
         ),
       );

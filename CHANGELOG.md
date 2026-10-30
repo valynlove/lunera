@@ -4,6 +4,45 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-10-31
+
+### Added
+- **Unified Signature "Celestial Midnight & Pastel" Theme (`lib/theme.dart`):**
+  - Consolidated application visual architecture into an iconic, proprietary signature theme combining deep atmospheric midnight lake canvas (`#0B0D21`) and velvet midnight card surfaces (`#16193E`).
+  - Infused tender Celestial Pastel palette accents across key user touchpoints:
+    - **Moonlight Lilac (`#D8B4FE`)**: Hero countdown banners, highlighted dose cards, and active releases.
+    - **Rose Quartz Mist (`#FBCFE8`)**: Emotional mood check-ins and body transformation logs.
+    - **Sage Cloud Mint (`#A7F3D0`)**: Taken dose indicators, schedule compliance, and safe inventory stock.
+    - **Periwinkle Twilight (`#BAE6FD`)**: Pharmacokinetic level simulation curves, lab result markers, and calendar dots.
+    - **Warm Butter Glow (`#FEF08A`)**: Friendly supply reminders and gentle notifications.
+- **Bespoke Phase Accents System:**
+  - Redesigned Appearance settings to highlight the signature aesthetic alongside customizable celestial Phase Accents (*Celestial Lilac & Mint*, *Rose Quartz & Peony*, *Lagoon Mint & Sky*, *Solstice Sunset & Gold*).
+
+---
+
+## [1.7.0] - 2026-10-31
+
+### Added
+- **In-App Version Changelog Viewer (`lib/ui/app_changelog.dart`):**
+  - Integrated offline changelog bottom sheet modal (`showAppChangelogSheet`) accessible directly from Settings and More dashboards.
+  - Release history tracking from v1.7.0 down to v1.0.0 with categorical change tags (**Added**, **Changed**, **Fixed**), current version badges (**LATEST** / **TERBARU**), and complete bilingual (English & Indonesian) support.
+- **Reactive Update Notification & State Management (`availableUpdateProvider`):**
+  - Added Riverpod notifier provider (`availableUpdateProvider`) dynamically tracking GitHub release status across the application.
+  - Interactive "NEW" badge indicator displayed on the "Check for Updates" tile when a newer release is published on GitHub, displaying transition versions (`v1.7.0 ➔ v1.7.1`).
+  - Automated startup check with `UpdateCheckerService.checkAndNotify(ref, context: context)`.
+
+### Changed
+- **Revamped Settings Dashboard & Multilingual Localization:**
+  - Modernized Settings structure with a unified **About & Support** section featuring "Check for Updates", "Version Changelog", "GitHub Repository", and "Medical Disclaimer".
+  - Refactored entire Settings interface to utilize dynamic runtime translation (`context.tr`) across English and Bahasa Indonesia.
+
+### Fixed
+- **CI/CD Pipeline & Gradle Build Resilience:**
+  - Added Google Cloud Maven Central mirror (`https://maven-central.storage-download.googleapis.com/maven2/`) in Android `build.gradle.kts` and `settings.gradle.kts` to eliminate HTTP 429 rate limit errors.
+  - Integrated `gradle/actions/setup-gradle@v4` with build cache and a 3-attempt retry loop on release APK compilation in `.github/workflows/release.yml`.
+
+---
+
 ## [1.6.0] - 2026-10-30
 
 ### Added

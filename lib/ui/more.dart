@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../l10n.dart';
 import '../profile.dart';
 import '../theme.dart';
 import '../update_checker.dart';
+import 'app_changelog.dart';
 import 'auth.dart';
 import 'body.dart';
 import 'data_page.dart';
@@ -22,12 +24,30 @@ class MorePage extends ConsumerWidget {
     final username = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
     final displayName = ref.watch(displayNameProvider);
     final fg = Theme.of(context).colorScheme.onSurface;
+    final updateInfo = ref.watch(availableUpdateProvider);
 
-    Widget tile(IconData icon, String title, VoidCallback onTap, {String? sub}) => ListTile(
+    Widget tile(
+      IconData icon,
+      String title,
+      VoidCallback onTap, {
+      String? sub,
+      Widget? trailing,
+      Widget? titleExtra,
+    }) =>
+        ListTile(
           leading: Icon(icon, color: C.peony),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              if (titleExtra != null) ...[
+                const SizedBox(width: 8),
+                titleExtra,
+              ],
+            ],
+          ),
           subtitle: sub == null ? null : Text(sub),
-          trailing: Icon(Icons.chevron_right_rounded, color: fg.withValues(alpha: .5)),
+          trailing: trailing ?? Icon(Icons.chevron_right_rounded, color: fg.withValues(alpha: .5)),
           onTap: onTap,
         );
     void go(Widget p) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => p));
@@ -66,7 +86,43 @@ class MorePage extends ConsumerWidget {
           tile(Icons.accessibility_new_rounded, context.tr('Body & Changes'), () => go(const BodyPage()), sub: context.tr('Timeline from your journal')),
           tile(Icons.lock_outline_rounded, context.tr('Security'), () => go(const SecurityPage()), sub: context.tr('App PIN lock protection')),
           tile(Icons.import_export_rounded, context.tr('Import, export, backup'), () => go(const DataPage())),
-          tile(Icons.system_update_rounded, context.tr('Check for Updates'), () => UpdateCheckerService.checkAndPromptUpdate(context), sub: 'v${UpdateCheckerService.currentVersion}'),
+          tile(
+            Icons.system_update_rounded,
+            context.tr('Check for Updates'),
+            () {
+              if (updateInfo != null) {
+                UpdateCheckerService.showUpdateDialog(context, updateInfo);
+              } else {
+                UpdateCheckerService.checkAndPromptUpdate(context, ref: ref);
+              }
+            },
+            titleExtra: updateInfo != null
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE65100),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      context.tr('NEW'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  )
+                : null,
+            sub: updateInfo != null
+                ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${context.tr('Update Available!')})'
+                : 'v${UpdateCheckerService.currentVersion}',
+          ),
+          tile(
+            Icons.history_edu_rounded,
+            context.tr('Version Changelog'),
+            () => showAppChangelogSheet(context),
+            sub: context.tr("See what's new in v{version} and past releases", {'version': UpdateCheckerService.currentVersion}),
+          ),
           tile(Icons.info_outline_rounded, context.tr('About {name}', {'name': appName}), () {
             showDialog<void>(
               context: context,
@@ -87,13 +143,4 @@ class MorePage extends ConsumerWidget {
   }
 }
 
-class MoonLogoSmall extends StatelessWidget {
-  const MoonLogoSmall({super.key});
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(color: C.deep, borderRadius: BorderRadius.circular(12)),
-        child: const MoonLogo(size: 28),
-      );
-}
 

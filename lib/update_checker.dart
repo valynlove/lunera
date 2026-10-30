@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'theme.dart';
 
@@ -27,9 +28,23 @@ class AppUpdateInfo {
   final bool hasUpdate;
 }
 
+class AvailableUpdateNotifier extends Notifier<AppUpdateInfo?> {
+  @override
+  AppUpdateInfo? build() => null;
+
+  void setUpdate(AppUpdateInfo? info) => state = info;
+  void dismiss() => state = null;
+}
+
+/// Reactive provider for application updates across screens.
+final availableUpdateProvider =
+    NotifierProvider<AvailableUpdateNotifier, AppUpdateInfo?>(
+      AvailableUpdateNotifier.new,
+    );
+
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.6.0';
+  static const currentVersion = '1.8.0';
 
   static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
 
@@ -38,6 +53,9 @@ class UpdateCheckerService {
 
   static const String _directDownloadUrl =
       'https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk';
+
+  static String? _promptedVersion;
+  static bool _isShowingDialog = false;
 
   /// Membuka URL di browser atau installer eksternal.
   static Future<void> openUrl(String url) async {
@@ -51,6 +69,27 @@ class UpdateCheckerService {
     } catch (e) {
       debugPrint('Failed to open URL via native: $e');
     }
+  }
+
+  /// Memeriksa pembaruan dan otomatis memicu notifikasi serta memperbarui provider reaktif.
+  static Future<AppUpdateInfo?> checkAndNotify(
+    WidgetRef ref, {
+    BuildContext? context,
+  }) async {
+    final info = await checkForUpdate();
+    if (info != null && info.hasUpdate) {
+      ref.read(availableUpdateProvider.notifier).setUpdate(info);
+
+      if (context != null &&
+          _promptedVersion != info.latestVersion &&
+          !_isShowingDialog) {
+        if (context.mounted) {
+          _promptedVersion = info.latestVersion;
+          showUpdateDialog(context, info);
+        }
+      }
+    }
+    return info;
   }
 
   /// Memeriksa apakah ada pembaruan rilis terbaru di GitHub.
@@ -141,9 +180,13 @@ class UpdateCheckerService {
   /// Memeriksa update dan langsung memunculkan dialog/snackbar.
   static Future<void> checkAndPromptUpdate(
     BuildContext context, {
+    WidgetRef? ref,
     bool silentIfUpToDate = false,
   }) async {
     final info = await checkForUpdate();
+    if (ref != null && info != null && info.hasUpdate) {
+      ref.read(availableUpdateProvider.notifier).setUpdate(info);
+    }
     if (!context.mounted) return;
 
     if (info != null && info.hasUpdate) {
@@ -160,7 +203,8 @@ class UpdateCheckerService {
 
   /// Menampilkan dialog pembaruan aplikasi berestetika Midnight UI.
   static void showUpdateDialog(BuildContext context, AppUpdateInfo info) {
-    showDialog(
+    _isShowingDialog = true;
+    showDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (ctx) {
@@ -174,12 +218,12 @@ class UpdateCheckerService {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: C.lavender.withValues(alpha: 0.15),
+                  color: C.peony.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.rocket_launch_rounded,
-                  color: C.lavender,
+                  color: C.peony,
                   size: 26,
                 ),
               ),
@@ -223,7 +267,7 @@ class UpdateCheckerService {
                     color: dark ? C.midnight : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: C.lavender.withValues(alpha: 0.2),
+                      color: C.peony.withValues(alpha: 0.25),
                     ),
                   ),
                   child: SingleChildScrollView(
@@ -258,8 +302,8 @@ class UpdateCheckerService {
               icon: const Icon(Icons.download_rounded, size: 18),
               label: const Text('Update Now'),
               style: FilledButton.styleFrom(
-                backgroundColor: C.lavender,
-                foregroundColor: C.midnight,
+                backgroundColor: C.peony,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               onPressed: () {
@@ -270,6 +314,8 @@ class UpdateCheckerService {
           ],
         );
       },
-    );
+    ).whenComplete(() {
+      _isShowingDialog = false;
+    });
   }
 }

@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.8.0";
 
 // Theme Switcher (Dark Mode by default for Lunera's Midnight Theme)
 function toggleTheme() {

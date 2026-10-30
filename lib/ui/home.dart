@@ -103,6 +103,8 @@ class DoseCard extends ConsumerWidget {
     final place = suggestPlace(prefs, logs, t.id);
     final idle = fg.withValues(alpha: .14);
     final hhmm = DateFormat('HH:mm');
+    final left = next == null ? 0 : daysBetween(today, next.at);
+    final isLate = left < 0;
     CustomPainter painter;
     List<Widget> center;
 
@@ -130,26 +132,25 @@ class DoseCard extends ConsumerWidget {
                 ];
     } else {
       final cycle = cycleOf(t), n = cycle.clamp(4, 60);
-      final left = next == null ? 0 : daysBetween(today, next.at);
-      final late = left < 0;
-      final elapsed = late ? n : (cycle - left).clamp(0, n);
+      final elapsed = isLate ? n : (cycle - left).clamp(0, n);
       painter = DialPainter(n, elapsed, idle);
       center = left == 0
           ? [Text('Hari ini', style: display(48)), gap(6), Text(next == null ? '' : 'pukul ${hhmm.format(next.at)}')]
           : [
-              Text('${left.abs()}', style: display(88, color: late ? C.peony : null)),
+              Text('${left.abs()}', style: display(88, color: isLate ? C.peony : null)),
               gap(6),
-              Text(late ? 'hari terlambat' : 'hari lagi'),
+              Text(isLate ? 'hari terlambat' : 'hari lagi'),
             ];
     }
 
     Widget chip(String s, IconData i) =>
         Chip(avatar: Icon(i, size: 16), label: Text(s), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07));
 
+    final isHighlighted = !t.asNeeded && !t.daily && (left == 0 || isLate);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(24),
-      decoration: cardBox(context, radius: 36),
+      decoration: cardBox(context, radius: 36, highlight: isHighlighted),
       child: Column(children: [
         Row(children: [
           const SizedBox(width: 48),
@@ -209,7 +210,7 @@ class DialPainter extends CustomPainter {
       final p = Paint()
         ..strokeWidth = w
         ..strokeCap = StrokeCap.round
-        ..color = i == cur ? C.peony : (i < elapsed ? C.lagoon : idle);
+        ..color = i == cur ? Pastel.lilac : (i < elapsed ? Pastel.mint : idle);
       canvas.drawLine(c + Offset(math.cos(a), math.sin(a)) * (r - len), c + Offset(math.cos(a), math.sin(a)) * (r - 2), p);
     }
   }
@@ -232,10 +233,10 @@ class HourDialPainter extends CustomPainter {
       final color = st == null
           ? idle
           : st == 'taken'
-              ? C.lagoon
+              ? Pastel.mint
               : (st == 'late' || st == 'overdue')
-                  ? C.peony
-                  : C.lagoon.withValues(alpha: .45);
+                  ? Pastel.rose
+                  : Pastel.mint.withValues(alpha: .45);
       final p = Paint()
         ..strokeWidth = 6
         ..strokeCap = StrokeCap.round

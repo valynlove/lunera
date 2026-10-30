@@ -4,6 +4,7 @@ import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
 import 'package:lunera/profile.dart';
 import 'package:lunera/sim.dart';
+import 'package:lunera/ui/app_changelog.dart';
 import 'package:lunera/update_checker.dart';
 
 void main() {
@@ -56,7 +57,14 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.6.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.8.0'));
+    });
+
+    test('AppChangelog releases metadata is populated and ordered', () {
+      expect(AppChangelog.releases, isNotEmpty);
+      expect(AppChangelog.releases.first.version, equals('1.8.0'));
+      expect(AppChangelog.releases.first.isCurrent, isTrue);
+      expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
 
     test('Prefs widgetHide and locale configuration', () {

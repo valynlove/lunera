@@ -46,7 +46,7 @@ class _ShellState extends ConsumerState<Shell> {
       }
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
-          UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: true);
+          UpdateCheckerService.checkAndNotify(ref, context: context);
         }
       });
     });

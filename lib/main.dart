@@ -40,7 +40,6 @@ class LuneraApp extends ConsumerWidget {
   const LuneraApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(prefsProvider.select((p) => p.value?.theme ?? 'system'));
     final localeCode = ref.watch(prefsProvider.select((p) => p.value?.locale ?? 'en'));
     AppLocale.code = localeCode;
     applyAccent(ref.watch(prefsProvider.select((p) => p.value?.accent ?? 'lunera')));
@@ -56,13 +55,9 @@ class LuneraApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: buildTheme(Brightness.light),
+      theme: buildTheme(Brightness.dark),
       darkTheme: buildTheme(Brightness.dark),
-      themeMode: switch (mode) {
-        'light' => ThemeMode.light,
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
-      },
+      themeMode: ThemeMode.dark,
       home: const AppRoot(),
     );
   }

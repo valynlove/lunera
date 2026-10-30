@@ -8,10 +8,11 @@ import '../theme.dart';
 import 'body.dart';
 
 Color moodColor(String? k) => switch (k) {
-      'happy' => C.lagoon,
-      'calm' => Color.lerp(C.lagoon, Colors.white, .45)!,
-      'low' => C.amber,
-      'anxious' => const Color(0xFFE5675A),
+      'happy' => Pastel.rose,
+      'calm' => Pastel.mint,
+      'neutral' => Pastel.sky,
+      'low' => const Color(0xFFC4B5FD),
+      'anxious' => Pastel.butter,
       _ => const Color(0xFF9A98B8),
     };
 
@@ -232,7 +233,7 @@ class MoodQuickCard extends ConsumerWidget {
       return card(InkWell(
         onTap: () => showSheet(context, JournalSheet(initial: e)),
         child: Row(children: [
-          Icon(m.$2, color: C.peony, size: 30),
+          Icon(m.$2, color: moodColor(e.mood), size: 30),
           const SizedBox(width: 14),
           Expanded(child: Text('Hari ini kamu merasa ${m.$1.toLowerCase()}', style: const TextStyle(fontWeight: FontWeight.w600))),
           Icon(Icons.edit_outlined, size: 18, color: fg.withValues(alpha: .5)),

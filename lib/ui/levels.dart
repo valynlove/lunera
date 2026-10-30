@@ -222,7 +222,13 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
       ),
       rangeAnnotations: bandD == null
           ? null
-          : RangeAnnotations(horizontalRangeAnnotations: [HorizontalRangeAnnotation(y1: bandD[0], y2: bandD[1], color: C.lagoon.withValues(alpha: .14))]),
+          : RangeAnnotations(horizontalRangeAnnotations: [
+              HorizontalRangeAnnotation(
+                y1: bandD[0],
+                y2: bandD[1],
+                color: Pastel.lilac.withValues(alpha: .12),
+              ),
+            ]),
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
           getTooltipItems: (touched) => [
