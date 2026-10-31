@@ -59,12 +59,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.1'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.0'));
+      expect(AppChangelog.releases.first.version, equals('1.11.1'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -220,6 +220,30 @@ void main() {
       expect(statuses.containsKey('Left buttock'), isTrue);
       expect(statuses['Left buttock']!.isResting, isFalse); // Never used (ready)
       expect(statuses['Left buttock']!.daysSince, isNull);
+    });
+
+    test('Body overview silhouette proportions are bounded on tablets and mobile', () {
+      const h = 420.0;
+
+      // Phone screen (e.g. maxW = 340)
+      const phoneMaxW = 340.0;
+      const phoneDiagramW = phoneMaxW > 460.0 ? 440.0 : phoneMaxW;
+      final phoneSw = (phoneDiagramW * .3).clamp(80.0, h * 0.25);
+      final phoneCx = (phoneDiagramW * .2).clamp(55.0, phoneSw * 0.75);
+
+      expect(phoneDiagramW, equals(340.0));
+      expect(phoneSw, equals(102.0));
+      expect(phoneCx, equals(68.0));
+
+      // Tablet screen landscape (e.g. maxW = 1200)
+      const tabletMaxW = 1200.0;
+      const tabletDiagramW = tabletMaxW > 460.0 ? 440.0 : tabletMaxW;
+      final tabletSw = (tabletDiagramW * .3).clamp(80.0, h * 0.25);
+      final tabletCx = (tabletDiagramW * .2).clamp(55.0, tabletSw * 0.75);
+
+      expect(tabletDiagramW, equals(440.0));
+      expect(tabletSw, equals(105.0)); // Strictly bounded, preventing squashed/gepeng drawing
+      expect(tabletCx, equals(78.75));
     });
   });
 }

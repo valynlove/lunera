@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.0',
+      version: '1.11.1',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed squashed and flattened ("gepeng") body silhouette overview on tablet and wide-screen landscape displays.',
+          textId: 'Perbaikan siluet tubuh yang gepeng pada tampilan tablet dan lanskap layar lebar.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Centered anatomical overview diagram with responsive width constraint and locked aspect ratio proportions.',
+          textId: 'Diagram anatomi tubuh kini berada di tengah dengan batas lebar responsif dan proporsi aspek rasio terkunci.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.0',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

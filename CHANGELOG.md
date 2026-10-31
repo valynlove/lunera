@@ -4,6 +4,16 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1] - 2026-10-31
+
+### Fixed
+- **Responsive Body Silhouette Proportions on Tablets (`lib/ui/body.dart`):**
+  - Resolved distorted and flattened ("gepeng") anatomical silhouette drawing when viewed in landscape mode on tablet and wide-screen devices.
+  - Decoupled body shoulder width scale factor (`sw`) and center offset (`cx`) in `_BodyPainter` from unbounded viewport width, bounding it to anatomical height proportions (`h * 0.25`).
+  - Centered the overview silhouette and callout badges within a responsive `diagramW` constraint (capped at 440px on tablets) while preserving 100% natural full-width rendering on mobile devices.
+
+---
+
 ## [1.11.0] - 2026-10-31
 
 ### Added

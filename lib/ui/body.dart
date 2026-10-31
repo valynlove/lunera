@@ -86,14 +86,18 @@ class _BodyPageState extends ConsumerState<BodyPage> {
         padding: const EdgeInsets.all(16),
         decoration: cardBox(context),
         child: LayoutBuilder(builder: (c, cons) {
-          final w = cons.maxWidth;
+          final maxW = cons.maxWidth;
           const h = 420.0;
-          return SizedBox(
-            height: h,
-            child: Stack(children: [
-              Positioned.fill(child: CustomPaint(painter: _BodyPainter(C.peony))),
-              for (final a in _onBody) callout(a.$1, a.$2, w, h),
-            ]),
+          final diagramW = maxW > 460.0 ? 440.0 : maxW;
+          return Center(
+            child: SizedBox(
+              width: diagramW,
+              height: h,
+              child: Stack(children: [
+                Positioned.fill(child: CustomPaint(painter: _BodyPainter(C.peony))),
+                for (final a in _onBody) callout(a.$1, a.$2, diagramW, h),
+              ]),
+            ),
           );
         }),
       ),
@@ -1356,7 +1360,9 @@ class _BodyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size s) {
-    final w = s.width, h = s.height, cx = w * .2, sw = w * .3;
+    final w = s.width, h = s.height;
+    final sw = (w * .3).clamp(80.0, h * 0.25);
+    final cx = (w * .2).clamp(55.0, sw * 0.75);
     final fill = Paint()..color = color.withValues(alpha: .26);
     final stroke = Paint()
       ..color = color.withValues(alpha: .26)
