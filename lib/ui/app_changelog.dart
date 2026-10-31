@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.2',
+      version: '1.11.3',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Seamless hybrid Asteria architecture: built-in public key injected via GitHub Actions Secret for zero-setup instant chat.',
+          textId: 'Arsitektur Asteria hibrida: kunci publik bawaan disuntikkan via GitHub Actions Secret agar pengguna awam bisa langsung curhat tanpa setup.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Gentle "Asteria is resting" quota handler with live status indicators when public daily quota is exhausted.',
+          textId: 'Penanganan kuota lembut "Asteria sedang beristirahat" lengkap dengan indikator status jika kuota harian publik tercapai.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.2',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

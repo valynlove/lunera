@@ -60,12 +60,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.2'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.3'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.2'));
+      expect(AppChangelog.releases.first.version, equals('1.11.3'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -265,6 +265,13 @@ void main() {
       );
       expect(summary.mood, equals('anxious'));
       expect(summary.summary, contains('Merasa cemas'));
+
+      // Hybrid Key Resolution tests
+      expect(AsteriaService.resolveApiKey('custom-key'), equals('custom-key'));
+      expect(AsteriaService.hasAvailableKey('custom-key'), isTrue);
+
+      const quotaEx = AsteriaQuotaException();
+      expect(quotaEx.toString(), contains('Asteria is resting'));
     });
   });
 }

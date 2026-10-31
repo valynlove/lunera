@@ -4,6 +4,17 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.3] - 2026-10-31
+
+### Added
+- **Hybrid Asteria Architecture with Zero-Setup Instant Venting (`lib/asteria.dart` & `lib/ui/asteria_chat.dart`):**
+  - Integrated built-in public key support (`DEFAULT_GEMINI_API_KEY`) compiled via GitHub Actions Secret for zero-friction chat experience for general users.
+  - Retained private key override in Settings for users desiring dedicated, unshared quota.
+  - Implemented compassionate HTTP 429 quota exhaustion handler: Asteria displays a soothing "Asteria is resting" celestial status card rather than technical errors when public daily limits are reached.
+  - Added live status dot indicators in Asteria's header bar reflecting active, offline, and resting states.
+
+---
+
 ## [1.11.2] - 2026-10-31
 
 ### Added

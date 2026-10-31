@@ -27,9 +27,30 @@ class AsteriaSummary {
   final String mood; // 'happy' | 'calm' | 'neutral' | 'low' | 'anxious'
 }
 
+/// Eksepsi ketika kuota harian Gemini API telah habis (HTTP 429).
+class AsteriaQuotaException implements Exception {
+  const AsteriaQuotaException([this.message = 'Asteria is resting. Daily quota reached.']);
+  final String message;
+  @override
+  String toString() => message;
+}
+
 /// Layanan AI Asteria menggunakan Google Gemini REST API dengan deteksi offline terintegrasi.
 class AsteriaService {
   static const String _model = 'gemini-1.5-flash';
+
+  /// Kunci API bawaan yang disuntikkan saat kompilasi rilis APK via GitHub Actions Secret.
+  static const String defaultApiKey = String.fromEnvironment('DEFAULT_GEMINI_API_KEY');
+
+  /// Menentukan kunci mana yang digunakan: kunci kustom pengguna jika ada, atau kunci bawaan.
+  static String resolveApiKey(String userCustomKey) {
+    final custom = userCustomKey.trim();
+    if (custom.isNotEmpty) return custom;
+    return defaultApiKey.trim();
+  }
+
+  /// Memeriksa apakah ada kunci yang tersedia (baik kunci pribadi atau kunci bawaan).
+  static bool hasAvailableKey(String userCustomKey) => resolveApiKey(userCustomKey).isNotEmpty;
 
   /// Memeriksa apakah perangkat sedang memiliki koneksi internet aktif.
   static Future<bool> isOnline() async {
@@ -126,6 +147,10 @@ Your persona:
 
       final res = await req.close();
       final body = await res.transform(utf8.decoder).join();
+
+      if (res.statusCode == 429) {
+        throw const AsteriaQuotaException();
+      }
 
       if (res.statusCode != 200) {
         final err = jsonDecode(body);
@@ -253,3 +278,4 @@ Return ONLY valid JSON without markdown wrapping:
     );
   }
 }
+

@@ -119,7 +119,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "Attempt $i to build release APK..."
-            flutter build apk --release && break || {
+            flutter build apk --release --dart-define=DEFAULT_GEMINI_API_KEY="${{ secrets.DEFAULT_GEMINI_API_KEY }}" && break || {
               if [ $i -lt 3 ]; then
                 echo "Build attempt $i failed. Retrying in 15 seconds..."
                 sleep 15

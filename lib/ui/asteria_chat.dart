@@ -26,6 +26,7 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
   bool _isOnline = true;
   bool _isGenerating = false;
   bool _isSummarizing = false;
+  bool _isQuotaExhausted = false;
 
   @override
   void initState() {
@@ -66,7 +67,8 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
     if (text.isEmpty || _isGenerating) return;
 
     final prefs = ref.read(prefsProvider).value ?? const Prefs();
-    if (prefs.geminiApiKey.isEmpty) {
+    final apiKey = AsteriaService.resolveApiKey(prefs.geminiApiKey);
+    if (apiKey.isEmpty) {
       _showApiKeyDialog();
       return;
     }
@@ -90,7 +92,7 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
 
     try {
       final reply = await AsteriaService.sendMessage(
-        apiKey: prefs.geminiApiKey,
+        apiKey: apiKey,
         history: _messages.sublist(0, _messages.length - 1),
         userMessage: text,
         languageCode: L10n.code,
@@ -100,14 +102,25 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
       setState(() {
         _messages.add(ChatMessage(role: 'model', text: reply, time: DateTime.now()));
         _isGenerating = false;
+        _isQuotaExhausted = false;
       });
       _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isGenerating = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${tr("Error communicating with Asteria")}: $e')),
-      );
+      if (e is AsteriaQuotaException) {
+        setState(() => _isQuotaExhausted = true);
+        _messages.add(ChatMessage(
+          role: 'model',
+          text: tr('Asteria has expended her starry energy listening to many friends today. She is resting beneath the night clouds and will be fully refreshed tomorrow.'),
+          time: DateTime.now(),
+        ));
+        _scrollToBottom();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${tr("Error communicating with Asteria")}: $e')),
+        );
+      }
     }
   }
 
@@ -115,11 +128,12 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
     if (_messages.isEmpty || _isSummarizing) return;
 
     final prefs = ref.read(prefsProvider).value ?? const Prefs();
+    final apiKey = AsteriaService.resolveApiKey(prefs.geminiApiKey);
     setState(() => _isSummarizing = true);
 
     try {
       final summary = await AsteriaService.summarizeSession(
-        apiKey: prefs.geminiApiKey,
+        apiKey: apiKey,
         messages: _messages,
         languageCode: L10n.code,
       );
@@ -512,17 +526,23 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: _isOnline ? Colors.greenAccent : Colors.amber,
+                        color: _isQuotaExhausted
+                            ? Colors.amber
+                            : (_isOnline ? Colors.greenAccent : Colors.amber),
                         shape: BoxShape.circle,
                       ),
                     ),
                   ],
                 ),
                 Text(
-                  _isOnline ? tr('Always here to listen') : tr('Offline mode'),
+                  _isQuotaExhausted
+                      ? tr('Resting (quota reached)')
+                      : (_isOnline ? tr('Always here to listen') : tr('Offline mode')),
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: _isQuotaExhausted
+                        ? Colors.amber
+                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -560,7 +580,7 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
           children: [
             if (!_isOnline)
               Expanded(child: _buildOfflineView())
-            else if (prefs.geminiApiKey.isEmpty)
+            else if (!AsteriaService.hasAvailableKey(prefs.geminiApiKey))
               Expanded(
                 child: Center(
                   child: Padding(
@@ -672,8 +692,39 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
                 ),
               ),
 
+            // Resting quota warning banner
+            if (_isQuotaExhausted)
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.nights_stay_rounded, color: Colors.amber, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        tr('Public quota is resting until tomorrow. You can enter a private API key in Settings anytime.'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _showApiKeyDialog,
+                      child: Text(tr('Private Key'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ),
+
             // Composer area
-            if (_isOnline && prefs.geminiApiKey.isNotEmpty)
+            if (_isOnline && AsteriaService.hasAvailableKey(prefs.geminiApiKey))
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 decoration: BoxDecoration(
