@@ -37,7 +37,82 @@ class AsteriaQuotaException implements Exception {
 
 /// Layanan AI Asteria menggunakan Google Gemini REST API dengan deteksi offline terintegrasi.
 class AsteriaService {
-  static const String _model = 'gemini-1.5-flash';
+  /// Model aktif yang berhasil diverifikasi.
+  static String? _resolvedModel;
+
+  /// Daftar prioritas model Flash terkini dari yang paling mutakhir.
+  static const List<String> candidateModels = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash',
+  ];
+
+  /// Menemukan model Gemini Flash aktif yang didukung oleh API key pengguna.
+  static Future<String> resolveActiveModel(String apiKey) async {
+    if (_resolvedModel != null && _resolvedModel!.isNotEmpty) {
+      return _resolvedModel!;
+    }
+
+    final key = apiKey.trim();
+    if (key.isNotEmpty) {
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+      try {
+        final uri = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models?key=$key',
+        );
+        final req = await client.getUrl(uri);
+        final res = await req.close();
+        if (res.statusCode == 200) {
+          final body = await res.transform(utf8.decoder).join();
+          final data = jsonDecode(body) as Map<String, dynamic>;
+          final list = (data['models'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+          final supported = list.where((m) {
+            final methods = (m['supportedGenerationMethods'] as List?)?.cast<String>() ?? [];
+            return methods.contains('generateContent');
+          }).toList();
+
+          // 1. Cek dari daftar kandidat prioritas
+          for (final c in candidateModels) {
+            for (final m in supported) {
+              final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
+              if (name == c) {
+                _resolvedModel = name;
+                return name;
+              }
+            }
+          }
+
+          // 2. Jika tidak ada yang cocok persis, pilih model apapun yang mengandung 'flash'
+          for (final m in supported) {
+            final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
+            if (name.contains('flash')) {
+              _resolvedModel = name;
+              return name;
+            }
+          }
+
+          // 3. Fallback ke model generateContent pertama
+          if (supported.isNotEmpty) {
+            final name = (supported.first['name'] as String? ?? '').replaceFirst('models/', '');
+            if (name.isNotEmpty) {
+              _resolvedModel = name;
+              return name;
+            }
+          }
+        }
+      } catch (_) {
+        // Fallback anggun jika listModels terhalang
+      } finally {
+        client.close();
+      }
+    }
+
+    _resolvedModel = candidateModels.first;
+    return _resolvedModel!;
+  }
 
   /// Kunci API bawaan yang disuntikkan saat kompilasi rilis APK via GitHub Actions Secret.
   static const String defaultApiKey = String.fromEnvironment('DEFAULT_GEMINI_API_KEY');
@@ -105,6 +180,72 @@ Your persona:
     }
   }
 
+  /// Mengirim payload generateContent ke endpoint Gemini API dengan auto-fallback jika model mengalami 404.
+  static Future<Map<String, dynamic>> _postGenerateContent({
+    required String apiKey,
+    required Map<String, dynamic> payload,
+  }) async {
+    final key = apiKey.trim();
+    if (key.isEmpty) {
+      throw const SocketException('API Key is missing');
+    }
+
+    // Ambil model aktif saat ini
+    final active = await resolveActiveModel(key);
+
+    // Susun antrian model yang akan dicoba jika terjadi 404 (model retired/deprecated)
+    final queue = <String>[
+      active,
+      ...candidateModels.where((m) => m != active),
+    ];
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 12);
+    try {
+      String lastErrorMessage = 'Unknown Gemini API error';
+
+      for (final model in queue) {
+        final uri = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$key',
+        );
+
+        final req = await client.postUrl(uri);
+        req.headers.set('Content-Type', 'application/json; charset=utf-8');
+        req.add(utf8.encode(jsonEncode(payload)));
+
+        final res = await req.close();
+        final body = await res.transform(utf8.decoder).join();
+
+        if (res.statusCode == 429) {
+          throw const AsteriaQuotaException();
+        }
+
+        if (res.statusCode == 200) {
+          _resolvedModel = model; // Kunci model yang terbukti aktif
+          return jsonDecode(body) as Map<String, dynamic>;
+        }
+
+        // Jika 404 (model tidak didukung/ditemukan pada API version ini), coba kandidat berikutnya
+        if (res.statusCode == 404) {
+          _resolvedModel = null;
+          continue;
+        }
+
+        // Jika status error lain (misal 400 Bad Request, 403 Forbidden)
+        try {
+          final err = jsonDecode(body);
+          lastErrorMessage = err['error']?['message'] ?? 'Gemini API Error (${res.statusCode})';
+        } catch (_) {
+          lastErrorMessage = 'Gemini API Error (${res.statusCode})';
+        }
+        throw Exception(lastErrorMessage);
+      }
+
+      throw Exception(lastErrorMessage);
+    } finally {
+      client.close();
+    }
+  }
+
   /// Mengirim pesan ke Gemini API dan mengembalikan balasan teks.
   static Future<String> sendMessage({
     required String apiKey,
@@ -112,15 +253,6 @@ Your persona:
     required String userMessage,
     required String languageCode,
   }) async {
-    final key = apiKey.trim();
-    if (key.isEmpty) {
-      throw const SocketException('API Key is missing');
-    }
-
-    final uri = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent?key=$key',
-    );
-
     final contents = <Map<String, dynamic>>[];
     for (final m in history) {
       contents.add({
@@ -150,38 +282,16 @@ Your persona:
       },
     };
 
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
-    try {
-      final req = await client.postUrl(uri);
-      req.headers.set('Content-Type', 'application/json; charset=utf-8');
-      req.add(utf8.encode(jsonEncode(payload)));
-
-      final res = await req.close();
-      final body = await res.transform(utf8.decoder).join();
-
-      if (res.statusCode == 429) {
-        throw const AsteriaQuotaException();
+    final json = await _postGenerateContent(apiKey: apiKey, payload: payload);
+    final candidates = json['candidates'] as List?;
+    if (candidates != null && candidates.isNotEmpty) {
+      final content = candidates[0]['content'] as Map<String, dynamic>?;
+      final parts = content?['parts'] as List?;
+      if (parts != null && parts.isNotEmpty) {
+        return (parts[0]['text'] as String?)?.trim() ?? '';
       }
-
-      if (res.statusCode != 200) {
-        final err = jsonDecode(body);
-        final msg = err['error']?['message'] ?? 'Gemini API Error (${res.statusCode})';
-        throw Exception(msg);
-      }
-
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final candidates = json['candidates'] as List?;
-      if (candidates != null && candidates.isNotEmpty) {
-        final content = candidates[0]['content'] as Map<String, dynamic>?;
-        final parts = content?['parts'] as List?;
-        if (parts != null && parts.isNotEmpty) {
-          return (parts[0]['text'] as String?)?.trim() ?? '';
-        }
-      }
-      return '';
-    } finally {
-      client.close();
     }
+    return '';
   }
 
   /// Merangkum percakapan saat sesi berakhir menjadi entri jurnal reflektif + perkiraan mood.
@@ -232,10 +342,6 @@ Return ONLY valid JSON without markdown wrapping:
 {"summary": "summary text...", "mood": "calm"}
 ''';
 
-    final uri = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent?key=$key',
-    );
-
     final payload = {
       'contents': [
         {
@@ -252,33 +358,21 @@ Return ONLY valid JSON without markdown wrapping:
       },
     };
 
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
     try {
-      final req = await client.postUrl(uri);
-      req.headers.set('Content-Type', 'application/json; charset=utf-8');
-      req.add(utf8.encode(jsonEncode(payload)));
-
-      final res = await req.close();
-      final body = await res.transform(utf8.decoder).join();
-
-      if (res.statusCode == 200) {
-        final json = jsonDecode(body) as Map<String, dynamic>;
-        final parts = json['candidates']?[0]?['content']?['parts'] as List?;
-        final rawText = parts?[0]?['text'] as String? ?? '';
-        final cleanJson = rawText.replaceAll('```json', '').replaceAll('```', '').trim();
-        final parsed = jsonDecode(cleanJson) as Map<String, dynamic>;
-        final summary = parsed['summary'] as String? ?? '';
-        final mood = parsed['mood'] as String? ?? 'calm';
-        const validMoods = {'happy', 'calm', 'neutral', 'low', 'anxious'};
-        return AsteriaSummary(
-          summary: summary.isNotEmpty ? summary : 'Sesi refleksi bersama Asteria.',
-          mood: validMoods.contains(mood) ? mood : 'calm',
-        );
-      }
+      final json = await _postGenerateContent(apiKey: apiKey, payload: payload);
+      final parts = json['candidates']?[0]?['content']?['parts'] as List?;
+      final rawText = parts?[0]?['text'] as String? ?? '';
+      final cleanJson = rawText.replaceAll('```json', '').replaceAll('```', '').trim();
+      final parsed = jsonDecode(cleanJson) as Map<String, dynamic>;
+      final summary = parsed['summary'] as String? ?? '';
+      final mood = parsed['mood'] as String? ?? 'calm';
+      const validMoods = {'happy', 'calm', 'neutral', 'low', 'anxious'};
+      return AsteriaSummary(
+        summary: summary.isNotEmpty ? summary : 'Sesi refleksi bersama Asteria.',
+        mood: validMoods.contains(mood) ? mood : 'calm',
+      );
     } catch (_) {
       // Fallback anggun jika JSON parsing gagal
-    } finally {
-      client.close();
     }
 
     return AsteriaSummary(

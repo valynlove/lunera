@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.4',
+      version: '1.11.5',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Dynamic Gemini Flash model discovery & resilient fallback: auto-detects active models and migrates from retired gemini-1.5-flash to gemini-2.5-flash / gemini-2.0-flash.',
+          textId: 'Pendeteksian model Gemini Flash dinamis & fallback tangguh: otomatis mendeteksi model aktif dan bermigrasi dari gemini-1.5-flash ke gemini-2.5-flash / gemini-2.0-flash.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.4',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

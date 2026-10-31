@@ -11,7 +11,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.11.4-6C5CE7.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.11.5-6C5CE7.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Download Latest APK](https://github.com/valynlove/lunera/releases/latest) • [📋 Changelog](CHANGELOG.md)
 

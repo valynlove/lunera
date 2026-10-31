@@ -4,6 +4,16 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.5] - 2026-10-31
+
+### Fixed
+- **Dynamic Gemini Flash Model Discovery & Resilient Fallback (`lib/asteria.dart`):**
+  - Resolved `models/gemini-1.5-flash is not found for API version v1beta` (404) by upgrading to Google's active Flash family (`gemini-2.5-flash` and `gemini-2.0-flash`).
+  - Added programmatic runtime model discovery via `https://generativelanguage.googleapis.com/v1beta/models` to automatically bind to whichever Flash model is enabled for the provided API key.
+  - Implemented multi-model fallback queue in `_postGenerateContent`: if any candidate returns 404, Asteria immediately shifts to the next active model in the queue without interrupting the conversation or throwing exceptions to the user.
+
+---
+
 ## [1.11.4] - 2026-10-31
 
 ### Added
