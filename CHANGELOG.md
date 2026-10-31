@@ -4,6 +4,20 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.7] - 2026-10-31
+
+### Fixed
+- **Gemini 3.8 Flash & Gemini 3.6 Flash Flagship Prioritization (`lib/asteria.dart`):**
+  - Updated candidate endpoints to prioritize active Gemini 3.x Flash models (`gemini-3.8-flash` and `gemini-3.6-flash`), removing obsolete fallback dependencies.
+  - Implemented universal fallback: if model discovery finds any active model supporting `generateContent`, Asteria dynamically binds to it regardless of model identifier changes.
+
+### Added
+- **In-Dialog Live Connection Testing (`lib/ui/asteria_chat.dart` & `lib/l10n_id.dart`):**
+  - Introduced a **[Tes Koneksi / Test Connection]** button directly inside the Asteria Connection Modal.
+  - Users can now verify their Gemini API Key with one tap, receiving instant live feedback confirming active model availability or detailed server diagnostics.
+
+---
+
 ## [1.11.6] - 2026-10-31
 
 ### Fixed

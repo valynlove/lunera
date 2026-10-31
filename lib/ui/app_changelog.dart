@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.6',
+      version: '1.11.7',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Upgraded flagship candidate priority to Gemini 3.8 Flash & Gemini 3.6 Flash with automated universal model discovery.',
+          textId: 'Peningkatan prioritas kandidat utama ke Gemini 3.8 Flash & Gemini 3.6 Flash dilengkapi penemuan model universal otomatis.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'In-dialog connection test tool: one-tap diagnostics pinging Google Gemini directly to display active models or detailed server response.',
+          textId: 'Alat uji koneksi interaktif di dialog: diagnosa satu ketukan yang memverifikasi Google Gemini secara langsung dan menampilkan model aktif atau respon server.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.6',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

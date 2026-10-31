@@ -65,15 +65,20 @@ class AsteriaService {
   /// Endpoint aktif yang berhasil diverifikasi.
   static AsteriaEndpoint? _resolvedEndpoint;
 
-  /// Daftar prioritas endpoint (versi API + model) dari yang paling stabil & mutakhir.
+  /// Daftar prioritas endpoint (versi API + model) dari yang paling mutakhir & stabil.
   static const List<AsteriaEndpoint> candidateEndpoints = [
-    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-flash'),
-    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-pro'),
-    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-1.5-flash'),
-    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-3.8-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-3.6-flash'),
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-3.8-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-3.6-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-2.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-2.0-flash'),
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash-lite'),
-    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-pro'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-1.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-pro'),
   ];
 
   /// Menemukan endpoint aktif yang didukung oleh API key pengguna.
@@ -86,7 +91,7 @@ class AsteriaService {
     if (key.isNotEmpty) {
       final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
       try {
-        for (final ver in ['v1', 'v1beta']) {
+        for (final ver in ['v1beta', 'v1']) {
           try {
             final uri = Uri.parse(
               'https://generativelanguage.googleapis.com/$ver/models?key=$key',
@@ -103,7 +108,7 @@ class AsteriaService {
                 return methods.contains('generateContent');
               }).toList();
 
-              // Cocokkan dengan kandidat prioritas
+              // 1. Cocokkan dengan kandidat prioritas
               for (final c in candidateEndpoints) {
                 if (c.apiVersion != ver) continue;
                 for (final m in supported) {
@@ -115,10 +120,20 @@ class AsteriaService {
                 }
               }
 
-              // Jika ada model flash lain
+              // 2. Jika ada model flash lain
               for (final m in supported) {
                 final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
                 if (name.contains('flash')) {
+                  final ep = AsteriaEndpoint(apiVersion: ver, model: name);
+                  _resolvedEndpoint = ep;
+                  return ep;
+                }
+              }
+
+              // 3. Fallback ke model generateContent apapun yang tersedia untuk kunci ini
+              for (final m in supported) {
+                final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
+                if (name.isNotEmpty) {
                   final ep = AsteriaEndpoint(apiVersion: ver, model: name);
                   _resolvedEndpoint = ep;
                   return ep;
@@ -136,6 +151,52 @@ class AsteriaService {
 
     _resolvedEndpoint = candidateEndpoints.first;
     return _resolvedEndpoint!;
+  }
+
+  /// Menguji koneksi kunci API ke server Google dan mengembalikan ringkasan status / model yang tersedia.
+  static Future<String> testConnection(String apiKey) async {
+    final key = apiKey.trim();
+    if (key.isEmpty) return 'Kunci API belum diisi.';
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+    try {
+      final errors = <String>[];
+      for (final ver in ['v1beta', 'v1']) {
+        try {
+          final uri = Uri.parse(
+            'https://generativelanguage.googleapis.com/$ver/models?key=$key',
+          );
+          final req = await client.getUrl(uri);
+          final res = await req.close();
+          final body = await res.transform(utf8.decoder).join();
+
+          if (res.statusCode == 200) {
+            final data = jsonDecode(body) as Map<String, dynamic>;
+            final list = (data['models'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+            final supported = list.where((m) {
+              final methods = (m['supportedGenerationMethods'] as List?)?.cast<String>() ?? [];
+              return methods.contains('generateContent');
+            }).map((m) => (m['name'] as String? ?? '').replaceFirst('models/', '')).toList();
+
+            if (supported.isNotEmpty) {
+              return 'Koneksi Berhasil ($ver)!\nModel aktif: ${supported.take(3).join(", ")}';
+            }
+          } else {
+            try {
+              final err = jsonDecode(body);
+              errors.add('$ver: ${err["error"]?["message"] ?? res.statusCode}');
+            } catch (_) {
+              errors.add('$ver: status ${res.statusCode}');
+            }
+          }
+        } catch (e) {
+          errors.add('$ver: $e');
+        }
+      }
+      return 'Gagal terhubung:\n${errors.join("\n")}';
+    } finally {
+      client.close();
+    }
   }
 
   /// Kunci API bawaan yang disuntikkan saat kompilasi rilis APK via GitHub Actions Secret.

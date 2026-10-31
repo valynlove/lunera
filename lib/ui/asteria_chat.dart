@@ -742,6 +742,9 @@ Future<void> showAsteriaConnectionDialog(BuildContext context, WidgetRef ref) as
   final dark = Theme.of(context).brightness == Brightness.dark;
   final onSurface = Theme.of(context).colorScheme.onSurface;
 
+  bool isTesting = false;
+  String? testResult;
+
   await showDialog<void>(
     context: context,
     builder: (ctx) => StatefulBuilder(
@@ -790,7 +793,10 @@ Future<void> showAsteriaConnectionDialog(BuildContext context, WidgetRef ref) as
                     Expanded(
                       child: ChoiceChip(
                         selected: !isPersonal,
-                        onSelected: (_) => setDialogState(() => selectedMode = 'shared'),
+                        onSelected: (_) => setDialogState(() {
+                          selectedMode = 'shared';
+                          testResult = null;
+                        }),
                         label: Center(
                           child: Text(
                             tr('Shared Star'),
@@ -804,7 +810,10 @@ Future<void> showAsteriaConnectionDialog(BuildContext context, WidgetRef ref) as
                     Expanded(
                       child: ChoiceChip(
                         selected: isPersonal,
-                        onSelected: (_) => setDialogState(() => selectedMode = 'personal'),
+                        onSelected: (_) => setDialogState(() {
+                          selectedMode = 'personal';
+                          testResult = null;
+                        }),
                         label: Center(
                           child: Text(
                             tr('Personal Star'),
@@ -892,6 +901,7 @@ Future<void> showAsteriaConnectionDialog(BuildContext context, WidgetRef ref) as
                                     final data = await Clipboard.getData('text/plain');
                                     if (data?.text != null) {
                                       apiKeyCtrl.text = data!.text!.trim();
+                                      setDialogState(() => testResult = null);
                                     }
                                   },
                                 ),
@@ -905,6 +915,69 @@ Future<void> showAsteriaConnectionDialog(BuildContext context, WidgetRef ref) as
                           ],
                         ),
                 ),
+                gap(10),
+                Row(
+                  children: [
+                    TextButton.icon(
+                      onPressed: isTesting
+                          ? null
+                          : () async {
+                              final testKey = selectedMode == 'personal'
+                                  ? apiKeyCtrl.text.trim()
+                                  : AsteriaService.resolveApiKey(prefs.geminiApiKey, 'shared');
+                              if (testKey.isEmpty) {
+                                setDialogState(() => testResult = tr('API Key is missing'));
+                                return;
+                              }
+                              setDialogState(() {
+                                isTesting = true;
+                                testResult = null;
+                              });
+                              final res = await AsteriaService.testConnection(testKey);
+                              setDialogState(() {
+                                isTesting = false;
+                                testResult = res;
+                              });
+                            },
+                      icon: isTesting
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.network_check_rounded, size: 16),
+                      label: Text(
+                        isTesting ? tr('Testing...') : tr('Test Connection'),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                if (testResult != null) ...[
+                  gap(6),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: testResult!.contains('Berhasil') || testResult!.contains('success')
+                          ? Colors.green.withValues(alpha: 0.12)
+                          : Colors.amber.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: testResult!.contains('Berhasil') || testResult!.contains('success')
+                            ? Colors.greenAccent.withValues(alpha: 0.4)
+                            : Colors.amber.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Text(
+                      testResult!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
