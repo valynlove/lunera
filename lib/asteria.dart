@@ -68,13 +68,13 @@ class AsteriaService {
   /// Daftar prioritas endpoint (versi API + model) dari yang paling mutakhir & stabil.
   static const List<AsteriaEndpoint> candidateEndpoints = [
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-3.8-flash'),
-    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-3.6-flash'),
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.5-flash'),
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-3.6-flash'),
     AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-3.8-flash'),
-    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-3.6-flash'),
     AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-2.5-flash'),
     AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-2.0-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-3.6-flash'),
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash-lite'),
     AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-flash'),
     AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-1.5-flash'),
@@ -89,17 +89,17 @@ class AsteriaService {
 
     final key = apiKey.trim();
     if (key.isNotEmpty) {
-      final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
       try {
         for (final ver in ['v1beta', 'v1']) {
           try {
             final uri = Uri.parse(
               'https://generativelanguage.googleapis.com/$ver/models?key=$key',
             );
-            final req = await client.getUrl(uri);
-            final res = await req.close();
+            final req = await client.getUrl(uri).timeout(const Duration(seconds: 5));
+            final res = await req.close().timeout(const Duration(seconds: 5));
             if (res.statusCode == 200) {
-              final body = await res.transform(utf8.decoder).join();
+              final body = await res.transform(utf8.decoder).join().timeout(const Duration(seconds: 5));
               final data = jsonDecode(body) as Map<String, dynamic>;
               final list = (data['models'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 
@@ -158,7 +158,7 @@ class AsteriaService {
     final key = apiKey.trim();
     if (key.isEmpty) return 'Kunci API belum diisi.';
 
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
       final errors = <String>[];
       for (final ver in ['v1beta', 'v1']) {
@@ -166,9 +166,9 @@ class AsteriaService {
           final uri = Uri.parse(
             'https://generativelanguage.googleapis.com/$ver/models?key=$key',
           );
-          final req = await client.getUrl(uri);
-          final res = await req.close();
-          final body = await res.transform(utf8.decoder).join();
+          final req = await client.getUrl(uri).timeout(const Duration(seconds: 8));
+          final res = await req.close().timeout(const Duration(seconds: 8));
+          final body = await res.transform(utf8.decoder).join().timeout(const Duration(seconds: 8));
 
           if (res.statusCode == 200) {
             final data = jsonDecode(body) as Map<String, dynamic>;
@@ -265,6 +265,25 @@ Your persona:
     }
   }
 
+  /// Menyesuaikan payload generationConfig berdasarkan model (membatasi reasoning/thinking token agar respons secepat kilat).
+  static Map<String, dynamic> _preparePayloadForModel(String model, Map<String, dynamic> basePayload) {
+    final copy = Map<String, dynamic>.from(basePayload);
+    final genConfig = Map<String, dynamic>.from(copy['generationConfig'] as Map<String, dynamic>? ?? {});
+
+    if (model.startsWith('gemini-3')) {
+      // Model Gemini 3 series: gunakan thinkingLevel 'low' agar respons kilat tanpa menunggu lama
+      genConfig['thinkingConfig'] = {'thinkingLevel': 'low'};
+    } else if (model.contains('2.5')) {
+      // Model Gemini 2.5: matikan thinking budget agar obrolan langsung instan
+      genConfig['thinkingConfig'] = {'thinkingBudget': 0};
+    } else {
+      genConfig.remove('thinkingConfig');
+    }
+
+    copy['generationConfig'] = genConfig;
+    return copy;
+  }
+
   /// Mengirim payload generateContent ke endpoint Gemini API dengan auto-fallback jika model/versi mengalami 404.
   static Future<Map<String, dynamic>> _postGenerateContent({
     required String apiKey,
@@ -275,8 +294,8 @@ Your persona:
       throw const SocketException('API Key is missing');
     }
 
-    // Ambil endpoint aktif saat ini
-    final active = await resolveActiveEndpoint(key);
+    // Gunakan endpoint yang telah terbukti aktif, atau mulai langsung dari kandidat pertama tanpa menunggu GET models
+    final active = _resolvedEndpoint ?? candidateEndpoints.first;
 
     // Susun antrian endpoint yang akan dicoba jika terjadi 404 (model retired/endpoint version mismatch)
     final queue = <AsteriaEndpoint>[
@@ -284,45 +303,79 @@ Your persona:
       ...candidateEndpoints.where((e) => e != active),
     ];
 
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
     try {
       String lastErrorMessage = 'Unknown Gemini API error';
 
       for (final endpoint in queue) {
+        final modelPayload = _preparePayloadForModel(endpoint.model, payload);
         final uri = endpoint.toGenerateUri(key);
 
-        final req = await client.postUrl(uri);
-        req.headers.set('Content-Type', 'application/json; charset=utf-8');
-        req.add(utf8.encode(jsonEncode(payload)));
-
-        final res = await req.close();
-        final body = await res.transform(utf8.decoder).join();
-
-        if (res.statusCode == 429) {
-          throw const AsteriaQuotaException();
-        }
-
-        if (res.statusCode == 200) {
-          _resolvedEndpoint = endpoint; // Kunci endpoint yang terbukti aktif
-          return jsonDecode(body) as Map<String, dynamic>;
-        }
-
-        // Catat pesan error detail dari respon Google (bahkan pada 404)
         try {
-          final err = jsonDecode(body);
-          lastErrorMessage = err['error']?['message'] ?? 'Gemini API Error (${res.statusCode})';
-        } catch (_) {
-          lastErrorMessage = 'Gemini API Error (${res.statusCode}): $body';
-        }
+          final req = await client.postUrl(uri).timeout(const Duration(seconds: 10));
+          req.headers.set('Content-Type', 'application/json; charset=utf-8');
+          req.add(utf8.encode(jsonEncode(modelPayload)));
 
-        // Jika 404 (model atau versi API tidak cocok), coba kandidat berikutnya
-        if (res.statusCode == 404) {
-          _resolvedEndpoint = null;
+          final res = await req.close().timeout(const Duration(seconds: 18));
+          final body = await res.transform(utf8.decoder).join().timeout(const Duration(seconds: 18));
+
+          if (res.statusCode == 429) {
+            throw const AsteriaQuotaException();
+          }
+
+          if (res.statusCode == 200) {
+            _resolvedEndpoint = endpoint; // Kunci endpoint yang terbukti aktif
+            return jsonDecode(body) as Map<String, dynamic>;
+          }
+
+          // Catat pesan error detail dari respon Google (bahkan pada 404)
+          try {
+            final err = jsonDecode(body);
+            lastErrorMessage = err['error']?['message'] ?? 'Gemini API Error (${res.statusCode})';
+          } catch (_) {
+            lastErrorMessage = 'Gemini API Error (${res.statusCode}): $body';
+          }
+
+          // Jika 404 (model atau versi API tidak cocok), coba kandidat berikutnya
+          if (res.statusCode == 404) {
+            _resolvedEndpoint = null;
+            continue;
+          }
+
+          // Jika 400 karena konfigurasi thinking tidak dikenali model ini, coba tanpa thinkingConfig
+          if (res.statusCode == 400 &&
+              (lastErrorMessage.contains('thinking') || lastErrorMessage.contains('thinkingConfig'))) {
+            final cleanPayload = Map<String, dynamic>.from(payload);
+            final cleanGen = Map<String, dynamic>.from(cleanPayload['generationConfig'] as Map<String, dynamic>? ?? {});
+            cleanGen.remove('thinkingConfig');
+            cleanPayload['generationConfig'] = cleanGen;
+
+            final retryReq = await client.postUrl(uri).timeout(const Duration(seconds: 10));
+            retryReq.headers.set('Content-Type', 'application/json; charset=utf-8');
+            retryReq.add(utf8.encode(jsonEncode(cleanPayload)));
+            final retryRes = await retryReq.close().timeout(const Duration(seconds: 18));
+            final retryBody = await retryRes.transform(utf8.decoder).join().timeout(const Duration(seconds: 18));
+
+            if (retryRes.statusCode == 200) {
+              _resolvedEndpoint = endpoint;
+              return jsonDecode(retryBody) as Map<String, dynamic>;
+            }
+          }
+
+          // Jika error non-404 lain (misal 403 Forbidden, 400 Bad Request), langsung laporkan pesan error Google
+          throw Exception(lastErrorMessage);
+        } on AsteriaQuotaException {
+          rethrow;
+        } on SocketException {
+          rethrow;
+        } catch (e) {
+          if (e is AsteriaQuotaException) rethrow;
+          lastErrorMessage = e.toString();
+          if (queue.last == endpoint) {
+            throw Exception(lastErrorMessage);
+          }
           continue;
         }
-
-        // Jika error non-404 (misal 400 Bad Request, 403 Forbidden), langsung laporkan pesan error Google
-        throw Exception(lastErrorMessage);
       }
 
       throw Exception(lastErrorMessage);
@@ -373,7 +426,25 @@ Your persona:
       final content = candidates[0]['content'] as Map<String, dynamic>?;
       final parts = content?['parts'] as List?;
       if (parts != null && parts.isNotEmpty) {
-        return (parts[0]['text'] as String?)?.trim() ?? '';
+        // Ambil semua bagian teks yang bukan token pemikiran (thought tokens)
+        final textParts = parts
+            .where((p) => p is Map && p['thought'] != true && p['text'] is String)
+            .map((p) => (p['text'] as String).trim())
+            .where((t) => t.isNotEmpty)
+            .toList();
+        if (textParts.isNotEmpty) {
+          return textParts.join('\n\n');
+        }
+
+        // Fallback jika seluruh bagian berlabel thought (sangat jarang)
+        final fallbackParts = parts
+            .where((p) => p is Map && p['text'] is String)
+            .map((p) => (p['text'] as String).trim())
+            .where((t) => t.isNotEmpty)
+            .toList();
+        if (fallbackParts.isNotEmpty) {
+          return fallbackParts.join('\n\n');
+        }
       }
     }
     return '';
@@ -446,7 +517,17 @@ Return ONLY valid JSON without markdown wrapping:
     try {
       final json = await _postGenerateContent(apiKey: apiKey, payload: payload);
       final parts = json['candidates']?[0]?['content']?['parts'] as List?;
-      final rawText = parts?[0]?['text'] as String? ?? '';
+      String rawText = '';
+      if (parts != null && parts.isNotEmpty) {
+        final textParts = parts
+            .where((p) => p is Map && p['thought'] != true && p['text'] is String)
+            .map((p) => (p['text'] as String).trim())
+            .where((t) => t.isNotEmpty)
+            .toList();
+        rawText = textParts.isNotEmpty
+            ? textParts.join('\n')
+            : (parts[0]?['text'] as String? ?? '');
+      }
       final cleanJson = rawText.replaceAll('```json', '').replaceAll('```', '').trim();
       final parsed = jsonDecode(cleanJson) as Map<String, dynamic>;
       final summary = parsed['summary'] as String? ?? '';

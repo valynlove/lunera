@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.7',
+      version: '1.11.8',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Ultra-low latency Asteria responses: tuned Gemini 3.8 and Gemini 2.5 Flash thinking configurations for instant conversational replies without prolonged reasoning pauses.',
+          textId: 'Respons secepat kilat Asteria: konfigurasi pemikiran model Gemini 3.8 & Gemini 2.5 Flash disesuaikan untuk percakapan instan tanpa jeda perenungan yang lama.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Separated internal thought tokens from user-facing responses, and added socket/HTTP timeout safeguards preventing hang states on slow mobile connections.',
+          textId: 'Pemisahan token pemikiran internal dari teks balasan pengguna, serta pengamanan batas waktu koneksi untuk mencegah Asteria menggantung pada jaringan lambat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.7',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

@@ -4,6 +4,19 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.8] - 2026-10-31
+
+### Fixed
+- **Ultra-Low Latency Asteria Conversational Replies (`lib/asteria.dart`):**
+  - Integrated model-aware thinking configuration: applied `thinkingLevel: 'low'` for Gemini 3.8 and `thinkingBudget: 0` for Gemini 2.5 Flash, preventing 15–30 second internal reasoning pauses and delivering instant companion replies.
+  - Added robust candidate part extraction filtering out internal reasoning thoughts (`part.thought == true`), ensuring Asteria surfaces only compassionate and soothing dialogue.
+  - Eliminated pre-flight model discovery latency by directly attempting generation with active candidates first, saving up to 10 seconds of round-trip downloads on mobile connections.
+- **Connection Hang Prevention & Timeout Safeguards (`lib/asteria.dart` & `lib/ui/asteria_chat.dart`):**
+  - Implemented strict per-phase HTTP timeouts (10s connect, 18s stream body read) preventing unbounded socket hangs on cellular networks.
+  - Added a 22-second UI safeguard in `AsteriaChatPage` with graceful fallback handling and friendly localized timeout messages, guaranteeing Asteria never remains indefinitely stuck on "Asteria is reflecting...".
+
+---
+
 ## [1.11.7] - 2026-10-31
 
 ### Fixed

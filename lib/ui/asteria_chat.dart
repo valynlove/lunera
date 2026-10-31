@@ -94,9 +94,12 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
         history: _messages.sublist(0, _messages.length - 1),
         userMessage: text,
         languageCode: L10n.code,
-      );
+      ).timeout(const Duration(seconds: 22));
 
       if (!mounted) return;
+      if (reply.trim().isEmpty) {
+        throw Exception(tr('Asteria could not produce a response. Please try again.'));
+      }
       setState(() {
         _messages.add(ChatMessage(role: 'model', text: reply, time: DateTime.now()));
         _isGenerating = false;
@@ -118,8 +121,11 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
         ));
         _scrollToBottom();
       } else {
+        final errText = e.toString().contains('TimeoutException')
+            ? tr('Connection timed out. Please check your internet connection and try again.')
+            : '${tr("Error communicating with Asteria")}: $e';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tr("Error communicating with Asteria")}: $e')),
+          SnackBar(content: Text(errText)),
         );
       }
     }
