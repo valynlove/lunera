@@ -1,521 +1,401 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lunera - Every Phase, Your Own | Personal Health & Therapy Tracker</title>
-  <meta name="description" content="A gentle, elegant, and privacy-focused personal health and hormone therapy tracker. Simulate pharmacokinetic level curves, master dosage schedules, and protect your data with cross-device PIN security.">
-  <meta name="keywords" content="Lunera, HRT tracker, hormone therapy, estradiol, testosterone, pharmacokinetics simulation, privacy health app, flutter, offline first">
+  <title>Lunera — Every phase, your own | Hormone Therapy & Wellness Companion</title>
+  <meta name="description" content="Lunera tracks your injections and medication, reminds you right on time, and shows your estimated levels. Calm, clear, and synced across all your devices.">
+  <meta name="keywords" content="Lunera, HRT tracker, hormone therapy, estradiol, testosterone, pharmacokinetic simulation, bra size calculator, privacy health app, offline first">
   <meta name="author" content="Lunera">
 
   <!-- Open Graph / Social Meta -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Lunera - Every Phase, Your Own">
-  <meta property="og:description" content="A gentle, elegant, and privacy-focused personal health and therapy companion. Simulate pharmacokinetic level curves, track schedules, and protect records with salted PIN security.">
+  <meta property="og:title" content="Lunera — Every phase, your own">
+  <meta property="og:description" content="Calm, clear, and privacy-focused hormone therapy tracking companion. Simulate pharmacokinetic levels, manage schedules, and protect your records.">
   <meta property="og:image" content="images/logo.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Lunera - Every Phase, Your Own">
-  <meta name="twitter:description" content="A gentle, elegant, and privacy-focused personal health and therapy companion.">
+  <meta name="twitter:title" content="Lunera — Every phase, your own">
+  <meta name="twitter:description" content="Calm, clear, and privacy-focused hormone therapy companion.">
   <meta name="twitter:image" content="images/logo.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="images/icon.png">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Manrope (headings/numbers), Jost (logo), Figtree (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Jost:wght@300;400;500&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Ambient Glow Effects -->
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
-  <div class="ambient-glow glow-3"></div>
-
-  <!-- Navigation Bar -->
+  <!-- Top Navigation -->
   <header class="navbar">
-    <div class="container nav-container">
-      <a href="#" class="brand">
-        <img src="images/icon.png" alt="Lunera Logo" class="brand-icon">
+    <div class="nav-container">
+      <a href="#top" class="brand">
+        <!-- Lunera Crescent Moon Logo SVG -->
+        <svg class="brand-svg" width="40" height="40" viewBox="0 0 48 48" role="img" aria-label="Lunera logo">
+          <mask id="mA">
+            <rect width="48" height="48" fill="#fff"/>
+            <circle cx="32" cy="19" r="13" fill="#000"/>
+          </mask>
+          <circle cx="24" cy="24" r="16" fill="#E7E3FF" mask="url(#mA)"/>
+          <path d="M38 6l1.6 4.4L44 12l-4.4 1.6L38 18l-1.6-4.4L32 12l4.4-1.6z" fill="#E7E3FF"/>
+        </svg>
         <span class="brand-name">Lunera</span>
-        <span class="brand-tag app-version-tag">v1.10.2</span>
+        <span class="app-version-tag">v1.10.2</span>
       </a>
 
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#features" class="nav-link">Features</a></li>
-        <li><a href="#showcase" class="nav-link">Showcase</a></li>
-        <li><a href="#comparison" class="nav-link">Comparison</a></li>
-        <li><a href="https://github.com/valynlove/lunera" class="nav-link" target="_blank" rel="noopener">GitHub</a></li>
-        <li><a href="#download" class="nav-link btn-nav-download apk-download-btn">Download APK</a></li>
-      </ul>
+      <button class="nav-toggle" id="mobile-toggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
-      <div class="nav-actions">
-        <button id="mobile-toggle" class="mobile-toggle" aria-label="Toggle Mobile Menu">☰</button>
-      </div>
+      <nav class="nav-links" id="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#showcase" class="nav-link">Showcase</a>
+        <a href="#brand" class="nav-link">Brand</a>
+        <a href="https://github.com/valynlove/lunera" target="_blank" rel="noopener noreferrer" class="nav-link github-link">GitHub</a>
+        <a href="#download" class="nav-btn apk-download-btn">Download</a>
+      </nav>
     </div>
   </header>
 
-  <main>
-    <!-- HERO SECTION -->
-    <section class="hero" id="about">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <div class="hero-badge">
-            <span class="badge-pulse"></span>
-            <span><span class="app-version-tag">v1.10.0</span> • Latest Stable Release</span>
-          </div>
+  <!-- Hero Section -->
+  <section id="top" class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <p class="hero-kicker">Hormone therapy companion</p>
+        <h1 class="hero-title">Every phase,<br>your own.</h1>
+        <p class="hero-desc">
+          Lunera tracks your injections and medication, reminds you right on time, and shows your estimated levels. Calm, clear, and synced across all your devices.
+        </p>
 
-          <h1 class="hero-title">
-            Every Phase,<br>
-            <span class="gradient-text">Your Own.</span>
-          </h1>
-
-          <p class="hero-desc">
-            A gentle, elegant, and privacy-focused personal health and hormone therapy tracker. Simulate pharmacokinetic level curves, master dosage schedules, log physical transitions, and safeguard data with cross-device PIN security.
-          </p>
-
-          <div class="hero-actions">
-            <a href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk" class="btn btn-primary apk-download-btn" id="hero-cta-download">
-              <span>📥</span>
-              <span id="hero-download-text">Download APK (v1.10.0)</span>
-            </a>
-            <a href="#showcase" class="btn btn-secondary">
-              <span>📱</span>
-              <span>Explore Interface</span>
-            </a>
-          </div>
-
-          <div class="hero-highlights">
-            <div class="highlight-item">
-              <span class="highlight-icon">⚡</span>
-              <span>Offline-First</span>
-            </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🔒</span>
-              <span>PIN Secured</span>
-            </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">☁️</span>
-              <span>Cloud Sync</span>
-            </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🛡️</span>
-              <span>100% Ad-Free</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phone Mockup Preview -->
-        <div class="phone-mockup-wrapper">
-          <div class="phone-card-float float-top">
-            <div class="float-icon icon-level">📈</div>
-            <div class="float-text">
-              <span class="float-label">Estradiol Level</span>
-              <span class="float-val">185 pg/mL • In Range</span>
-            </div>
-          </div>
-
-          <div class="phone-card-float float-bottom">
-            <div class="float-icon icon-intake">💉</div>
-            <div class="float-text">
-              <span class="float-label">Next Scheduled Dose</span>
-              <span class="float-val">Tomorrow • 09:00 AM</span>
-            </div>
-          </div>
-
-          <div class="phone-frame">
-            <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div class="screen-app-bar">
-                <div>
-                  <div class="app-user-greeting">Good morning 👋</div>
-                  <div class="app-user-name">Lunaria</div>
-                </div>
-                <div class="app-user-avatar">🌙</div>
-              </div>
-
-              <!-- Hero Regimen Card -->
-              <div class="screen-hero-card">
-                <div class="hero-card-title">Next Scheduled Administration</div>
-                <div class="hero-card-medicine">Estradiol Valerate 4mg</div>
-                <div class="hero-card-stats">
-                  <div class="stat-pill">
-                    Intake Time
-                    <span style="color: var(--secondary);">Tomorrow, 09:00</span>
-                  </div>
-                  <div class="stat-pill">
-                    Route & Volume
-                    <span style="color: var(--accent);">0.2 mL (SubQ)</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quick Actions -->
-              <div class="screen-quick-actions">
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">💉</div>
-                  <span>Log Dose</span>
-                </button>
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">📈</div>
-                  <span>PK Levels</span>
-                </button>
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">📅</div>
-                  <span>Calendar</span>
-                </button>
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">📖</div>
-                  <span>Journal</span>
-                </button>
-              </div>
-
-              <!-- Recent Activity Feed -->
-              <div class="screen-section-title">
-                <span>Today's Rhythm</span>
-                <a href="#showcase">View All</a>
-              </div>
-
-              <div class="mock-activity-list">
-                <div class="mock-activity-item">
-                  <div class="activity-left">
-                    <div class="activity-icon-box">💉</div>
-                    <div>
-                      <div class="activity-name">Estradiol Valerate</div>
-                      <div class="activity-sub">4mg • Injected at 09:00 AM</div>
-                    </div>
-                  </div>
-                  <span class="activity-badge badge-success">Logged</span>
-                </div>
-
-                <div class="mock-activity-item">
-                  <div class="activity-left">
-                    <div class="activity-icon-box">✨</div>
-                    <div>
-                      <div class="activity-name">Daily Mood & Physical</div>
-                      <div class="activity-sub">Calm & energized • 5/5</div>
-                    </div>
-                  </div>
-                  <span class="activity-badge badge-info">Recorded</span>
-                </div>
-
-                <div class="mock-activity-item">
-                  <div class="activity-left">
-                    <div class="activity-icon-box">📦</div>
-                    <div>
-                      <div class="activity-name">Needles 25G 1"</div>
-                      <div class="activity-sub">Inventory: 14 units left</div>
-                    </div>
-                  </div>
-                  <span class="activity-badge badge-success">In Stock</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CELESTIAL PANORAMA BANNER -->
-    <section class="banner-section" aria-label="Celestial Panorama Banner">
-      <div class="container">
-        <div class="hero-banner-wrapper">
-          <img src="images/banner.jpg" alt="Lunera - Every Phase, Your Own. Celestial Midnight Panorama Banner" class="hero-banner-img" loading="lazy">
-          <div class="banner-glow-overlay"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CORE FEATURES SECTION -->
-    <section class="features-section" id="features">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Core Features</span>
-          <h2 class="section-title">Engineered for Velocity, Elegance & Privacy</h2>
-          <p class="section-desc">All the essential tools you need to accompany and understand your physiological journey without compromises.</p>
-        </div>
-
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">⚡</div>
-            <h3 class="feature-title">Offline-First & Instantaneous</h3>
-            <p class="feature-text">Built with an offline-first architecture. Launch Lunera and log doses, journals, and inventories instantly with zero network delay or buffering.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🔒</div>
-            <h3 class="feature-title">PIN Security & Multi-Device Sync</h3>
-            <p class="feature-text">Protect private medical data with salted SHA-256 PIN credentials. Sync across all your devices via Cloud Firestore without setting up PINs again.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">📈</div>
-            <h3 class="feature-title">Pharmacokinetic Level Curves</h3>
-            <p class="feature-text">Interactive multi-compartment pharmacokinetic models for Estradiol (EV, EC, EB, EEn) and Testosterone, with customizable target ranges and blood test calibration.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">📅</div>
-            <h3 class="feature-title">Dynamic Schedules & Timeline</h3>
-            <p class="feature-text">Visual calendar picker navigation, rolling interval scheduling, and automatic dose reminders with exact historical intake logs.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🔔</div>
-            <h3 class="feature-title">Exact Alarm Reminders</h3>
-            <p class="feature-text">Reliable offline Android local notifications with custom channels, high importance, and precise scheduling so you never miss an injection.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">📖</div>
-            <h3 class="feature-title">Transition & Mood Journal</h3>
-            <p class="feature-text">Daily emotional state scoring, physical transition observation notes, and categorized wellness entries designed for mindful reflection.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">📦</div>
-            <h3 class="feature-title">Medical Supply Inventory</h3>
-            <p class="feature-text">Track vials, syringes, alcohol wipes, and needles with automatic deduction upon dose intake and proactive low-stock warnings.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🌙</div>
-            <h3 class="feature-title">Midnight Celestial Aesthetics</h3>
-            <p class="feature-text">A soothing dark theme with animated lake landscapes, orbit ring iconography, and dynamic accent palettes (Lunera, Moonlight, Ocean, Forest).</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🌐</div>
-            <h3 class="feature-title">Bilingual Localization</h3>
-            <p class="feature-text">Full native support for English (Default) and Bahasa Indonesia with seamless runtime switching across all interfaces and date formatters.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SHOWCASE SECTION -->
-    <section class="showcase-section" id="showcase">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Interface</span>
-          <h2 class="section-title">Explore Lunera's Interface</h2>
-          <p class="section-desc">Thoughtfully crafted screens designed to bring calm, structure, and clarity to your therapy routine.</p>
-        </div>
-
-        <div class="showcase-tabs">
-          <button class="showcase-tab-btn active" data-tab="beranda">🏠 Dashboard</button>
-          <button class="showcase-tab-btn" data-tab="levels">📈 PK Levels</button>
-          <button class="showcase-tab-btn" data-tab="jadwal">📅 Calendar & Cycles</button>
-          <button class="showcase-tab-btn" data-tab="jurnal">📖 Journal & Supplies</button>
-        </div>
-
-        <div class="showcase-content-card">
-          <div class="showcase-desc-box">
-            <h3 class="showcase-desc-title" id="showcase-title">Intuitive Daily Rhythm & Dose Counter</h3>
-            <p class="showcase-desc-text" id="showcase-desc">Everything you need at a glance. Check your upcoming dose countdown, recent injection sites, estimated hormone levels, and quick logging shortcuts.</p>
-            <ul class="showcase-feature-list" id="showcase-bullets">
-              <li><span class="check-icon">✓</span> Live countdown timer to your next scheduled hormone dose</li>
-              <li><span class="check-icon">✓</span> Immediate one-tap "Take Dose" and "Skip Dose" quick actions</li>
-              <li><span class="check-icon">✓</span> Overview of today's mood, physical transitions, and stock alerts</li>
-            </ul>
-          </div>
-
-          <div class="showcase-visual-preview">
-            <div style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="font-weight: 700; color: var(--primary);">Lunera Native Experience</span>
-                <span style="font-size: 0.75rem; background: var(--primary-container); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 6px;">Smooth 60 FPS</span>
-              </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
-                Engineered with Flutter Riverpod and Material 3, guaranteeing fluid 60 FPS transitions whether you're navigating calendar cycles or calculating pharmacokinetic curves.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- DOWNLOAD SECTION -->
-    <section class="download-section" id="download">
-      <div class="container">
-        <div class="download-card-wrapper">
-          <div class="download-content">
-            <div>
-              <h2 class="download-title">Begin Your Personal Journey Today</h2>
-              <p class="download-subtitle">Download the standalone Lunera APK installer directly to your Android device for free, without ads or hidden paywalls.</p>
-
-              <div class="download-cta-group">
-                <a href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk" class="btn-download-main apk-download-btn" target="_blank" rel="noopener">
-                  <span>📥</span>
-                  <span>Direct APK Download</span>
-                </a>
-                <a href="https://github.com/valynlove/lunera/releases" class="btn-github-release" target="_blank" rel="noopener">
-                  <span>🔗</span>
-                  <span>View on GitHub Releases</span>
-                </a>
-              </div>
-            </div>
-
-            <!-- Specs Card -->
-            <div class="download-specs-card">
-              <div class="specs-title">
-                <span>📱</span>
-                <span>Release Specifications</span>
-              </div>
-              <div class="specs-list">
-                <div class="specs-item">
-                  <span class="specs-label">App Version</span>
-                  <span class="specs-val" id="specs-version-val">v1.10.0 (Release)</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">File Size</span>
-                  <span class="specs-val">~22 MB</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">Operating System</span>
-                  <span class="specs-val">Android 5.0+ (API 21)</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">License</span>
-                  <span class="specs-val">Open Source (MIT)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Android Install Guide -->
-        <div class="install-guide-box">
-          <h3 class="install-guide-title">
-            <span>⚙️</span>
-            <span>How to Install APK on Android</span>
-          </h3>
-          <div class="install-steps">
-            <div class="install-step-card">
-              <div class="step-num">1</div>
-              <strong>1. Download APK</strong>
-              <p class="step-text">Tap the download button above and wait for the Lunera APK file to complete downloading.</p>
-            </div>
-            <div class="install-step-card">
-              <div class="step-num">2</div>
-              <strong>2. Open File</strong>
-              <p class="step-text">Tap the download completion notification or find the file in your device's 'Downloads' folder.</p>
-            </div>
-            <div class="install-step-card">
-              <div class="step-num">3</div>
-              <strong>3. Allow Unknown Sources</strong>
-              <p class="step-text">If prompted with 'Install unknown apps', tap 'Settings' and enable 'Allow from this source'.</p>
-            </div>
-            <div class="install-step-card">
-              <div class="step-num">4</div>
-              <strong>4. Install & Launch</strong>
-              <p class="step-text">Tap 'Install'. Launch Lunera, set up your personal PIN, and embrace your therapy journey!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- COMPARISON SECTION -->
-    <section class="comparison-section" id="comparison">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Comparison</span>
-          <h2 class="section-title">Why Choose Lunera?</h2>
-          <p class="section-desc">How Lunera stands apart from conventional health and tracker applications.</p>
-        </div>
-
-        <div class="comparison-table-wrapper">
-          <table class="comp-table">
-            <thead>
-              <tr>
-                <th>Aspect / Criteria</th>
-                <th class="highlight-col">🌙 Lunera</th>
-                <th>Conventional Health Apps</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Pharmacokinetic Curves</td>
-                <td class="highlight-col">Scientific multi-compartment models & calibration</td>
-                <td>Generic static reminders without biology modeling</td>
-              </tr>
-              <tr>
-                <td>Data Privacy & Ownership</td>
-                <td class="highlight-col">Stored locally + salted SHA-256 PIN</td>
-                <td>Often monetized, tracked, or sold to brokers</td>
-              </tr>
-              <tr>
-                <td>Offline Usability</td>
-                <td class="highlight-col">100% full functionality offline</td>
-                <td>Features blocked or degraded without internet</td>
-              </tr>
-              <tr>
-                <td>Advertisements</td>
-                <td class="highlight-col">Zero ads & zero tracking (100% distraction-free)</td>
-                <td>Cluttered with banner ads and marketing popups</td>
-              </tr>
-              <tr>
-                <td>Cloud Synchronization</td>
-                <td class="highlight-col">Free & optional via Firebase Firestore</td>
-                <td>Locked behind expensive monthly subscriptions</td>
-              </tr>
-              <tr>
-                <td>Data Portability & Export</td>
-                <td class="highlight-col">Unrestricted offline JSON export and backup</td>
-                <td>Gated behind premium paywalls</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-top">
-        <div>
-          <a href="#" class="brand">
-            <img src="images/icon.png" alt="Lunera Logo" class="brand-icon">
-            <span class="brand-name">Lunera</span>
+        <div class="hero-actions">
+          <a href="#download" class="btn btn-primary apk-download-btn" id="hero-download-btn">
+            <span id="hero-download-text">Download for Android</span>
           </a>
-          <p class="footer-brand-desc">
-            A gentle, elegant, and privacy-focused personal health and therapy companion. Every phase, your own.
-          </p>
+          <a href="#features" class="btn btn-outline">See features</a>
         </div>
 
-        <div>
-          <div class="footer-col-title">Navigation</div>
-          <ul class="footer-nav-list">
-            <li><a href="#about" class="footer-nav-link">About</a></li>
-            <li><a href="#features" class="footer-nav-link">Core Features</a></li>
-            <li><a href="#showcase" class="footer-nav-link">Showcase</a></li>
-            <li><a href="#comparison" class="footer-nav-link">Comparison</a></li>
-            <li><a href="#download" class="footer-nav-link">Download APK</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="footer-col-title">Documentation</div>
-          <ul class="footer-nav-list">
-            <li><a href="https://github.com/valynlove/lunera/blob/main/CHANGELOG.md" class="footer-nav-link" target="_blank" rel="noopener">Changelog & Releases</a></li>
-            <li><a href="https://github.com/valynlove/lunera/blob/main/README.md" class="footer-nav-link" target="_blank" rel="noopener">Developer Guide (README)</a></li>
-            <li><a href="https://github.com/valynlove/lunera/releases" class="footer-nav-link" target="_blank" rel="noopener">GitHub Releases</a></li>
-            <li><a href="https://github.com/valynlove/lunera/issues" class="footer-nav-link" target="_blank" rel="noopener">Issue Tracker & Feedback</a></li>
-          </ul>
-        </div>
+        <ul class="hero-badges">
+          <li>English and Bahasa Indonesia</li>
+          <li>Synced across devices</li>
+          <li>PIN and biometric lock</li>
+          <li>Offline-first</li>
+        </ul>
       </div>
 
+      <!-- Hero Phone Card Mockup -->
+      <div class="hero-mockup">
+        <div class="phone-frame-card">
+          <p class="phone-date" id="phone-date-display">Thursday, October 29</p>
+          <p class="phone-greeting">Good morning 👋</p>
+          <div class="phone-inner-card">
+            <p class="phone-therapy-title">Estradiol Cypionate</p>
+            <svg class="cycle-dial-svg" viewBox="-120 -120 240 240" width="210" height="210" role="img" aria-label="Seven-day cycle dial, one day left">
+              <g stroke-linecap="round" stroke-width="9" fill="none">
+                <line x1="0" y1="-96" x2="0" y2="-74" stroke="#1D9B7E" transform="rotate(0)"/>
+                <line x1="0" y1="-96" x2="0" y2="-74" stroke="#1D9B7E" transform="rotate(51.4)"/>
+                <line x1="0" y1="-96" x2="0" y2="-74" stroke="#1D9B7E" transform="rotate(102.9)"/>
+                <line x1="0" y1="-96" x2="0" y2="-74" stroke="#1D9B7E" transform="rotate(154.3)"/>
+                <line x1="0" y1="-96" x2="0" y2="-60" stroke="#6B5CE0" transform="rotate(205.7)"/>
+                <line x1="0" y1="-96" x2="0" y2="-74" stroke="#CFCBEF" transform="rotate(257.1)"/>
+                <line x1="0" y1="-96" x2="0" y2="-74" stroke="#CFCBEF" transform="rotate(308.6)"/>
+              </g>
+              <text x="0" y="18" text-anchor="middle" font-family="'Manrope', sans-serif" font-weight="800" font-size="64" fill="#1E1B4B">1</text>
+              <text x="0" y="42" text-anchor="middle" font-family="'Figtree', sans-serif" font-size="14" fill="#4A4780">day left</text>
+            </svg>
+            <p class="phone-therapy-sub">7.5 mg, every 7 days. Next: right thigh</p>
+            <span class="phone-log-btn">Log injection</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mountain Silhouette Horizon SVGs -->
+    <svg class="mountain-horizon" viewBox="0 0 1440 140" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 140V82l140-46 120 38 170-58 190 66 170-44 200 52 150-40 180 38 120-26v78z" fill="#1A1844"/>
+      <path d="M0 140V108l180-30 150 26 220-38 200 34 240-30 250 32v38z" fill="#12112F"/>
+    </svg>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="section">
+    <div class="container">
+      <h2 class="section-title">All your therapy rhythm, in one place</h2>
+      <p class="section-desc">Built around the real needs of living with hormone therapy every day.</p>
+
+      <div class="features-grid">
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+              <path d="M8 3v4M16 3v4M3 10h18"></path>
+            </svg>
+          </div>
+          <h3>Flexible schedules</h3>
+          <p>Daily, weekly, monthly, every N days, or as needed. Nine ways to take your medication, from injections to patches, with rolling cycle intervals counting from your last dose.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9zM10 20a2 2 0 0 0 4 0"></path>
+            </svg>
+          </div>
+          <h3>Reminders right on time</h3>
+          <p>High-priority notifications at the exact scheduled time, even completely offline. Plus smart alerts when medication supplies run low or are about to expire.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 17l5-6 4 3 6-8 3 4"></path>
+              <path d="M3 21h18"></path>
+            </svg>
+          </div>
+          <h3>Estimated levels</h3>
+          <p>Multi-compartment pharmacokinetic curves estimated from your injection or oral entries, layered with actual blood lab results and target ranges set with your doctor.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 3h10l1 4H6zM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM12 11v6M9 14h6"></path>
+            </svg>
+          </div>
+          <h3>Supplies that manage themselves</h3>
+          <p>Vials, syringes, needles, and alcohol wipes deduct automatically every time you log a dose. Logged by mistake? Delete the entry and the stock returns automatically.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+            </svg>
+          </div>
+          <h3>Body & clothing sizing</h3>
+          <p>Track full bust, underbust, waist, hips, thighs, and feet. Includes scientific dual-standard bra cup sizing (US/UK & EU/ID), sister sizes, clothing fit, and shoe conversion.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <h3>Native Android widgets</h3>
+          <p>Glanceable home screen widgets for your HRT therapy duration, next injection countdown, and hormone curves, dynamically translated to your active language.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="3"></rect>
+              <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
+            </svg>
+          </div>
+          <h3>Privacy in your hands</h3>
+          <p>Lock the app with salted SHA-256 PIN or biometric fingerprint / face unlock. Your data is accessible solely by your account with zero ads and zero third-party trackers.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5CC6A8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12M7 10l5 5 5-5M4 20h16"></path>
+            </svg>
+          </div>
+          <h3>Dual cloud & offline backup</h3>
+          <p>Seamless real-time synchronization via Firebase Cloud Firestore alongside full offline JSON file export/import. Switching phones never means starting from zero.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase Section -->
+  <section id="showcase" class="section">
+    <div class="container">
+      <h2 class="section-title">A calming look</h2>
+      <p class="section-desc">Soft nocturnal sanctuary with gentle pastel highlights and numbers you can read at a single glance.</p>
+
+      <div class="showcase-cards">
+        <!-- Showcase 1: Levels -->
+        <figure class="showcase-card light-mockup">
+          <figcaption class="mockup-header">Levels</figcaption>
+          <div class="mockup-body">
+            <p class="mockup-sub">Estimated estradiol</p>
+            <p class="mockup-value">245 <span class="mockup-unit">pg/mL</span></p>
+            <svg viewBox="0 0 240 120" width="100%" class="mockup-chart" role="img" aria-label="Estimated level chart with target area">
+              <rect x="0" y="34" width="240" height="40" fill="#1D9B7E" opacity=".16"/>
+              <path d="M0 96C20 90 30 40 52 44S84 92 110 70 140 30 166 40 200 78 240 52V120H0z" fill="#6B5CE0" opacity=".12"/>
+              <path d="M0 96C20 90 30 40 52 44S84 92 110 70 140 30 166 40 200 78 240 52" fill="none" stroke="#6B5CE0" stroke-width="3" stroke-linecap="round"/>
+              <line x1="166" y1="4" x2="166" y2="116" stroke="#4A4780" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <circle cx="110" cy="70" r="5" fill="#fff" stroke="#E04E7B" stroke-width="3"/>
+            </svg>
+            <span class="badge-status badge-success">In range</span>
+          </div>
+        </figure>
+
+        <!-- Showcase 2: Today (Dark card) -->
+        <figure class="showcase-card dark-mockup">
+          <figcaption class="mockup-header">Today</figcaption>
+          <div class="mockup-list-item">
+            <div>
+              <p class="item-title">Estradiol Cypionate</p>
+              <p class="item-sub">20:00, 7.5 mg</p>
+            </div>
+            <span class="btn-sm btn-primary">Log</span>
+          </div>
+          <div class="mockup-list-item">
+            <div>
+              <p class="item-title">Spironolactone</p>
+              <p class="item-sub">09:00, 50 mg</p>
+            </div>
+            <span class="text-success-mint">Done</span>
+          </div>
+          <div class="mockup-list-item alert-item">
+            <div>
+              <p class="item-title">Running low</p>
+              <p class="item-sub text-warn-amber">Alcohol wipes down to 3</p>
+            </div>
+          </div>
+        </figure>
+
+        <!-- Showcase 3: Supplies -->
+        <figure class="showcase-card light-mockup">
+          <figcaption class="mockup-header">Supplies</figcaption>
+          <div class="mockup-supply-box">
+            <p class="item-title">Estradiol valerate 40 mg/mL</p>
+            <div class="progress-bar-bg bg-mint-light">
+              <div class="progress-bar-fill bg-mint" style="width: 78%;"></div>
+            </div>
+            <p class="supply-stat">8 doses left</p>
+          </div>
+          <div class="mockup-supply-box">
+            <p class="item-title">Syringe 1 mL</p>
+            <div class="progress-bar-bg bg-amber-light">
+              <div class="progress-bar-fill bg-amber" style="width: 18%;"></div>
+            </div>
+            <p class="supply-stat">Restock soon</p>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brand Section -->
+  <section id="brand" class="section">
+    <div class="container">
+      <div class="brand-showcase-box">
+        <div class="brand-left">
+          <p class="brand-kicker">Brand</p>
+          <div class="brand-identity-row">
+            <svg class="brand-large-svg" width="68" height="68" viewBox="0 0 48 48" role="img" aria-label="Crescent moon logo">
+              <mask id="mB">
+                <rect width="48" height="48" fill="#fff"/>
+                <circle cx="32" cy="19" r="13" fill="#000"/>
+              </mask>
+              <circle cx="24" cy="24" r="16" fill="#E7E3FF" mask="url(#mB)"/>
+              <path d="M38 6l1.6 4.4L44 12l-4.4 1.6L38 18l-1.6-4.4L32 12l4.4-1.6z" fill="#E7E3FF"/>
+            </svg>
+            <span class="brand-title-jost">Lunera</span>
+          </div>
+
+          <p class="brand-quote">Every phase, your own.</p>
+          <p class="brand-philosophy">
+            The crescent moon stands for change that moves at its own rhythm: slow, steady, and never needing to be compared with anyone else.
+          </p>
+
+          <ul class="brand-pill-tags">
+            <li>Calm</li>
+            <li>Clear</li>
+            <li>Respectful</li>
+          </ul>
+        </div>
+
+        <div class="brand-right">
+          <p class="swatch-label">Colors</p>
+          <div class="swatch-grid">
+            <div class="swatch-item">
+              <div class="swatch-color" style="background:#12112F;border:1px solid rgba(255,255,255,.2)"></div>
+              <p class="swatch-name">Night<br><span class="swatch-hex">#12112F</span></p>
+            </div>
+            <div class="swatch-item">
+              <div class="swatch-color" style="background:#6B5CE0"></div>
+              <p class="swatch-name">Violet<br><span class="swatch-hex">#6B5CE0</span></p>
+            </div>
+            <div class="swatch-item">
+              <div class="swatch-color" style="background:#B8B0FF"></div>
+              <p class="swatch-name">Lavender<br><span class="swatch-hex">#B8B0FF</span></p>
+            </div>
+            <div class="swatch-item">
+              <div class="swatch-color" style="background:#5CC6A8"></div>
+              <p class="swatch-name">Mint<br><span class="swatch-hex">#5CC6A8</span></p>
+            </div>
+            <div class="swatch-item">
+              <div class="swatch-color" style="background:#F4F3FD"></div>
+              <p class="swatch-name">Mist<br><span class="swatch-hex">#F4F3FD</span></p>
+            </div>
+          </div>
+
+          <p class="type-label">Type</p>
+          <div class="type-specimen">
+            <p class="type-manrope">Manrope, for headings and numbers</p>
+            <p class="type-jost">Jost, for the logo only</p>
+            <p class="type-figtree">Figtree, for everyday text</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section id="download" class="section download-section">
+    <div class="container">
+      <div class="download-banner">
+        <div class="download-info">
+          <h2 class="download-title">Take Lunera with you</h2>
+          <p class="download-sub">Available for Android as an APK file. Latest stable release <span class="app-version-tag" id="specs-version-val">v1.10.2</span>.</p>
+          <ol class="download-steps">
+            <li>Download the official APK file from GitHub Releases.</li>
+            <li>Allow installing from this source when Android requests permission.</li>
+            <li>Open Lunera, set up your PIN, and begin tracking your therapy with peace of mind.</li>
+          </ol>
+        </div>
+
+        <div class="download-action">
+          <a href="https://github.com/valynlove/lunera/releases/latest" class="btn btn-white apk-download-btn">
+            Download APK
+          </a>
+          <p class="download-source-tag">
+            <a href="https://github.com/valynlove/lunera/releases" target="_blank" rel="noopener noreferrer">
+              View on GitHub Releases ➔
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <p class="footer-disclaimer">
+        Lunera is a personal tracking and reminder tool, not a substitute for professional medical advice. Estimated hormone curves use an average pharmacokinetic model and can differ from lab results. Dosing decisions are always made with your doctor.
+      </p>
       <div class="footer-bottom">
-        <div>Copyright &copy; 2026 <strong>Lunera</strong>. Licensed under the MIT License.</div>
-        <div>Crafted with care for your health and personal freedom.</div>
+        <p>© 2026 Lunera • Open-source under MIT License</p>
+        <div class="footer-links">
+          <a href="https://github.com/valynlove/lunera" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://github.com/valynlove/lunera/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a>
+          <a href="#top">Back to top ↑</a>
+        </div>
       </div>
     </div>
   </footer>
