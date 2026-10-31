@@ -18,9 +18,10 @@ Setiap kali melakukan modifikasi kode, penambahan fitur, pembaruan UI, atau perb
    - Perbarui teks badge versi dan link download di `docs/index.html` serta konfigurasi di `docs/script.js`.
 
 ### Aturan Penomoran Versi (Semantic Versioning)
-- **Major Release (`(+1).0.0+B`)**: Perombakan arsitektur besar, perubahan skema database/backup tanpa backward-compatibility, atau perubahan fundamental pada alur aplikasi.
-- **Minor Feature (`X.(+1).0+B`)**: Penambahan modul atau fitur baru (contoh: integrasi tipe terapi baru, penambahan visualisasi grafik farmakokinetik baru, fitur export baru).
-- **Patch / Bug Fix (`X.Y.(+1)+B`)**: Perbaikan bug, penyesuaian styling UI/tema, perbaikan teks/lokalisasi, atau optimasi notifikasi & performa.
+- **Siklus Versi Aktif (`1.11.x`)**:
+  - Untuk pembaruan rutin ke depan (baik perbaikan bug, penyesuaian UI, maupun fitur baru biasa), **cukup naikkan nomor versi patch `x` saja (`1.11.(x+1)+B`)**.
+  - **Minor Release / Big Patch (`1.(Y+1).0+B`)**: Angka versi tengah hanya dinaikkan **jika user secara eksplisit menyebut atau meminta "big patch"**.
+  - **Major Release (`(+1).0.0+B`)**: Perombakan arsitektur besar, perubahan skema database/backup tanpa backward-compatibility, atau perubahan fundamental pada alur aplikasi.
 
 ---
 
