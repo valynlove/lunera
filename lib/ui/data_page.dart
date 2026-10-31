@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-import '../l10n.dart';
 import '../repo.dart';
 import '../theme.dart';
+import '../l10n.dart';
 
 class DataPage extends ConsumerStatefulWidget {
   const DataPage({super.key});
@@ -30,9 +30,9 @@ class _DataPageState extends ConsumerState<DataPage> {
     } on FormatException catch (e) {
       _toast(e.message);
     } on TimeoutException {
-      _toast(trG('No connection yet. Changes will sync once online.'));
+      _toast(tr('You\'re offline. Changes will sync when you\'re back online.'));
     } catch (e) {
-      _toast('${trG('Failed')}: $e');
+      _toast(tr('Failed: {0}', [e]));
     }
     if (mounted) setState(() => busy = false);
   }
@@ -40,12 +40,12 @@ class _DataPageState extends ConsumerState<DataPage> {
   Future<String?> _ask(int n) => showDialog<String>(
         context: context,
         builder: (d) => AlertDialog(
-          title: Text(context.tr('Import {n} records', {'n': n})),
-          content: Text(context.tr('Merge: records from file are added or updated, existing data is preserved.\n\nReplace all: current data is deleted first, then loaded from file.')),
+          title: Text(tr('Import {0} {0?record|records}', [n])),
+          content: Text(tr('Merge: records from the file are added or updated, and your current data stays.\n\n') + tr('Replace all: your current data is deleted first, then filled from the file.')),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(d), child: Text(context.tr('Cancel'))),
-            TextButton(onPressed: () => Navigator.pop(d, 'merge'), child: Text(context.tr('Merge'))),
-            FilledButton(onPressed: () => Navigator.pop(d, 'replace'), child: Text(context.tr('Replace all'))),
+            TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+            TextButton(onPressed: () => Navigator.pop(d, 'merge'), child: Text(tr('Merge'))),
+            FilledButton(onPressed: () => Navigator.pop(d, 'replace'), child: Text(tr('Replace all'))),
           ],
         ),
       );
@@ -57,7 +57,7 @@ class _DataPageState extends ConsumerState<DataPage> {
     final mode = await _ask(n);
     if (mode == null) return;
     await repo.importData(raw as Map, replace: mode == 'replace');
-    _toast(trG('Successfully restored {n} records.', {'n': n}));
+    _toast(tr('Restored {0} {0?record|records}.', [n]));
   }
 
   Future<void> _exportFile() => _run(() async {
@@ -66,7 +66,7 @@ class _DataPageState extends ConsumerState<DataPage> {
         final f = XFile.fromData(Uint8List.fromList(utf8.encode(text)), mimeType: 'application/json', name: name);
         if (kIsWeb) {
           await f.saveTo(name);
-          _toast(trG('File downloaded.'));
+          _toast(tr('File downloaded.'));
         } else {
           await Share.shareXFiles([f], fileNameOverrides: [name]);
         }
@@ -83,35 +83,35 @@ class _DataPageState extends ConsumerState<DataPage> {
   @override
   Widget build(BuildContext context) {
     final backups = ref.watch(backupsProvider).value ?? [];
-    final fmtDate = DateFormat('d MMM y, HH:mm', AppLocale.code);
+    final fmtDate = DateFormat('d MMM y, HH:mm', L10n.code);
     return Scaffold(
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-            Expanded(child: Text(context.tr('Data & Storage'), style: display(32))),
+            Expanded(child: Text('Data', style: display(32))),
           ]),
           gap(12),
           _Panel(
             icon: Icons.wifi_off_rounded,
             tag: 'Offline',
-            title: context.tr('On-device file'),
-            body: context.tr('Save all your data to a single JSON file, or restore from a file. No internet required.'),
+            title: tr('File on this device'),
+            body: tr('Save all your data to a single JSON file, or restore from a file. No internet needed.'),
             actions: [
-              pillButton(context.tr('Export'), busy ? () {} : _exportFile, icon: Icons.file_upload_outlined),
-              OutlinedButton.icon(onPressed: busy ? null : _importFile, icon: const Icon(Icons.file_download_outlined), label: Text(context.tr('Import'))),
+              pillButton(tr('Export'), busy ? () {} : _exportFile, icon: Icons.file_upload_outlined),
+              OutlinedButton.icon(onPressed: busy ? null : _importFile, icon: const Icon(Icons.file_download_outlined), label: Text(tr('Import'))),
             ],
           ),
           gap(14),
           _Panel(
             icon: Icons.cloud_done_rounded,
             tag: 'Online',
-            title: context.tr('Cloud backup'),
-            body: context.tr('Save a copy of your data to your Firebase account. Useful for restoring to a previous state.'),
+            title: tr('Cloud backup'),
+            body: tr('Keep a copy of your data in your Firebase account. Useful for going back to an earlier state.'),
             actions: [
-              pillButton(context.tr('Back up now'), busy ? () {} : () => _run(() async {
+              pillButton(tr('Back up now'), busy ? () {} : () => _run(() async {
                     await ref.read(repoProvider)!.saveBackup();
-                    _toast(trG('Backup saved.'));
+                    _toast(tr('Backup saved.'));
                   }), icon: Icons.cloud_upload_rounded, color: C.lagoon),
             ],
           ),
@@ -120,15 +120,15 @@ class _DataPageState extends ConsumerState<DataPage> {
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 8),
               title: Text(fmtDate.format(b.at), style: const TextStyle(fontWeight: FontWeight.w700)),
-              subtitle: Text(context.tr('{count} records, {size} KB', {'count': b.count, 'size': (b.bytes / 1024).ceil()})),
+              subtitle: Text(tr('{0} {0?record|records}, {1} KB', [b.count, (b.bytes / 1024).ceil()])),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 IconButton(
-                  tooltip: context.tr('Restore'),
+                  tooltip: tr('Restore'),
                   onPressed: busy ? null : () => _run(() async => _importRaw(await ref.read(repoProvider)!.backupJson(b.id))),
                   icon: const Icon(Icons.settings_backup_restore_rounded),
                 ),
                 IconButton(
-                  tooltip: context.tr('Delete'),
+                  tooltip: tr('Delete'),
                   onPressed: busy ? null : () => _run(() => ref.read(repoProvider)!.deleteBackup(b.id)),
                   icon: const Icon(Icons.delete_outline_rounded),
                 ),

@@ -18,15 +18,15 @@ import 'ui/splash.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('en');
-  await initializeDateFormatting('id');
+  await initializeDateFormatting();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   try {
     await AppNotifier.instance.init();
   } catch (e) {
-    debugPrint('Notifikasi tidak aktif: $e');
+    debugPrint(tr('Notifications are off: {0}', [e]));
   }
   await Lock.instance.load();
+  await L10n.load();
   final prefs = await SharedPreferences.getInstance();
   runApp(ProviderScope(
     overrides: [
@@ -40,25 +40,27 @@ class LuneraApp extends ConsumerWidget {
   const LuneraApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localeCode = ref.watch(prefsProvider.select((p) => p.value?.locale ?? 'en'));
-    AppLocale.code = localeCode;
+    final mode = ref.watch(prefsProvider.select((p) => p.value?.theme ?? 'system'));
     applyAccent(ref.watch(prefsProvider.select((p) => p.value?.accent ?? 'lunera')));
-    return MaterialApp(
-      title: appName,
-      builder: appBackdrop,
-      debugShowCheckedModeBanner: false,
-      locale: Locale(localeCode),
-      supportedLocales: AppLocale.supported,
-      localizationsDelegates: const [
-        AppStrings.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      theme: buildTheme(Brightness.dark),
-      darkTheme: buildTheme(Brightness.dark),
-      themeMode: ThemeMode.dark,
-      home: const AppRoot(),
+    return ValueListenableBuilder<String>(
+      valueListenable: L10n.notifier,
+      builder: (context, code, _) => MaterialApp(
+        key: ValueKey(code), // bahasa berganti: bangun ulang seluruh aplikasi agar teks berganti seketika
+        title: appName,
+        locale: Locale(code),
+        supportedLocales: const [Locale('en'), Locale('id')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        builder: appBackdrop,
+        debugShowCheckedModeBanner: false,
+        theme: buildTheme(Brightness.dark),
+        darkTheme: buildTheme(Brightness.dark),
+        themeMode: switch (mode) {
+          'light' => ThemeMode.light,
+          'dark' => ThemeMode.dark,
+          _ => ThemeMode.system,
+        },
+        home: const AppRoot(),
+      ),
     );
   }
 }
@@ -71,12 +73,15 @@ class AppRoot extends ConsumerStatefulWidget {
 }
 
 class _AppRootState extends ConsumerState<AppRoot> {
-  bool minDone = false;
+  static bool _shown = false; // layar pembuka tampil sekali per proses, termasuk saat bahasa berganti
+  bool minDone = _shown;
 
   @override
   void initState() {
     super.initState();
+    if (_shown) return;
     Future.delayed(const Duration(milliseconds: 2400), () {
+      _shown = true;
       if (mounted) setState(() => minDone = true);
     });
   }
@@ -86,14 +91,10 @@ class _AppRootState extends ConsumerState<AppRoot> {
     final loading = ref.watch(userProvider.select((u) => u.isLoading));
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
-      child: minDone && !loading
-          ? const AuthGate(key: ValueKey('gate'))
-          : const SplashPage(key: ValueKey('splash')),
+      child: minDone && !loading ? const AuthGate(key: ValueKey('gate')) : const SplashPage(key: ValueKey('splash')),
     );
   }
 }
-
-typedef RitmeApp = LuneraApp;
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});

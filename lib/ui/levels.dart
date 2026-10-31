@@ -3,15 +3,15 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../sim.dart';
 import '../theme.dart';
 import 'insights.dart';
 import 'journal.dart' show moodColor;
+import '../l10n.dart';
 
-String _date(DateTime d) => DateFormat('d MMM y', AppLocale.code).format(d);
+String _date(DateTime d) => DateFormat('d MMM y', L10n.code).format(d);
 
 class LevelsPage extends ConsumerWidget {
   const LevelsPage({super.key});
@@ -27,19 +27,19 @@ class LevelsPage extends ConsumerWidget {
     }
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
-        Expanded(child: Text(context.tr('Levels'), style: display(40))),
+        Expanded(child: Text(tr('Levels'), style: display(40))),
         IconButton.filledTonal(
-          tooltip: context.tr('Insights'),
+          tooltip: tr('Insights'),
           onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InsightsPage())),
           icon: const Icon(Icons.insights_rounded),
         ),
         const SizedBox(width: 8),
-        pillButton(context.tr('Lab results'), () => showSheet(context, const LabSheet()), icon: Icons.add_rounded),
+        pillButton(tr('Lab result'), () => showSheet(context, const LabSheet()), icon: Icons.add_rounded),
       ]),
       gap(18),
       for (final h in simIds) Padding(padding: const EdgeInsets.only(bottom: 14), child: LevelPanel(h, compact: true)),
       if (byH.isEmpty && simIds.isEmpty)
-        Padding(padding: const EdgeInsets.only(top: 40), child: Text(context.tr('No data yet. Log doses or add your first blood test result.'))),
+        Padding(padding: const EdgeInsets.only(top: 40), child: Text(tr('No data yet. Log a dose or add your first blood test result.'))),
       for (final e in byH.entries) _LevelCard(hormoneId: e.key, labs: e.value),
     ]);
   }
@@ -83,7 +83,7 @@ class _LevelCard extends ConsumerWidget {
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(color: color.withValues(alpha: .18), borderRadius: BorderRadius.circular(999)),
-        child: Text(inRange ? context.tr('In range') : (last.base < band[0] ? context.tr('Below target') : context.tr('Above target')),
+        child: Text(inRange ? tr('In range') : (last.base < band[0] ? tr('Below target') : tr('Above target')),
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: dark ? color : Color.lerp(color, C.ink, .5))),
       );
     }
@@ -102,14 +102,14 @@ class _LevelCard extends ConsumerWidget {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(p.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  Text('${context.tr('Lab result')}, ${_date(last.at)}', style: Theme.of(context).textTheme.bodySmall),
+                  Text(tr('Lab result, {0}', [_date(last.at)]), style: Theme.of(context).textTheme.bodySmall),
                   gap(14),
                   Text.rich(TextSpan(text: fmt(last.base / f), style: display(44), children: [
                     TextSpan(text: ' $u', style: Theme.of(context).textTheme.bodyMedium),
                   ])),
                   if (delta != null) ...[
                     gap(6),
-                    Text('${delta >= 0 ? '↑' : '↓'} ${delta.abs().toStringAsFixed(0)}% ${context.tr('from previous test')}', style: Theme.of(context).textTheme.bodySmall),
+                    Text(tr('{0} {1}% from previous test', [delta >= 0 ? '↑' : '↓', delta.abs().toStringAsFixed(0)]), style: Theme.of(context).textTheme.bodySmall),
                   ],
                   if (status != null) status,
                 ]),
@@ -162,9 +162,9 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
 
     if (!hasSim && labs.isEmpty) {
       return box([
-        Text(context.tr('Estimated {name}', {'name': p.name}), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        Text(tr('Estimated {0}', [p.name]), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         gap(8),
-        Text(context.tr('Log your first dose on Home tab to see level estimates.')),
+        Text(tr('Log your first dose on the Home tab to see estimated levels.')),
       ]);
     }
 
@@ -216,26 +216,20 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             interval: math.max(total / 4, 1),
             getTitlesWidget: (v, m) => Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(DateFormat('d MMM', AppLocale.code).format(from.add(Duration(minutes: (v * 1440).round()))), style: const TextStyle(fontSize: 11)),
+              child: Text(DateFormat('d MMM', L10n.code).format(from.add(Duration(minutes: (v * 1440).round()))), style: const TextStyle(fontSize: 11)),
             ),
           ),
         ),
       ),
       rangeAnnotations: bandD == null
           ? null
-          : RangeAnnotations(horizontalRangeAnnotations: [
-              HorizontalRangeAnnotation(
-                y1: bandD[0],
-                y2: bandD[1],
-                color: Pastel.lilac.withValues(alpha: .12),
-              ),
-            ]),
+          : RangeAnnotations(horizontalRangeAnnotations: [HorizontalRangeAnnotation(y1: bandD[0], y2: bandD[1], color: C.lagoon.withValues(alpha: .14))]),
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
           getTooltipItems: (touched) => [
             for (final s in touched)
               LineTooltipItem(
-                s.barIndex == moodBar ? (moods[moodEntries[s.spotIndex].mood]?.$1 ?? '') : fmt(s.y),
+                s.barIndex == moodBar ? tr(moods[moodEntries[s.spotIndex].mood]?.$1 ?? '') : fmt(s.y),
                 const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
               ),
           ],
@@ -275,17 +269,17 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     final est = hasSim ? levelAt(intakes, now) * scale / f : null;
     return box([
       Row(children: [
-        Expanded(child: Text(hasSim ? context.tr('Estimated {name}', {'name': p.name}) : p.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
+        Expanded(child: Text(hasSim ? tr('Estimated {0}', [p.name]) : p.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
         if (widget.compact)
           IconButton(
-            tooltip: context.tr('Open details'),
+            tooltip: tr('Open details'),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => HormonePage(widget.hormoneId))),
             icon: const Icon(Icons.open_in_full_rounded, size: 20),
           ),
       ]),
       if (est != null) ...[
         Text.rich(TextSpan(text: fmt(est.roundToDouble()), style: display(44), children: [
-          TextSpan(text: ' $u ${context.tr('current')}', style: theme.textTheme.bodyMedium),
+          TextSpan(text: tr(' {0} now', [u]), style: theme.textTheme.bodyMedium),
         ])),
         gap(12),
       ],
@@ -293,7 +287,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         Row(children: [
           IconButton(onPressed: () => setState(() => off++), icon: const Icon(Icons.chevron_left_rounded)),
           Expanded(
-            child: Center(child: Text('${DateFormat('d MMM', AppLocale.code).format(from)} - ${_date(to)}', style: theme.textTheme.bodySmall)),
+            child: Center(child: Text(tr('{0} to {1}', [DateFormat('d MMM', L10n.code).format(from), _date(to)]), style: theme.textTheme.bodySmall)),
           ),
           IconButton(onPressed: off > 0 ? () => setState(() => off--) : null, icon: const Icon(Icons.chevron_right_rounded)),
         ]),
@@ -302,7 +296,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
       PillTabs<int>(
         items: [
           for (final w in [7, 30, 90, 180, 365, if (!hasSim && labs.isNotEmpty) 0])
-            (w, switch (w) { 0 => context.tr('All'), 7 => '1 ${context.tr('wk')}', 30 => '1 ${context.tr('mo')}', 90 => '3 ${context.tr('mo')}', 180 => '6 ${context.tr('mo')}', _ => '1 ${context.tr('yr')}' }),
+            (w, switch (w) { 0 => tr('All'), 7 => tr('1 wk'), 30 => tr('1 mo'), 90 => tr('3 mo'), 180 => tr('6 mo'), _ => tr('1 yr') }),
         ],
         value: d,
         onChanged: (w) => setState(() {
@@ -314,21 +308,21 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         gap(8),
         Wrap(spacing: 8, runSpacing: 4, children: [
           if (hasSim && nCal > 0)
-            FilterChip(label: Text(context.tr('Adjust to lab results ({n})', {'n': nCal})), selected: cal, onSelected: (v) => setState(() => cal = v)),
+            FilterChip(label: Text(tr('Fit to lab results ({0})', [nCal])), selected: cal, onSelected: (v) => setState(() => cal = v)),
           if (moodEntries.isNotEmpty)
-            FilterChip(avatar: const Icon(Icons.mood_rounded, size: 16), label: Text(context.tr('Mood')), selected: showMood, onSelected: (v) => setState(() => showMood = v)),
+            FilterChip(avatar: const Icon(Icons.mood_rounded, size: 16), label: Text(tr('Mood')), selected: showMood, onSelected: (v) => setState(() => showMood = v)),
         ]),
       ],
       if (hasSim) ...[
         gap(10),
         Row(children: [
           Icon(Icons.horizontal_rule_rounded, size: 18, color: C.lagoon),
-          Text(' ${context.tr('estimated')}   '),
+          Text(tr(' estimated   ')),
           Icon(Icons.circle_outlined, size: 12, color: C.peony),
-          Text(' ${context.tr('lab result')}'),
+          Text(tr(' lab result')),
         ]),
         gap(6),
-        Text(context.tr('Estimates use an average population model, not lab results. Individual levels vary; always consult your physician for dosage decisions.'),
+        Text(tr('Estimates use an average model, not lab results. Everyone\'s levels differ, and dosing decisions stay with your doctor.'),
             style: theme.textTheme.bodySmall),
       ],
       if (drawMood) ...[
@@ -338,7 +332,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.circle, size: 10, color: moodColor(m.key)),
               const SizedBox(width: 4),
-              Text(m.value.$1, style: theme.textTheme.bodySmall),
+              Text(tr(m.value.$1), style: theme.textTheme.bodySmall),
             ]),
         ]),
       ],
@@ -363,10 +357,10 @@ class HormonePage extends ConsumerWidget {
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
             Expanded(child: Text(p.name, style: display(32))),
-            IconButton.filledTonal(tooltip: context.tr('Set target'), onPressed: () => _target(context, ref, p, u, band), icon: const Icon(Icons.flag_rounded)),
+            IconButton.filledTonal(tooltip: tr('Set target'), onPressed: () => _target(context, ref, p, u, band), icon: const Icon(Icons.flag_rounded)),
           ]),
           gap(8),
-          Text(context.tr('Chart in {unit} (change in Settings). Shaded area is your custom target agreed with doctor.', {'unit': u}), style: Theme.of(context).textTheme.bodySmall),
+          Text(tr('Chart in {0} (change in Settings). The green area is the target you set with your doctor.', [u]), style: Theme.of(context).textTheme.bodySmall),
           gap(16),
           LevelPanel(hormoneId),
           gap(16),
@@ -390,15 +384,15 @@ class HormonePage extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: c,
       builder: (d) => AlertDialog(
-        title: Text(c.tr('Target {name} ({unit})', {'name': p.name, 'unit': u})),
+        title: Text(tr('{0} target ({1})', [p.name, u])),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: lo, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: c.tr('Lower limit'))),
+          TextField(controller: lo, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Lower limit'))),
           gap(8),
-          TextField(controller: hi, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: c.tr('Upper limit'))),
+          TextField(controller: hi, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Upper limit'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(c.tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(c.tr('Save target'))),
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(tr('Save target'))),
         ],
       ),
     );
@@ -442,7 +436,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
         unit = null;
         value.clear();
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('{saved} saved. Enter next hormone.', {'saved': saved}))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('{0} saved. Enter the next hormone.', [saved]))));
     } else {
       Navigator.pop(context);
     }
@@ -453,7 +447,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
     final u = unit ?? h.base;
     final editing = widget.initial != null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? context.tr('Edit lab result') : context.tr('New lab result'), style: display(28)),
+      Text(editing ? tr('Edit lab result') : tr('New lab result'), style: display(28)),
       gap(16),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final p in presets)
@@ -469,7 +463,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           ),
       ]),
       gap(12),
-      TextField(controller: value, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: context.tr('Value'))),
+      TextField(controller: value, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Value'))),
       gap(8),
       Wrap(spacing: 8, children: [
         for (final k in h.units.keys) ChoiceChip(label: Text(k), selected: u == k, onSelected: (_) => setState(() => unit = k)),
@@ -481,25 +475,25 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           if (d != null) setState(() => at = d);
         },
         icon: const Icon(Icons.calendar_today_rounded, size: 18),
-        label: Text('${context.tr('Test date')}: ${_date(at)}'),
+        label: Text(tr('Test date: {0}', [_date(at)])),
       ),
       gap(10),
-      TextField(controller: note, decoration: InputDecoration(labelText: context.tr('Notes (optional)'))),
+      TextField(controller: note, decoration: InputDecoration(labelText: tr('Note (optional)'))),
       gap(20),
       Row(children: [
         if (editing)
           TextButton.icon(
             onPressed: () async {
-              if (!await confirm(context, context.tr('Delete this lab result?')) || !context.mounted) return;
+              if (!await confirm(context, tr('Delete this lab result?')) || !context.mounted) return;
               ref.read(repoProvider)?.deleteLab(widget.initial!.id);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.delete_outline_rounded),
-            label: Text(context.tr('Delete')),
+            label: Text(tr('Delete')),
           ),
-        Expanded(child: pillButton(editing ? context.tr('Save changes') : context.tr('Save'), () => _save())),
+        Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save'), () => _save())),
       ]),
-      if (!editing) Center(child: TextButton(onPressed: () => _save(again: true), child: Text(context.tr('Save and add another hormone')))),
+      if (!editing) Center(child: TextButton(onPressed: () => _save(again: true), child: Text(tr('Save and add another hormone')))),
     ]);
   }
 }

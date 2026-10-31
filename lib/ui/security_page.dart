@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../l10n.dart';
 import '../lock.dart';
 import '../theme.dart';
 import 'lock_screen.dart';
+import '../l10n.dart';
 
 class SecurityPage extends StatelessWidget {
   const SecurityPage({super.key});
@@ -11,7 +11,7 @@ class SecurityPage extends StatelessWidget {
     if (on) {
       final pin = await createPin(context);
       if (pin != null) await Lock.instance.setPin(pin);
-    } else if (await askPin(context, title: context.tr('Enter PIN to disable'))) {
+    } else if (await askPin(context, title: tr('Enter your PIN to turn it off'))) {
       await Lock.instance.disable();
     }
   }
@@ -24,7 +24,7 @@ class SecurityPage extends StatelessWidget {
             child: ListView(padding: const EdgeInsets.all(20), children: [
               Row(children: [
                 IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-                Expanded(child: Text(context.tr('Security'), style: display(32))),
+                Expanded(child: Text(tr('Security'), style: display(32))),
               ]),
               gap(16),
               Container(
@@ -33,33 +33,43 @@ class SecurityPage extends StatelessWidget {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(context.tr('App PIN Lock')),
-                    subtitle: Text(context.tr('PIN protects your medical data and automatically syncs across your devices.')),
+                    title: Text(tr('Lock with PIN')),
+                    subtitle: Text(tr('Your PIN is stored only on this device.')),
                     value: st.enabled,
                     onChanged: (v) => _toggle(context, v),
                   ),
                   if (st.enabled) ...[
-                    gap(12),
-                    Text(context.tr('Auto-lock timeout'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                    FutureBuilder<bool>(
+                      future: Lock.instance.bioAvailable(),
+                      builder: (c, snap) => SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(tr('Fingerprint or face')),
+                        subtitle: Text(snap.data == true ? tr('Unlock without typing your PIN.') : tr('Not available on this device.')),
+                        value: st.bio,
+                        onChanged: snap.data == true
+                            ? (v) async {
+                                if (!v || await Lock.instance.authBio()) await Lock.instance.setBio(v);
+                              }
+                            : null,
+                      ),
+                    ),
+                    gap(8),
+                    Text(tr('Lock again after leaving the app')),
                     gap(8),
                     PillTabs<int>(
-                      items: [
-                        (0, context.tr('Immediately')),
-                        (1, context.tr('1 minute')),
-                        (5, context.tr('5 minutes')),
-                      ],
+                      items: [(0, tr('Immediately')), (1, tr('1 minute')), (5, tr('5 minutes'))],
                       value: st.delayMin,
                       onChanged: (m) => Lock.instance.setDelay(m),
                     ),
-                    gap(16),
+                    gap(8),
                     TextButton.icon(
                       onPressed: () async {
-                        if (!await askPin(context, title: context.tr('Enter old PIN')) || !context.mounted) return;
+                        if (!await askPin(context, title: tr('Enter your current PIN')) || !context.mounted) return;
                         final pin = await createPin(context);
                         if (pin != null) await Lock.instance.setPin(pin);
                       },
                       icon: const Icon(Icons.password_rounded),
-                      label: Text(context.tr('Change PIN')),
+                      label: Text(tr('Change PIN')),
                     ),
                   ],
                 ]),

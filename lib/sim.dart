@@ -1,25 +1,27 @@
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
+import 'l10n.dart';
 import 'models.dart';
 
 /// Profil farmakokinetik. Injeksi: p = [F, auc, k1, k2, k3] (model 3 kompartemen).
 /// Oral: p = [gain pg/mL per mg, ka, ke] per hari (model 1 kompartemen, perkiraan kasar).
 /// Parameter ester injeksi diambil dari Mona (AGPL-3.0, "inferred by alix, WHSAH Collective").
 class PkProfile {
-  const PkProfile(this.id, this.name, this.oral, this.p);
-  final String id, name;
+  const PkProfile(this.id, this.en, this.oral, this.p);
+  final String id, en;
+  String get name => tr(en);
   final bool oral;
   final List<double> p;
 }
 
 const pkProfiles = <PkProfile>[
-  PkProfile('e2_enanthate', 'Enantat', false, [0.708, 875.4, 0.09441, 3.354, 0.4078]),
-  PkProfile('e2_valerate', 'Valerat', false, [0.764, 621.3, 0.2230, 17.62, 1.305]),
-  PkProfile('e2_benzoate', 'Benzoat', false, [0.723, 889.9, 0.5220, 521.9, 5.223]),
-  PkProfile('e2_cypionate', 'Sipionat', false, [0.687, 554.5, 0.0880, 17.95, 0.7177]),
-  PkProfile('e2_cyp_susp', 'Sipionat suspensi', false, [0.687, 852.6, 0.0973, 218.67, 6.624]),
-  PkProfile('e2_undecylate', 'Undesilat', false, [0.618, 385.8, 0.02189, 183.4, 1.564]),
-  PkProfile('e2_oral', 'Estradiol oral (kasar)', true, [27.6, 8.4, 1.188]),
+  PkProfile('e2_enanthate', 'Enanthate', false, [0.708, 875.4, 0.09441, 3.354, 0.4078]),
+  PkProfile('e2_valerate', 'Valerate', false, [0.764, 621.3, 0.2230, 17.62, 1.305]),
+  PkProfile('e2_benzoate', 'Benzoate', false, [0.723, 889.9, 0.5220, 521.9, 5.223]),
+  PkProfile('e2_cypionate', 'Cypionate', false, [0.687, 554.5, 0.0880, 17.95, 0.7177]),
+  PkProfile('e2_cyp_susp', 'Cypionate suspension', false, [0.687, 852.6, 0.0973, 218.67, 6.624]),
+  PkProfile('e2_undecylate', 'Undecylate', false, [0.618, 385.8, 0.02189, 183.4, 1.564]),
+  PkProfile('e2_oral', 'Oral estradiol (rough)', true, [27.6, 8.4, 1.188]),
 ];
 
 PkProfile? pkOf(String? id) => id == null ? null : pkProfiles.where((p) => p.id == id).firstOrNull;

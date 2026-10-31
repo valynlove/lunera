@@ -1,66 +1,77 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../l10n.dart';
 import '../lock.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../widget_sync.dart';
+import '../l10n.dart';
 
 final _nameRe = RegExp(r'^[a-z0-9_.]{3,20}$');
 
 String authError(Object e) {
-  if (e is FormatException) return trG(e.message);
+  if (e is FormatException) return e.message;
   if (e is FirebaseAuthException) {
     return switch (e.code) {
-      'invalid-credential' || 'wrong-password' || 'user-not-found' || 'invalid-login-credentials' =>
-        trG('Incorrect username/email or password.'),
-      'email-already-in-use' => trG('This email is already in use. Try signing in.'),
-      'weak-password' => trG('Password is too weak (minimum 6 characters).'),
-      'invalid-email' => trG('Invalid email format.'),
-      'network-request-failed' => trG('No internet connection.'),
-      'too-many-requests' => trG('Too many attempts. Please try again later.'),
+      'invalid-credential' ||
+      'wrong-password' ||
+      'user-not-found' ||
+      'invalid-login-credentials' =>
+        tr('Wrong username/email or password.'),
+      'email-already-in-use' =>
+        tr('This email is already registered. Try logging in.'),
+      'weak-password' => tr('Password is too weak (at least 6 characters).'),
+      'invalid-email' => tr('Invalid email format.'),
+      'network-request-failed' => tr('No internet connection.'),
+      'too-many-requests' => tr('Too many attempts. Try again later.'),
       _ => e.message ?? e.code,
     };
   }
   if (e is FirebaseException) {
     return e.code == 'permission-denied'
-        ? trG('Firestore rules not updated. Paste firestore.rules and Publish.')
+        ? tr(
+            'Firestore rules are out of date. Paste firestore.rules and publish.')
         : (e.message ?? e.code);
   }
-  return '${trG('An error occurred')}: $e';
+  return tr('Something went wrong: {0}', [e]);
 }
 
 /// Keluar dan batalkan semua pengingat di perangkat ini.
 Future<void> signOutAll() async {
+  Lock.instance.sessionUnlocked = false;
   await AppNotifier.instance.cancelAll();
   await WidgetSync.clear();
-  await Lock.instance.clearLocal();
   await FirebaseAuth.instance.signOut();
 }
 
 Future<String?> _emailFor(String id) async {
   final v = id.trim();
   if (v.contains('@')) return v;
-  final d = await FirebaseFirestore.instance.doc('usernames/${v.toLowerCase()}').get();
+  final d = await FirebaseFirestore.instance
+      .doc('usernames/${v.toLowerCase()}')
+      .get();
   return d.exists ? d.get('email') as String : null;
 }
 
 /// [id] boleh username atau email.
 Future<void> signIn(String id, String pass) async {
-  if (id.trim().isEmpty || pass.isEmpty) throw const FormatException('Fill in username/email and password.');
-  final email = await _emailFor(id);
-  if (email == null) throw const FormatException('Incorrect username/email or password.');
-  final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass);
-  if (cred.user != null) {
-    await Lock.instance.syncWithCloud(cred.user!.uid);
+  if (id.trim().isEmpty || pass.isEmpty) {
+    throw FormatException(tr('Enter your username/email and password.'));
   }
+  final email = await _emailFor(id);
+  if (email == null) {
+    throw FormatException(tr('Wrong username/email or password.'));
+  }
+  await FirebaseAuth.instance
+      .signInWithEmailAndPassword(email: email, password: pass);
 }
 
 /// Kirim email atur ulang kata sandi. Hasilnya sengaja sama, ada atau tidaknya akun,
 /// supaya tidak membocorkan siapa saja yang terdaftar.
 Future<void> resetPassword(String id) async {
-  if (id.trim().isEmpty) throw const FormatException('Fill in username or email.');
+  if (id.trim().isEmpty) {
+    throw FormatException(tr('Enter your username or email.'));
+  }
   final email = await _emailFor(id);
   if (email == null) return;
   try {
@@ -74,27 +85,37 @@ Future<void> signUp(String username, String email, String pass) async {
   final name = username.trim().toLowerCase();
   final mail = email.trim().toLowerCase();
   if (!_nameRe.hasMatch(name)) {
-    throw const FormatException('Username must be 3-20 characters: lowercase letters, numbers, dots, or underscores.');
+    throw FormatException(tr(
+        'Username must be 3 to 20 characters: lowercase letters, numbers, dots, or underscores.'));
   }
-  if (!mail.contains('@')) throw const FormatException('Invalid email format.');
+  if (!mail.contains('@')) throw FormatException(tr('Invalid email format.'));
   final db = FirebaseFirestore.instance;
-  if ((await db.doc('usernames/$name').get()).exists) throw const FormatException('Username is already taken.');
-  final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: mail, password: pass);
+  if ((await db.doc('usernames/$name').get()).exists) {
+    throw FormatException(tr('That username is taken.'));
+  }
+  final cred = await FirebaseAuth.instance
+      .createUserWithEmailAndPassword(email: mail, password: pass);
   try {
     await db.doc('usernames/$name').set({'uid': cred.user!.uid, 'email': mail});
     await cred.user!.updateDisplayName(name);
-    await Lock.instance.syncWithCloud(cred.user!.uid);
   } on FirebaseException catch (e) {
     await cred.user!.delete();
-    throw FormatException(e.code == 'permission-denied' ? 'Username is already taken.' : 'Failed to save username: ${e.message}');
+    throw FormatException(e.code == 'permission-denied'
+        ? tr('That username is taken.')
+        : tr('Could not save username: {0}', [e.message]));
   }
 }
 
-void _toast(BuildContext c, String s) => ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(s)));
+void _toast(BuildContext c, String s) =>
+    ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(s)));
 
 /// Halaman masuk/daftar selalu bertema malam, seperti layar pembuka.
 class _AuthShell extends StatelessWidget {
-  const _AuthShell({required this.title, required this.subtitle, required this.children, this.back = false});
+  const _AuthShell(
+      {required this.title,
+      required this.subtitle,
+      required this.children,
+      this.back = false});
   final String title, subtitle;
   final List<Widget> children;
   final bool back;
@@ -107,19 +128,28 @@ class _AuthShell extends StatelessWidget {
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 420),
-                  child: ListView(shrinkWrap: true, padding: const EdgeInsets.fromLTRB(28, 8, 28, 120), children: [
-                    if (back)
-                      Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)))
-                    else
-                      gap(40),
-                    const MoonLogo(size: 56),
-                    gap(14),
-                    Text(title, style: display(36, color: Colors.white)),
-                    gap(8),
-                    Text(subtitle, style: TextStyle(color: Colors.white.withValues(alpha: .8))),
-                    gap(26),
-                    ...children,
-                  ]),
+                  child: ListView(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.fromLTRB(28, 8, 28, 120),
+                      children: [
+                        if (back)
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  icon: const Icon(Icons.arrow_back_rounded)))
+                        else
+                          gap(40),
+                        const MoonLogo(size: 56),
+                        gap(14),
+                        Text(title, style: display(36, color: Colors.white)),
+                        gap(8),
+                        Text(subtitle,
+                            style: TextStyle(
+                                color: Colors.white.withValues(alpha: .8))),
+                        gap(26),
+                        ...children,
+                      ]),
                 ),
               ),
             ),
@@ -141,21 +171,35 @@ class WelcomePage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 110),
                 child: Column(children: [
+                  const Align(
+                      alignment: Alignment.centerRight, child: _LangToggle()),
                   const Spacer(flex: 2),
                   const MoonLogo(size: 120),
                   gap(18),
                   Text(appName, style: wordmark(48, color: Colors.white)),
                   gap(12),
-                  Text(context.tr(tagline), style: TextStyle(color: Colors.white.withValues(alpha: .85), fontSize: 17)),
+                  Text(tagline,
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: .85),
+                          fontSize: 17)),
                   const Spacer(flex: 3),
                   SizedBox(
                     width: double.infinity,
-                    child: pillButton(context.tr('Get Started'), () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignUpPage()))),
+                    child: pillButton(
+                        tr('Get started'),
+                        () => Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => const SignUpPage()))),
                   ),
                   gap(8),
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Text(context.tr('Already have an account?'), style: TextStyle(color: Colors.white.withValues(alpha: .85))),
-                    TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SignInPage())), child: Text(context.tr('Sign in'))),
+                    Text(tr('Already have an account?'),
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: .85))),
+                    TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => const SignInPage())),
+                        child: Text(tr('Log in'))),
                   ]),
                 ]),
               ),
@@ -182,10 +226,11 @@ class _PassFieldState extends State<_PassField> {
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => widget.onSubmit?.call(),
         decoration: InputDecoration(
-          labelText: context.tr('Password'),
+          labelText: tr('Password'),
           suffixIcon: IconButton(
             onPressed: () => setState(() => hide = !hide),
-            icon: Icon(hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+            icon: Icon(
+                hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
           ),
         ),
       );
@@ -219,22 +264,32 @@ class _SignInState extends State<SignInPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: Text(context.tr('Reset password')),
+        title: Text(tr('Reset password')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(context.tr('We will send a reset link to your account email.')),
+          Text(tr('We\'ll send a reset link to your account email.')),
           gap(12),
-          TextField(controller: c, keyboardType: TextInputType.emailAddress, decoration: InputDecoration(labelText: context.tr('Username or email'))),
+          TextField(
+              controller: c,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(labelText: tr('Username or email'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(context.tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(context.tr('Send link'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: Text(tr('Cancel'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(tr('Send link'))),
         ],
       ),
     );
     if (ok != true) return;
     try {
       await resetPassword(c.text);
-      if (mounted) _toast(context, context.tr('If the account exists, a reset link was sent to its email. Check spam folder as well.'));
+      if (mounted) {
+        _toast(context,
+            tr('If the account exists, a reset link has been sent to its email. Check your spam folder too.'));
+      }
     } catch (e) {
       if (mounted) _toast(context, authError(e));
     }
@@ -243,26 +298,32 @@ class _SignInState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) => _AuthShell(
         back: true,
-        title: context.tr('Welcome back'),
-        subtitle: context.tr('Sign in to continue your therapy rhythm.'),
+        title: tr('Welcome back'),
+        subtitle: tr('Log in to continue your therapy rhythm.'),
         children: [
           TextField(
             controller: _id,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(labelText: context.tr('Username or email')),
+            decoration: InputDecoration(labelText: tr('Username or email')),
           ),
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
-          Align(alignment: Alignment.centerRight, child: TextButton(onPressed: _forgot, child: Text(context.tr('Forgot password?')))),
+          Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                  onPressed: _forgot, child: Text(tr('Forgot password?')))),
           gap(8),
-          pillButton(_busy ? context.tr('Processing...') : context.tr('Sign in'), _go),
+          pillButton(_busy ? tr('Working...') : tr('Log in'), _go),
           gap(8),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(context.tr("Don't have an account?")),
+            Text(tr('Don\'t have an account?')),
             TextButton(
-              onPressed: _busy ? null : () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignUpPage())),
-              child: Text(context.tr('Sign up')),
+              onPressed: _busy
+                  ? null
+                  : () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const SignUpPage())),
+              child: Text(tr('Sign up')),
             ),
           ]),
         ],
@@ -276,7 +337,9 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUpPage> {
-  final _u = TextEditingController(), _e = TextEditingController(), _p = TextEditingController();
+  final _u = TextEditingController(),
+      _e = TextEditingController(),
+      _p = TextEditingController();
   bool _busy = false;
 
   Future<void> _go() async {
@@ -294,33 +357,62 @@ class _SignUpState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) => _AuthShell(
         back: true,
-        title: context.tr('Create account'),
-        subtitle: context.tr('Username is used to sign in, email for account recovery.'),
+        title: tr('Create account'),
+        subtitle: tr(
+            'Your username is for logging in, and your email is for account recovery.'),
         children: [
           TextField(
             controller: _u,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(labelText: context.tr('Username'), prefixText: '@', helperText: context.tr('Lowercase letters, numbers, dots, underscores (3-20)')),
+            decoration: InputDecoration(
+                labelText: 'Username',
+                prefixText: '@',
+                helperText: tr(
+                    'Lowercase letters, numbers, dots, underscores (3 to 20)')),
           ),
           gap(12),
           TextField(
             controller: _e,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(labelText: context.tr('Email')),
+            decoration: const InputDecoration(labelText: 'Email'),
           ),
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
           gap(20),
-          pillButton(_busy ? context.tr('Processing...') : context.tr('Sign up'), _go),
+          pillButton(_busy ? tr('Working...') : tr('Sign up'), _go),
           gap(8),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(context.tr('Already have an account?')),
+            Text(tr('Already have an account?')),
             TextButton(
-              onPressed: _busy ? null : () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignInPage())),
-              child: Text(context.tr('Sign in')),
+              onPressed: _busy
+                  ? null
+                  : () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const SignInPage())),
+              child: Text(tr('Log in')),
             ),
           ]),
         ],
       );
+}
+
+/// Pilihan bahasa di layar Mulai: EN | ID.
+class _LangToggle extends StatelessWidget {
+  const _LangToggle();
+  @override
+  Widget build(BuildContext context) =>
+      Row(mainAxisSize: MainAxisSize.min, children: [
+        for (final l in const [('en', 'EN'), ('id', 'ID')])
+          TextButton(
+            onPressed: () => L10n.set(l.$1),
+            child: Text(
+              l.$2,
+              style: TextStyle(
+                  color: Colors.white
+                      .withValues(alpha: L10n.code == l.$1 ? 1 : .55),
+                  fontWeight:
+                      L10n.code == l.$1 ? FontWeight.w800 : FontWeight.w500),
+            ),
+          ),
+      ]);
 }

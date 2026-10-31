@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'l10n.dart';
 import 'models.dart';
+import 'l10n.dart';
 
 String two(int n) => n.toString().padLeft(2, '0');
 bool sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
@@ -15,30 +15,21 @@ String slotKey(DateTime at) => '${at.year}-${two(at.month)}-${two(at.day)} ${two
 /// "Hari ini" menurut pengaturan awal hari (mis. 04:00: pukul 02:00 masih dihitung kemarin).
 DateTime logicalToday(Prefs p) => DateUtils.dateOnly(DateTime.now().subtract(Duration(minutes: p.dayStart)));
 
-const _dayNamesEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const _dayNamesId = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 String scheduleText(Therapy t) {
   final n = t.times.length;
-  final isId = AppLocale.code == 'id';
-  final dayNames = isId ? _dayNamesId : _dayNamesEn;
   switch (t.kind) {
     case 'weekly':
       final d = [...t.weekdays]..sort();
-      final days = d.map((x) => dayNames[x - 1]).join(', ');
-      return isId ? 'Tiap $days' : 'Every $days';
+      return tr('Every {0}', [d.map((x) => tr(_dayNames[x - 1])).join(', ')]);
     case 'monthly':
-      return isId ? 'Tiap tanggal ${t.monthDay}' : 'Every month day ${t.monthDay}';
+      return tr('Every month on day {0}', [t.monthDay]);
     case 'asneeded':
-      return isId ? 'Saat perlu' : 'As needed';
+      return tr('As needed');
     default:
-      if (t.everyDays == 1) {
-        if (isId) {
-          return n > 1 ? 'Setiap hari, $n kali' : 'Setiap hari';
-        }
-        return n > 1 ? 'Every day, $n times' : 'Every day';
-      }
-      return isId ? 'Tiap ${t.everyDays} hari' : 'Every ${t.everyDays} days';
+      if (t.everyDays == 1) return n > 1 ? tr('Every day, {0} times', [n]) : tr('Every day');
+      return tr('Every {0} {0?day|days}', [t.everyDays]);
   }
 }
 
@@ -151,10 +142,6 @@ String hrtDuration(DateTime from, DateTime to) {
     y -= 1;
     m += 12;
   }
-  final isId = AppLocale.code == 'id';
-  final yStr = isId ? '$y tahun' : (y == 1 ? '1 year' : '$y years');
-  final mStr = isId ? '$m bulan' : (m == 1 ? '1 month' : '$m months');
-  final dStr = isId ? '$d hari' : (d == 1 ? '1 day' : '$d days');
-  final parts = [if (y > 0) yStr, if (m > 0) mStr, if (d > 0 || (y == 0 && m == 0)) dStr];
+  final parts = [if (y > 0) tr('{0} {0?year|years}', [y]), if (m > 0) tr('{0} {0?month|months}', [m]), if (d > 0 || (y == 0 && m == 0)) tr('{0} {0?day|days}', [d])];
   return parts.join(' ');
 }

@@ -28,7 +28,8 @@ void main() {
     test('Pharmacokinetic profile lookup and dose conversion', () {
       final pk = pkOf('e2_valerate');
       expect(pk, isNotNull);
-      expect(pk!.name, equals('Valerat'));
+      expect(pk!.en, equals('Valerate'));
+      expect(pk.name, isNotEmpty);
 
       // Test mgOf
       expect(mgOf(500, 'mcg'), equals(0.5));
@@ -57,12 +58,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.9.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.10.0'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.9.0'));
+      expect(AppChangelog.releases.first.version, equals('1.10.0'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -115,6 +116,37 @@ void main() {
       expect(reconstructed.mood, equals('happy'));
       expect(reconstructed.body['Skin'], equals('Smoother'));
       expect(reconstructed.text, equals('Hari yang sangat menyenangkan'));
+    });
+
+    test('BodyMeasurement and bra size calculations', () {
+      final m = BodyMeasurement(
+        id: 'm1',
+        at: DateTime(2026, 10, 31),
+        unit: 'cm',
+        bust: 88,
+        underbust: 74,
+        waist: 68,
+        hips: 92,
+      );
+
+      final bra = m.braSize;
+      expect(bra, isNotNull);
+      expect(bra!.bandUs, equals(34));
+      expect(bra.bandEu, equals(75));
+      expect(bra.cup, equals('C'));
+      expect(bra.usUk, equals('34C'));
+      expect(bra.euId, equals('75C'));
+      expect(bra.sisterTight, contains('32D'));
+      expect(bra.sisterLoose, contains('36B'));
+
+      expect(m.topSize, equals('M'));
+      expect(m.bottomSize, equals('27–28 (S)'));
+      expect(m.waistToHipRatio, closeTo(0.739, 0.01));
+
+      final map = m.toMap();
+      final recon = BodyMeasurement.from('m1', map);
+      expect(recon.bust, equals(88.0));
+      expect(recon.underbust, equals(74.0));
     });
   });
 }

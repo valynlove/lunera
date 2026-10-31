@@ -1,18 +1,17 @@
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../l10n.dart';
 import '../models.dart';
-import '../profile.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import 'journal.dart';
-import 'profile_page.dart';
 import 'sheets.dart';
+import '../l10n.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -37,10 +36,9 @@ class HomePage extends ConsumerWidget {
             for (final s in xs) SlotTile(s: s, logs: logs, supplies: supplies, prefs: prefs),
           ]);
 
-    final displayName = ref.watch(displayNameProvider);
-    final h = DateTime.now().hour;
-    final greetKey = h < 11 ? 'Good morning' : (h < 15 ? 'Good afternoon' : (h < 19 ? 'Good evening' : 'Good night'));
-    final greet = context.tr(greetKey);
+    final user = FirebaseAuth.instance.currentUser;
+    final name = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
+    final greet = greeting();
 
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
@@ -48,16 +46,16 @@ class HomePage extends ConsumerWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('$greet,', style: Theme.of(context).textTheme.bodyLarge),
             gap(2),
-            Text(displayName ?? appName, style: display(30)),
+            Text(name ?? appName, style: display(30)),
             gap(4),
-            Text(DateFormat('EEEE, d MMMM y', AppLocale.code).format(DateTime.now()), style: Theme.of(context).textTheme.bodySmall),
+            Text(DateFormat('EEEE, d MMMM y', L10n.code).format(DateTime.now()), style: Theme.of(context).textTheme.bodySmall),
           ]),
         ),
-        IconButton.filledTonal(tooltip: context.tr('Add therapy'), onPressed: () => showSheet(context, TherapySheet(supplies: supplies)), icon: const Icon(Icons.add_rounded)),
-        const SizedBox(width: 8),
-        UserAvatar(
-          size: 44,
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfilePage())),
+        IconButton.filledTonal(tooltip: tr('Add therapy'), onPressed: () => showSheet(context, TherapySheet(supplies: supplies)), icon: const Icon(Icons.add_rounded)),
+        const SizedBox(width: 6),
+        GestureDetector(
+          onTap: () => ref.read(tabProvider.notifier).state = 4,
+          child: CircleAvatar(radius: 22, backgroundColor: C.peony, child: Text((name ?? appName).substring(0, 1).toUpperCase(), style: display(18, color: Colors.white))),
         ),
       ]),
       gap(16),
@@ -67,19 +65,19 @@ class HomePage extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(top: 80),
           child: Column(children: [
-            Text(context.tr('No therapies yet'), style: display(32)),
+            Text(tr('No therapies yet'), style: display(32)),
             gap(10),
-            Text(context.tr('Add your first medicine to calculate schedules.')),
+            Text(tr('Add your first medication to start tracking your schedule.')),
             gap(20),
-            pillButton(context.tr('Add therapy'), () => showSheet(context, TherapySheet(supplies: supplies)), icon: Icons.add_rounded),
+            pillButton(tr('Add therapy'), () => showSheet(context, TherapySheet(supplies: supplies)), icon: Icons.add_rounded),
           ]),
         )
       else ...[
         for (final t in ths) DoseCard(t: t, slots: slots, logs: logs, supplies: supplies, prefs: prefs),
         WeekCard(ths: ths, logs: logs),
-        section(context.tr('Overdue'), overdue),
-        section(context.tr('Today'), todays),
-        section(context.tr('Next 7 days'), upcoming),
+        section(tr('Missed'), overdue),
+        section(tr('Today'), todays),
+        section(tr('Next 7 days'), upcoming),
       ],
     ]);
   }
@@ -103,8 +101,6 @@ class DoseCard extends ConsumerWidget {
     final place = suggestPlace(prefs, logs, t.id);
     final idle = fg.withValues(alpha: .14);
     final hhmm = DateFormat('HH:mm');
-    final left = next == null ? 0 : daysBetween(today, next.at);
-    final isLate = left < 0;
     CustomPainter painter;
     List<Widget> center;
 
@@ -114,7 +110,7 @@ class DoseCard extends ConsumerWidget {
       center = [
         Text(last == null ? '-' : '$since', style: display(88)),
         gap(6),
-        Text(last == null ? context.tr('no logs yet') : context.tr('days since last dose')),
+        Text(last == null ? tr('no entries yet') : tr('{0?day|days} since last dose', [since])),
       ];
     } else if (t.daily) {
       final td = [for (final s in mine) if (sameDay(s.at, today)) s];
@@ -122,41 +118,42 @@ class DoseCard extends ConsumerWidget {
       final nextToday = td.where((s) => s.pending).firstOrNull;
       painter = HourDialPainter({for (final s in td) s.at.hour: s.status}, idle);
       center = td.isEmpty
-          ? [Text(context.tr('Day off'), style: display(48))]
+          ? [Text(tr('Day off'), style: display(48))]
           : nextToday == null
-              ? [Text(context.tr('Done'), style: display(48)), gap(6), Text(context.tr('{done} of {total} doses today', {'done': done, 'total': td.length}))]
+              ? [Text(tr('Done'), style: display(48)), gap(6), Text(tr('{0} of {1} {1?dose|doses} today', [done, td.length]))]
               : [
                   Text(hhmm.format(nextToday.at), style: display(64, color: nextToday.status == 'late' ? C.peony : null)),
                   gap(6),
-                  Text(context.tr('next, {done} of {total} done', {'done': done, 'total': td.length})),
+                  Text(tr('next up, {0} of {1} done', [done, td.length])),
                 ];
     } else {
       final cycle = cycleOf(t), n = cycle.clamp(4, 60);
-      final elapsed = isLate ? n : (cycle - left).clamp(0, n);
+      final left = next == null ? 0 : daysBetween(today, next.at);
+      final late = left < 0;
+      final elapsed = late ? n : (cycle - left).clamp(0, n);
       painter = DialPainter(n, elapsed, idle);
       center = left == 0
-          ? [Text(context.tr('Today'), style: display(48)), gap(6), Text(next == null ? '' : context.tr('at {time}', {'time': hhmm.format(next.at)}))]
+          ? [Text(tr('Today'), style: display(48)), gap(6), Text(next == null ? '' : tr('at {0}', [hhmm.format(next.at)]))]
           : [
-              Text('${left.abs()}', style: display(88, color: isLate ? C.peony : null)),
+              Text('${left.abs()}', style: display(88, color: late ? C.peony : null)),
               gap(6),
-              Text(isLate ? (left.abs() == 1 ? context.tr('day overdue') : context.tr('days overdue')) : (left.abs() == 1 ? context.tr('day left') : context.tr('days left'))),
+              Text(late ? tr('{0?day|days} late', [left.abs()]) : tr('{0?day|days} left', [left.abs()])),
             ];
     }
 
     Widget chip(String s, IconData i) =>
         Chip(avatar: Icon(i, size: 16), label: Text(s), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07));
 
-    final isHighlighted = !t.asNeeded && !t.daily && (left == 0 || isLate);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(24),
-      decoration: cardBox(context, radius: 36, highlight: isHighlighted),
+      decoration: cardBox(context, radius: 36),
       child: Column(children: [
         Row(children: [
           const SizedBox(width: 48),
           Expanded(child: Center(child: Text(t.name, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)))),
           IconButton(
-            tooltip: context.tr('Edit therapy'),
+            tooltip: tr('Edit therapy'),
             onPressed: () => showSheet(context, TherapySheet(supplies: supplies, initial: t)),
             icon: const Icon(Icons.edit_outlined, size: 20),
           ),
@@ -174,15 +171,15 @@ class DoseCard extends ConsumerWidget {
         Wrap(spacing: 8, runSpacing: 4, alignment: WrapAlignment.center, children: [
           chip('${fmt(t.dose)} ${t.doseUnit}', t.adm.icon),
           chip(scheduleText(t), Icons.event_repeat_rounded),
-          if (t.adm.places && place.isNotEmpty) chip(context.tr('next: {place}', {'place': place}), Icons.my_location_rounded),
+          if (t.adm.places && place.isNotEmpty) chip(tr('next: {0}', [tr(place)]), Icons.my_location_rounded),
         ]),
         gap(18),
         pillButton(
-          t.route == 'inj' ? context.tr('Log injection') : context.tr('Log dose'),
+          t.route == 'inj' ? tr('Log injection') : tr('Log dose'),
           () => showSheet(context, DoseSheet(t: t, slot: next, supplies: supplies, prefs: prefs, suggested: place)),
           icon: Icons.check_rounded,
         ),
-        if (next != null && !t.asNeeded) TextButton(onPressed: () => skipSlot(context, ref, next), child: Text(context.tr('Skip this dose'))),
+        if (next != null && !t.asNeeded) TextButton(onPressed: () => skipSlot(context, ref, next), child: Text(tr('Skip this dose'))),
       ]),
     );
   }
@@ -190,7 +187,7 @@ class DoseCard extends ConsumerWidget {
 
 /// Tandai satu jadwal sebagai sengaja dilewati.
 Future<void> skipSlot(BuildContext context, WidgetRef ref, Slot s) async {
-  if (!await confirm(context, context.tr('Skip this dose? It will not be counted as taken and its reminders will stop.'), ok: 'Skip')) return;
+  if (!await confirm(context, tr('Skip this dose? It won\'t count as taken and its reminder will stop.'), ok: tr('Skip'))) return;
   ref.read(repoProvider)?.logDose(DoseLog(id: '', therapyId: s.t.id, at: s.at, skipped: true, slot: slotKey(s.at)));
 }
 
@@ -210,7 +207,7 @@ class DialPainter extends CustomPainter {
       final p = Paint()
         ..strokeWidth = w
         ..strokeCap = StrokeCap.round
-        ..color = i == cur ? Pastel.lilac : (i < elapsed ? Pastel.mint : idle);
+        ..color = i == cur ? C.peony : (i < elapsed ? C.lagoon : idle);
       canvas.drawLine(c + Offset(math.cos(a), math.sin(a)) * (r - len), c + Offset(math.cos(a), math.sin(a)) * (r - 2), p);
     }
   }
@@ -233,10 +230,10 @@ class HourDialPainter extends CustomPainter {
       final color = st == null
           ? idle
           : st == 'taken'
-              ? Pastel.mint
+              ? C.lagoon
               : (st == 'late' || st == 'overdue')
-                  ? Pastel.rose
-                  : Pastel.mint.withValues(alpha: .45);
+                  ? C.peony
+                  : C.lagoon.withValues(alpha: .45);
       final p = Paint()
         ..strokeWidth = 6
         ..strokeCap = StrokeCap.round
@@ -261,7 +258,7 @@ class SlotTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = s.t, fg = Theme.of(context).colorScheme.onSurface;
     final late = s.status == 'overdue' || s.status == 'late';
-    final label = sameDay(s.at, logicalToday(prefs)) ? DateFormat('HH:mm').format(s.at) : DateFormat('EEE d MMM, HH:mm', AppLocale.code).format(s.at);
+    final label = sameDay(s.at, logicalToday(prefs)) ? DateFormat('HH:mm').format(s.at) : DateFormat('EEE d MMM, HH:mm', L10n.code).format(s.at);
     void open() => showSheet(
         context,
         DoseSheet(
@@ -273,7 +270,7 @@ class SlotTile extends ConsumerWidget {
           suggested: suggestPlace(prefs, logs, t.id),
         ));
     Future<void> undoSkip() async {
-      if (await confirm(context, context.tr('Undo skip for this dose?'), ok: 'Undo')) ref.read(repoProvider)?.deleteLog(s.log!, {});
+      if (await confirm(context, tr('Undo "skip" for this dose?'), ok: tr('Undo'))) ref.read(repoProvider)?.deleteLog(s.log!, {});
     }
 
     return Container(
@@ -286,14 +283,14 @@ class SlotTile extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         leading: Icon(s.skipped ? Icons.skip_next_rounded : t.adm.icon, color: s.taken ? C.lagoon : (s.skipped ? fg.withValues(alpha: .45) : (late ? C.peony : fg))),
         title: Text(t.name, style: TextStyle(fontWeight: FontWeight.w700, color: s.skipped ? fg.withValues(alpha: .55) : null)),
-        subtitle: Text(s.skipped ? context.tr('Skipped, scheduled {time}', {'time': label}) : '$label, ${fmt(t.dose)} ${t.doseUnit}'),
+        subtitle: Text(s.skipped ? tr('Skipped, scheduled {0}', [label]) : '$label, ${fmt(t.dose)} ${t.doseUnit}'),
         trailing: s.taken
             ? Icon(Icons.check_circle_rounded, color: C.lagoon)
             : s.skipped
                 ? null
                 : Row(mainAxisSize: MainAxisSize.min, children: [
-                    IconButton(tooltip: context.tr('Skip'), onPressed: () => skipSlot(context, ref, s), icon: const Icon(Icons.skip_next_rounded)),
-                    FilledButton.tonal(onPressed: open, child: Text(context.tr('Log'))),
+                    IconButton(tooltip: tr('Skip'), onPressed: () => skipSlot(context, ref, s), icon: const Icon(Icons.skip_next_rounded)),
+                    FilledButton.tonal(onPressed: open, child: Text(tr('Log'))),
                   ]),
       ),
     );
@@ -309,12 +306,12 @@ class AlertsCard extends ConsumerWidget {
     final alerts = <(IconData, String)>[];
     for (final s in supplies) {
       if (s.expired) {
-        alerts.add((Icons.error_outline_rounded, context.tr('{name} has expired', {'name': s.name})));
+        alerts.add((Icons.error_outline_rounded, tr('{0} has expired', [s.name])));
         continue;
       }
-      if (s.low) alerts.add((Icons.inventory_2_outlined, s.generic ? context.tr('{name}: {qty} left', {'name': s.name, 'qty': fmt(s.qty)}) : context.tr('{name}: {doses} doses left', {'name': s.name, 'doses': s.doses})));
+      if (s.low) alerts.add((Icons.inventory_2_outlined, s.generic ? tr('{0} has {1} left', [s.name, fmt(s.qty)]) : tr('{0} has {1} {1?dose|doses} left', [s.name, s.doses])));
       final d = s.daysToExpiry;
-      if (d != null && d <= 30) alerts.add((Icons.event_busy_outlined, context.tr('{name} expires in {days} days', {'name': s.name, 'days': d})));
+      if (d != null && d <= 30) alerts.add((Icons.event_busy_outlined, tr('{0} expires in {1} {1?day|days}', [s.name, d])));
     }
     if (alerts.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -328,7 +325,7 @@ class AlertsCard extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: cardBox(context, radius: 24).copyWith(border: Border.all(color: C.amber.withValues(alpha: .6))),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(context.tr('Needs attention'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+              Text(tr('Needs attention'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
               gap(8),
               for (final a in alerts.take(4))
                 Padding(
@@ -361,8 +358,8 @@ class WeekCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       decoration: cardBox(context, radius: 28),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(context.tr('This week'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-        Text(context.tr('Estimated estradiol, {level} pg/mL now', {'level': fmt(levelAt(intakes, now).roundToDouble())}), style: Theme.of(context).textTheme.bodySmall),
+        Text(tr('This week'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+        Text(tr('Estimated estradiol, {0} pg/mL now', [fmt(levelAt(intakes, now).roundToDouble())]), style: Theme.of(context).textTheme.bodySmall),
         gap(8),
         SizedBox(
           height: 90,

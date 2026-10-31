@@ -11,7 +11,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.9.0-6C5CE7.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.10.0-6C5CE7.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Download Latest APK](https://github.com/valynlove/lunera/releases/latest) • [📋 Changelog](CHANGELOG.md)
 
@@ -32,6 +32,7 @@
 - 📊 **Pharmacokinetic Level Simulations:** Interactive multi-compartment pharmacokinetic curves for Estradiol and Testosterone with customizable target zones and lab result calibration.
 - 📅 **Dual-View Timeline & Schedule:** Interactive calendar picker navigation, rolling interval scheduling, and dose history logs.
 - 🔔 **Scheduled Dose Reminders:** Offline-capable native local notifications (`flutter_local_notifications`) with exact alarm receivers and high-importance sound/vibration channels.
+- 📏 **Body Measurements & Sizing Calculator:** Dual-unit body measurement logging (bust, underbust, waist, hips, shoulder, weight, height) with automatic US/UK and EU/ID bra size calculation, sister sizing recommendations, top/bottom size estimates, and waist-to-hip ratio (WHR).
 - 📖 **Mood & Body Observation Journal:** Daily emotional state logging, physical transition observation notes, and category filters.
 - 📦 **Supply & Equipment Tracking:** Manage inventory for vials, syringes, alcohol wipes, and needles with automatic stock deduction upon dose intake.
 - 💾 **Dual Local & Cloud Safety:** Completely offline JSON export/import and secure cloud synchronization via Firebase Cloud Firestore.

@@ -1,12 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
 import 'journal.dart';
+import '../l10n.dart';
 
 /// Rata-rata skor suasana hati menurut hari sejak dosis terakhir: (hari, jumlah entri, rata-rata).
 List<(int, int, double?)> moodByCycleDay(Therapy t, List<DoseLog> logs, List<JournalEntry> journal) {
@@ -82,14 +82,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
     if (used >= 6 && solid.length >= 2) {
       final hi = solid.reduce((a, b) => b.$3! > a.$3! ? b : a), lo = solid.reduce((a, b) => b.$3! < a.$3! ? b : a);
       if (hi.$1 != lo.$1 && (hi.$3! - lo.$3!) >= .5) {
-        insight = context.tr('Your mood tends to be highest on day {hi} after dosing (avg {hiAvg}) and lowest on day {lo} (avg {loAvg}).', {
-          'hi': hi.$1,
-          'hiAvg': hi.$3!.toStringAsFixed(1),
-          'lo': lo.$1,
-          'loAvg': lo.$3!.toStringAsFixed(1),
-        });
+        insight = tr('Your mood tends to be best on day {0} after your dose (average {1}) ', [hi.$1, hi.$3!.toStringAsFixed(1)]) + tr('and lowest on day {0} ({1}).', [lo.$1, lo.$3!.toStringAsFixed(1)]);
       } else {
-        insight = context.tr('Your mood is relatively stable across your cycle.');
+        insight = tr('Your mood stays fairly steady throughout the cycle.');
       }
     }
 
@@ -127,7 +122,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
               getTooltipItem: (g, gi, rod, ri) {
                 final b = bs[g.x];
                 return BarTooltipItem(
-                  b.$3 == null ? context.tr('Day {day}: no data', {'day': b.$1}) : context.tr('Day {day}: {score} ({count} entries)', {'day': b.$1, 'score': b.$3!.toStringAsFixed(1), 'count': b.$2}),
+                  b.$3 == null ? tr('Day {0}: no data yet', [b.$1]) : tr('Day {0}: {1} ({2} {2?entry|entries})', [b.$1, b.$3!.toStringAsFixed(1), b.$2]),
                   const TextStyle(color: Colors.white, fontSize: 12),
                 );
               },
@@ -153,29 +148,29 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-            Expanded(child: Text(context.tr('Insights'), style: display(32))),
+            Expanded(child: Text(tr('Insights'), style: display(32))),
           ]),
           gap(16),
-          _card(context.tr('Last 30 days'), [
+          _card(tr('Last 30 days'), [
             if (total == 0)
-              Text(context.tr('Not enough data yet. Log your doses and journal for a few days to see a summary.'))
+              Text(tr('Not enough data yet. Log your doses and journal for a few days to see a summary.'))
             else ...[
               Text.rich(TextSpan(text: '${(taken / total * 100).round()}%', style: display(44), children: [
-                TextSpan(text: ' ${context.tr('doses logged')}', style: theme.textTheme.bodyMedium),
+                TextSpan(text: tr(' of doses logged'), style: theme.textTheme.bodyMedium),
               ])),
               gap(10),
               Wrap(spacing: 8, runSpacing: 4, children: [
-                Chip(label: Text(context.tr('{n} taken', {'n': taken})), side: BorderSide.none, backgroundColor: C.lagoon.withValues(alpha: .16)),
-                Chip(label: Text(context.tr('{n} skipped', {'n': skipped})), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07)),
-                Chip(label: Text(context.tr('{n} missed', {'n': missed})), side: BorderSide.none, backgroundColor: C.amber.withValues(alpha: .18)),
+                Chip(label: Text(tr('{0} taken', [taken])), side: BorderSide.none, backgroundColor: C.lagoon.withValues(alpha: .16)),
+                Chip(label: Text(tr('{0} skipped', [skipped])), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07)),
+                Chip(label: Text(tr('{0} missed', [missed])), side: BorderSide.none, backgroundColor: C.amber.withValues(alpha: .18)),
               ]),
               gap(4),
-              Text(context.tr('Estimated from fixed schedules. As-needed doses are not counted.'), style: theme.textTheme.bodySmall),
+              Text(tr('Estimated from fixed schedules. "As needed" doses aren\'t counted.'), style: theme.textTheme.bodySmall),
             ],
           ]),
-          _card(context.tr('30-day mood'), [
+          _card(tr('Mood, last 30 days'), [
             if (moods30.isEmpty)
-              Text(context.tr('No mood entries yet. Log from the home card.'))
+              Text(tr('No mood entries yet. Log one from the card on the home screen.'))
             else
               for (final m in moods.entries)
                 Padding(
@@ -183,7 +178,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   child: Row(children: [
                     Icon(m.value.$2, size: 20, color: moodColor(m.key)),
                     const SizedBox(width: 10),
-                    SizedBox(width: 56, child: Text(context.tr(m.value.$1), style: theme.textTheme.bodySmall)),
+                    SizedBox(width: 56, child: Text(tr(m.value.$1), style: theme.textTheme.bodySmall)),
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(6),
@@ -200,27 +195,27 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   ]),
                 ),
           ]),
-          _card(context.tr('Mood across cycle'), [
+          _card(tr('Mood across your cycle'), [
             if (sel == null)
-              Text(context.tr('Requires a recurring schedule therapy (every 2+ days).'))
+              Text(tr('Needs a therapy with a repeating schedule (every 2 days or more).'))
             else ...[
               if (cyclic.length > 1)
                 Wrap(spacing: 8, runSpacing: 4, children: [
                   for (final t in cyclic) ChoiceChip(label: Text(t.name), selected: t.id == sel.id, onSelected: (_) => setState(() => therapyId = t.id)),
                 ]),
               if (cyclic.length > 1) gap(10),
-              Text(context.tr('Average by days since last dose (day 0 = dose day).'), style: theme.textTheme.bodySmall),
+              Text(tr('Average by days since your last dose (day 0 = dose day).'), style: theme.textTheme.bodySmall),
               gap(8),
               if (buckets.isEmpty)
-                Text(context.tr('No recorded doses for this therapy yet.'))
+                Text(tr('No doses logged for this therapy yet.'))
               else ...[
                 chart(buckets),
                 gap(6),
-                Text(context.tr('Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.'), style: theme.textTheme.bodySmall),
+                Text(tr('Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.'), style: theme.textTheme.bodySmall),
                 gap(10),
-                Text(insight ?? context.tr('Requires at least 6 mood entries after doses, and 2 per compared day. Currently {used} entries.', {'used': used})),
+                Text(insight ?? tr('Needs at least 6 mood entries after logged doses, and 2 entries on each day being compared. Currently {0} {0?entry|entries}.', [used])),
                 gap(8),
-                Text(context.tr('This reflects your own recorded patterns, not causation. Many factors influence mood.'), style: theme.textTheme.bodySmall),
+                Text(tr('This is a pattern from your own notes, not cause and effect. Many other things affect mood.'), style: theme.textTheme.bodySmall),
               ],
             ],
           ]),

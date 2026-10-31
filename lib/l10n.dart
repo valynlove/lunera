@@ -1,472 +1,85 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n_id.dart';
 
-/// Active application locale for formatting dates and non-widget strings.
-class AppLocale {
-  static String code = 'en';
-  static const supported = [Locale('en'), Locale('id')];
-}
+/// Bahasa aplikasi: English (bawaan) atau Indonesia. Disimpan per perangkat.
+class L10n {
+  L10n._();
+  static final notifier = ValueNotifier<String>('en');
+  static String get code => notifier.value;
 
-/// Simple, efficient translation engine:
-/// English text is used directly as the key.
-/// Indonesian translations are retrieved from [_id].
-class AppStrings {
-  AppStrings(this.code);
+  static Future<void> load() async {
+    final c = (await SharedPreferences.getInstance()).getString('app.lang');
+    notifier.value = c == 'id' ? 'id' : 'en';
+  }
 
-  final String code;
-
-  static AppStrings of(BuildContext context) =>
-      Localizations.of<AppStrings>(context, AppStrings) ?? AppStrings(AppLocale.code);
-
-  static const LocalizationsDelegate<AppStrings> delegate = _AppStringsDelegate();
-
-  String tr(String key, [Map<String, Object?>? args]) {
-    var text = code == 'id' ? (_id[key] ?? key) : key;
-    if (args != null) {
-      args.forEach((k, v) => text = text.replaceAll('{$k}', '$v'));
-    }
-    return text;
+  static Future<void> set(String c) async {
+    final code = c == 'id' ? 'id' : 'en';
+    if (code == notifier.value) return;
+    await (await SharedPreferences.getInstance()).setString('app.lang', code);
+    notifier.value = code;
   }
 }
 
-class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
-  const _AppStringsDelegate();
+/// Backwards compatibility for AppLocale
+class AppLocale {
+  static String get code => L10n.code;
+  static const supported = [Locale('en'), Locale('id')];
+}
 
-  @override
-  bool isSupported(Locale locale) =>
-      locale.languageCode == 'en' || locale.languageCode == 'id';
+final _plural = RegExp(r'\{(\d+)\?([^|}]*)\|([^}]*)\}');
+final _slot = RegExp(r'\{(\d+)\}');
 
-  @override
-  Future<AppStrings> load(Locale locale) => SynchronousFuture(
-        AppStrings(locale.languageCode == 'id' ? 'id' : 'en'),
-      );
-
-  @override
-  bool shouldReload(covariant LocalizationsDelegate<AppStrings> old) => false;
+/// Terjemahan. Teks dasar (kunci) selalu English; Indonesia diambil dari `idStrings`.
+/// `{0}`, `{1}` diisi dari [args]; `{0?day|days}` memilih kata tunggal atau jamak menurut argumen ke-0.
+/// Mendukung argumen List `[a, b]` maupun Map `{'name': 'val'}` untuk fleksibilitas.
+String tr(String en, [dynamic args = const []]) {
+  var s = en;
+  if (L10n.code == 'id') {
+    final t = idStrings[en];
+    if (t != null) {
+      s = t;
+    } else if (kDebugMode) {
+      debugPrint('i18n: belum ada terjemahan Indonesia untuk "$en"');
+    }
+  }
+  if (args is Map) {
+    args.forEach((k, v) => s = s.replaceAll('{$k}', '$v'));
+    return s;
+  }
+  final list = args is List ? args : [args];
+  s = s.replaceAllMapped(_plural, (m) {
+    final i = int.parse(m[1]!);
+    final v = i < list.length ? list[i] : null;
+    final n = v is num ? v : num.tryParse('$v');
+    return n == 1 ? m[2]! : m[3]!;
+  });
+  return s.replaceAllMapped(_slot, (m) {
+    final i = int.parse(m[1]!);
+    return i < list.length ? '${list[i]}' : m[0]!;
+  });
 }
 
 extension TrContext on BuildContext {
-  /// Context-aware translation string.
-  String tr(String key, [Map<String, Object?>? args]) =>
-      AppStrings.of(this).tr(key, args);
+  String tr(String key, [dynamic args = const []]) => l10nTr(key, args);
 }
 
-/// Global translation without context.
-String trG(String key, [Map<String, Object?>? args]) =>
-      AppStrings(AppLocale.code).tr(key, args);
+String trG(String key, [dynamic args = const []]) => tr(key, args);
+String l10nTr(String key, [dynamic args = const []]) => tr(key, args);
 
-/// Indonesian translation dictionary (English key -> Indonesian translation).
-const Map<String, String> _id = {
-  // Brand & Taglines
-  'Every Phase, Your Own.': 'Setiap fase, milikmu.',
-  'Every phase,\nyour own.': 'Setiap fase,\nmilikmu.',
+/// Sapaan menurut jam. English memakai tiga bagian hari, Indonesia empat.
+String greeting() {
+  final h = DateTime.now().hour;
+  if (L10n.code == 'id') return h < 11 ? 'Selamat pagi' : (h < 15 ? 'Selamat siang' : (h < 19 ? 'Selamat sore' : 'Selamat malam'));
+  return h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+}
 
-  // Common Actions
-  'Cancel': 'Batal',
-  'Exit': 'Keluar',
-  'Save': 'Simpan',
-  'Delete': 'Hapus',
-  'Close': 'Tutup',
-  'Edit': 'Ubah',
-  'Undo': 'Batalkan',
-  'Skip': 'Lewati',
-  'Log': 'Catat',
-  'Add': 'Tambah',
-  'Write': 'Tulis',
-  'Restore': 'Pulihkan',
-  'Export': 'Ekspor',
-  'Import': 'Impor',
-  'Merge': 'Gabungkan',
-  'Replace all': 'Ganti semua',
-  'Save changes': 'Simpan perubahan',
-  'Failed': 'Gagal',
-  'An error occurred': 'Terjadi kesalahan',
-
-  // Navigation & Shell
-  'Home': 'Beranda',
-  'Calendar': 'Kalender',
-  'Levels': 'Level',
-  'Supplies': 'Stok',
-  'More': 'Lainnya',
-  'Settings': 'Pengaturan',
-  'Security': 'Keamanan',
-  'Insights': 'Wawasan',
-  'Body & Changes': 'Tubuh & perubahan',
-  'Account Profile': 'Profil Akun',
-  'Import, export, backup': 'Impor, ekspor, cadangan',
-  'Check for Updates': 'Periksa Pembaruan',
-  'About {name}': 'Tentang {name}',
-  'Sign out': 'Keluar',
-  'Exit {name}?': 'Keluar dari {name}?',
-  'Are you sure you want to exit the application?': 'Apakah kamu yakin ingin keluar dari aplikasi?',
-
-  // Home Screen
-  'Good morning': 'Selamat pagi',
-  'Good afternoon': 'Selamat siang',
-  'Good evening': 'Selamat sore',
-  'Good night': 'Selamat malam',
-  'How are you feeling today?': 'Bagaimana perasaanmu hari ini?',
-  'Today you feel {mood}': 'Hari ini kamu merasa {mood}',
-  'Add therapy': 'Tambah terapi',
-  'No therapies yet': 'Belum ada terapi',
-  'Add your first medicine to calculate schedules.': 'Tambahkan obat pertamamu untuk mulai menghitung jadwal.',
-  'Low supply alert': 'Peringatan stok menipis',
-  'Medicine expiring soon': 'Obat segera kedaluwarsa',
-  'Take dose': 'Catat dosis',
-  'Skip dose': 'Lewati',
-  'Overdue': 'Terlewat',
-  'Today': 'Hari ini',
-  'Next 7 days': '7 hari ke depan',
-  'no logs yet': 'belum ada catatan',
-  'days since last dose': 'hari sejak dosis terakhir',
-  'Day off': 'Libur',
-  'Done': 'Selesai',
-  '{done} of {total} doses today': '{done} dari {total} dosis hari ini',
-  'next, {done} of {total} done': 'berikutnya, {done} dari {total} selesai',
-  'at {time}': 'pukul {time}',
-  'day overdue': 'hari terlambat',
-  'days overdue': 'hari terlambat',
-  'day left': 'hari lagi',
-  'days left': 'hari lagi',
-  'Edit therapy': 'Ubah terapi',
-  'next: {place}': 'berikutnya: {place}',
-  'Log injection': 'Catat suntikan',
-  'Log dose': 'Catat dosis',
-  'Skip this dose': 'Lewati dosis ini',
-  'Skip this dose? It will not be counted as taken and its reminders will stop.': 'Lewati dosis ini? Dosis tidak dihitung sebagai sudah diminum dan pengingatnya berhenti.',
-  'Undo skip for this dose?': 'Batalkan "lewati" untuk dosis ini?',
-  'Skipped, scheduled {time}': 'Dilewati, jadwal {time}',
-  '{name} has expired': '{name} sudah kedaluwarsa',
-  '{name}: {qty} left': '{name}: tinggal {qty}',
-  '{name}: {doses} doses left': '{name}: tinggal {doses} dosis',
-  '{name} expires in {days} days': '{name} kedaluwarsa dalam {days} hari',
-  'Needs attention': 'Perlu perhatian',
-  'This week': 'Minggu ini',
-  'Estimated estradiol, {level} pg/mL now': 'Perkiraan estradiol, {level} pg/mL sekarang',
-
-  // Calendar & Schedule
-  'Schedule': 'Jadwal',
-  'History': 'Riwayat',
-  'Journal': 'Jurnal',
-  'No schedule for this day.': 'Tidak ada jadwal di hari ini.',
-  'Add schedule': 'Tambah jadwal',
-  'All': 'Semua',
-  'Mood': 'Suasana',
-  'Body': 'Tubuh',
-  'Notes': 'Catatan',
-  'No entries yet. Record your mood, physical changes, or daily notes.': 'Belum ada entri. Catat suasana hati, perubahan tubuh, atau apa pun yang ingin kamu ingat.',
-  'Timeline by body area': 'Garis waktu per bagian tubuh',
-  'Body changes': 'Perubahan tubuh',
-  'Fill at least one: mood, body changes, or notes.': 'Isi minimal satu: suasana hati, perubahan tubuh, atau catatan.',
-  'Delete this journal entry?': 'Hapus entri jurnal ini?',
-  'Edit journal': 'Ubah jurnal',
-  'New journal': 'Jurnal baru',
-  'What are you noticing or feeling?': 'Apa yang kamu rasakan atau lihat?',
-
-  // History Page
-  'Therapy deleted': 'Terapi dihapus',
-  'Therapy for this log has been deleted. Delete log?': 'Terapi untuk catatan ini sudah dihapus. Hapus catatannya?',
-  '{count} doses logged': '{count} dosis tercatat',
-  'No logs yet. Doses you record appear here.': 'Belum ada catatan. Dosis yang kamu catat muncul di sini.',
-  'Which therapy?': 'Terapi mana?',
-
-  // Levels & Labs
-  'Lab results': 'Hasil lab',
-  'Estimated {name}': 'Perkiraan {name}',
-  'current': 'saat ini',
-  'Adjust to lab results ({n})': 'Sesuaikan ke hasil lab ({n})',
-  'estimated': 'perkiraan',
-  'lab result': 'hasil lab',
-  'Lab result': 'Hasil lab',
-  'Estimates use an average population model, not lab results. Individual levels vary; always consult your physician for dosage decisions.': 'Perkiraan memakai model rata-rata, bukan hasil lab. Level tiap orang berbeda, dan keputusan dosis tetap bersama dokter.',
-  'No data yet. Log doses or add your first blood test result.': 'Belum ada data. Catat dosis atau tambahkan hasil tes darah pertamamu.',
-  'In range': 'Dalam rentang',
-  'Below target': 'Di bawah target',
-  'Above target': 'Di atas target',
-  'from previous test': 'dari tes sebelumnya',
-  'Log your first dose on Home tab to see level estimates.': 'Catat dosis pertamamu di tab Beranda untuk melihat perkiraan level.',
-  'Open details': 'Buka detail',
-  'wk': 'mgg',
-  'mo': 'bln',
-  'yr': 'thn',
-  'Set target': 'Atur target',
-  'Chart in {unit} (change in Settings). Shaded area is your custom target agreed with doctor.': 'Grafik dalam {unit} (ubah di Pengaturan). Area hijau adalah target yang kamu atur sendiri bersama dokter.',
-  'Target {name} ({unit})': 'Target {name} ({unit})',
-  'Lower limit': 'Batas bawah',
-  'Upper limit': 'Batas atas',
-  'Save target': 'Simpan target',
-  '{saved} saved. Enter next hormone.': '{saved} tersimpan. Isi hormon berikutnya.',
-  'Edit lab result': 'Ubah hasil lab',
-  'New lab result': 'Hasil lab baru',
-  'Value': 'Nilai',
-  'Test date': 'Tanggal tes',
-  'Notes (optional)': 'Catatan (opsional)',
-  'Delete this lab result?': 'Hapus hasil lab ini?',
-  'Save and add another hormone': 'Simpan dan tambah hormon lain',
-
-  // Body & Changes Page
-  'Overview': 'Ringkasan',
-  'Details': 'Detail',
-  'No notes yet': 'Belum ada catatan',
-  'Changes take time. Record what you observe, then compare again weeks later.': 'Perubahan butuh waktu. Catat apa adanya, lalu bandingkan lagi beberapa minggu kemudian.',
-  'No notes yet for {area}. Add them using "Log changes".': 'Belum ada catatan untuk {area}. Tambahkan lewat tombol "Catat perubahan".',
-  '{count} notes, first on {date}': '{count} catatan, pertama pada {date}',
-  'Log changes': 'Catat perubahan',
-
-  // Insights Page
-  'Last 30 days': '30 hari terakhir',
-  'Not enough data yet. Log your doses and journal for a few days to see a summary.': 'Belum cukup data. Catat dosis dan jurnalmu beberapa hari untuk melihat ringkasan.',
-  'doses logged': 'dosis tercatat',
-  '{n} taken': '{n} diminum',
-  '{n} skipped': '{n} dilewati',
-  '{n} missed': '{n} terlewat',
-  'Estimated from fixed schedules. As-needed doses are not counted.': 'Perkiraan dari jadwal tetap. Dosis "saat perlu" tidak dihitung.',
-  '30-day mood': 'Suasana hati 30 hari',
-  'No mood entries yet. Log from the home card.': 'Belum ada entri suasana hati. Catat dari kartu di beranda.',
-  'Mood across cycle': 'Suasana hati sepanjang siklus',
-  'Requires a recurring schedule therapy (every 2+ days).': 'Butuh terapi dengan jadwal berulang (selang 2 hari atau lebih).',
-  'Average by days since last dose (day 0 = dose day).': 'Rata-rata menurut hari sejak dosis terakhir (hari 0 = hari dosis).',
-  'No recorded doses for this therapy yet.': 'Belum ada dosis tercatat untuk terapi ini.',
-  'Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.': 'Skala: 1 cemas, 2 murung, 3 biasa, 4 tenang, 5 senang.',
-  'Requires at least 6 mood entries after doses, and 2 per compared day. Currently {used} entries.': 'Butuh sedikitnya 6 entri suasana hati setelah dosis tercatat, dan 2 entri di tiap hari yang dibandingkan. Saat ini ada {used} entri.',
-  'This reflects your own recorded patterns, not causation. Many factors influence mood.': 'Ini pola dari catatanmu sendiri, bukan sebab-akibat. Banyak hal lain memengaruhi suasana hati.',
-  'Your mood tends to be highest on day {hi} after dosing (avg {hiAvg}) and lowest on day {lo} (avg {loAvg}).': 'Suasana hatimu cenderung paling baik di hari ke-{hi} setelah dosis (rata-rata {hiAvg}) dan paling rendah di hari ke-{lo} ({loAvg}).',
-  'Your mood is relatively stable across your cycle.': 'Suasana hatimu relatif stabil sepanjang siklus.',
-  'Day {day}: no data': 'Hari {day}: belum ada data',
-  'Day {day}: {score} ({count} entries)': 'Hari {day}: {score} ({count} entri)',
-
-  // Supplies Page
-  'No supplies yet. Track medications, syringes, needles, and other items here.': 'Belum ada stok. Catat obat, spuit, jarum, dan perlengkapan lainnya di sini.',
-  'Medications': 'Obat',
-  'Supplies & Tools': 'Perlengkapan',
-  '{doses} doses left, refill soon': '{doses} dosis tersisa, segera isi ulang',
-  '{doses} doses left': '{doses} dosis tersisa',
-  'Expired since': 'Kedaluwarsa sejak',
-  'Expires': 'Kedaluwarsa',
-  'Delete this supply item?': 'Hapus stok ini?',
-  'Edit supply': 'Ubah stok',
-  'New supply': 'Stok baru',
-  'Medication': 'Obat',
-  'Syringe': 'Spuit',
-  'Alcohol wipe': 'Tisu alkohol',
-  'Needle': 'Jarum',
-  'Gloves': 'Sarung tangan',
-  'Bandage': 'Plester',
-  'Name (optional)': 'Nama (opsional)',
-  'Quantity': 'Jumlah',
-  'Name (e.g. Estradiol valerate 40 mg/mL)': 'Nama (mis. Estradiol valerat 40 mg/mL)',
-  'Unit (vial, mL, pill)': 'Satuan (vial, mL, pil)',
-  'Used per dose (unit above)': 'Terpakai per dosis (satuan di atas)',
-  'Concentration: mg per unit (optional)': 'Kadar: mg per satuan (opsional)',
-  'E.g. 40 for 40 mg/mL. If set, usage is calculated from dose (mg).': 'Mis. 40 untuk 40 mg/mL. Jika diisi, pemakaian dihitung dari dosis (mg).',
-  'Expiry date (optional)': 'Tanggal kedaluwarsa (opsional)',
-  'Save supply': 'Simpan stok',
-  'item': 'buah',
-
-  // Sheets (Dose & Therapy)
-  'Please enter dose amount.': 'Isi jumlah dosis.',
-  'Delete this log? Used supplies will be restored.': 'Hapus catatan ini? Stok yang terpakai akan dikembalikan.',
-  'Edit log': 'Ubah catatan',
-  'scheduled {time}': 'jadwal {time}',
-  'Dose': 'Dosis',
-  'Time': 'Waktu',
-  'Site': 'Lokasi',
-  'Intramuscular (IM)': 'Intramuskular (IM)',
-  'Subcutaneous (SC)': 'Subkutan (SC)',
-  'Deduct medication stock': 'Potong stok obat',
-  'No stock deduction': 'Tanpa stok',
-  'Supplies used (1 each)': 'Perlengkapan terpakai (masing-masing 1)',
-  'Advanced': 'Lanjutan',
-  'Wasted (mL)': 'Terbuang (mL)',
-  'Needle dead space (µL)': 'Ruang mati jarum (µL)',
-  'Testosterone': 'Testosteron',
-  'Progesterone': 'Progesteron',
-  'Other medicine': 'Obat lain',
-  'Every N days': 'Setiap N hari',
-  'Weekly': 'Mingguan',
-  'Monthly': 'Bulanan',
-  'As needed': 'Saat perlu',
-  'Please enter dose.': 'Isi dosis.',
-  'Repeat must be at least 1 day.': 'Ulangi tiap minimal 1 hari.',
-  'Select at least one day.': 'Pilih minimal satu hari.',
-  'Day of month must be 1 to 31.': 'Tanggal harus 1 sampai 31.',
-  'Add at least one time.': 'Tambahkan minimal satu jam.',
-  'Medicine': 'Obat',
-  'Delete this therapy? Its dose history will be preserved.': 'Hapus terapi ini? Riwayat dosisnya tetap tersimpan.',
-  'New therapy': 'Terapi baru',
-  'Route': 'Cara pakai',
-  'Simulation profile:': 'Profil simulasi level:',
-  'Estradiol ester (for PK simulation):': 'Ester estradiol (untuk simulasi level):',
-  'No simulation': 'Tanpa simulasi',
-  'Medicine name': 'Nama obat',
-  'Medicine name (e.g. {name} valerate)': 'Nama obat (mis. {name} valerat)',
-  'Unit': 'Satuan',
-  'Mass dose (mg)': 'Dosis massa (mg)',
-  'Release rate (µg/day)': 'Laju lepas (µg/hari)',
-  'Repeat every (days), 1 = every day': 'Ulangi tiap (hari), 1 = setiap hari',
-  'Calculate from last dose': 'Hitung dari dosis terakhir',
-  'Next schedule follows when you last logged a dose, not the start date.': 'Jadwal berikutnya mengikuti kapan kamu terakhir mencatat dosis, bukan tanggal mulai.',
-  'Day of month (1 to 31)': 'Tanggal tiap bulan (1 sampai 31)',
-  'Add time': 'Tambah jam',
-  'Start': 'Mulai',
-  'Deduct stock from:': 'Potong stok dari:',
-  'Save therapy': 'Simpan terapi',
-  'Injection': 'Suntik',
-  'Implant': 'Implan',
-  'Suppository': 'Supositoria',
-  'Spray': 'Semprot',
-  'Drops': 'Tetes',
-  'Paha kiri': 'Paha kiri',
-  'Paha kanan': 'Paha kanan',
-  'Bokong kiri': 'Bokong kiri',
-  'Bokong kanan': 'Bokong kanan',
-  'Left thigh': 'Paha kiri',
-  'Right thigh': 'Paha kanan',
-  'Left glute': 'Bokong kiri',
-  'Right glute': 'Bokong kanan',
-
-  // Data & Storage Page
-  'No connection yet. Changes will sync once online.': 'Belum ada koneksi. Perubahan akan terkirim saat kamu online.',
-  'Import {n} records': 'Impor {n} catatan',
-  'Merge: records from file are added or updated, existing data is preserved.\n\nReplace all: current data is deleted first, then loaded from file.': 'Gabungkan: catatan dari file ditambahkan atau diperbarui, datamu sekarang tetap ada.\n\nGanti semua: data sekarang dihapus dulu, lalu diisi dari file.',
-  'Successfully restored {n} records.': 'Berhasil memulihkan {n} catatan.',
-  'File downloaded.': 'File diunduh.',
-  'On-device file': 'File di perangkat',
-  'Save all your data to a single JSON file, or restore from a file. No internet required.': 'Simpan semua datamu ke satu file JSON, atau pulihkan dari file. Tidak butuh internet.',
-  'Cloud backup': 'Cadangan awan',
-  'Save a copy of your data to your Firebase account. Useful for restoring to a previous state.': 'Simpan salinan datamu di akun Firebase-mu. Berguna untuk kembali ke kondisi sebelumnya.',
-  'Back up now': 'Cadangkan sekarang',
-  'Backup saved.': 'Cadangan tersimpan.',
-  '{count} records, {size} KB': '{count} catatan, {size} KB',
-
-  // Authentication & Welcome
-  'Incorrect username/email or password.': 'Username/email atau kata sandi salah.',
-  'This email is already in use. Try signing in.': 'Email ini sudah terdaftar. Coba masuk.',
-  'Password is too weak (minimum 6 characters).': 'Kata sandi terlalu lemah (minimal 6 karakter).',
-  'Invalid email format.': 'Format email tidak valid.',
-  'No internet connection.': 'Tidak ada koneksi internet.',
-  'Too many attempts. Please try again later.': 'Terlalu banyak percobaan. Coba lagi nanti.',
-  'Firestore rules not updated. Paste firestore.rules and Publish.': 'Aturan Firestore belum diperbarui. Tempel isi firestore.rules lalu Publish.',
-  'Fill in username/email and password.': 'Isi username/email dan kata sandi.',
-  'Fill in username or email.': 'Isi username atau email.',
-  'Username must be 3-20 characters: lowercase letters, numbers, dots, or underscores.': 'Username 3 sampai 20 karakter: huruf kecil, angka, titik, atau garis bawah.',
-  'Username is already taken.': 'Username sudah dipakai.',
-  'Failed to save username: {message}': 'Gagal menyimpan username: {message}',
-  'Get Started': 'Mulai',
-  'Already have an account?': 'Sudah punya akun?',
-  'Sign in': 'Masuk',
-  'Password': 'Kata sandi',
-  'Reset password': 'Atur ulang kata sandi',
-  'We will send a reset link to your account email.': 'Kami kirim tautan atur ulang ke email akunmu.',
-  'Username or email': 'Username atau email',
-  'Send link': 'Kirim tautan',
-  'If the account exists, a reset link was sent to its email. Check spam folder as well.': 'Jika akunnya ada, tautan atur ulang sudah dikirim ke emailnya. Cek juga folder spam.',
-  'Welcome back': 'Selamat datang kembali',
-  'Sign in to continue your therapy rhythm.': 'Masuk untuk melanjutkan ritme terapimu.',
-  'Forgot password?': 'Lupa kata sandi?',
-  'Processing...': 'Memproses...',
-  "Don't have an account?": 'Belum punya akun?',
-  'Sign up': 'Daftar',
-  'Create account': 'Buat akun',
-  'Username is used to sign in, email for account recovery.': 'Username dipakai untuk masuk, email untuk pemulihan akun.',
-  'Lowercase letters, numbers, dots, underscores (3-20)': 'Huruf kecil, angka, titik, garis bawah (3 sampai 20)',
-  'Email': 'Email',
-
-  // Moods & Body Areas
-  'Happy': 'Senang',
-  'Calm': 'Tenang',
-  'Neutral': 'Biasa',
-  'Low': 'Murung',
-  'Anxious': 'Cemas',
-  'Hair': 'Rambut',
-  'Breasts': 'Payudara',
-  'Body shape': 'Bentuk tubuh',
-  'Skin': 'Kulit',
-  'Energy': 'Energi',
-  'Sleep': 'Tidur',
-
-  // Security & PIN
-  'App PIN Lock': 'Kunci dengan PIN',
-  'PIN protects your medical data and automatically syncs across your devices.': 'PIN melindungi data medismu dan otomatis tersinkron antar perangkat.',
-  'Auto-lock timeout': 'Kunci lagi setelah ditinggalkan',
-  'Immediately': 'Segera',
-  '1 minute': '1 menit',
-  '5 minutes': '5 menit',
-  'Change PIN': 'Ubah PIN',
-  'Enter old PIN': 'Masukkan PIN lama',
-  'Enter PIN to disable': 'Masukkan PIN untuk mematikan',
-  'Create 6-digit PIN': 'Buat PIN 6 digit',
-  'Confirm 6-digit PIN': 'Ketik ulang PIN untuk memastikan',
-  'Incorrect PIN. Try again.': 'PIN salah. Coba lagi.',
-  'PIN does not match. Try again.': 'PIN tidak sama. Coba lagi.',
-  'Enter your 6-digit PIN': 'Masukkan 6 digit PIN untuk membuka',
-  'Please wait before trying again.': 'Tunggu sebentar sebelum mencoba lagi.',
-
-  // Settings & Profile
-  'Appearance': 'Tampilan',
-  'Celestial Midnight & Pastel': 'Celestial Midnight & Pastel',
-  'Signature nocturnal sanctuary with soft pastel highlights.': 'Suaka malam eksklusif dengan sentuhan pastel yang lembut.',
-  'Phase accent': 'Aksen fase',
-  'Theme': 'Tema',
-  'System': 'Sistem',
-  'Light': 'Terang',
-  'Dark': 'Gelap',
-  'Follow system': 'Ikuti sistem',
-  'Accent Color': 'Warna Aksen',
-  'Accent color': 'Warna aksen',
-  'Language': 'Bahasa',
-  'English (Default)': 'English (Default)',
-  'Bahasa Indonesia': 'Bahasa Indonesia',
-  'Reminders': 'Pengingat',
-  'Dose Reminders': 'Pengingat Dosis',
-  'Dose reminders': 'Pengingat dosis',
-  'Notifications appear at scheduled times, even offline.': 'Notifikasi muncul pada jam jadwal, juga saat offline.',
-  'Only available on Android and iOS apps.': 'Hanya tersedia di aplikasi Android dan iOS.',
-  'Notification permission was denied. Enable it in system settings.': 'Izin notifikasi ditolak. Aktifkan lewat pengaturan sistem.',
-  'Send test notification': 'Kirim notifikasi uji',
-  'Hormone Level Units': 'Satuan Level Hormon',
-  'Injection & Patch Sites': 'Lokasi Suntik & Patch',
-  'Selection order determines next suggested site, alternating from top to bottom.': 'Urutan pemilihan menentukan saran lokasi berikutnya, bergantian dari atas ke bawah.',
-  'Other location': 'Lokasi lain',
-  'Days & Counters': 'Hari & Penghitung',
-  'Count HRT therapy duration': 'Hitung lama menjalani terapi',
-  'Show on History tab.': 'Tampil di tab Riwayat.',
-  'Day starts at': 'Hari baru dimulai pukul',
-  'Doses past midnight are counted for the previous day.': 'Dosis lewat tengah malam masih dihitung hari sebelumnya.',
-  'Home Screen Widgets': 'Widget layar utama',
-  'Home Screen Widget': 'Widget Layar Utama',
-  'Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.': 'Tahan layar utama, pilih Widget, lalu cari Lunera: tersedia widget lama terapi, jadwal, dan grafik level.',
-  'Hide details on widgets': 'Sembunyikan detail di widget',
-  'Widgets only display the app name. Useful if your home screen is seen by others.': 'Widget hanya menampilkan nama aplikasi. Berguna jika layar utamamu terlihat orang lain.',
-  'Sample Data': 'Data Contoh',
-  'Populate your account with sample therapies, logs, lab results, and stock to test the app. All marked as "(sample)" and can be safely deleted.': 'Isi akunmu dengan terapi, catatan, hasil lab, dan stok contoh untuk mencoba aplikasi. Semuanya diberi tanda "(contoh)" dan bisa dihapus tanpa menyentuh datamu.',
-  'Add sample data to your account?': 'Tambahkan data contoh ke akunmu?',
-  'Delete all sample data?': 'Hapus semua data contoh?',
-  'Data & Storage': 'Data & Penyimpanan',
-  'Data': 'Data',
-  'Account': 'Akun',
-  'Log out': 'Keluar',
-  'About & Support': 'Tentang & Dukungan',
-  'Version Changelog': 'Catatan Pembaruan',
-  "See what's new in v{version} and past releases": "Lihat apa yang baru di v{version} dan rilis sebelumnya",
-  "What's new in Lunera v{version}": "Apa yang baru di Lunera v{version}",
-  'NEW': 'BARU',
-  'Update Available!': 'Pembaruan Tersedia!',
-  'Checking for updates...': 'Memeriksa pembaruan...',
-  'GitHub Repository': 'Repositori GitHub',
-  'View source code, release notes, and issue tracker.': 'Lihat kode sumber, catatan rilis, dan pelacak kendala.',
-  'Medical Disclaimer': 'Disklaimer Medis',
-  'Profile': 'Profil',
-  'Nickname': 'Nama Panggilan (Nickname)',
-  'Shown in greetings on the Home screen and profile card.': 'Ditampilkan pada salam Beranda dan kartu profil.',
-  'Change photo': 'Ganti foto',
-  'Remove photo': 'Hapus foto',
-  'Save Profile': 'Simpan Profil',
-  'Profile saved.': 'Profil berhasil disimpan.',
-  'Profile photo updated.': 'Foto profil berhasil diperbarui.',
-  'Profile photo removed.': 'Foto profil dihapus.',
-  'Remove profile photo?': 'Hapus foto profil saat ini?',
-  'Account username': 'Username akun',
-  'Registered email': 'Email terdaftar',
-  'Username and email are used for login authentication and cannot be changed.': 'Username dan email digunakan untuk otentikasi login dan tidak dapat diubah.',
-};
+/// Untuk provider yang harus dijalankan ulang saat bahasa berganti (notifikasi, widget).
+final langProvider = Provider<String>((ref) {
+  void listener() => ref.invalidateSelf();
+  L10n.notifier.addListener(listener);
+  ref.onDispose(() => L10n.notifier.removeListener(listener));
+  return L10n.code;
+});

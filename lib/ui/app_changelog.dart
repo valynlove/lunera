@@ -41,10 +41,38 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.9.0',
+      version: '1.10.0',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Native Android bilingual home screen widgets (HRT counter, schedule, levels) dynamically synced with active app language.',
+          textId: 'Widget layar utama Android bilingual bawaan (lama terapi, jadwal, level) tersinkron otomatis dengan bahasa aplikasi aktif.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Body Measurements & Clothing Sizing calculator with dual-standard Bra fit (US/UK, EU/ID, sister sizes), top/shirt, and pants sizing.',
+          textId: 'Kalkulator ukuran badan & pakaian dengan estimasi ukuran bra dual standar (US/UK, EU/ID, sister sizes), ukuran baju, dan celana.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Biometric security authentication (fingerprint / face unlock) with grace period and cloud-synced PIN security.',
+          textId: 'Autentikasi keamanan biometrik (sidik jari / wajah) dengan masa tenggang dan kunci PIN tersinkron cloud.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'High-performance global translation architecture (L10n with tr) with comprehensive 600+ entry bilingual dictionary.',
+          textId: 'Arsitektur penerjemahan global performa tinggi (L10n dengan tr) dengan kamus dwibahasa komprehensif 600+ entri.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.9.0',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

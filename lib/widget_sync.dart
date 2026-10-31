@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import 'l10n.dart';
 import 'models.dart';
 import 'repo.dart';
 import 'schedule.dart';
 import 'sim.dart';
 import 'theme.dart';
+import 'l10n.dart';
 
 /// Mengirim data ke widget layar utama Android: lama terapi, jadwal, dan grafik level.
 /// Data ditulis ke penyimpanan bersama (SharedPreferences) yang dibaca kode Kotlin widget.
@@ -31,7 +31,7 @@ class WidgetSync {
     if (!supported) return;
     _timer?.cancel();
     _timer = Timer(const Duration(seconds: 2), () {
-      _run(ths, logs, labs, targets, prefs).catchError((Object e) => debugPrint('Widget gagal diperbarui: $e'));
+      _run(ths, logs, labs, targets, prefs).catchError((Object e) => debugPrint(tr('Widget update failed: {0}', [e])));
     });
   }
 
@@ -45,7 +45,7 @@ class WidgetSync {
       }
       await _refresh();
     } catch (e) {
-      debugPrint('Widget gagal dikosongkan: $e');
+      debugPrint(tr('Widget clear failed: {0}', [e]));
     }
   }
 
@@ -56,6 +56,7 @@ class WidgetSync {
   }
 
   static Future<void> _run(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs) async {
+    await HomeWidget.saveWidgetData<String>('lang', L10n.code); // dibaca kode Kotlin widget
     await HomeWidget.saveWidgetData<String>('widget_hidden', prefs.widgetHide ? '1' : '0');
     if (prefs.widgetHide) {
       await _refresh();
@@ -76,7 +77,7 @@ class WidgetSync {
       final place = s != null && s.t.adm.places ? suggestPlace(prefs, desc, s.t.id) : '';
       await HomeWidget.saveWidgetData<String>('sch_${i}_title', s?.t.name ?? '');
       await HomeWidget.saveWidgetData<String>('sch_${i}_at', s == null ? '' : '${s.at.millisecondsSinceEpoch}');
-      await HomeWidget.saveWidgetData<String>('sch_${i}_sub', s == null ? '' : '${fmt(s.t.dose)} ${s.t.doseUnit}${place.isEmpty ? '' : ', $place'}');
+      await HomeWidget.saveWidgetData<String>('sch_${i}_sub', s == null ? '' : '${fmt(s.t.dose)} ${s.t.doseUnit}${place.isEmpty ? '' : ', ${tr(place)}'}');
     }
 
     // 3. Grafik level
@@ -116,16 +117,13 @@ class WidgetSync {
     final ys = <double>[...sim.map((s) => s.y), ...dots.map((d) => d.dy), ...?band];
     final top = (ys.isEmpty ? 10.0 : ys.reduce(math.max)) * 1.15 + 1;
 
-    final isId = AppLocale.code == 'id';
     String value = '', note = '';
     if (intakes.isNotEmpty) {
       value = '${fmt((levelAt(intakes, now) / f).roundToDouble())} $unit';
-      note = isId ? 'Perkiraan dari catatan dosis, titik = hasil lab' : 'Estimated from doses, dots = lab results';
+      note = tr('Estimated from dose entries, dots = lab results');
     } else if (hl.isNotEmpty) {
       value = '${fmt(hl.last.base / f)} $unit';
-      note = isId
-          ? 'Hasil lab ${DateFormat('d MMM y', 'id').format(hl.last.at)}'
-          : 'Lab result ${DateFormat('d MMM y', 'en').format(hl.last.at)}';
+      note = tr('Lab result {0}', [DateFormat('d MMM y', L10n.code).format(hl.last.at)]);
     }
     await HomeWidget.saveWidgetData<String>('lvl_title', p.name);
     await HomeWidget.saveWidgetData<String>('lvl_value', value);
@@ -138,8 +136,8 @@ class WidgetSync {
         total: to.difference(from).inMinutes / 1440,
         nowX: 14,
         top: top,
-        fromLabel: DateFormat('d MMM', 'id').format(from),
-        toLabel: DateFormat('d MMM', 'id').format(to),
+        fromLabel: DateFormat('d MMM', L10n.code).format(from),
+        toLabel: DateFormat('d MMM', L10n.code).format(to),
       ),
       key: 'lvl_image',
       logicalSize: const Size(360, 150),
@@ -271,6 +269,7 @@ class _ChartPainter extends CustomPainter {
 
 /// Dipantau dari Shell: memperbarui widget saat data berubah.
 final widgetSyncProvider = Provider<void>((ref) {
+  ref.watch(langProvider); // teks widget ikut bahasa
   final ths = ref.watch(therapiesProvider).value;
   final logs = ref.watch(logsProvider).value;
   final labs = ref.watch(labsProvider).value;

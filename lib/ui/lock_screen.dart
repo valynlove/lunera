@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../l10n.dart';
 import '../lock.dart';
 import '../theme.dart';
 import 'auth.dart';
+import '../l10n.dart';
 
 /// Membungkus aplikasi: terkunci saat dibuka, dan lagi setelah ditinggalkan cukup lama.
 class LockGate extends StatefulWidget {
@@ -13,7 +13,7 @@ class LockGate extends StatefulWidget {
 }
 
 class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
-  late bool locked = Lock.instance.state.value.enabled;
+  late bool locked = Lock.instance.state.value.enabled && !Lock.instance.sessionUnlocked;
   DateTime? leftAt;
 
   @override
@@ -39,24 +39,32 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
     final st = Lock.instance.state.value;
     if (s == AppLifecycleState.paused) leftAt = DateTime.now();
     if (s == AppLifecycleState.resumed && st.enabled && leftAt != null && !locked) {
-      final timeout = st.delayMin == 0 ? const Duration(seconds: 3) : Duration(minutes: st.delayMin);
-      if (DateTime.now().difference(leftAt!) >= timeout) setState(() => locked = true);
+      if (DateTime.now().difference(leftAt!) >= Duration(minutes: st.delayMin)) {
+        Lock.instance.sessionUnlocked = false;
+        setState(() => locked = true);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) => Stack(children: [
         widget.child,
-        if (locked) Positioned.fill(child: LockScreen(onUnlock: () => setState(() => locked = false))),
+        if (locked) Positioned.fill(child: LockScreen(
+            onUnlock: () {
+              Lock.instance.sessionUnlocked = true;
+              setState(() => locked = false);
+            },
+          )),
       ]);
 }
 
-/// Papan angka dengan penanda 6 titik (PIN only, tanpa biometrik).
+/// Papan angka dengan penanda 6 titik.
 class PinPad extends StatelessWidget {
-  const PinPad({super.key, required this.value, required this.onChanged, this.length = 6});
+  const PinPad({super.key, required this.value, required this.onChanged, this.length = 6, this.onBio});
   final String value;
   final ValueChanged<String> onChanged;
   final int length;
+  final VoidCallback? onBio;
 
   Widget _key(Widget child, VoidCallback? tap) => Padding(
         padding: const EdgeInsets.all(7),
@@ -87,7 +95,7 @@ class PinPad extends StatelessWidget {
         gap(24),
         for (final row in const [[1, 2, 3], [4, 5, 6], [7, 8, 9]]) Row(mainAxisSize: MainAxisSize.min, children: [for (final d in row) _digit(d)]),
         Row(mainAxisSize: MainAxisSize.min, children: [
-          const SizedBox(width: 72, height: 72),
+          _key(const Icon(Icons.fingerprint_rounded, color: Colors.white), onBio),
           _digit(0),
           _key(const Icon(Icons.backspace_outlined, color: Colors.white), value.isEmpty ? null : () => onChanged(value.substring(0, value.length - 1))),
         ]),
@@ -107,9 +115,19 @@ class _LockScreenState extends State<LockScreen> {
   int fails = 0;
   DateTime? until;
 
+  @override
+  void initState() {
+    super.initState();
+    if (Lock.instance.state.value.bio) WidgetsBinding.instance.addPostFrameCallback((_) => _bio());
+  }
+
+  Future<void> _bio() async {
+    if (await Lock.instance.authBio() && mounted) widget.onUnlock();
+  }
+
   void _changed(String v) {
     if (until != null && DateTime.now().isBefore(until!)) {
-      setState(() => msg = context.tr('Please wait before trying again.'));
+      setState(() => msg = tr('Wait a moment before trying again.'));
       return;
     }
     setState(() {
@@ -124,17 +142,17 @@ class _LockScreenState extends State<LockScreen> {
     fails++;
     setState(() {
       pin = '';
-      msg = context.tr('Incorrect PIN. Try again.');
+      msg = tr('Wrong PIN.');
       if (fails >= 5) {
         until = DateTime.now().add(const Duration(seconds: 30));
         fails = 0;
-        msg = context.tr('Please wait before trying again.');
+        msg = tr('Too many attempts. Try again in 30 seconds.');
       }
     });
   }
 
   Future<void> _forgot() async {
-    if (!await confirm(context, context.tr('Sign out'), ok: context.tr('Exit'))) return;
+    if (!await confirm(context, tr('Log out and turn off the lock? You\'ll need to log in again with your password.'), ok: tr('Log out'))) return;
     await Lock.instance.disable();
     await signOutAll();
   }
@@ -152,11 +170,11 @@ class _LockScreenState extends State<LockScreen> {
                     gap(10),
                     Text(appName, style: wordmark(30, color: Colors.white)),
                     gap(26),
-                    Text(context.tr('Enter your 6-digit PIN'), style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
+                    Text(tr('Enter PIN'), style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
                     gap(18),
-                    PinPad(value: pin, onChanged: _changed),
+                    PinPad(value: pin, onChanged: _changed, onBio: Lock.instance.state.value.bio ? _bio : null),
                     SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
-                    TextButton(onPressed: _forgot, child: const Text('Forgot PIN?', style: TextStyle(color: Colors.white70))),
+                    TextButton(onPressed: _forgot, child: Text(tr('Forgot PIN?'), style: const TextStyle(color: Colors.white70))),
                   ]),
                 ),
               ),
@@ -190,7 +208,7 @@ class _PinFlowState extends State<_PinFlow> {
       } else {
         setState(() {
           pin = '';
-          msg = context.tr('Incorrect PIN. Try again.');
+          msg = tr('Wrong PIN.');
         });
       }
     } else if (first == null) {
@@ -204,7 +222,7 @@ class _PinFlowState extends State<_PinFlow> {
       setState(() {
         first = null;
         pin = '';
-        msg = context.tr('PIN does not match. Try again.');
+        msg = tr('PINs don\'t match. Start again.');
       });
     }
   }
@@ -221,7 +239,7 @@ class _PinFlowState extends State<_PinFlow> {
                   child: Center(
                     child: SingleChildScrollView(
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text(widget.create ? (first == null ? context.tr('Create 6-digit PIN') : context.tr('Confirm 6-digit PIN')) : widget.title, style: display(26, color: Colors.white)),
+                        Text(widget.create ? (first == null ? tr('Create a 6-digit PIN') : tr('Repeat PIN')) : widget.title, style: display(26, color: Colors.white)),
                         gap(24),
                         PinPad(value: pin, onChanged: _changed),
                         SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
@@ -238,7 +256,7 @@ class _PinFlowState extends State<_PinFlow> {
 
 /// Minta PIN yang berlaku; true jika benar.
 Future<bool> askPin(BuildContext c, {String? title}) async =>
-    await Navigator.of(c).push<bool>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => _PinFlow(create: false, title: title ?? c.tr('Enter your 6-digit PIN')))) ?? false;
+    await Navigator.of(c).push<bool>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => _PinFlow(create: false, title: title ?? tr('Enter PIN')))) ?? false;
 
 /// PIN baru (dua kali ketik); null jika dibatalkan.
 Future<String?> createPin(BuildContext c) =>

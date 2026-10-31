@@ -4,6 +4,28 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-10-31
+
+### Added
+- **Body Measurements & Clothing Sizing Calculator (`lib/models.dart` & `lib/ui/body.dart`):**
+  - Integrated smart body measurements tracking with dual-unit support (cm and inches) for bust, underbust, waist, hips, shoulder, weight, and height.
+  - Implemented accurate **Bra & Chest Size Calculator** (`calculateBraSize`) displaying dual standard sizing (US/UK e.g., 34C and EU/ID e.g., 75C), full cup ladder (AA through G+), and snug/comfort sister size recommendations.
+  - Implemented estimated clothing size calculations for Top/Shirt sizing (XS to XXL), Bottom/Pants sizing (waist inch equivalent 26–35+), and Waist-to-Hip Ratio (WHR).
+  - Added interactive measurement modal bottom sheet (`MeasurementSheet`) with live interactive bra size preview and history management with deletion and edit support.
+- **Native Android Bilingual Home Screen Widgets (`android_widget/` & `lib/widget_sync.dart`):**
+  - Integrated native Android home screen widgets for HRT Duration (`HrtWidget.kt`), Therapy Schedule (`ScheduleWidget.kt`), and Level Curves (`LevelWidget.kt`) with full bilingual string support (`res/values/lunera_widget_strings.xml` and `res/values-in/lunera_widget_strings.xml`).
+  - Added dynamic language sync via `widget_sync.dart` transmitting active language preference (`lang`) to SharedPreferences so home screen widgets dynamically match the app's selected language.
+- **Biometric Security & Authentication (`lib/lock.dart` & `lib/ui/security_page.dart`):**
+  - Added biometric fingerprint and face unlock via `local_auth` (`Lock.instance.bioAvailable()` and `Lock.instance.authBio()`) alongside existing cloud-synced PIN security.
+  - Added configurable auto-lock delay selector (Immediately, 1 minute, 5 minutes) and `sessionUnlocked` persistence preventing unnecessary re-locks on locale rebuilds.
+
+### Changed
+- **High-Performance Global Translation Architecture (`lib/l10n.dart` & `lib/l10n_id.dart`):**
+  - Re-architected localization into a centralized, reactive translation engine (`L10n` with `tr()`) featuring singular/plural interpolations (`{0?day|days}`) and reactive rebuilds via `langProvider`.
+  - Expanded comprehensive English-to-Indonesian dictionary in `lib/l10n_id.dart` with over 430 curated entries covering all user flows, medical routes, notification alerts, profile settings, and dialogs.
+
+---
+
 ## [1.9.0] - 2026-10-31
 
 ### Added

@@ -1,16 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart' show IconData, Icons;
+import 'l10n.dart';
 
 DateTime _d(dynamic t) => (t as Timestamp).toDate();
 Timestamp _t(DateTime d) => Timestamp.fromDate(d);
-String fmt(double v) =>
-    v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
-double? parseNum(String s) => double.tryParse(s.trim().replaceAll(',', '.'));
+
+double? parseNum(String? s) => s == null ? null : double.tryParse(s.trim().replaceAll(',', '.'));
+String fmt(double v) => v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(1);
 
 /// Hormon untuk hasil lab. `units`: satuan -> faktor ke satuan dasar (satuan pertama).
 class HormonePreset {
-  const HormonePreset(this.id, this.name, this.units);
-  final String id, name;
+  const HormonePreset(this.id, this.en, this.units);
+  final String id, en;
+  String get name => tr(en);
   final Map<String, double> units;
   String get base => units.keys.first;
   double toBase(double v, String u) => v * (units[u] ?? 1);
@@ -18,46 +20,52 @@ class HormonePreset {
 
 const presets = <HormonePreset>[
   HormonePreset('estradiol', 'Estradiol', {'pg/mL': 1, 'pmol/L': 1 / 3.671}),
-  HormonePreset('testosterone', 'Testosteron', {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84}),
-  HormonePreset('progesterone', 'Progesteron', {'ng/mL': 1, 'nmol/L': 1 / 3.18}),
+  HormonePreset('testosterone', 'Testosterone', {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84}),
+  HormonePreset('progesterone', 'Progesterone', {'ng/mL': 1, 'nmol/L': 1 / 3.18}),
   HormonePreset('lh', 'LH', {'IU/L': 1, 'mIU/mL': 1}),
   HormonePreset('fsh', 'FSH', {'IU/L': 1, 'mIU/mL': 1}),
-  HormonePreset('prolactin', 'Prolaktin', {'ng/mL': 1, 'mIU/L': 1 / 21.2}),
+  HormonePreset('prolactin', 'Prolactin', {'ng/mL': 1, 'mIU/L': 1 / 21.2}),
 ];
 HormonePreset presetOf(String id) => presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
 
 /// Cara pemakaian obat. `places`: butuh lokasi (suntik, patch).
 class AdminRoute {
-  const AdminRoute(this.id, this.label, this.icon, {this.places = false});
-  final String id, label;
+  const AdminRoute(this.id, this.en, this.icon, {this.places = false});
+  final String id, en;
+  String get label => tr(en);
   final IconData icon;
   final bool places;
 }
 
-const routes = <AdminRoute>[
-  AdminRoute('inj', 'Injection', Icons.vaccines_rounded, places: true),
+const adminRoutes = <AdminRoute>[
+  AdminRoute('inj', 'Injection', Icons.colorize_rounded, places: true),
   AdminRoute('oral', 'Oral', Icons.medication_rounded),
-  AdminRoute('sublingual', 'Sublingual', Icons.medication_liquid_rounded),
-  AdminRoute('patch', 'Patch', Icons.sticky_note_2_rounded, places: true),
-  AdminRoute('gel', 'Gel', Icons.sanitizer_rounded),
-  AdminRoute('implant', 'Implant', Icons.push_pin_rounded),
-  AdminRoute('supp', 'Suppository', Icons.medication_rounded),
-  AdminRoute('spray', 'Spray', Icons.water_drop_rounded),
+  AdminRoute('sublingual', 'Sublingual', Icons.face_rounded),
+  AdminRoute('patch', 'Patch', Icons.layers_rounded, places: true),
+  AdminRoute('gel', 'Gel', Icons.water_drop_rounded),
+  AdminRoute('implant', 'Implant', Icons.straighten_rounded),
+  AdminRoute('supp', 'Suppository', Icons.medication_liquid_rounded),
+  AdminRoute('spray', 'Spray', Icons.air_rounded),
   AdminRoute('drops', 'Drops', Icons.opacity_rounded),
+  AdminRoute('other', 'Other', Icons.more_horiz_rounded),
 ];
-AdminRoute routeOf(String id) => routes.firstWhere((r) => r.id == id, orElse: () => routes.first);
+AdminRoute routeOf(String id) => adminRoutes.firstWhere((r) => r.id == id, orElse: () => adminRoutes.last);
 
-const genericTypes = <String, (String, IconData)>{
+const routes = adminRoutes;
+
+/// Jenis barang non-obat yang umum untuk HRT (kunci -> label English, ikon).
+const genericSupplyTypes = <String, (String, IconData)>{
   'syringe': ('Syringe', Icons.vaccines_rounded),
   'wipe': ('Alcohol wipe', Icons.cleaning_services_rounded),
-  'needle': ('Needle', Icons.push_pin_rounded),
+  'needle': ('Needle', Icons.colorize_rounded),
   'gloves': ('Gloves', Icons.back_hand_rounded),
   'bandage': ('Bandage', Icons.healing_rounded),
 };
+const genericTypes = genericSupplyTypes;
 
-const defaultPlaces = ['Paha kiri', 'Paha kanan', 'Bokong kiri', 'Bokong kanan'];
+const defaultPlaces = ['Left thigh', 'Right thigh', 'Left buttock', 'Right buttock'];
 const placePresets = [
-  'Paha kiri', 'Paha kanan', 'Lengan kiri', 'Lengan kanan', 'Bokong kiri', 'Bokong kanan', 'Perut kiri', 'Perut kanan'
+  'Left thigh', 'Right thigh', 'Left arm', 'Right arm', 'Left buttock', 'Right buttock', 'Left abdomen', 'Right abdomen'
 ];
 
 /// Jadwal: kind = interval (1 hari = setiap hari) | weekly | monthly | asneeded.
@@ -71,26 +79,72 @@ class Therapy {
     required this.start,
     this.everyDays = 1,
     this.supplyId,
-    this.route = 'inj',
+    this.route = 'oral',
     this.pk,
-    this.kind = 'interval',
-    this.weekdays = const [],
-    this.monthDay = 1,
-    this.times = const ['09:00'],
-    this.injType,
     this.rolling = false,
+    this.injType,
+    this.times = const ['08:00'],
+    this.weekdays = const [1],
+    this.monthDay = 1,
+    this.kind = 'interval',
   });
-  final String id, hormoneId, name, doseUnit, route, kind;
+  final String id;
+  final String hormoneId;
+  final String name;
   final double dose;
-  final int everyDays, monthDay;
+  final String doseUnit;
+  final int everyDays; // jika kind == 'interval'
   final DateTime start;
-  final String? supplyId, pk, injType;
-  final List<int> weekdays; // 1 = Senin ... 7 = Minggu
-  final List<String> times; // 'HH:mm'
-  final bool rolling; // jadwal berikutnya dihitung dari dosis terakhir (hanya interval 2 hari atau lebih)
-  AdminRoute get adm => routeOf(route);
+  final String? supplyId;
+  final String route;
+  final String? pk; // profil PK di sim.dart
+  final bool rolling; // jeda dihitung dari dosis terakhir
+  final String? injType; // im | subq
+  final List<String> times; // jam dalam sehari, mis. ['08:00', '20:00']
+  final List<int> weekdays; // jika kind == 'weekly' (1 = Senin .. 7 = Minggu)
+  final int monthDay; // jika kind == 'monthly' (1 .. 31)
+  final String kind; // interval | weekly | monthly | asneeded
+
   bool get asNeeded => kind == 'asneeded';
   bool get daily => kind == 'interval' && everyDays == 1;
+
+  AdminRoute get adm => routeOf(route);
+
+  Therapy copy({
+    String? hormoneId,
+    String? name,
+    double? dose,
+    String? doseUnit,
+    int? everyDays,
+    DateTime? start,
+    String? supplyId,
+    String? route,
+    String? pk,
+    bool? rolling,
+    String? injType,
+    List<String>? times,
+    List<int>? weekdays,
+    int? monthDay,
+    String? kind,
+  }) =>
+      Therapy(
+        id: id,
+        hormoneId: hormoneId ?? this.hormoneId,
+        name: name ?? this.name,
+        dose: dose ?? this.dose,
+        doseUnit: doseUnit ?? this.doseUnit,
+        everyDays: everyDays ?? this.everyDays,
+        start: start ?? this.start,
+        supplyId: supplyId ?? this.supplyId,
+        route: route ?? this.route,
+        pk: pk ?? this.pk,
+        rolling: rolling ?? this.rolling,
+        injType: injType ?? this.injType,
+        times: times ?? this.times,
+        weekdays: weekdays ?? this.weekdays,
+        monthDay: monthDay ?? this.monthDay,
+        kind: kind ?? this.kind,
+      );
 
   Map<String, dynamic> toMap() => {
         'hormoneId': hormoneId,
@@ -102,12 +156,12 @@ class Therapy {
         'supplyId': supplyId,
         'route': route,
         'pk': pk,
-        'kind': kind,
+        'rolling': rolling,
+        'injType': injType,
+        'times': times,
         'weekdays': weekdays,
         'monthDay': monthDay,
-        'times': times,
-        'injType': injType,
-        'rolling': rolling,
+        'kind': kind,
       };
 
   factory Therapy.from(String id, Map<String, dynamic> m) => Therapy(
@@ -119,14 +173,14 @@ class Therapy {
         everyDays: (m['everyDays'] as num?)?.toInt() ?? 1,
         start: _d(m['start']),
         supplyId: m['supplyId'],
-        route: m['route'] ?? 'inj',
+        route: m['route'] ?? 'oral',
         pk: m['pk'],
-        kind: m['kind'] ?? 'interval',
-        weekdays: m['weekdays'] is List ? [for (final x in m['weekdays'] as List) (x as num).toInt()] : const <int>[],
+        rolling: m['rolling'] ?? false,
+        injType: m['injType'] ?? 'im',
+        times: m['times'] is List && (m['times'] as List).isNotEmpty ? [for (final x in m['times'] as List) x as String] : const ['08:00'],
+        weekdays: m['weekdays'] is List && (m['weekdays'] as List).isNotEmpty ? [for (final x in m['weekdays'] as List) (x as num).toInt()] : const [1],
         monthDay: (m['monthDay'] as num?)?.toInt() ?? 1,
-        times: m['times'] is List ? [for (final x in m['times'] as List) x as String] : const ['09:00'],
-        injType: m['injType'],
-        rolling: m['rolling'] ?? ((m['kind'] ?? 'interval') == 'interval' && ((m['everyDays'] as num?)?.toInt() ?? 1) > 1),
+        kind: m['kind'] ?? ((m['everyDays'] as num?) != null ? 'interval' : 'interval'),
       );
 }
 
@@ -142,22 +196,55 @@ class DoseLog {
     this.dead,
     this.injType,
     this.slot,
-    this.used = const {},
+    Map<String, double>? used,
+    Map<String, double> usedSupplies = const {},
     this.skipped = false,
-  });
-  final String id, therapyId;
+  }) : usedSupplies = used ?? usedSupplies;
+  final String id;
+  final String therapyId;
   final DateTime at;
-  final List<String> places;
-  final double? dose, wasted, dead; // wasted: mL, dead: µL
-  final String? note, injType, slot; // slot: 'yyyy-MM-dd HH:mm' jadwal yang dipenuhi
-  final Map<String, double> used; // id stok -> jumlah yang terpakai
-  final bool skipped; // dosis sengaja dilewati (tidak dihitung sebagai dosis)
+  final List<String> places; // lokasi pemakaian obat
+  final double? dose;
+  final String? note;
+  final double? wasted, dead; // obat terbuang
+  final String? injType, slot;
+  final Map<String, double> usedSupplies; // id barang -> jumlah yang dipotong
+  final bool skipped; // dilewati (bukan diminum/disuntikkan)
+
+  Map<String, double> get used => usedSupplies;
   String get site => places.isEmpty ? '' : places.first;
+
+  DoseLog copy({
+    String? therapyId,
+    DateTime? at,
+    List<String>? places,
+    double? dose,
+    String? note,
+    double? wasted,
+    double? dead,
+    String? injType,
+    String? slot,
+    Map<String, double>? usedSupplies,
+    bool? skipped,
+  }) =>
+      DoseLog(
+        id: id,
+        therapyId: therapyId ?? this.therapyId,
+        at: at ?? this.at,
+        places: places ?? this.places,
+        dose: dose ?? this.dose,
+        note: note ?? this.note,
+        wasted: wasted ?? this.wasted,
+        dead: dead ?? this.dead,
+        injType: injType ?? this.injType,
+        slot: slot ?? this.slot,
+        usedSupplies: usedSupplies ?? this.usedSupplies,
+        skipped: skipped ?? this.skipped,
+      );
 
   Map<String, dynamic> toMap() => {
         'therapyId': therapyId,
         'at': _t(at),
-        'site': site,
         'places': places,
         'dose': dose,
         'note': note,
@@ -165,7 +252,7 @@ class DoseLog {
         'dead': dead,
         'injType': injType,
         'slot': slot,
-        'used': used,
+        'usedSupplies': usedSupplies,
         'skipped': skipped,
       };
 
@@ -174,40 +261,42 @@ class DoseLog {
         therapyId: m['therapyId'],
         at: _d(m['at']),
         places: m['places'] is List
-            ? [for (final x in m['places'] as List) x as String]
-            : (m['site'] is String && m['site'] != '' && m['site'] != 'oral' ? [m['site'] as String] : <String>[]),
+            ? [for (final x in m['places'] as List) _key(x as String)]
+            : (m['site'] is String && m['site'] != '' && m['site'] != 'oral' ? [_key(m['site'] as String)] : <String>[]),
         dose: (m['dose'] as num?)?.toDouble(),
         note: m['note'],
         wasted: (m['wasted'] as num?)?.toDouble(),
         dead: (m['dead'] as num?)?.toDouble(),
         injType: m['injType'],
         slot: m['slot'],
-        used: m['used'] is Map
-            ? {for (final e in (m['used'] as Map).entries) e.key as String: (e.value as num).toDouble()}
-            : const <String, double>{},
+        usedSupplies: m['usedSupplies'] is Map ? {for (final e in (m['usedSupplies'] as Map).entries) e.key as String: (e.value as num).toDouble()} : const {},
         skipped: m['skipped'] ?? false,
       );
 }
 
 class Lab {
   const Lab({required this.id, required this.hormoneId, required this.at, required this.value, required this.unit, this.note});
-  final String id, hormoneId, unit;
+  final String id;
+  final String hormoneId;
   final DateTime at;
   final double value;
+  final String unit;
   final String? note;
+
   double get base => presetOf(hormoneId).toBase(value, unit);
+
   Map<String, dynamic> toMap() => {'hormoneId': hormoneId, 'at': _t(at), 'value': value, 'unit': unit, 'note': note};
+
   factory Lab.from(String id, Map<String, dynamic> m) => Lab(
-      id: id,
-      hormoneId: m['hormoneId'],
-      at: _d(m['at']),
-      value: (m['value'] as num).toDouble(),
-      unit: m['unit'],
-      note: m['note']);
+        id: id,
+        hormoneId: m['hormoneId'],
+        at: _d(m['at']),
+        value: (m['value'] as num).toDouble(),
+        unit: m['unit'],
+        note: m['note'],
+      );
 }
 
-/// Stok. kind 'med' = obat (qty dalam satuan, perDose terpakai per dosis, dosePerUnit mg per satuan),
-/// kind 'generic' = perlengkapan (spuit, jarum, dst), berkurang 1 tiap dipilih.
 class Supply {
   const Supply({
     required this.id,
@@ -215,22 +304,53 @@ class Supply {
     required this.qty,
     required this.initial,
     this.perDose = 1,
-    this.unitLabel = 'buah',
+    this.unitLabel = 'pcs',
     this.expiry,
     this.kind = 'med',
     this.gtype,
     this.dosePerUnit,
   });
-  final String id, name, unitLabel, kind;
-  final double qty, initial, perDose;
+  final String id;
+  final String name;
+  final double qty;
+  final double initial;
+  final double perDose;
+  final String unitLabel;
   final DateTime? expiry;
-  final String? gtype;
-  final double? dosePerUnit;
+  final String kind; // med | generic
+  final String? gtype; // syringe | wipe | needle | gloves | bandage (jika kind == generic)
+  final double? dosePerUnit; // mg per unitLabel, mis. 40 mg/mL
+
   bool get generic => kind == 'generic';
-  bool get low => generic ? qty <= 5 : doses <= 2;
+  int get doses => perDose > 0 ? (qty / perDose).floor() : 0;
+  bool get low => generic ? qty <= 5 : doses <= 3;
   bool get expired => expiry != null && expiry!.isBefore(DateTime.now());
-  int? get daysToExpiry => expiry == null ? null : DateTime(expiry!.year, expiry!.month, expiry!.day).difference(DateTime.now()).inDays;
-  int get doses => perDose <= 0 ? 0 : (qty / perDose).floor();
+  int? get daysToExpiry => expiry?.difference(DateTime.now()).inDays;
+
+  Supply copy({
+    String? name,
+    double? qty,
+    double? initial,
+    double? perDose,
+    String? unitLabel,
+    DateTime? expiry,
+    String? kind,
+    String? gtype,
+    double? dosePerUnit,
+  }) =>
+      Supply(
+        id: id,
+        name: name ?? this.name,
+        qty: qty ?? this.qty,
+        initial: initial ?? this.initial,
+        perDose: perDose ?? this.perDose,
+        unitLabel: unitLabel ?? this.unitLabel,
+        expiry: expiry ?? this.expiry,
+        kind: kind ?? this.kind,
+        gtype: gtype ?? this.gtype,
+        dosePerUnit: dosePerUnit ?? this.dosePerUnit,
+      );
+
   Map<String, dynamic> toMap() => {
         'name': name,
         'qty': qty,
@@ -242,55 +362,19 @@ class Supply {
         'gtype': gtype,
         'dosePerUnit': dosePerUnit,
       };
+
   factory Supply.from(String id, Map<String, dynamic> m) => Supply(
       id: id,
       name: m['name'],
       qty: (m['qty'] as num).toDouble(),
       initial: (m['initial'] as num).toDouble(),
       perDose: (m['perDose'] as num?)?.toDouble() ?? 1,
-      unitLabel: m['unitLabel'] ?? 'buah',
+      unitLabel: m['unitLabel'] ?? 'pcs',
       expiry: m['expiry'] == null ? null : _d(m['expiry']),
       kind: m['kind'] ?? 'med',
       gtype: m['gtype'],
       dosePerUnit: (m['dosePerUnit'] as num?)?.toDouble());
 }
-
-/// Suasana hati untuk jurnal: kunci -> (label, ikon).
-const moods = <String, (String, IconData)>{
-  'happy': ('Happy', Icons.sentiment_very_satisfied_rounded),
-  'calm': ('Calm', Icons.sentiment_satisfied_rounded),
-  'neutral': ('Neutral', Icons.sentiment_neutral_rounded),
-  'low': ('Low', Icons.sentiment_dissatisfied_rounded),
-  'anxious': ('Anxious', Icons.sentiment_very_dissatisfied_rounded),
-};
-
-const bodyAreas = ['Skin', 'Breasts', 'Body shape', 'Hair', 'Energy', 'Sleep'];
-
-/// Satu entri jurnal: suasana hati, perubahan tubuh per bagian, dan/atau catatan bebas.
-class JournalEntry {
-  const JournalEntry({required this.id, required this.at, this.mood, this.body = const {}, this.text});
-  final String id;
-  final DateTime at;
-  final String? mood, text;
-  final Map<String, String> body;
-  bool get hasMood => mood != null;
-  bool get hasBody => body.isNotEmpty;
-  bool get hasText => text != null && text!.isNotEmpty;
-
-  Map<String, dynamic> toMap() => {'at': _t(at), 'mood': mood, 'body': body, 'text': text};
-  factory JournalEntry.from(String id, Map<String, dynamic> m) => JournalEntry(
-        id: id,
-        at: _d(m['at']),
-        mood: m['mood'],
-        body: m['body'] is Map
-            ? {for (final e in (m['body'] as Map).entries) e.key as String: e.value as String}
-            : const <String, String>{},
-        text: m['text'],
-      );
-}
-
-/// Skor suasana hati untuk menghitung pola (1 terendah, 5 tertinggi).
-const moodScore = <String, double>{'happy': 5, 'calm': 4, 'neutral': 3, 'low': 2, 'anxious': 1};
 
 /// Pengaturan yang ikut tersinkron antar perangkat.
 class Prefs {
@@ -301,14 +385,14 @@ class Prefs {
     this.hrtCounter = true,
     this.dayStart = 240,
     this.accent = 'lunera',
-    this.notify = true,
+    this.notify = false,
     this.widgetHide = false,
     this.locale = 'en',
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
   final bool widgetHide; // widget hanya menampilkan nama aplikasi
-  final String locale; // 'en' (default) atau 'id'
+  final String locale; // bahasa preferensi
   final String theme; // system | light | dark
   final Map<String, String> units; // id hormon -> satuan tampilan
   final List<String> places;
@@ -361,20 +445,299 @@ class Prefs {
             ? {for (final e in (m['units'] as Map).entries) e.key as String: e.value as String}
             : const <String, String>{},
         places: m['places'] is List && (m['places'] as List).isNotEmpty
-            ? [for (final x in m['places'] as List) x as String]
+            ? [for (final x in m['places'] as List) _key(x as String)]
             : defaultPlaces,
         hrtCounter: m['hrtCounter'] ?? true,
         dayStart: (m['dayStart'] as num?)?.toInt() ?? 240,
         accent: m['accent'] ?? 'lunera',
-        notify: m['notify'] ?? true,
+        notify: m['notify'] ?? false,
         widgetHide: m['widgetHide'] ?? false,
         locale: m['locale'] ?? 'en',
       );
 }
+
+/// Lokasi dan bagian tubuh yang dulu disimpan dengan nama Indonesia dipetakan ke kunci English saat dibaca.
+const _legacyKeys = {
+  'Paha kiri': 'Left thigh', 'Paha kanan': 'Right thigh', 'Bokong kiri': 'Left buttock', 'Bokong kanan': 'Right buttock',
+  'Lengan kiri': 'Left arm', 'Lengan kanan': 'Right arm', 'Perut kiri': 'Left abdomen', 'Perut kanan': 'Right abdomen',
+  'Kulit': 'Skin', 'Payudara': 'Breasts', 'Bentuk tubuh': 'Body shape', 'Rambut': 'Hair', 'Energi': 'Energy', 'Tidur': 'Sleep',
+};
+String _key(String s) => _legacyKeys[s] ?? s;
 
 class CloudBackup {
   const CloudBackup({required this.id, required this.at, required this.count, required this.bytes});
   final String id;
   final DateTime at;
   final int count, bytes;
+}
+
+/// Suasana hati untuk jurnal: kunci -> (label, ikon).
+const moodTypes = <String, (String, IconData)>{
+  'happy': ('Happy', Icons.sentiment_very_satisfied_rounded),
+  'calm': ('Calm', Icons.sentiment_satisfied_rounded),
+  'neutral': ('Neutral', Icons.sentiment_neutral_rounded),
+  'low': ('Low', Icons.sentiment_dissatisfied_rounded),
+  'anxious': ('Anxious', Icons.sentiment_very_dissatisfied_rounded),
+};
+const moods = moodTypes;
+
+/// Bagian tubuh untuk observasi transisi di jurnal.
+const bodyAreas = ['Skin', 'Breasts', 'Body shape', 'Hair', 'Energy', 'Sleep'];
+
+class JournalEntry {
+  const JournalEntry({required this.id, required this.at, this.mood, this.body = const {}, this.text});
+  final String id;
+  final DateTime at;
+  final String? mood; // happy | calm | neutral | low | anxious
+  final Map<String, String> body; // area -> catatan
+  final String? text; // catatan umum bebas
+
+  bool get hasMood => mood != null && mood!.isNotEmpty;
+  bool get hasBody => body.isNotEmpty;
+  bool get hasText => text != null && text!.trim().isNotEmpty;
+
+  Map<String, dynamic> toMap() => {'at': _t(at), 'mood': mood, 'body': body, 'text': text};
+
+  factory JournalEntry.from(String id, Map<String, dynamic> m) => JournalEntry(
+        id: id,
+        at: _d(m['at']),
+        mood: m['mood'],
+        body: m['body'] is Map
+            ? {for (final e in (m['body'] as Map).entries) _key(e.key as String): e.value as String}
+            : const <String, String>{},
+        text: m['text'],
+      );
+}
+
+/// Skor suasana hati untuk menghitung pola (1 terendah, 5 tertinggi).
+const moodScore = <String, double>{'happy': 5, 'calm': 4, 'neutral': 3, 'low': 2, 'anxious': 1};
+
+/// Hasil perhitungan ukuran bra dan dada
+class BraSizeResult {
+  const BraSizeResult({
+    required this.usUk,
+    required this.euId,
+    required this.cup,
+    required this.bandEu,
+    required this.bandUs,
+    required this.diffCm,
+    this.sisterTight,
+    this.sisterLoose,
+  });
+
+  final String usUk; // misal: "34B"
+  final String euId; // misal: "75B"
+  final String cup; // misal: "B"
+  final int bandEu; // 75
+  final int bandUs; // 34
+  final double diffCm; // selisih bust - underbust dalam cm
+  final String? sisterTight; // misal: "32C (70C)"
+  final String? sisterLoose; // misal: "36A (80A)"
+}
+
+/// Menghitung ukuran bra berdasarkan lingkar dada (bust) dan bawah dada (underbust) dalam cm
+BraSizeResult calculateBraSize({required double bustCm, required double underbustCm}) {
+  final diff = (bustCm - underbustCm).clamp(0.0, 100.0);
+
+  // Band EU & US
+  int bandEu;
+  int bandUs;
+  if (underbustCm < 63) {
+    bandEu = 60; bandUs = 28;
+  } else if (underbustCm < 68) {
+    bandEu = 65; bandUs = 30;
+  } else if (underbustCm < 73) {
+    bandEu = 70; bandUs = 32;
+  } else if (underbustCm < 78) {
+    bandEu = 75; bandUs = 34;
+  } else if (underbustCm < 83) {
+    bandEu = 80; bandUs = 36;
+  } else if (underbustCm < 88) {
+    bandEu = 85; bandUs = 38;
+  } else if (underbustCm < 93) {
+    bandEu = 90; bandUs = 40;
+  } else if (underbustCm < 98) {
+    bandEu = 95; bandUs = 42;
+  } else if (underbustCm < 103) {
+    bandEu = 100; bandUs = 44;
+  } else if (underbustCm < 108) {
+    bandEu = 105; bandUs = 46;
+  } else {
+    bandEu = 110; bandUs = 48;
+  }
+
+  // Cup ladder
+  const cupLadder = ['AA', 'A', 'B', 'C', 'D', 'DD', 'E', 'F', 'FF', 'G'];
+  String cup;
+  int cupIndex;
+  if (diff < 10.0) {
+    cup = 'AA'; cupIndex = 0;
+  } else if (diff < 12.0) {
+    cup = 'A'; cupIndex = 1;
+  } else if (diff < 14.0) {
+    cup = 'B'; cupIndex = 2;
+  } else if (diff < 16.0) {
+    cup = 'C'; cupIndex = 3;
+  } else if (diff < 18.0) {
+    cup = 'D'; cupIndex = 4;
+  } else if (diff < 20.0) {
+    cup = 'DD'; cupIndex = 5;
+  } else if (diff < 22.0) {
+    cup = 'E'; cupIndex = 6;
+  } else if (diff < 24.0) {
+    cup = 'F'; cupIndex = 7;
+  } else if (diff < 26.0) {
+    cup = 'FF'; cupIndex = 8;
+  } else {
+    cup = 'G'; cupIndex = 9;
+  }
+
+  final usUk = '$bandUs$cup';
+  final euId = '$bandEu$cup';
+
+  String? sisterTight;
+  if (bandUs > 28 && cupIndex < cupLadder.length - 1) {
+    sisterTight = '${bandUs - 2}${cupLadder[cupIndex + 1]} (${bandEu - 5}${cupLadder[cupIndex + 1]})';
+  }
+  String? sisterLoose;
+  if (bandUs < 48 && cupIndex > 0) {
+    sisterLoose = '${bandUs + 2}${cupLadder[cupIndex - 1]} (${bandEu + 5}${cupLadder[cupIndex - 1]})';
+  }
+
+  return BraSizeResult(
+    usUk: usUk,
+    euId: euId,
+    cup: cup,
+    bandEu: bandEu,
+    bandUs: bandUs,
+    diffCm: diff,
+    sisterTight: sisterTight,
+    sisterLoose: sisterLoose,
+  );
+}
+
+/// Catatan ukuran tubuh untuk menentukan ukuran pakaian dan perkembangan fisik
+class BodyMeasurement {
+  const BodyMeasurement({
+    required this.id,
+    required this.at,
+    this.unit = 'cm',
+    this.bust,
+    this.underbust,
+    this.waist,
+    this.hips,
+    this.shoulder,
+    this.weight,
+    this.height,
+    this.note,
+  });
+
+  final String id;
+  final DateTime at;
+  final String unit; // 'cm' | 'in'
+  final double? bust; // Lingkar dada / full bust
+  final double? underbust; // Lingkar bawah dada / ribcage
+  final double? waist; // Lingkar pinggang
+  final double? hips; // Lingkar pinggul
+  final double? shoulder; // Lebar bahu
+  final double? weight; // Berat badan (kg)
+  final double? height; // Tinggi badan (cm)
+  final String? note;
+
+  double? get bustCm => bust == null ? null : (unit == 'in' ? bust! * 2.54 : bust);
+  double? get underbustCm => underbust == null ? null : (unit == 'in' ? underbust! * 2.54 : underbust);
+  double? get waistCm => waist == null ? null : (unit == 'in' ? waist! * 2.54 : waist);
+  double? get hipsCm => hips == null ? null : (unit == 'in' ? hips! * 2.54 : hips);
+  double? get shoulderCm => shoulder == null ? null : (unit == 'in' ? shoulder! * 2.54 : shoulder);
+
+  /// Hitung ukuran bra / dada lengkap (US/UK, EU/ID, cup, sister sizes)
+  BraSizeResult? get braSize {
+    final b = bustCm, u = underbustCm;
+    if (b == null || u == null || b < u) return null;
+    return calculateBraSize(bustCm: b, underbustCm: u);
+  }
+
+  /// Estimasi ukuran atasan / baju
+  String? get topSize {
+    final b = bustCm;
+    if (b == null) return null;
+    if (b < 80) return 'XS';
+    if (b <= 86) return 'S';
+    if (b <= 93) return 'M';
+    if (b <= 100) return 'L';
+    if (b <= 108) return 'XL';
+    return 'XXL';
+  }
+
+  /// Estimasi ukuran bawahan / celana
+  String? get bottomSize {
+    final w = waistCm;
+    if (w == null) return null;
+    if (w < 65) return '26 (XS)';
+    if (w <= 71) return '27–28 (S)';
+    if (w <= 78) return '29–30 (M)';
+    if (w <= 85) return '31–32 (L)';
+    if (w <= 93) return '33–34 (XL)';
+    return '35+ (XXL)';
+  }
+
+  /// Rasio Pinggang ke Pinggul (Waist-to-Hip Ratio / WHR)
+  double? get waistToHipRatio {
+    final w = waistCm, h = hipsCm;
+    if (w == null || h == null || h <= 0) return null;
+    return w / h;
+  }
+
+  BodyMeasurement copy({
+    DateTime? at,
+    String? unit,
+    double? bust,
+    double? underbust,
+    double? waist,
+    double? hips,
+    double? shoulder,
+    double? weight,
+    double? height,
+    String? note,
+  }) =>
+      BodyMeasurement(
+        id: id,
+        at: at ?? this.at,
+        unit: unit ?? this.unit,
+        bust: bust ?? this.bust,
+        underbust: underbust ?? this.underbust,
+        waist: waist ?? this.waist,
+        hips: hips ?? this.hips,
+        shoulder: shoulder ?? this.shoulder,
+        weight: weight ?? this.weight,
+        height: height ?? this.height,
+        note: note ?? this.note,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'at': _t(at),
+        'unit': unit,
+        'bust': bust,
+        'underbust': underbust,
+        'waist': waist,
+        'hips': hips,
+        'shoulder': shoulder,
+        'weight': weight,
+        'height': height,
+        'note': note,
+      };
+
+  factory BodyMeasurement.from(String id, Map<String, dynamic> m) => BodyMeasurement(
+        id: id,
+        at: _d(m['at']),
+        unit: m['unit'] ?? 'cm',
+        bust: (m['bust'] as num?)?.toDouble(),
+        underbust: (m['underbust'] as num?)?.toDouble(),
+        waist: (m['waist'] as num?)?.toDouble(),
+        hips: (m['hips'] as num?)?.toDouble(),
+        shoulder: (m['shoulder'] as num?)?.toDouble(),
+        weight: (m['weight'] as num?)?.toDouble(),
+        height: (m['height'] as num?)?.toDouble(),
+        note: m['note'],
+      );
 }

@@ -72,12 +72,12 @@ class _ShellState extends ConsumerState<Shell> {
           ),
         ),
         title: Text(
-          context.tr('Exit {name}?', {'name': appName}),
+          tr('Exit {0}?', [appName]),
           textAlign: TextAlign.center,
           style: display(20, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
         ),
         content: Text(
-          context.tr('Are you sure you want to exit the application?'),
+          tr('Are you sure you want to exit the application?'),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -94,7 +94,7 @@ class _ShellState extends ConsumerState<Shell> {
               side: BorderSide(color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.2)),
             ),
             child: Text(
-              context.tr('Cancel'),
+              tr('Cancel'),
               style: TextStyle(
                 color: dark ? Colors.white70 : C.midnight,
                 fontWeight: FontWeight.w600,
@@ -107,16 +107,17 @@ class _ShellState extends ConsumerState<Shell> {
               backgroundColor: C.peony,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: Text(
-              context.tr('Exit'),
+              tr('Exit'),
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ],
       ),
     );
+
     return result ?? false;
   }
 
@@ -132,10 +133,6 @@ class _ShellState extends ConsumerState<Shell> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (i != 0) {
-          ref.read(tabProvider.notifier).state = 0;
-          return;
-        }
         final shouldExit = await _showExitDialog(context);
         if (shouldExit && context.mounted) {
           SystemNavigator.pop();
@@ -146,10 +143,7 @@ class _ShellState extends ConsumerState<Shell> {
           Expanded(
             child: SafeArea(
               bottom: false,
-              child: IndexedStack(
-                index: i,
-                children: const [HomePage(), CalendarPage(), LevelsPage(), SuppliesPage(), MorePage()],
-              ),
+              child: IndexedStack(index: i, children: const [HomePage(), CalendarPage(), LevelsPage(), SuppliesPage(), MorePage()]),
             ),
           ),
           Container(
@@ -157,15 +151,7 @@ class _ShellState extends ConsumerState<Shell> {
               color: theme.colorScheme.surface,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               border: dark ? Border(top: BorderSide(color: Colors.white.withValues(alpha: .07))) : null,
-              boxShadow: dark
-                  ? null
-                  : [
-                      BoxShadow(
-                        color: const Color(0xFF6B5CE0).withValues(alpha: .10),
-                        blurRadius: 24,
-                        offset: const Offset(0, -6),
-                      ),
-                    ],
+              boxShadow: dark ? null : [BoxShadow(color: const Color(0xFF6B5CE0).withValues(alpha: .10), blurRadius: 24, offset: const Offset(0, -6))],
             ),
             child: SafeArea(
               top: false,
@@ -184,24 +170,13 @@ class _ShellState extends ConsumerState<Shell> {
                               duration: const Duration(milliseconds: 200),
                               width: 56,
                               height: 30,
-                              decoration: BoxDecoration(
-                                color: i == k ? C.peony.withValues(alpha: .16) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Icon(
-                                i == k ? _items[k].$1 : _items[k].$2,
-                                size: 24,
-                                color: i == k ? C.peony : fg.withValues(alpha: .6),
-                              ),
+                              decoration: BoxDecoration(color: i == k ? C.peony.withValues(alpha: .16) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
+                              child: Icon(i == k ? _items[k].$1 : _items[k].$2, size: 24, color: i == k ? C.peony : fg.withValues(alpha: .6)),
                             ),
                             gap(2),
                             Text(
-                              context.tr(_items[k].$3),
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: i == k ? FontWeight.w700 : FontWeight.w500,
-                                color: i == k ? C.peony : fg.withValues(alpha: .6),
-                              ),
+                              tr(_items[k].$3),
+                              style: TextStyle(fontSize: 11, fontWeight: i == k ? FontWeight.w700 : FontWeight.w500, color: i == k ? C.peony : fg.withValues(alpha: .6)),
                             ),
                           ]),
                         ),

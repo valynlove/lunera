@@ -53,7 +53,7 @@ class MorePage extends ConsumerWidget {
     void go(Widget p) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => p));
 
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
-      Text(context.tr('More'), style: display(36)),
+      Text(tr('More'), style: display(36)),
       gap(18),
       InkWell(
         borderRadius: BorderRadius.circular(24),
@@ -80,15 +80,15 @@ class MorePage extends ConsumerWidget {
       Container(
         decoration: cardBox(context),
         child: Column(children: [
-          tile(Icons.person_outline_rounded, context.tr('Account Profile'), () => go(const ProfilePage()), sub: context.tr('Change photo and nickname')),
-          tile(Icons.tune_rounded, context.tr('Settings'), () => go(const SettingsPage()), sub: context.tr('Appearance, units, injection sites, reminders')),
-          tile(Icons.insights_rounded, context.tr('Insights'), () => go(const InsightsPage()), sub: context.tr('Adherence and mood patterns')),
-          tile(Icons.accessibility_new_rounded, context.tr('Body & Changes'), () => go(const BodyPage()), sub: context.tr('Timeline from your journal')),
-          tile(Icons.lock_outline_rounded, context.tr('Security'), () => go(const SecurityPage()), sub: context.tr('App PIN lock protection')),
-          tile(Icons.import_export_rounded, context.tr('Import, export, backup'), () => go(const DataPage())),
+          tile(Icons.person_outline_rounded, tr('Account Profile'), () => go(const ProfilePage()), sub: tr('Change photo and nickname')),
+          tile(Icons.tune_rounded, tr('Settings'), () => go(const SettingsPage()), sub: tr('Appearance, units, injection sites, reminders')),
+          tile(Icons.insights_rounded, tr('Insights'), () => go(const InsightsPage()), sub: tr('Adherence and mood patterns')),
+          tile(Icons.accessibility_new_rounded, tr('Body & changes'), () => go(const BodyPage()), sub: tr('Timeline from your journal')),
+          tile(Icons.lock_outline_rounded, tr('Security'), () => go(const SecurityPage()), sub: tr('PIN lock and biometrics')),
+          tile(Icons.import_export_rounded, tr('Import, export, backups'), () => go(const DataPage())),
           tile(
             Icons.system_update_rounded,
-            context.tr('Check for Updates'),
+            tr('Check for Updates'),
             () {
               if (updateInfo != null) {
                 UpdateCheckerService.showUpdateDialog(context, updateInfo);
@@ -104,7 +104,7 @@ class MorePage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      context.tr('NEW'),
+                      tr('NEW'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -114,33 +114,40 @@ class MorePage extends ConsumerWidget {
                   )
                 : null,
             sub: updateInfo != null
-                ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${context.tr('Update Available!')})'
+                ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${tr('Update Available!')})'
                 : 'v${UpdateCheckerService.currentVersion}',
           ),
           tile(
             Icons.history_edu_rounded,
-            context.tr('Version Changelog'),
+            tr('Version Changelog'),
             () => showAppChangelogSheet(context),
-            sub: context.tr("See what's new in v{version} and past releases", {'version': UpdateCheckerService.currentVersion}),
+            sub: tr("See what's new in v{version} and past releases", {'version': UpdateCheckerService.currentVersion}),
           ),
-          tile(Icons.info_outline_rounded, context.tr('About {name}', {'name': appName}), () {
+          tile(Icons.info_outline_rounded, tr('About {0}', [appName]), () {
             showDialog<void>(
               context: context,
               builder: (d) => AlertDialog(
                 title: const Row(children: [MoonLogoSmall(), SizedBox(width: 12), Text(appName)]),
-                content: const Text(
-                    'Version ${UpdateCheckerService.currentVersion}\n\n$appName is a tracking and reminder tool, not a substitute for professional medical advice. '
-                    'Estimated levels use population average models and may differ from your lab tests. Always consult your physician for dosage decisions.'),
-                actions: [TextButton(onPressed: () => Navigator.pop(d), child: Text(context.tr('Close')))],
+                content: Text(
+                    'Version ${UpdateCheckerService.currentVersion}\n\n$appName ${tr('is a tracking and reminder tool, not a substitute for medical advice. ')}${tr('Estimated levels use an average model and can differ from lab results. Dosing decisions always stay with your doctor.')}'),
+                actions: [TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Close')))],
               ),
             );
           }),
         ]),
       ),
       gap(16),
-      OutlinedButton.icon(onPressed: () => signOutAll(), icon: const Icon(Icons.logout_rounded), label: Text(context.tr('Sign out'))),
+      OutlinedButton.icon(onPressed: () => signOutAll(), icon: const Icon(Icons.logout_rounded), label: Text(tr('Sign out'))),
     ]);
   }
 }
 
-
+class MoonLogoSmall extends StatelessWidget {
+  const MoonLogoSmall({super.key});
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(color: C.deep, borderRadius: BorderRadius.circular(12)),
+        child: const MoonLogo(size: 28),
+      );
+}

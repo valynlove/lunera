@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "1.9.0";
+const APP_VERSION = "1.10.0";
 
 // Unified Signature Theme - Permanent Dark Celestial Midnight Palette
 function lockSignatureTheme() {
