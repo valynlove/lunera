@@ -21,7 +21,6 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
   final _messages = <ChatMessage>[];
   final _textCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
-  final _apiKeyCtrl = TextEditingController();
 
   bool _isOnline = true;
   bool _isGenerating = false;
@@ -38,7 +37,6 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
   void dispose() {
     _textCtrl.dispose();
     _scrollCtrl.dispose();
-    _apiKeyCtrl.dispose();
     super.dispose();
   }
 
@@ -67,9 +65,9 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
     if (text.isEmpty || _isGenerating) return;
 
     final prefs = ref.read(prefsProvider).value ?? const Prefs();
-    final apiKey = AsteriaService.resolveApiKey(prefs.geminiApiKey);
+    final apiKey = AsteriaService.resolveApiKey(prefs.geminiApiKey, prefs.asteriaMode);
     if (apiKey.isEmpty) {
-      _showApiKeyDialog();
+      showAsteriaConnectionDialog(context, ref);
       return;
     }
 
@@ -110,9 +108,12 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
       setState(() => _isGenerating = false);
       if (e is AsteriaQuotaException) {
         setState(() => _isQuotaExhausted = true);
+        final isPersonal = AsteriaService.isPersonalMode(prefs.geminiApiKey, prefs.asteriaMode);
         _messages.add(ChatMessage(
           role: 'model',
-          text: tr('Asteria has expended her starry energy listening to many friends today. She is resting beneath the night clouds and will be fully refreshed tomorrow.'),
+          text: isPersonal
+              ? tr('Your Personal Star connection has reached its daily limit. Asteria is resting beneath the night clouds, but you can switch to the Shared Star anytime.')
+              : tr('Asteria has expended her starry energy on the Shared Star today. She is resting beneath the night clouds, but you can switch to your Personal Star for unlimited conversations.'),
           time: DateTime.now(),
         ));
         _scrollToBottom();
@@ -128,7 +129,7 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
     if (_messages.isEmpty || _isSummarizing) return;
 
     final prefs = ref.read(prefsProvider).value ?? const Prefs();
-    final apiKey = AsteriaService.resolveApiKey(prefs.geminiApiKey);
+    final apiKey = AsteriaService.resolveApiKey(prefs.geminiApiKey, prefs.asteriaMode);
     setState(() => _isSummarizing = true);
 
     try {
@@ -299,82 +300,6 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
     );
   }
 
-  void _showApiKeyDialog() {
-    final prefs = ref.read(prefsProvider).value ?? const Prefs();
-    _apiKeyCtrl.text = prefs.geminiApiKey;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: dark ? C.deepCard : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: [
-            Icon(Icons.key_rounded, color: C.peony),
-            const SizedBox(width: 8),
-            Text(tr('Asteria API Key'), style: display(18)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              tr('Enter your Google Gemini API key to activate Asteria. Your key is stored securely in your private account preferences.'),
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75)),
-            ),
-            gap(14),
-            TextField(
-              controller: _apiKeyCtrl,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'AIzaSy...',
-                filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.content_paste_rounded),
-                  tooltip: tr('Paste from clipboard'),
-                  onPressed: () async {
-                    final data = await Clipboard.getData('text/plain');
-                    if (data?.text != null) {
-                      _apiKeyCtrl.text = data!.text!.trim();
-                    }
-                  },
-                ),
-              ),
-            ),
-            gap(8),
-            Text(
-              tr('Get a free key at aistudio.google.com'),
-              style: TextStyle(fontSize: 12, color: C.peony, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        actions: [
-          OutlinedButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(tr('Cancel')),
-          ),
-          FilledButton(
-            onPressed: () {
-              final newKey = _apiKeyCtrl.text.trim();
-              ref.read(repoProvider)?.setPrefs(prefs.copy(geminiApiKey: newKey));
-              Navigator.pop(ctx);
-              setState(() {});
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(tr('Asteria API Key updated.'))),
-              );
-            },
-            style: FilledButton.styleFrom(backgroundColor: C.peony, foregroundColor: Colors.white),
-            child: Text(tr('Save Key')),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildOfflineView() {
     return Center(
       child: Padding(
@@ -537,7 +462,11 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
                 Text(
                   _isQuotaExhausted
                       ? tr('Resting (quota reached)')
-                      : (_isOnline ? tr('Always here to listen') : tr('Offline mode')),
+                      : (_isOnline
+                          ? (prefs.asteriaMode == 'personal'
+                              ? tr('Personal Star ✦')
+                              : tr('Shared Star ✦'))
+                          : tr('Offline mode')),
                   style: TextStyle(
                     fontSize: 11,
                     color: _isQuotaExhausted
@@ -568,9 +497,9 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
               ),
             ),
           IconButton(
-            tooltip: tr('Asteria Settings / API Key'),
-            icon: const Icon(Icons.key_rounded, size: 20),
-            onPressed: _showApiKeyDialog,
+            tooltip: tr('Asteria Connection'),
+            icon: const Icon(Icons.tune_rounded, size: 20),
+            onPressed: () => showAsteriaConnectionDialog(context, ref),
           ),
           const SizedBox(width: 4),
         ],
@@ -580,7 +509,7 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
           children: [
             if (!_isOnline)
               Expanded(child: _buildOfflineView())
-            else if (!AsteriaService.hasAvailableKey(prefs.geminiApiKey))
+            else if (!AsteriaService.hasAvailableKey(prefs.geminiApiKey, prefs.asteriaMode))
               Expanded(
                 child: Center(
                   child: Padding(
@@ -588,17 +517,21 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.key_rounded, size: 50, color: C.peony),
+                        Icon(Icons.auto_awesome_rounded, size: 50, color: C.peony),
                         gap(16),
                         Text(tr('Connect to Asteria'), style: display(20)),
                         gap(8),
                         Text(
-                          tr('Please configure your free Gemini API key to start chatting with Asteria.'),
+                          tr('Please configure your connection to start chatting with Asteria.'),
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
                         ),
                         gap(20),
-                        pillButton(tr('Enter API Key'), _showApiKeyDialog, icon: Icons.vpn_key_rounded),
+                        pillButton(
+                          tr('Configure Connection'),
+                          () => showAsteriaConnectionDialog(context, ref),
+                          icon: Icons.tune_rounded,
+                        ),
                       ],
                     ),
                   ),
@@ -708,23 +641,52 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        tr('Public quota is resting until tomorrow. You can enter a private API key in Settings anytime.'),
+                        prefs.asteriaMode == 'personal'
+                            ? tr('Personal Star daily limit reached. Would you like to switch to the Shared Star?')
+                            : tr('Shared Star is resting tonight. Would you like to switch to your Personal Star?'),
                         style: TextStyle(
                           fontSize: 11,
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85),
                         ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: _showApiKeyDialog,
-                      child: Text(tr('Private Key'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                    ),
+                    const SizedBox(width: 6),
+                    if (prefs.asteriaMode == 'personal')
+                      TextButton(
+                        onPressed: () {
+                          ref.read(repoProvider)?.setPrefs(prefs.copy(asteriaMode: 'shared'));
+                          setState(() => _isQuotaExhausted = false);
+                        },
+                        child: Text(
+                          tr('Switch to Shared Star'),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                        ),
+                      )
+                    else if (prefs.geminiApiKey.trim().isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          ref.read(repoProvider)?.setPrefs(prefs.copy(asteriaMode: 'personal'));
+                          setState(() => _isQuotaExhausted = false);
+                        },
+                        child: Text(
+                          tr('Switch to Personal Star'),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                        ),
+                      )
+                    else
+                      TextButton(
+                        onPressed: () => showAsteriaConnectionDialog(context, ref),
+                        child: Text(
+                          tr('Set up Personal Star'),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                        ),
+                      ),
                   ],
                 ),
               ),
 
             // Composer area
-            if (_isOnline && AsteriaService.hasAvailableKey(prefs.geminiApiKey))
+            if (_isOnline && AsteriaService.hasAvailableKey(prefs.geminiApiKey, prefs.asteriaMode))
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 decoration: BoxDecoration(
@@ -770,4 +732,209 @@ class _AsteriaChatPageState extends ConsumerState<AsteriaChatPage> {
       ),
     );
   }
+}
+
+/// Dialog pemilihan mode koneksi Asteria: Bintang Bersama (bawaan) vs Bintang Pribadi (kunci sendiri).
+Future<void> showAsteriaConnectionDialog(BuildContext context, WidgetRef ref) async {
+  final prefs = ref.read(prefsProvider).value ?? const Prefs();
+  String selectedMode = prefs.asteriaMode;
+  final apiKeyCtrl = TextEditingController(text: prefs.geminiApiKey);
+  final dark = Theme.of(context).brightness == Brightness.dark;
+  final onSurface = Theme.of(context).colorScheme.onSurface;
+
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setDialogState) {
+        final isPersonal = selectedMode == 'personal';
+        return AlertDialog(
+          backgroundColor: dark ? C.deepCard : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: C.peony.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.auto_awesome_rounded, color: C.peony, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  tr('Asteria Connection'),
+                  style: display(18),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('Choose how Asteria connects to the starry night:'),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: onSurface.withValues(alpha: 0.75),
+                  ),
+                ),
+                gap(12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        selected: !isPersonal,
+                        onSelected: (_) => setDialogState(() => selectedMode = 'shared'),
+                        label: Center(
+                          child: Text(
+                            tr('Shared Star'),
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                        ),
+                        selectedColor: C.peony.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ChoiceChip(
+                        selected: isPersonal,
+                        onSelected: (_) => setDialogState(() => selectedMode = 'personal'),
+                        label: Center(
+                          child: Text(
+                            tr('Personal Star'),
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                        ),
+                        selectedColor: C.peony.withValues(alpha: 0.25),
+                      ),
+                    ),
+                  ],
+                ),
+                gap(14),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: dark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: dark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
+                    ),
+                  ),
+                  child: !isPersonal
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.groups_rounded, size: 16, color: C.peony),
+                                const SizedBox(width: 6),
+                                Text(
+                                  tr('Shared Star (Default)'),
+                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                            gap(6),
+                            Text(
+                              tr('Free community connection provided for all Lunera friends. Ready to talk without any setup.'),
+                              style: TextStyle(fontSize: 12, color: onSurface.withValues(alpha: 0.7), height: 1.35),
+                            ),
+                            gap(8),
+                            Row(
+                              children: [
+                                const Icon(Icons.check_circle_rounded, size: 14, color: Colors.greenAccent),
+                                const SizedBox(width: 6),
+                                Text(
+                                  tr('Active & ready to listen'),
+                                  style: const TextStyle(fontSize: 12, color: Colors.greenAccent, fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.star_rounded, size: 16, color: C.peony),
+                                const SizedBox(width: 6),
+                                Text(
+                                  tr('Personal Star (Own Key)'),
+                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                            gap(6),
+                            Text(
+                              tr('Exclusive connection using your private Google Gemini Key for dedicated conversation quota.'),
+                              style: TextStyle(fontSize: 12, color: onSurface.withValues(alpha: 0.7), height: 1.35),
+                            ),
+                            gap(12),
+                            TextField(
+                              controller: apiKeyCtrl,
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                hintText: 'AIzaSy...',
+                                filled: true,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                suffixIcon: IconButton(
+                                  icon: const Icon(Icons.content_paste_rounded, size: 18),
+                                  tooltip: tr('Paste from clipboard'),
+                                  onPressed: () async {
+                                    final data = await Clipboard.getData('text/plain');
+                                    if (data?.text != null) {
+                                      apiKeyCtrl.text = data!.text!.trim();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            gap(6),
+                            Text(
+                              tr('Get a free key at aistudio.google.com'),
+                              style: TextStyle(fontSize: 11, color: C.peony, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr('Cancel')),
+            ),
+            FilledButton(
+              onPressed: () {
+                final newKey = apiKeyCtrl.text.trim();
+                ref.read(repoProvider)?.setPrefs(prefs.copy(
+                  asteriaMode: selectedMode,
+                  geminiApiKey: newKey,
+                ));
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(tr('Asteria connection updated.'))),
+                );
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: C.peony,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(tr('Save')),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+  apiKeyCtrl.dispose();
 }

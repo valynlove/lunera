@@ -60,12 +60,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.3'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.4'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.3'));
+      expect(AppChangelog.releases.first.version, equals('1.11.4'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -266,9 +266,24 @@ void main() {
       expect(summary.mood, equals('anxious'));
       expect(summary.summary, contains('Merasa cemas'));
 
-      // Hybrid Key Resolution tests
+      // Hybrid Key & Celestial Mode Resolution tests
       expect(AsteriaService.resolveApiKey('custom-key'), equals('custom-key'));
+      expect(AsteriaService.resolveApiKey('custom-key', 'personal'), equals('custom-key'));
       expect(AsteriaService.hasAvailableKey('custom-key'), isTrue);
+      expect(AsteriaService.isPersonalMode('custom-key', 'personal'), isTrue);
+      expect(AsteriaService.isPersonalMode('custom-key', 'shared'), isFalse);
+      expect(AsteriaService.isPersonalMode('', 'personal'), isFalse);
+
+      const defaultPrefs = Prefs();
+      expect(defaultPrefs.asteriaMode, equals('shared'));
+      final personalPrefs = defaultPrefs.copy(asteriaMode: 'personal', geminiApiKey: 'my-key');
+      expect(personalPrefs.asteriaMode, equals('personal'));
+      expect(personalPrefs.geminiApiKey, equals('my-key'));
+
+      final map = personalPrefs.toMap();
+      final reconstructed = Prefs.from(map);
+      expect(reconstructed.asteriaMode, equals('personal'));
+      expect(reconstructed.geminiApiKey, equals('my-key'));
 
       const quotaEx = AsteriaQuotaException();
       expect(quotaEx.toString(), contains('Asteria is resting'));

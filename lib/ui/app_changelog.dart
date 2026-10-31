@@ -41,10 +41,33 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.3',
+      version: '1.11.4',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Celestial mode switcher: easily switch between Shared Star (Bintang Bersama - free community connection) and Personal Star (Bintang Pribadi - private key connection).',
+          textId: 'Pengalih mode bintang: beralih dengan mudah antara Bintang Bersama (koneksi komunitas gratis) dan Bintang Pribadi (koneksi kunci mandiri).',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Gentle and friendly celestial terminology replacing technical developer jargon across all chat dialogs and settings.',
+          textId: 'Terminologi surgawi yang ramah dan lembut menggantikan istilah teknis di seluruh dialog percakapan dan pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Seamless bidirectional quota fallback: one-tap switching between Shared and Personal Star when either reaches its resting limit.',
+          textId: 'Peralihan kuota dua arah otomatis: beralih dalam satu ketukan antara Bintang Bersama dan Pribadi saat salah satunya sedang beristirahat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.3',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

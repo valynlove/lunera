@@ -4,6 +4,21 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.4] - 2026-10-31
+
+### Added
+- **Celestial Mode Switcher for Asteria AI (`lib/models.dart`, `lib/asteria.dart`, `lib/ui/asteria_chat.dart`):**
+  - Introduced seamless mode selection between **Shared Star** (*Bintang Bersama* - free community connection provided out-of-the-box) and **Personal Star** (*Bintang Pribadi* - dedicated connection powered by user's own Google Gemini API key).
+  - Designed elegant and intuitive `showAsteriaConnectionDialog` accessible directly from both the Asteria chat screen and the application Settings page.
+  - Added bidirectional quota fallback: if either Shared Star or Personal Star reaches its daily resting limit (HTTP 429), users are gently prompted with a one-tap option to switch to the alternative mode immediately without disruption.
+
+### Changed
+- **Softened and Welcoming Celestial Terminology (`lib/l10n_id.dart` & `lib/ui/settings_page.dart`):**
+  - Completely replaced cold technical developer jargon ("Public Key", "Private Key", "BYOK") with warm, poetic, and friendly celestial language tailored for all users.
+  - Full bilingual localization (English and Indonesian) across all modal dialogs, status badges, and resting notification banners.
+
+---
+
 ## [1.11.3] - 2026-10-31
 
 ### Added
