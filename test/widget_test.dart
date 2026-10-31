@@ -5,6 +5,7 @@ import 'package:lunera/models.dart';
 import 'package:lunera/profile.dart';
 import 'package:lunera/sim.dart';
 import 'package:lunera/ui/app_changelog.dart';
+import 'package:lunera/ui/site_map.dart';
 import 'package:lunera/update_checker.dart';
 
 void main() {
@@ -58,12 +59,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.10.2'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.0'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.10.2'));
+      expect(AppChangelog.releases.first.version, equals('1.11.0'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -180,6 +181,45 @@ void main() {
       expect(legacyRecon.footLength, isNull);
       expect(legacyRecon.shoeSize, isNull);
       expect(legacyRecon.bottomSize, equals('27–28 (S)'));
+    });
+
+    test('Injection site status and rotation health computation', () {
+      const prefs = Prefs(places: ['Left thigh', 'Right thigh', 'Left buttock']);
+      final now = DateTime.now();
+
+      final logs = [
+        DoseLog(
+          id: 'l1',
+          therapyId: 't1',
+          at: now.subtract(const Duration(days: 1)),
+          places: ['Left thigh'],
+        ),
+        DoseLog(
+          id: 'l2',
+          therapyId: 't1',
+          at: now.subtract(const Duration(days: 10)),
+          places: ['Right thigh'],
+        ),
+      ];
+
+      final statuses = getSiteStatuses(
+        sites: prefs.places,
+        logsDesc: logs,
+        prefs: prefs,
+        therapyId: 't1',
+      );
+
+      expect(statuses.containsKey('Left thigh'), isTrue);
+      expect(statuses['Left thigh']!.isResting, isTrue); // Injected 1 day ago (resting)
+      expect(statuses['Left thigh']!.daysSince, equals(1));
+
+      expect(statuses.containsKey('Right thigh'), isTrue);
+      expect(statuses['Right thigh']!.isResting, isFalse); // Injected 10 days ago (ready)
+      expect(statuses['Right thigh']!.daysSince, equals(10));
+
+      expect(statuses.containsKey('Left buttock'), isTrue);
+      expect(statuses['Left buttock']!.isResting, isFalse); // Never used (ready)
+      expect(statuses['Left buttock']!.daysSince, isNull);
     });
   });
 }

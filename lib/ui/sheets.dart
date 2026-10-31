@@ -7,6 +7,7 @@ import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import '../l10n.dart';
+import 'site_map.dart';
 
 const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -33,6 +34,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
   late String injType = widget.edit?.injType ?? widget.t.injType ?? 'im';
   late String? supplyId = widget.supplies.any((s) => s.id == widget.t.supplyId) ? widget.t.supplyId : null;
   final generics = <String>{};
+  bool _showMap = true;
 
   Future<void> _pick() async {
     final d = await showDatePicker(context: context, initialDate: at, firstDate: DateTime(2000), lastDate: DateTime.now());
@@ -113,15 +115,45 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       ),
       if (t.adm.places && widget.prefs.places.isNotEmpty) ...[
         gap(14),
-        Text(tr('Site')),
-        Wrap(spacing: 8, runSpacing: 4, children: [
-          for (final p in widget.prefs.places)
-            FilterChip(
-              label: Text(tr(p)),
-              selected: places.contains(p),
-              onSelected: (v) => setState(() => v ? places.add(p) : places.remove(p)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(tr('Site'), style: const TextStyle(fontWeight: FontWeight.w700)),
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                foregroundColor: Pastel.lilac,
+              ),
+              onPressed: () => setState(() => _showMap = !_showMap),
+              icon: Icon(_showMap ? Icons.view_headline_rounded : Icons.accessibility_new_rounded, size: 18),
+              label: Text(_showMap ? tr('Show chips') : tr('Show body map'), style: const TextStyle(fontSize: 12)),
             ),
-        ]),
+          ],
+        ),
+        gap(6),
+        if (_showMap)
+          InjectionSiteMap(
+            selectedSites: places,
+            onSiteToggled: (p) => setState(() {
+              if (places.contains(p)) {
+                places.remove(p);
+              } else {
+                places.add(p);
+              }
+            }),
+            therapyId: t.id,
+            logs: ref.watch(logsProvider).value ?? <DoseLog>[],
+            prefs: widget.prefs,
+          )
+        else
+          Wrap(spacing: 8, runSpacing: 4, children: [
+            for (final p in widget.prefs.places)
+              FilterChip(
+                label: Text(tr(p)),
+                selected: places.contains(p),
+                onSelected: (v) => setState(() => v ? places.add(p) : places.remove(p)),
+              ),
+          ]),
       ],
       if (t.route == 'inj') ...[
         gap(8),

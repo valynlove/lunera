@@ -11,6 +11,7 @@ import '../update_checker.dart';
 import 'app_changelog.dart';
 import 'auth.dart';
 import 'data_page.dart';
+import 'site_map.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -165,7 +166,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ]),
           _card(tr('Injection & Patch Sites'), [
             Text(tr('Selection order determines next suggested site, alternating from top to bottom.')),
-            gap(8),
+            gap(10),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                side: BorderSide(color: Pastel.lilac.withValues(alpha: 0.3)),
+              ),
+              onPressed: () => showSheet(context, const SiteRotationSheet()),
+              icon: const Icon(Icons.accessibility_new_rounded, size: 18, color: Pastel.lilac),
+              label: Text(tr('View Site Rotation & Health'), style: const TextStyle(color: Pastel.lilac, fontWeight: FontWeight.w600)),
+            ),
+            gap(10),
             Wrap(spacing: 8, runSpacing: 4, children: [
               for (final x in [...placePresets, ...extra])
                 FilterChip(

@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.10.2',
+      version: '1.11.0',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Body measurement progression trend charts (WHR, Bust & Ribcage, Waist & Hips, Weight, Legs) with baseline comparison.',
+          textId: 'Kurva tren perkembangan ukuran tubuh (WHR, Dada & Bawah Dada, Pinggang & Pinggul, Berat Badan, Kaki) dengan perbandingan awal.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Interactive anatomical injection site map & tissue rest heatmap (Front and Back perspectives) with smart rotation guidance.',
+          textId: 'Peta anatomi titik suntik interaktif & heatmap istirahat jaringan (sudut pandang Depan & Belakang) dengan panduan rotasi cerdas.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.10.2',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

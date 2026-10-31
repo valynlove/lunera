@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "1.10.2";
+const APP_VERSION = "1.11.0";
 
 // Mobile Navigation Toggle
 function setupMobileNav() {

@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -395,6 +396,10 @@ class _SizeTab extends ConsumerWidget {
       ),
       gap(14),
 
+      // Trends & Progression Curves
+      _MeasurementTrendsCard(measurements: measurements),
+      gap(14),
+
       // Measurement History
       Text(tr('Measurement History'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
       gap(8),
@@ -495,6 +500,462 @@ class _MetricTile extends StatelessWidget {
         gap(2),
         Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
       ]),
+    );
+  }
+}
+
+class _MeasurementTrendsCard extends StatefulWidget {
+  const _MeasurementTrendsCard({required this.measurements});
+  final List<BodyMeasurement> measurements;
+
+  @override
+  State<_MeasurementTrendsCard> createState() => _MeasurementTrendsCardState();
+}
+
+class _MeasurementTrendsCardState extends State<_MeasurementTrendsCard> {
+  String _metric = 'whr'; // 'whr', 'bust', 'waist_hips', 'weight', 'legs'
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = Theme.of(context).colorScheme.onSurface;
+    final chronological = [...widget.measurements]..sort((a, b) => a.at.compareTo(b.at));
+
+    if (chronological.length < 2) {
+      return Container(
+        padding: const EdgeInsets.all(18),
+        decoration: cardBox(context),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Pastel.lilac.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.trending_up_rounded, color: Pastel.lilac, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tr('Progression Curves'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  const SizedBox(height: 2),
+                  Text(
+                    tr('Log at least 2 measurements to view your progression trends over time.'),
+                    style: TextStyle(fontSize: 12, color: fg.withValues(alpha: 0.65)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Determine data based on _metric
+    List<BodyMeasurement> filtered;
+    String primaryLabel;
+    String? secondaryLabel;
+    Color primaryColor;
+    Color secondaryColor;
+    String unitLabel;
+    double Function(BodyMeasurement) getPrimary;
+    double? Function(BodyMeasurement)? getSecondary;
+
+    switch (_metric) {
+      case 'bust':
+        filtered = chronological.where((m) => m.bustCm != null).toList();
+        primaryLabel = tr('Full Bust');
+        secondaryLabel = tr('Underbust');
+        primaryColor = Pastel.lilac;
+        secondaryColor = C.lagoon;
+        unitLabel = 'cm';
+        getPrimary = (m) => m.bustCm!;
+        getSecondary = (m) => m.underbustCm;
+        break;
+      case 'waist_hips':
+        filtered = chronological.where((m) => m.waistCm != null && m.hipsCm != null).toList();
+        primaryLabel = tr('Waist');
+        secondaryLabel = tr('Hips');
+        primaryColor = C.amber;
+        secondaryColor = Pastel.lilac;
+        unitLabel = 'cm';
+        getPrimary = (m) => m.waistCm!;
+        getSecondary = (m) => m.hipsCm;
+        break;
+      case 'weight':
+        filtered = chronological.where((m) => m.weight != null).toList();
+        primaryLabel = tr('Weight');
+        secondaryLabel = null;
+        primaryColor = Pastel.sky;
+        secondaryColor = Colors.transparent;
+        unitLabel = 'kg';
+        getPrimary = (m) => m.weight!;
+        getSecondary = null;
+        break;
+      case 'legs':
+        filtered = chronological.where((m) => m.thighCm != null).toList();
+        primaryLabel = tr('Thigh');
+        secondaryLabel = tr('Calf');
+        primaryColor = Pastel.mint;
+        secondaryColor = Pastel.sky;
+        unitLabel = 'cm';
+        getPrimary = (m) => m.thighCm!;
+        getSecondary = (m) => m.calfCm;
+        break;
+      case 'whr':
+      default:
+        filtered = chronological.where((m) => m.waistToHipRatio != null).toList();
+        primaryLabel = tr('WHR Ratio');
+        secondaryLabel = null;
+        primaryColor = Pastel.lilac;
+        secondaryColor = Colors.transparent;
+        unitLabel = '';
+        getPrimary = (m) => m.waistToHipRatio!;
+        getSecondary = null;
+        break;
+    }
+
+    Widget content;
+    if (filtered.length < 2) {
+      content = Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: Text(
+            tr('Not enough records with this measurement yet.'),
+            style: TextStyle(color: fg.withValues(alpha: 0.6), fontSize: 13),
+          ),
+        ),
+      );
+    } else {
+      final firstVal = getPrimary(filtered.first);
+      final lastVal = getPrimary(filtered.last);
+      final diff = lastVal - firstVal;
+
+      // Calculate Min & Max for Chart
+      double minY = double.infinity;
+      double maxY = -double.infinity;
+      final primarySpots = <FlSpot>[];
+      final secondarySpots = <FlSpot>[];
+
+      for (var i = 0; i < filtered.length; i++) {
+        final m = filtered[i];
+        final pVal = getPrimary(m);
+        primarySpots.add(FlSpot(i.toDouble(), pVal));
+        if (pVal < minY) minY = pVal;
+        if (pVal > maxY) maxY = pVal;
+
+        if (getSecondary != null) {
+          final sVal = getSecondary(m);
+          if (sVal != null) {
+            secondarySpots.add(FlSpot(i.toDouble(), sVal));
+            if (sVal < minY) minY = sVal;
+            if (sVal > maxY) maxY = sVal;
+          }
+        }
+      }
+
+      // Add breathing room padding
+      final span = maxY - minY;
+      final pad = span == 0 ? 1.0 : span * 0.18;
+      minY = (minY - pad).clamp(0.0, double.infinity);
+      maxY = maxY + pad;
+      if (minY >= maxY) {
+        minY = 0;
+        maxY = 1;
+      }
+
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Baseline vs Current Comparison Banner
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _StatColumn(
+                  label: tr('Baseline'),
+                  value: '${fmt(firstVal)} $unitLabel'.trim(),
+                  date: filtered.first.at,
+                ),
+                Container(width: 1, height: 32, color: Colors.white12),
+                _StatColumn(
+                  label: tr('Current'),
+                  value: '${fmt(lastVal)} $unitLabel'.trim(),
+                  date: filtered.last.at,
+                ),
+                Container(width: 1, height: 32, color: Colors.white12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(tr('Difference'), style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.6))),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${diff >= 0 ? '+' : ''}${fmt(diff)} $unitLabel'.trim(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: diff == 0 ? fg : (primaryColor == C.amber ? (diff < 0 ? Pastel.mint : C.amber) : Pastel.lilac),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          gap(14),
+
+          // Legend
+          if (secondaryLabel != null && secondarySpots.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _LegendItem(color: primaryColor, label: primaryLabel),
+                const SizedBox(width: 16),
+                _LegendItem(color: secondaryColor, label: secondaryLabel),
+              ],
+            ),
+            gap(10),
+          ],
+
+          // Interactive FlChart
+          SizedBox(
+            height: 190,
+            child: LineChart(
+              LineChartData(
+                minX: 0,
+                maxX: (filtered.length - 1).toDouble(),
+                minY: minY,
+                maxY: maxY,
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (_) => FlLine(color: fg.withValues(alpha: 0.08), strokeWidth: 1),
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(),
+                  rightTitles: const AxisTitles(),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 42,
+                      getTitlesWidget: (v, m) => Text(
+                        fmt(v),
+                        style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.5)),
+                      ),
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 26,
+                      interval: 1,
+                      getTitlesWidget: (val, meta) {
+                        final idx = val.toInt();
+                        if (idx < 0 || idx >= filtered.length) return const SizedBox.shrink();
+                        if (filtered.length > 5 && idx != 0 && idx != filtered.length - 1 && idx != filtered.length ~/ 2) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            DateFormat('d MMM', L10n.code).format(filtered[idx].at),
+                            style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.55)),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (touched) => [
+                      for (final s in touched)
+                        LineTooltipItem(
+                          '${s.barIndex == 0 ? primaryLabel : (secondaryLabel ?? '')}: ${fmt(s.y)} $unitLabel\n${DateFormat('d MMM y', L10n.code).format(filtered[s.spotIndex].at)}'.trim(),
+                          TextStyle(color: s.bar.color, fontWeight: FontWeight.w700, fontSize: 12),
+                        ),
+                    ],
+                  ),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: primarySpots,
+                    isCurved: true,
+                    curveSmoothness: 0.35,
+                    preventCurveOverShooting: true,
+                    color: primaryColor,
+                    barWidth: 3,
+                    isStrokeCapRound: true,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                        radius: 4,
+                        color: primaryColor,
+                        strokeWidth: 2,
+                        strokeColor: Colors.white,
+                      ),
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: primaryColor.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  if (secondarySpots.isNotEmpty)
+                    LineChartBarData(
+                      spots: secondarySpots,
+                      isCurved: true,
+                      curveSmoothness: 0.35,
+                      preventCurveOverShooting: true,
+                      color: secondaryColor,
+                      barWidth: 2.5,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                          radius: 3.5,
+                          color: secondaryColor,
+                          strokeWidth: 1.5,
+                          strokeColor: Colors.white,
+                        ),
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: secondaryColor.withValues(alpha: 0.08),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: cardBox(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.trending_up_rounded, color: Pastel.lilac, size: 22),
+                  const SizedBox(width: 8),
+                  Text(tr('Progression Trends'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Pastel.lilac.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  tr('{0} {0?record|records}', [chronological.length]),
+                  style: const TextStyle(fontSize: 11, color: Pastel.lilac, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          gap(12),
+
+          // Metric Chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _MetricChip(label: tr('WHR Ratio'), selected: _metric == 'whr', onSelected: () => setState(() => _metric = 'whr')),
+                const SizedBox(width: 8),
+                _MetricChip(label: tr('Bust & Ribcage'), selected: _metric == 'bust', onSelected: () => setState(() => _metric = 'bust')),
+                const SizedBox(width: 8),
+                _MetricChip(label: tr('Waist & Hips'), selected: _metric == 'waist_hips', onSelected: () => setState(() => _metric = 'waist_hips')),
+                const SizedBox(width: 8),
+                _MetricChip(label: tr('Weight'), selected: _metric == 'weight', onSelected: () => setState(() => _metric = 'weight')),
+                const SizedBox(width: 8),
+                _MetricChip(label: tr('Thigh & Calf'), selected: _metric == 'legs', onSelected: () => setState(() => _metric = 'legs')),
+              ],
+            ),
+          ),
+          gap(14),
+
+          content,
+        ],
+      ),
+    );
+  }
+}
+
+class _StatColumn extends StatelessWidget {
+  const _StatColumn({required this.label, required this.value, required this.date});
+  final String label, value;
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = Theme.of(context).colorScheme.onSurface;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.6))),
+        const SizedBox(height: 2),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 1),
+        Text(
+          DateFormat('d MMM y', L10n.code).format(date),
+          style: TextStyle(fontSize: 9, color: fg.withValues(alpha: 0.45)),
+        ),
+      ],
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.color, required this.label});
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+}
+
+class _MetricChip extends StatelessWidget {
+  const _MetricChip({required this.label, required this.selected, required this.onSelected});
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        color: selected ? Colors.white : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+      ),
     );
   }
 }

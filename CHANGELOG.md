@@ -4,6 +4,20 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-10-31
+
+### Added
+- **Body Measurement Progression Trend Charts (`lib/ui/body.dart`):**
+  - Integrated interactive FlChart progression curves in the *Size & Measures* tab (`_MeasurementTrendsCard`) for visualizing long-term physical transition metrics.
+  - Multi-metric selector supporting Waist-to-Hip Ratio (WHR), Bust & Ribcage (dual curves), Waist & Hips (dual curves), Weight, and Lower Body (Thigh & Calf).
+  - Live baseline vs current comparison cards showing net change ($\Delta$), touch tooltips with dates, and smooth gradient area curves.
+- **Interactive Visual Injection Site Map & Tissue Rest Heatmap (`lib/ui/site_map.dart` & `lib/ui/sheets.dart`):**
+  - Integrated 2D anatomical silhouette body map with dual-perspective views (Front for arms, abdomen, thighs; Back for gluteal/buttocks).
+  - Intelligent tissue rest status indicators displaying days since last injection, color-coded health badges ("Resting" vs "Ready"), and celestial suggested site highlight.
+  - Direct toggle integration into dose logging modal (`DoseSheet`) and standalone rotation overview in Settings (`SiteRotationSheet`).
+
+---
+
 ## [1.10.2] - 2026-10-31
 
 ### Added
