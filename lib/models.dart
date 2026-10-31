@@ -396,6 +396,7 @@ class Prefs {
     this.locale = 'en',
     this.geminiApiKey = '',
     this.asteriaMode = 'shared',
+    this.discreetNotify = 'off',
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
@@ -408,6 +409,7 @@ class Prefs {
   final int dayStart; // menit sejak 00:00; hari "logis" mulai di jam ini
   final String geminiApiKey;
   final String asteriaMode; // 'shared' (Bintang Bersama) | 'personal' (Bintang Pribadi)
+  final String discreetNotify; // 'off' | 'wellness' | 'minimal'
 
   String unitOf(String hormoneId) {
     final p = presetOf(hormoneId), u = units[hormoneId];
@@ -426,6 +428,7 @@ class Prefs {
     String? locale,
     String? geminiApiKey,
     String? asteriaMode,
+    String? discreetNotify,
   }) =>
       Prefs(
         theme: theme ?? this.theme,
@@ -439,6 +442,7 @@ class Prefs {
         locale: locale ?? this.locale,
         geminiApiKey: geminiApiKey ?? this.geminiApiKey,
         asteriaMode: asteriaMode ?? this.asteriaMode,
+        discreetNotify: discreetNotify ?? this.discreetNotify,
       );
 
   Map<String, dynamic> toMap() => {
@@ -453,6 +457,7 @@ class Prefs {
         'locale': locale,
         'geminiApiKey': geminiApiKey,
         'asteriaMode': asteriaMode,
+        'discreetNotify': discreetNotify,
       };
 
   factory Prefs.from(Map<String, dynamic> m) => Prefs(
@@ -471,6 +476,7 @@ class Prefs {
         locale: m['locale'] ?? 'en',
         geminiApiKey: m['geminiApiKey'] ?? '',
         asteriaMode: m['asteriaMode'] ?? 'shared',
+        discreetNotify: m['discreetNotify'] ?? 'off',
       );
 }
 

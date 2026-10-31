@@ -4,6 +4,20 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.10] - 2026-11-01
+
+### Added
+- **Decoy Calculator Lock (`lib/lock.dart`, `lib/ui/lock_screen.dart`, `lib/ui/security_page.dart`):**
+  - Integrated stealth calculator lock screen disguise that acts as a real, functional dark-themed calculator performing genuine mathematical operations.
+  - Owners securely unlock the application by entering their 6-digit PIN followed by `=` (or biometric authentication when enabled).
+  - Added dedicated toggle in Security Settings allowing users to choose between the celestial Moon PIN pad and the stealth Decoy Calculator.
+- **Discreet Notifications / Lockscreen Masking (`lib/models.dart`, `lib/notifications.dart`, `lib/ui/settings_page.dart`):**
+  - Added notification text masking to prevent sensitive medication names and dosages from appearing on device lockscreens in public or family environments.
+  - Introduced customizable privacy modes: *Standard*, *Wellness & Routine* (*"Routine Reminder ✦ Time for your daily hydration and wellness routine"*), and *Minimal* (*"Lunera ✦ Gentle reminder."*).
+  - Integrated live test notification preview directly from the Dose Reminders settings card.
+
+---
+
 ## [1.11.9] - 2026-10-31
 
 ### Removed

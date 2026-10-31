@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.11.10',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Decoy Calculator Lock: stealth lock screen disguise functioning as an authentic working calculator with secret PIN & "=" unlock and configurable settings toggle.',
+          textId: 'Kunci Kalkulator Samaran: penyamaran layar kunci sebagai kalkulator fungsional nyata dengan buka kunci rahasia PIN & "=" serta opsi sakelar di Pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Discreet Notifications: lockscreen notification masking with customizable modes (Standard, Wellness & Routine, and Minimal) for full privacy in public and family environments.',
+          textId: 'Privasi Notifikasi: penyamaran teks pengingat layar kunci dengan mode yang dapat disesuaikan (Standar, Hidrasi & Rutinitas, serta Minimalis) demi privasi penuh.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.9',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

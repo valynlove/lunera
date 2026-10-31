@@ -158,30 +158,408 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Theme(
+  Widget build(BuildContext context) {
+    if (Lock.instance.state.value.decoyCalculator) {
+      return Theme(
         data: buildTheme(Brightness.dark),
-        child: Scaffold(
-          body: NightScene(
-            child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const MoonLogo(size: 64),
-                    gap(10),
-                    Text(appName, style: wordmark(30, color: Colors.white)),
-                    gap(26),
-                    Text(tr('Enter PIN'), style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
-                    gap(18),
-                    PinPad(value: pin, onChanged: _changed, onBio: Lock.instance.state.value.bio ? _bio : null),
-                    SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
-                    TextButton(onPressed: _forgot, child: Text(tr('Forgot PIN?'), style: const TextStyle(color: Colors.white70))),
-                  ]),
-                ),
+        child: _DecoyCalculatorView(
+          onUnlock: widget.onUnlock,
+          onForgot: _forgot,
+          onBio: Lock.instance.state.value.bio ? _bio : null,
+        ),
+      );
+    }
+
+    return Theme(
+      data: buildTheme(Brightness.dark),
+      child: Scaffold(
+        body: NightScene(
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const MoonLogo(size: 64),
+                  gap(10),
+                  Text(appName, style: wordmark(30, color: Colors.white)),
+                  gap(26),
+                  Text(tr('Enter PIN'), style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
+                  gap(18),
+                  PinPad(value: pin, onChanged: _changed, onBio: Lock.instance.state.value.bio ? _bio : null),
+                  SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
+                  TextButton(onPressed: _forgot, child: Text(tr('Forgot PIN?'), style: const TextStyle(color: Colors.white70))),
+                ]),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
+}
+
+class _DecoyCalculatorView extends StatefulWidget {
+  const _DecoyCalculatorView({
+    required this.onUnlock,
+    required this.onForgot,
+    this.onBio,
+  });
+
+  final VoidCallback onUnlock;
+  final VoidCallback onForgot;
+  final VoidCallback? onBio;
+
+  @override
+  State<_DecoyCalculatorView> createState() => _DecoyCalculatorViewState();
+}
+
+class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
+  String _expression = '';
+  String _display = '0';
+  double? _firstOperand;
+  String? _operator;
+  bool _shouldReset = false;
+  String _pinBuffer = '';
+
+  void _onDigit(String d) {
+    setState(() {
+      if (_display == '0' || _shouldReset) {
+        _display = d;
+        _shouldReset = false;
+      } else if (_display.length < 14) {
+        _display += d;
+      }
+
+      _pinBuffer += d;
+      if (_pinBuffer.length > 6) {
+        _pinBuffer = _pinBuffer.substring(_pinBuffer.length - 6);
+      }
+    });
+  }
+
+  void _onDecimal() {
+    setState(() {
+      if (_shouldReset) {
+        _display = '0.';
+        _shouldReset = false;
+      } else if (!_display.contains('.')) {
+        _display += '.';
+      }
+    });
+  }
+
+  void _onBackspace() {
+    setState(() {
+      if (_display.length > 1) {
+        _display = _display.substring(0, _display.length - 1);
+      } else {
+        _display = '0';
+      }
+      if (_pinBuffer.isNotEmpty) {
+        _pinBuffer = _pinBuffer.substring(0, _pinBuffer.length - 1);
+      }
+    });
+  }
+
+  void _onClear() {
+    setState(() {
+      _display = '0';
+      _expression = '';
+      _firstOperand = null;
+      _operator = null;
+      _shouldReset = false;
+      _pinBuffer = '';
+    });
+  }
+
+  void _onSign() {
+    setState(() {
+      if (_display != '0') {
+        if (_display.startsWith('-')) {
+          _display = _display.substring(1);
+        } else {
+          _display = '-$_display';
+        }
+      }
+    });
+  }
+
+  void _onPercent() {
+    setState(() {
+      final val = double.tryParse(_display) ?? 0;
+      _display = _fmt(val / 100);
+    });
+  }
+
+  void _onOp(String op) {
+    setState(() {
+      _firstOperand = double.tryParse(_display);
+      _operator = op;
+      _expression = '$_display $op';
+      _shouldReset = true;
+      _pinBuffer = '';
+    });
+  }
+
+  void _onEquals() {
+    // Secret Unlock Check (periksa display saat ini atau buffer 6-digit PIN)
+    if (Lock.instance.verify(_display) || (_pinBuffer.length == 6 && Lock.instance.verify(_pinBuffer))) {
+      widget.onUnlock();
+      return;
+    }
+
+    // Perhitungan kalkulator biasa jika bukan PIN
+    if (_firstOperand != null && _operator != null) {
+      final num2 = double.tryParse(_display) ?? 0;
+      double result = 0;
+      switch (_operator) {
+        case '+':
+          result = _firstOperand! + num2;
+          break;
+        case '−':
+          result = _firstOperand! - num2;
+          break;
+        case '×':
+          result = _firstOperand! * num2;
+          break;
+        case '÷':
+          result = num2 != 0 ? _firstOperand! / num2 : 0;
+          break;
+      }
+      setState(() {
+        _expression = '$_firstOperand $_operator $_display =';
+        _display = _fmt(result);
+        _firstOperand = null;
+        _operator = null;
+        _shouldReset = true;
+        _pinBuffer = '';
+      });
+    }
+  }
+
+  String _fmt(double v) {
+    if (v.isNaN || v.isInfinite) return 'Error';
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    return v.toStringAsFixed(6).replaceFirst(RegExp(r'\.?0+$'), '');
+  }
+
+  Widget _calcButton({
+    required String label,
+    required VoidCallback onTap,
+    VoidCallback? onLongPress,
+    Color? color,
+    Color? textColor,
+    Widget? icon,
+  }) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: AspectRatio(
+          aspectRatio: 1.0,
+          child: Material(
+            color: color ?? Colors.white.withValues(alpha: 0.08),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: onTap,
+              onLongPress: onLongPress,
+              child: Center(
+                child: icon ??
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: textColor ?? Colors.white,
+                      ),
+                    ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF14121F),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top stealth header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Text(
+                    tr('Calculator'),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.6),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (widget.onBio != null)
+                    IconButton(
+                      icon: const Icon(Icons.fingerprint_rounded, color: Colors.white70),
+                      onPressed: widget.onBio,
+                      tooltip: tr('Fingerprint or face'),
+                    ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            // Calculator Display Area
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    height: 24,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _expression,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _display,
+                        style: const TextStyle(
+                          fontSize: 54,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.white,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Keypad Grid
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      _calcButton(
+                        label: 'C',
+                        onTap: _onClear,
+                        onLongPress: widget.onForgot,
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                      _calcButton(
+                        label: '±',
+                        onTap: _onSign,
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                      _calcButton(
+                        label: '%',
+                        onTap: _onPercent,
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                      _calcButton(
+                        label: '÷',
+                        onTap: () => _onOp('÷'),
+                        color: C.peony.withValues(alpha: 0.75),
+                        textColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _calcButton(label: '7', onTap: () => _onDigit('7')),
+                      _calcButton(label: '8', onTap: () => _onDigit('8')),
+                      _calcButton(label: '9', onTap: () => _onDigit('9')),
+                      _calcButton(
+                        label: '×',
+                        onTap: () => _onOp('×'),
+                        color: C.peony.withValues(alpha: 0.75),
+                        textColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _calcButton(label: '4', onTap: () => _onDigit('4')),
+                      _calcButton(label: '5', onTap: () => _onDigit('5')),
+                      _calcButton(label: '6', onTap: () => _onDigit('6')),
+                      _calcButton(
+                        label: '−',
+                        onTap: () => _onOp('−'),
+                        color: C.peony.withValues(alpha: 0.75),
+                        textColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _calcButton(label: '1', onTap: () => _onDigit('1')),
+                      _calcButton(label: '2', onTap: () => _onDigit('2')),
+                      _calcButton(label: '3', onTap: () => _onDigit('3')),
+                      _calcButton(
+                        label: '+',
+                        onTap: () => _onOp('+'),
+                        color: C.peony.withValues(alpha: 0.75),
+                        textColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _calcButton(label: '0', onTap: () => _onDigit('0')),
+                      _calcButton(label: '.', onTap: _onDecimal),
+                      _calcButton(
+                        label: '⌫',
+                        icon: const Icon(Icons.backspace_outlined, color: Colors.white, size: 20),
+                        onTap: _onBackspace,
+                      ),
+                      _calcButton(
+                        label: '=',
+                        onTap: _onEquals,
+                        color: C.peony,
+                        textColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton(
+                onPressed: widget.onForgot,
+                child: Text(
+                  tr('Forgot PIN?'),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.35),
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _PinFlow extends StatefulWidget {

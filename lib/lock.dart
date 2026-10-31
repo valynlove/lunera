@@ -10,9 +10,15 @@ import 'theme.dart';
 import 'l10n.dart';
 
 class AppLockState {
-  const AppLockState({this.enabled = false, this.bio = false, this.delayMin = 1});
+  const AppLockState({
+    this.enabled = false,
+    this.bio = false,
+    this.delayMin = 1,
+    this.decoyCalculator = false,
+  });
   final bool enabled, bio;
   final int delayMin; // kunci lagi setelah ditinggalkan sekian menit (0 = segera)
+  final bool decoyCalculator; // samarkan sebagai kalkulator fungsional
 }
 
 typedef LockState = AppLockState;
@@ -45,6 +51,7 @@ class Lock {
       enabled: p.getString('lock.hash') != null,
       bio: p.getBool('lock.bio') ?? false,
       delayMin: p.getInt('lock.delay') ?? 1,
+      decoyCalculator: p.getBool('lock.decoy') ?? false,
     );
   }
 
@@ -85,7 +92,7 @@ class Lock {
 
   Future<void> disable() async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    for (final k in const ['lock.salt', 'lock.hash', 'lock.bio', 'lock.updatedAt']) {
+    for (final k in const ['lock.salt', 'lock.hash', 'lock.bio', 'lock.decoy', 'lock.updatedAt']) {
       await _p?.remove(k);
     }
     _emit();
@@ -106,6 +113,23 @@ class Lock {
   Future<void> setBio(bool v) async {
     await _p?.setBool('lock.bio', v);
     _emit();
+  }
+
+  Future<void> setDecoyCalculator(bool v) async {
+    await _p?.setBool('lock.decoy', v);
+    _emit();
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null && state.value.enabled) {
+      try {
+        await _doc(uid).set({
+          'decoyCalculator': v,
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
+        }, SetOptions(merge: true));
+      } catch (e) {
+        debugPrint('Lock cloud decoy sync failed: $e');
+      }
+    }
   }
 
   Future<void> setDelay(int minutes) async {
@@ -168,11 +192,12 @@ class Lock {
             await _p!.setString('lock.salt', salt);
             await _p!.setString('lock.hash', hash);
             await _p!.setInt('lock.delay', delay);
+            await _p!.setBool('lock.decoy', data['decoyCalculator'] as bool? ?? false);
             await _p!.setInt('lock.updatedAt', cloudUpdated);
             _emit();
           }
         } else {
-          for (final k in const ['lock.salt', 'lock.hash', 'lock.bio']) {
+          for (final k in const ['lock.salt', 'lock.hash', 'lock.bio', 'lock.decoy']) {
             await _p!.remove(k);
           }
           await _p!.setInt('lock.updatedAt', cloudUpdated);

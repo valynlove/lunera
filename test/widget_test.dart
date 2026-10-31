@@ -52,34 +52,41 @@ void main() {
       expect(reconstructed.skipped, isTrue);
     });
 
-    test('AppLockState default values', () {
+    test('AppLockState default values and decoyCalculator', () {
       const state = AppLockState();
       expect(state.enabled, isFalse);
       expect(state.delayMin, equals(1));
+      expect(state.decoyCalculator, isFalse);
+
+      const decoyState = AppLockState(enabled: true, decoyCalculator: true);
+      expect(decoyState.decoyCalculator, isTrue);
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.9'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.10'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.9'));
+      expect(AppChangelog.releases.first.version, equals('1.11.10'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
 
-    test('Prefs widgetHide, locale, and geminiApiKey configuration', () {
+    test('Prefs widgetHide, locale, discreetNotify, and geminiApiKey configuration', () {
       const prefs = Prefs();
       expect(prefs.widgetHide, isFalse);
       expect(prefs.locale, equals('en'));
+      expect(prefs.discreetNotify, equals('off'));
       expect(prefs.geminiApiKey, equals(''));
-      final updated = prefs.copy(widgetHide: true, locale: 'id', geminiApiKey: 'test-api-key');
+      final updated = prefs.copy(widgetHide: true, locale: 'id', discreetNotify: 'wellness', geminiApiKey: 'test-api-key');
       expect(updated.widgetHide, isTrue);
       expect(updated.locale, equals('id'));
+      expect(updated.discreetNotify, equals('wellness'));
       expect(updated.geminiApiKey, equals('test-api-key'));
       expect(updated.toMap()['widgetHide'], isTrue);
       expect(updated.toMap()['locale'], equals('id'));
+      expect(updated.toMap()['discreetNotify'], equals('wellness'));
       expect(updated.toMap()['geminiApiKey'], equals('test-api-key'));
     });
 
@@ -260,6 +267,19 @@ void main() {
       final reconstructed = Prefs.from(map);
       expect(reconstructed.asteriaMode, equals('personal'));
       expect(reconstructed.geminiApiKey, equals('my-key'));
+    });
+
+    test('Decoy calculator number formatting and verification logic', () {
+      String fmt(double v) {
+        if (v.isNaN || v.isInfinite) return 'Error';
+        if (v == v.roundToDouble()) return v.toInt().toString();
+        return v.toStringAsFixed(6).replaceFirst(RegExp(r'\.?0+$'), '');
+      }
+
+      expect(fmt(10.0), equals('10'));
+      expect(fmt(12.5), equals('12.5'));
+      expect(fmt(1 / 3), startsWith('0.333333'));
+      expect(fmt(0.0), equals('0'));
     });
   });
 }

@@ -147,12 +147,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       _save(p.copy(notify: v));
                     },
             ),
-            if (AppNotifier.instance.supported && p.notify)
+            if (AppNotifier.instance.supported && p.notify) ...[
+              const Divider(height: 20),
+              Text(tr('Notification Privacy (Lockscreen Masking)'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              gap(4),
+              Text(
+                tr('Disguise notification text to protect your privacy when received in public or around family.'),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+              ),
+              gap(10),
+              PillTabs<String>(
+                items: [
+                  ('off', tr('Standard')),
+                  ('wellness', tr('Wellness & Routine')),
+                  ('minimal', tr('Minimal')),
+                ],
+                value: p.discreetNotify,
+                onChanged: (mode) => _save(p.copy(discreetNotify: mode)),
+              ),
+              gap(12),
               OutlinedButton.icon(
-                onPressed: () => AppNotifier.instance.test(),
+                onPressed: () => AppNotifier.instance.test(p),
                 icon: const Icon(Icons.notifications_active_outlined),
                 label: Text(tr('Send test notification')),
               ),
+            ],
           ]),
           _card(tr('Hormone Level Units'), [
             for (final h in presets) ...[

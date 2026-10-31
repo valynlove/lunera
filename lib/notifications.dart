@@ -74,10 +74,19 @@ class AppNotifier {
         _ => tr('Time for your medication'),
       };
 
-  Future<void> test() async {
+  Future<void> test([Prefs? prefs]) async {
     if (!supported) return;
     await init();
-    await _plugin.show(id: 1, title: 'Lunera', body: tr('Reminder notifications are working.'), notificationDetails: _details);
+    String title = 'Lunera';
+    String body = tr('Reminder notifications are working.');
+    if (prefs?.discreetNotify == 'wellness') {
+      title = tr('Routine Reminder ✦');
+      body = tr('Time for your daily hydration and wellness routine.');
+    } else if (prefs?.discreetNotify == 'minimal') {
+      title = 'Lunera ✦';
+      body = tr('Gentle reminder.');
+    }
+    await _plugin.show(id: 1, title: title, body: body, notificationDetails: _details);
   }
 
   Future<void> cancelAll() async {
@@ -109,10 +118,24 @@ class AppNotifier {
     for (final s in slots.take(60)) {
       final t = s.t;
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
+
+      String title;
+      String body;
+      if (prefs.discreetNotify == 'wellness') {
+        title = tr('Routine Reminder ✦');
+        body = tr('Time for your daily hydration and wellness routine.');
+      } else if (prefs.discreetNotify == 'minimal') {
+        title = 'Lunera ✦';
+        body = tr('Gentle reminder.');
+      } else {
+        title = '${_verb(t)}: ${t.name}';
+        body = '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', ${tr('site: {0}', [tr(place)])}'}';
+      }
+
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
-        title: '${_verb(t)}: ${t.name}',
-        body: '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', ${tr('site: {0}', [tr(place)])}'}',
+        title: title,
+        body: body,
         scheduledDate: tz.TZDateTime(tz.local, s.at.year, s.at.month, s.at.day, s.at.hour, s.at.minute),
         notificationDetails: _details,
         androidScheduleMode: mode,
