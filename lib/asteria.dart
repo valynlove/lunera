@@ -35,83 +35,107 @@ class AsteriaQuotaException implements Exception {
   String toString() => message;
 }
 
+/// Pasangan konfigurasi endpoint Gemini API: versi API (v1 / v1beta) dan nama model.
+class AsteriaEndpoint {
+  final String apiVersion; // 'v1' atau 'v1beta'
+  final String model;
+
+  const AsteriaEndpoint({required this.apiVersion, required this.model});
+
+  Uri toGenerateUri(String key) => Uri.parse(
+        'https://generativelanguage.googleapis.com/$apiVersion/models/$model:generateContent?key=$key',
+      );
+
+  @override
+  String toString() => '$apiVersion/models/$model';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AsteriaEndpoint &&
+          other.apiVersion == apiVersion &&
+          other.model == model;
+
+  @override
+  int get hashCode => Object.hash(apiVersion, model);
+}
+
 /// Layanan AI Asteria menggunakan Google Gemini REST API dengan deteksi offline terintegrasi.
 class AsteriaService {
-  /// Model aktif yang berhasil diverifikasi.
-  static String? _resolvedModel;
+  /// Endpoint aktif yang berhasil diverifikasi.
+  static AsteriaEndpoint? _resolvedEndpoint;
 
-  /// Daftar prioritas model Flash terkini dari yang paling mutakhir.
-  static const List<String> candidateModels = [
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash-latest',
-    'gemini-1.5-flash',
+  /// Daftar prioritas endpoint (versi API + model) dari yang paling stabil & mutakhir.
+  static const List<AsteriaEndpoint> candidateEndpoints = [
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-1.5-pro'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-1.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.5-flash'),
+    AsteriaEndpoint(apiVersion: 'v1beta', model: 'gemini-2.0-flash-lite'),
+    AsteriaEndpoint(apiVersion: 'v1', model: 'gemini-pro'),
   ];
 
-  /// Menemukan model Gemini Flash aktif yang didukung oleh API key pengguna.
-  static Future<String> resolveActiveModel(String apiKey) async {
-    if (_resolvedModel != null && _resolvedModel!.isNotEmpty) {
-      return _resolvedModel!;
+  /// Menemukan endpoint aktif yang didukung oleh API key pengguna.
+  static Future<AsteriaEndpoint> resolveActiveEndpoint(String apiKey) async {
+    if (_resolvedEndpoint != null) {
+      return _resolvedEndpoint!;
     }
 
     final key = apiKey.trim();
     if (key.isNotEmpty) {
-      final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
       try {
-        final uri = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models?key=$key',
-        );
-        final req = await client.getUrl(uri);
-        final res = await req.close();
-        if (res.statusCode == 200) {
-          final body = await res.transform(utf8.decoder).join();
-          final data = jsonDecode(body) as Map<String, dynamic>;
-          final list = (data['models'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        for (final ver in ['v1', 'v1beta']) {
+          try {
+            final uri = Uri.parse(
+              'https://generativelanguage.googleapis.com/$ver/models?key=$key',
+            );
+            final req = await client.getUrl(uri);
+            final res = await req.close();
+            if (res.statusCode == 200) {
+              final body = await res.transform(utf8.decoder).join();
+              final data = jsonDecode(body) as Map<String, dynamic>;
+              final list = (data['models'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 
-          final supported = list.where((m) {
-            final methods = (m['supportedGenerationMethods'] as List?)?.cast<String>() ?? [];
-            return methods.contains('generateContent');
-          }).toList();
+              final supported = list.where((m) {
+                final methods = (m['supportedGenerationMethods'] as List?)?.cast<String>() ?? [];
+                return methods.contains('generateContent');
+              }).toList();
 
-          // 1. Cek dari daftar kandidat prioritas
-          for (final c in candidateModels) {
-            for (final m in supported) {
-              final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
-              if (name == c) {
-                _resolvedModel = name;
-                return name;
+              // Cocokkan dengan kandidat prioritas
+              for (final c in candidateEndpoints) {
+                if (c.apiVersion != ver) continue;
+                for (final m in supported) {
+                  final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
+                  if (name == c.model) {
+                    _resolvedEndpoint = c;
+                    return c;
+                  }
+                }
+              }
+
+              // Jika ada model flash lain
+              for (final m in supported) {
+                final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
+                if (name.contains('flash')) {
+                  final ep = AsteriaEndpoint(apiVersion: ver, model: name);
+                  _resolvedEndpoint = ep;
+                  return ep;
+                }
               }
             }
-          }
-
-          // 2. Jika tidak ada yang cocok persis, pilih model apapun yang mengandung 'flash'
-          for (final m in supported) {
-            final name = (m['name'] as String? ?? '').replaceFirst('models/', '');
-            if (name.contains('flash')) {
-              _resolvedModel = name;
-              return name;
-            }
-          }
-
-          // 3. Fallback ke model generateContent pertama
-          if (supported.isNotEmpty) {
-            final name = (supported.first['name'] as String? ?? '').replaceFirst('models/', '');
-            if (name.isNotEmpty) {
-              _resolvedModel = name;
-              return name;
-            }
+          } catch (_) {
+            // Lanjut ke versi berikutnya jika ada error network
           }
         }
-      } catch (_) {
-        // Fallback anggun jika listModels terhalang
       } finally {
         client.close();
       }
     }
 
-    _resolvedModel = candidateModels.first;
-    return _resolvedModel!;
+    _resolvedEndpoint = candidateEndpoints.first;
+    return _resolvedEndpoint!;
   }
 
   /// Kunci API bawaan yang disuntikkan saat kompilasi rilis APK via GitHub Actions Secret.
@@ -180,7 +204,7 @@ Your persona:
     }
   }
 
-  /// Mengirim payload generateContent ke endpoint Gemini API dengan auto-fallback jika model mengalami 404.
+  /// Mengirim payload generateContent ke endpoint Gemini API dengan auto-fallback jika model/versi mengalami 404.
   static Future<Map<String, dynamic>> _postGenerateContent({
     required String apiKey,
     required Map<String, dynamic> payload,
@@ -190,23 +214,21 @@ Your persona:
       throw const SocketException('API Key is missing');
     }
 
-    // Ambil model aktif saat ini
-    final active = await resolveActiveModel(key);
+    // Ambil endpoint aktif saat ini
+    final active = await resolveActiveEndpoint(key);
 
-    // Susun antrian model yang akan dicoba jika terjadi 404 (model retired/deprecated)
-    final queue = <String>[
+    // Susun antrian endpoint yang akan dicoba jika terjadi 404 (model retired/endpoint version mismatch)
+    final queue = <AsteriaEndpoint>[
       active,
-      ...candidateModels.where((m) => m != active),
+      ...candidateEndpoints.where((e) => e != active),
     ];
 
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 12);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
     try {
       String lastErrorMessage = 'Unknown Gemini API error';
 
-      for (final model in queue) {
-        final uri = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$key',
-        );
+      for (final endpoint in queue) {
+        final uri = endpoint.toGenerateUri(key);
 
         final req = await client.postUrl(uri);
         req.headers.set('Content-Type', 'application/json; charset=utf-8');
@@ -220,23 +242,25 @@ Your persona:
         }
 
         if (res.statusCode == 200) {
-          _resolvedModel = model; // Kunci model yang terbukti aktif
+          _resolvedEndpoint = endpoint; // Kunci endpoint yang terbukti aktif
           return jsonDecode(body) as Map<String, dynamic>;
         }
 
-        // Jika 404 (model tidak didukung/ditemukan pada API version ini), coba kandidat berikutnya
-        if (res.statusCode == 404) {
-          _resolvedModel = null;
-          continue;
-        }
-
-        // Jika status error lain (misal 400 Bad Request, 403 Forbidden)
+        // Catat pesan error detail dari respon Google (bahkan pada 404)
         try {
           final err = jsonDecode(body);
           lastErrorMessage = err['error']?['message'] ?? 'Gemini API Error (${res.statusCode})';
         } catch (_) {
-          lastErrorMessage = 'Gemini API Error (${res.statusCode})';
+          lastErrorMessage = 'Gemini API Error (${res.statusCode}): $body';
         }
+
+        // Jika 404 (model atau versi API tidak cocok), coba kandidat berikutnya
+        if (res.statusCode == 404) {
+          _resolvedEndpoint = null;
+          continue;
+        }
+
+        // Jika error non-404 (misal 400 Bad Request, 403 Forbidden), langsung laporkan pesan error Google
         throw Exception(lastErrorMessage);
       }
 

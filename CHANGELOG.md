@@ -4,6 +4,16 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.6] - 2026-10-31
+
+### Fixed
+- **Official GA v1 Endpoint Routing with Multi-Tier Fallback (`lib/asteria.dart`):**
+  - Resolved `Unknown Gemini API error` by routing `gemini-1.5-flash` to its official GA endpoint (`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`).
+  - Added dual-version `AsteriaEndpoint` architecture supporting both GA (`v1`) and preview (`v1beta`) endpoints with automatic failover across multiple model tiers (`gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`, `gemini-2.5-flash`).
+  - Preserved comprehensive error messaging from Google's response payloads so diagnostic information is transparently displayed if API key permissions or project quotas are rejected.
+
+---
+
 ## [1.11.5] - 2026-10-31
 
 ### Fixed

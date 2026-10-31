@@ -60,12 +60,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.5'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.6'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.5'));
+      expect(AppChangelog.releases.first.version, equals('1.11.6'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -273,8 +273,9 @@ void main() {
       expect(AsteriaService.isPersonalMode('custom-key', 'personal'), isTrue);
       expect(AsteriaService.isPersonalMode('custom-key', 'shared'), isFalse);
       expect(AsteriaService.isPersonalMode('', 'personal'), isFalse);
-      expect(AsteriaService.candidateModels, contains('gemini-2.5-flash'));
-      expect(AsteriaService.candidateModels, contains('gemini-2.0-flash'));
+      expect(AsteriaService.candidateEndpoints, isNotEmpty);
+      expect(AsteriaService.candidateEndpoints.first.model, equals('gemini-1.5-flash'));
+      expect(AsteriaService.candidateEndpoints.first.apiVersion, equals('v1'));
 
       const defaultPrefs = Prefs();
       expect(defaultPrefs.asteriaMode, equals('shared'));

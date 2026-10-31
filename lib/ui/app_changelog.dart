@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.5',
+      version: '1.11.6',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed Gemini GA endpoint routing: targeting official v1 GA endpoint for gemini-1.5-flash with v1beta fallback for preview models, and capturing complete Google API error details.',
+          textId: 'Perbaikan perutean endpoint Gemini GA: menargetkan endpoint resmi v1 GA untuk gemini-1.5-flash dengan fallback v1beta untuk model pratinjau, serta menangkap detail lengkap pesan error Google API.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.5',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,
