@@ -4,6 +4,21 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1] - 2026-10-31
+
+### Added
+- **Lower Body Measurements & Sizing (`lib/models.dart` & `lib/ui/body.dart`):**
+  - Added support for lower body measurement tracking: Thigh (*Paha*), Calf (*Betis*), and Inseam (*Panjang Kaki*).
+  - Enhanced pants sizing calculator (`bottomSize`) with automatic inseam length notation (e.g., `27–28 (S) / L30`).
+  - Implemented 100% backward-compatibility ensuring existing cloud and local measurement records seamlessly load with zero errors.
+
+### Fixed
+- **Home Screen Profile Sync Discrepancy (`lib/ui/home.dart`):**
+  - Synchronized home screen greeting and avatar with `displayNameProvider` and `UserAvatar`, resolving the issue where home screen displayed username handle and fallback letter instead of user's custom nickname and uploaded profile picture.
+  - Hardened timestamp deserialization (`_d`) in `lib/models.dart` supporting multiple date representations (Timestamp, DateTime, String ISO, and Map).
+
+---
+
 ## [1.10.0] - 2026-10-31
 
 ### Added

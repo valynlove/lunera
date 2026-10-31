@@ -58,12 +58,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.10.0'));
+      expect(UpdateCheckerService.currentVersion, equals('1.10.1'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.10.0'));
+      expect(AppChangelog.releases.first.version, equals('1.10.1'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -127,6 +127,9 @@ void main() {
         underbust: 74,
         waist: 68,
         hips: 92,
+        thigh: 52,
+        calf: 34,
+        inseam: 76,
       );
 
       final bra = m.braSize;
@@ -140,13 +143,35 @@ void main() {
       expect(bra.sisterLoose, contains('36B'));
 
       expect(m.topSize, equals('M'));
-      expect(m.bottomSize, equals('27–28 (S)'));
+      expect(m.bottomSize, equals('27–28 (S) / L30'));
+      expect(m.thighCm, equals(52.0));
+      expect(m.calfCm, equals(34.0));
+      expect(m.inseamCm, equals(76.0));
       expect(m.waistToHipRatio, closeTo(0.739, 0.01));
 
       final map = m.toMap();
       final recon = BodyMeasurement.from('m1', map);
       expect(recon.bust, equals(88.0));
       expect(recon.underbust, equals(74.0));
+      expect(recon.thigh, equals(52.0));
+      expect(recon.calf, equals(34.0));
+      expect(recon.inseam, equals(76.0));
+
+      // Test backward-compatibility with legacy data (missing thigh, calf, inseam)
+      final legacyMap = {
+        'at': {r'$ts': '2026-10-31T00:00:00.000Z'},
+        'unit': 'cm',
+        'bust': 88.0,
+        'underbust': 74.0,
+        'waist': 68.0,
+        'hips': 92.0,
+      };
+      final legacyRecon = BodyMeasurement.from('legacy1', legacyMap);
+      expect(legacyRecon.bust, equals(88.0));
+      expect(legacyRecon.thigh, isNull);
+      expect(legacyRecon.calf, isNull);
+      expect(legacyRecon.inseam, isNull);
+      expect(legacyRecon.bottomSize, equals('27–28 (S)'));
     });
   });
 }

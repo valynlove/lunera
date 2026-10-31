@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models.dart';
+import '../profile.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../sim.dart';
@@ -36,8 +36,7 @@ class HomePage extends ConsumerWidget {
             for (final s in xs) SlotTile(s: s, logs: logs, supplies: supplies, prefs: prefs),
           ]);
 
-    final user = FirebaseAuth.instance.currentUser;
-    final name = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
+    final displayName = ref.watch(displayNameProvider);
     final greet = greeting();
 
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
@@ -46,16 +45,16 @@ class HomePage extends ConsumerWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('$greet,', style: Theme.of(context).textTheme.bodyLarge),
             gap(2),
-            Text(name ?? appName, style: display(30)),
+            Text(displayName ?? appName, style: display(30)),
             gap(4),
             Text(DateFormat('EEEE, d MMMM y', L10n.code).format(DateTime.now()), style: Theme.of(context).textTheme.bodySmall),
           ]),
         ),
         IconButton.filledTonal(tooltip: tr('Add therapy'), onPressed: () => showSheet(context, TherapySheet(supplies: supplies)), icon: const Icon(Icons.add_rounded)),
-        const SizedBox(width: 6),
-        GestureDetector(
+        const SizedBox(width: 8),
+        UserAvatar(
+          size: 44,
           onTap: () => ref.read(tabProvider.notifier).state = 4,
-          child: CircleAvatar(radius: 22, backgroundColor: C.peony, child: Text((name ?? appName).substring(0, 1).toUpperCase(), style: display(18, color: Colors.white))),
         ),
       ]),
       gap(16),

@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.10.0',
+      version: '1.10.1',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Lower body measurements tracking (Thigh, Calf, and Inseam) with enhanced pants sizing calculation.',
+          textId: 'Pelacakan ukuran tubuh bagian bawah (Paha, Betis, dan Panjang Kaki) dengan estimasi ukuran celana yang lebih presisi.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Home screen profile sync: greeting and avatar now accurately reflect custom nickname and profile photo.',
+          textId: 'Sinkronisasi profil beranda: sapaan nama dan avatar kini sesuai dengan foto profil dan nama panggilan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.10.0',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

@@ -365,6 +365,9 @@ class _SizeTab extends ConsumerWidget {
               if (latest.underbust != null) _measureChip(tr('Underbust'), latest.underbust!, latest.unit),
               if (latest.waist != null) _measureChip(tr('Waist'), latest.waist!, latest.unit),
               if (latest.hips != null) _measureChip(tr('Hips'), latest.hips!, latest.unit),
+              if (latest.thigh != null) _measureChip(tr('Thigh'), latest.thigh!, latest.unit),
+              if (latest.calf != null) _measureChip(tr('Calf'), latest.calf!, latest.unit),
+              if (latest.inseam != null) _measureChip(tr('Inseam'), latest.inseam!, latest.unit),
               if (latest.shoulder != null) _measureChip(tr('Shoulder'), latest.shoulder!, latest.unit),
               if (latest.weight != null) _measureChip(tr('Weight'), latest.weight!, 'kg'),
               if (latest.height != null) _measureChip(tr('Height'), latest.height!, 'cm'),
@@ -407,6 +410,8 @@ class _SizeTab extends ConsumerWidget {
                   if (m.bust != null) '${tr('Bust')}: ${fmt(m.bust!)}${m.unit}',
                   if (m.waist != null) '${tr('Waist')}: ${fmt(m.waist!)}${m.unit}',
                   if (m.hips != null) '${tr('Hips')}: ${fmt(m.hips!)}${m.unit}',
+                  if (m.thigh != null) '${tr('Thigh')}: ${fmt(m.thigh!)}${m.unit}',
+                  if (m.inseam != null) '${tr('Inseam')}: ${fmt(m.inseam!)}${m.unit}',
                 ].join(' • '),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -479,6 +484,9 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
   late final underbustCtl = TextEditingController(text: widget.initial?.underbust == null ? '' : fmt(widget.initial!.underbust!));
   late final waistCtl = TextEditingController(text: widget.initial?.waist == null ? '' : fmt(widget.initial!.waist!));
   late final hipsCtl = TextEditingController(text: widget.initial?.hips == null ? '' : fmt(widget.initial!.hips!));
+  late final thighCtl = TextEditingController(text: widget.initial?.thigh == null ? '' : fmt(widget.initial!.thigh!));
+  late final calfCtl = TextEditingController(text: widget.initial?.calf == null ? '' : fmt(widget.initial!.calf!));
+  late final inseamCtl = TextEditingController(text: widget.initial?.inseam == null ? '' : fmt(widget.initial!.inseam!));
   late final shoulderCtl = TextEditingController(text: widget.initial?.shoulder == null ? '' : fmt(widget.initial!.shoulder!));
   late final weightCtl = TextEditingController(text: widget.initial?.weight == null ? '' : fmt(widget.initial!.weight!));
   late final heightCtl = TextEditingController(text: widget.initial?.height == null ? '' : fmt(widget.initial!.height!));
@@ -501,6 +509,9 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     underbustCtl.dispose();
     waistCtl.dispose();
     hipsCtl.dispose();
+    thighCtl.dispose();
+    calfCtl.dispose();
+    inseamCtl.dispose();
     shoulderCtl.dispose();
     weightCtl.dispose();
     heightCtl.dispose();
@@ -529,11 +540,14 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     final u = parseNum(underbustCtl.text);
     final w = parseNum(waistCtl.text);
     final h = parseNum(hipsCtl.text);
+    final th = parseNum(thighCtl.text);
+    final cf = parseNum(calfCtl.text);
+    final ins = parseNum(inseamCtl.text);
     final s = parseNum(shoulderCtl.text);
     final wt = parseNum(weightCtl.text);
     final ht = parseNum(heightCtl.text);
 
-    if (b == null && u == null && w == null && h == null) {
+    if (b == null && u == null && w == null && h == null && th == null && cf == null && ins == null && s == null && wt == null && ht == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr('Please enter at least one measurement.'))),
       );
@@ -550,6 +564,9 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
       waist: w,
       hips: h,
       shoulder: s,
+      thigh: th,
+      calf: cf,
+      inseam: ins,
       weight: wt,
       height: ht,
       note: noteCtl.text.trim().isEmpty ? null : noteCtl.text.trim(),
@@ -677,8 +694,45 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
       ]),
       gap(10),
 
-      // Secondary: Shoulder & Weight
+      // Lower Body: Thigh & Calf
       Row(children: [
+        Expanded(
+          child: TextField(
+            controller: thighCtl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: tr('Thigh ({0})', [unit]),
+              hintText: unit == 'cm' ? '54' : '21.2',
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: calfCtl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: tr('Calf ({0})', [unit]),
+              hintText: unit == 'cm' ? '36' : '14.2',
+            ),
+          ),
+        ),
+      ]),
+      gap(10),
+
+      // Inseam & Shoulder
+      Row(children: [
+        Expanded(
+          child: TextField(
+            controller: inseamCtl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: tr('Inseam ({0})', [unit]),
+              hintText: unit == 'cm' ? '76' : '30',
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
         Expanded(
           child: TextField(
             controller: shoulderCtl,
@@ -689,7 +743,11 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
             ),
           ),
         ),
-        const SizedBox(width: 10),
+      ]),
+      gap(10),
+
+      // Weight & Height
+      Row(children: [
         Expanded(
           child: TextField(
             controller: weightCtl,
@@ -697,6 +755,17 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
             decoration: InputDecoration(
               labelText: tr('Weight (kg)'),
               hintText: '55',
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: heightCtl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: tr('Height (cm)'),
+              hintText: '165',
             ),
           ),
         ),

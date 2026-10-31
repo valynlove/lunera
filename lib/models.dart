@@ -2,7 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart' show IconData, Icons;
 import 'l10n.dart';
 
-DateTime _d(dynamic t) => (t as Timestamp).toDate();
+DateTime _d(dynamic t) {
+  if (t is Timestamp) return t.toDate();
+  if (t is DateTime) return t;
+  if (t is String) return DateTime.parse(t);
+  if (t is Map && t.containsKey(r'$ts')) return DateTime.parse(t[r'$ts'] as String);
+  return (t as Timestamp).toDate();
+}
 Timestamp _t(DateTime d) => Timestamp.fromDate(d);
 
 double? parseNum(String? s) => s == null ? null : double.tryParse(s.trim().replaceAll(',', '.'));
@@ -627,6 +633,9 @@ class BodyMeasurement {
     this.waist,
     this.hips,
     this.shoulder,
+    this.thigh,
+    this.calf,
+    this.inseam,
     this.weight,
     this.height,
     this.note,
@@ -640,6 +649,9 @@ class BodyMeasurement {
   final double? waist; // Lingkar pinggang
   final double? hips; // Lingkar pinggul
   final double? shoulder; // Lebar bahu
+  final double? thigh; // Lingkar paha
+  final double? calf; // Lingkar betis
+  final double? inseam; // Panjang kaki bagian dalam (selangkangan ke mata kaki)
   final double? weight; // Berat badan (kg)
   final double? height; // Tinggi badan (cm)
   final String? note;
@@ -649,6 +661,9 @@ class BodyMeasurement {
   double? get waistCm => waist == null ? null : (unit == 'in' ? waist! * 2.54 : waist);
   double? get hipsCm => hips == null ? null : (unit == 'in' ? hips! * 2.54 : hips);
   double? get shoulderCm => shoulder == null ? null : (unit == 'in' ? shoulder! * 2.54 : shoulder);
+  double? get thighCm => thigh == null ? null : (unit == 'in' ? thigh! * 2.54 : thigh);
+  double? get calfCm => calf == null ? null : (unit == 'in' ? calf! * 2.54 : calf);
+  double? get inseamCm => inseam == null ? null : (unit == 'in' ? inseam! * 2.54 : inseam);
 
   /// Hitung ukuran bra / dada lengkap (US/UK, EU/ID, cup, sister sizes)
   BraSizeResult? get braSize {
@@ -669,16 +684,29 @@ class BodyMeasurement {
     return 'XXL';
   }
 
-  /// Estimasi ukuran bawahan / celana
+  /// Estimasi ukuran bawahan / celana (dengan panjang inseam jika diisi)
   String? get bottomSize {
     final w = waistCm;
     if (w == null) return null;
-    if (w < 65) return '26 (XS)';
-    if (w <= 71) return '27–28 (S)';
-    if (w <= 78) return '29–30 (M)';
-    if (w <= 85) return '31–32 (L)';
-    if (w <= 93) return '33–34 (XL)';
-    return '35+ (XXL)';
+    String base;
+    if (w < 65) {
+      base = '26 (XS)';
+    } else if (w <= 71) {
+      base = '27–28 (S)';
+    } else if (w <= 78) {
+      base = '29–30 (M)';
+    } else if (w <= 85) {
+      base = '31–32 (L)';
+    } else if (w <= 93) {
+      base = '33–34 (XL)';
+    } else {
+      base = '35+ (XXL)';
+    }
+    if (inseamCm != null) {
+      final inInches = (inseamCm! / 2.54).round();
+      return '$base / L$inInches';
+    }
+    return base;
   }
 
   /// Rasio Pinggang ke Pinggul (Waist-to-Hip Ratio / WHR)
@@ -696,6 +724,9 @@ class BodyMeasurement {
     double? waist,
     double? hips,
     double? shoulder,
+    double? thigh,
+    double? calf,
+    double? inseam,
     double? weight,
     double? height,
     String? note,
@@ -709,6 +740,9 @@ class BodyMeasurement {
         waist: waist ?? this.waist,
         hips: hips ?? this.hips,
         shoulder: shoulder ?? this.shoulder,
+        thigh: thigh ?? this.thigh,
+        calf: calf ?? this.calf,
+        inseam: inseam ?? this.inseam,
         weight: weight ?? this.weight,
         height: height ?? this.height,
         note: note ?? this.note,
@@ -722,6 +756,9 @@ class BodyMeasurement {
         'waist': waist,
         'hips': hips,
         'shoulder': shoulder,
+        'thigh': thigh,
+        'calf': calf,
+        'inseam': inseam,
         'weight': weight,
         'height': height,
         'note': note,
@@ -736,6 +773,9 @@ class BodyMeasurement {
         waist: (m['waist'] as num?)?.toDouble(),
         hips: (m['hips'] as num?)?.toDouble(),
         shoulder: (m['shoulder'] as num?)?.toDouble(),
+        thigh: (m['thigh'] as num?)?.toDouble(),
+        calf: (m['calf'] as num?)?.toDouble(),
+        inseam: (m['inseam'] as num?)?.toDouble(),
         weight: (m['weight'] as num?)?.toDouble(),
         height: (m['height'] as num?)?.toDouble(),
         note: m['note'],
