@@ -31,6 +31,68 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   void _save(Prefs p) => ref.read(repoProvider)?.setPrefs(p);
 
+  void _editApiKey(Prefs p) {
+    final ctrl = TextEditingController(text: p.geminiApiKey);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dark ? C.deepCard : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded, color: C.peony),
+            const SizedBox(width: 8),
+            Text(tr('Asteria API Key'), style: display(18)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tr('Enter your Google Gemini API key to activate Asteria. Your key is stored securely in your private account preferences.'),
+              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75)),
+            ),
+            gap(14),
+            TextField(
+              controller: ctrl,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: 'AIzaSy...',
+                filled: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
+            ),
+            gap(8),
+            Text(
+              tr('Get a free key at aistudio.google.com'),
+              style: TextStyle(fontSize: 12, color: C.peony, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr('Cancel')),
+          ),
+          FilledButton(
+            onPressed: () {
+              _save(p.copy(geminiApiKey: ctrl.text.trim()));
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(tr('Asteria API Key updated.'))),
+              );
+            },
+            style: FilledButton.styleFrom(backgroundColor: C.peony, foregroundColor: Colors.white),
+            child: Text(tr('Save Key')),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _card(String title, List<Widget> kids) => Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(20),
@@ -226,6 +288,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               subtitle: Text(tr('Widgets only display the app name. Useful if your home screen is seen by others.')),
               value: p.widgetHide,
               onChanged: (v) => _save(p.copy(widgetHide: v)),
+            ),
+          ]),
+          _card(tr('Asteria AI Companion'), [
+            Text(tr('Configure your Google Gemini API key to chat with Asteria, your reflective companion in Lunera.')),
+            gap(10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    p.geminiApiKey.isEmpty
+                        ? tr('No API Key configured (Asteria is disabled)')
+                        : tr('API Key: {0}', ['••••••••${p.geminiApiKey.length > 6 ? p.geminiApiKey.substring(p.geminiApiKey.length - 4) : ""}']),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: p.geminiApiKey.isEmpty ? Colors.amber : Colors.greenAccent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => _editApiKey(p),
+                  child: Text(p.geminiApiKey.isEmpty ? tr('Set Key') : tr('Change')),
+                ),
+              ],
             ),
           ]),
           _card(tr('About & Support'), [

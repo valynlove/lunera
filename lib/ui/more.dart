@@ -7,6 +7,7 @@ import '../profile.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import 'app_changelog.dart';
+import 'asteria_chat.dart';
 import 'auth.dart';
 import 'body.dart';
 import 'data_page.dart';
@@ -80,6 +81,7 @@ class MorePage extends ConsumerWidget {
       Container(
         decoration: cardBox(context),
         child: Column(children: [
+          tile(Icons.auto_awesome_rounded, tr('Asteria AI Companion'), () => go(const AsteriaChatPage()), sub: tr('Reflective venting and emotional sanctuary')),
           tile(Icons.person_outline_rounded, tr('Account Profile'), () => go(const ProfilePage()), sub: tr('Change photo and nickname')),
           tile(Icons.tune_rounded, tr('Settings'), () => go(const SettingsPage()), sub: tr('Appearance, units, injection sites, reminders')),
           tile(Icons.insights_rounded, tr('Insights'), () => go(const InsightsPage()), sub: tr('Adherence and mood patterns')),

@@ -394,6 +394,7 @@ class Prefs {
     this.notify = false,
     this.widgetHide = false,
     this.locale = 'en',
+    this.geminiApiKey = '',
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
@@ -404,6 +405,7 @@ class Prefs {
   final List<String> places;
   final bool hrtCounter;
   final int dayStart; // menit sejak 00:00; hari "logis" mulai di jam ini
+  final String geminiApiKey;
 
   String unitOf(String hormoneId) {
     final p = presetOf(hormoneId), u = units[hormoneId];
@@ -420,6 +422,7 @@ class Prefs {
     bool? notify,
     bool? widgetHide,
     String? locale,
+    String? geminiApiKey,
   }) =>
       Prefs(
         theme: theme ?? this.theme,
@@ -431,6 +434,7 @@ class Prefs {
         notify: notify ?? this.notify,
         widgetHide: widgetHide ?? this.widgetHide,
         locale: locale ?? this.locale,
+        geminiApiKey: geminiApiKey ?? this.geminiApiKey,
       );
 
   Map<String, dynamic> toMap() => {
@@ -443,6 +447,7 @@ class Prefs {
         'notify': notify,
         'widgetHide': widgetHide,
         'locale': locale,
+        'geminiApiKey': geminiApiKey,
       };
 
   factory Prefs.from(Map<String, dynamic> m) => Prefs(
@@ -459,6 +464,7 @@ class Prefs {
         notify: m['notify'] ?? false,
         widgetHide: m['widgetHide'] ?? false,
         locale: m['locale'] ?? 'en',
+        geminiApiKey: m['geminiApiKey'] ?? '',
       );
 }
 

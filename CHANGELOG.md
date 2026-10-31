@@ -4,6 +4,19 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.2] - 2026-10-31
+
+### Added
+- **Asteria AI Companion (`lib/asteria.dart` & `lib/ui/asteria_chat.dart`):**
+  - Integrated Asteria, an empathetic, validating, non-judgmental conversational sanctuary for sharing transition dysphoria, mood fluctuations, self-doubt, and personal milestones.
+  - Powered by Google Gemini 1.5 Flash Cloud API using lightweight REST requests with zero additional third-party dependencies.
+  - Dedicated Home screen Floating Action Button (FAB) for instant, one-tap access to heart-to-heart venting.
+  - Graceful real-time offline detection: gently locks the interface with a peaceful celestial starry illustration when internet is unavailable and unlocks automatically upon reconnecting.
+  - Session Summarizer & Save to Journal: creates a warm 2-3 sentence reflection with estimated mood rating and saves directly to the user's personal Journal, while wiping the chat history clean for a fresh start.
+  - Secure Bring-Your-Own-Key (BYOK) architecture: Gemini API Key stored privately in user account preferences, editable via Chat modal or Settings page.
+
+---
+
 ## [1.11.1] - 2026-10-31
 
 ### Fixed

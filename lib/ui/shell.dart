@@ -8,6 +8,7 @@ import '../repo.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import '../widget_sync.dart';
+import 'asteria_chat.dart';
 import 'calendar.dart';
 import 'home.dart';
 import 'levels.dart';
@@ -139,6 +140,27 @@ class _ShellState extends ConsumerState<Shell> {
         }
       },
       child: Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: i == 0
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 60),
+                child: FloatingActionButton.extended(
+                  heroTag: 'asteria_fab',
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AsteriaChatPage()),
+                  ),
+                  backgroundColor: C.peony,
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  icon: const Icon(Icons.auto_awesome_rounded, size: 20),
+                  label: Text(
+                    tr('Curhat ke Asteria'),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  ),
+                ),
+              )
+            : null,
         body: Column(children: [
           Expanded(
             child: SafeArea(

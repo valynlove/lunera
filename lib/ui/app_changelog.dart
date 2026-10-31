@@ -41,10 +41,38 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.1',
+      version: '1.11.2',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Asteria AI Companion: empathetic, supportive conversational sanctuary powered by Google Gemini.',
+          textId: 'Pendamping AI Asteria: ruang curhat reflektif dan penuh empati yang ditenagai oleh Google Gemini.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Home screen Floating Action Button (FAB) for instant one-tap access to heart-to-heart venting.',
+          textId: 'Tombol mengambang (FAB) di Beranda untuk akses cepat curhat dan berbagi perasaan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Reflective session summarizer: automatically creates warm journal entries with mood score and clears chat history.',
+          textId: 'Rangkuman sesi reflektif: merangkum curhat otomatis ke Jurnal bersama skor mood dan membersihkan ruang obrolan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Graceful offline lock: automatically protects the chat interface when device has no internet connection.',
+          textId: 'Kunci mode offline: melindungi antarmuka obrolan secara anggun saat perangkat tidak terhubung internet.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.1',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

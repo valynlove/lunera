@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lunera/asteria.dart';
 import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
 import 'package:lunera/profile.dart';
@@ -59,25 +60,28 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.1'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.2'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.1'));
+      expect(AppChangelog.releases.first.version, equals('1.11.2'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
 
-    test('Prefs widgetHide and locale configuration', () {
+    test('Prefs widgetHide, locale, and geminiApiKey configuration', () {
       const prefs = Prefs();
       expect(prefs.widgetHide, isFalse);
       expect(prefs.locale, equals('en'));
-      final updated = prefs.copy(widgetHide: true, locale: 'id');
+      expect(prefs.geminiApiKey, equals(''));
+      final updated = prefs.copy(widgetHide: true, locale: 'id', geminiApiKey: 'test-api-key');
       expect(updated.widgetHide, isTrue);
       expect(updated.locale, equals('id'));
+      expect(updated.geminiApiKey, equals('test-api-key'));
       expect(updated.toMap()['widgetHide'], isTrue);
       expect(updated.toMap()['locale'], equals('id'));
+      expect(updated.toMap()['geminiApiKey'], equals('test-api-key'));
     });
 
     test('ProfileState model initialization', () {
@@ -244,6 +248,23 @@ void main() {
       expect(tabletDiagramW, equals(440.0));
       expect(tabletSw, equals(105.0)); // Strictly bounded, preventing squashed/gepeng drawing
       expect(tabletCx, equals(78.75));
+    });
+
+    test('Asteria models and session summary verification', () {
+      final now = DateTime(2026, 10, 31, 19, 0);
+      final userMsg = ChatMessage(role: 'user', text: 'Hari ini aku merasa cemas.', time: now);
+      final modelMsg = ChatMessage(role: 'model', text: 'Wajar merasa cemas, Olivia.', time: now);
+
+      expect(userMsg.isUser, isTrue);
+      expect(modelMsg.isUser, isFalse);
+      expect(userMsg.text, equals('Hari ini aku merasa cemas.'));
+
+      const summary = AsteriaSummary(
+        summary: 'Merasa cemas mengenai adaptasi transisi, namun mendapat afirmasi untuk bersabar.',
+        mood: 'anxious',
+      );
+      expect(summary.mood, equals('anxious'));
+      expect(summary.summary, contains('Merasa cemas'));
     });
   });
 }
