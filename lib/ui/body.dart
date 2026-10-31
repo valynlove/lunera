@@ -334,6 +334,18 @@ class _SizeTab extends ConsumerWidget {
                 subtitle: latest.waist != null ? '${fmt(latest.waist!)} ${latest.unit}' : tr('Measure waist'),
               ),
             ),
+          ]),
+          gap(10),
+          Row(children: [
+            Expanded(
+              child: _MetricTile(
+                title: tr('Shoes'),
+                value: latest.displayShoeSize ?? '-',
+                subtitle: latest.shoeSizeResult != null
+                    ? 'UK ${latest.shoeSizeResult!.uk} • ${fmt(latest.shoeSizeResult!.footCm)} cm'
+                    : (latest.footLength != null ? '${fmt(latest.footLength!)} ${latest.unit}' : tr('Measure foot')),
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: _MetricTile(
@@ -368,6 +380,8 @@ class _SizeTab extends ConsumerWidget {
               if (latest.thigh != null) _measureChip(tr('Thigh'), latest.thigh!, latest.unit),
               if (latest.calf != null) _measureChip(tr('Calf'), latest.calf!, latest.unit),
               if (latest.inseam != null) _measureChip(tr('Inseam'), latest.inseam!, latest.unit),
+              if (latest.footLength != null) _measureChip(tr('Foot Length'), latest.footLength!, latest.unit),
+              if (latest.displayShoeSize != null) _textChip(tr('Shoes'), latest.displayShoeSize!),
               if (latest.shoulder != null) _measureChip(tr('Shoulder'), latest.shoulder!, latest.unit),
               if (latest.weight != null) _measureChip(tr('Weight'), latest.weight!, 'kg'),
               if (latest.height != null) _measureChip(tr('Height'), latest.height!, 'cm'),
@@ -412,6 +426,7 @@ class _SizeTab extends ConsumerWidget {
                   if (m.hips != null) '${tr('Hips')}: ${fmt(m.hips!)}${m.unit}',
                   if (m.thigh != null) '${tr('Thigh')}: ${fmt(m.thigh!)}${m.unit}',
                   if (m.inseam != null) '${tr('Inseam')}: ${fmt(m.inseam!)}${m.unit}',
+                  if (m.displayShoeSize != null) '${tr('Shoes')}: ${m.displayShoeSize}',
                 ].join(' • '),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -440,6 +455,22 @@ class _SizeTab extends ConsumerWidget {
           children: [
             Text('$label: ', style: const TextStyle(fontSize: 12, color: Colors.white70)),
             Text('${fmt(val)} $unit', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      );
+
+  Widget _textChip(String label, String text) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('$label: ', style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
           ],
         ),
       );
@@ -487,6 +518,8 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
   late final thighCtl = TextEditingController(text: widget.initial?.thigh == null ? '' : fmt(widget.initial!.thigh!));
   late final calfCtl = TextEditingController(text: widget.initial?.calf == null ? '' : fmt(widget.initial!.calf!));
   late final inseamCtl = TextEditingController(text: widget.initial?.inseam == null ? '' : fmt(widget.initial!.inseam!));
+  late final footLengthCtl = TextEditingController(text: widget.initial?.footLength == null ? '' : fmt(widget.initial!.footLength!));
+  late final shoeSizeCtl = TextEditingController(text: widget.initial?.shoeSize ?? '');
   late final shoulderCtl = TextEditingController(text: widget.initial?.shoulder == null ? '' : fmt(widget.initial!.shoulder!));
   late final weightCtl = TextEditingController(text: widget.initial?.weight == null ? '' : fmt(widget.initial!.weight!));
   late final heightCtl = TextEditingController(text: widget.initial?.height == null ? '' : fmt(widget.initial!.height!));
@@ -498,6 +531,7 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     bustCtl.addListener(_onChanged);
     underbustCtl.addListener(_onChanged);
     waistCtl.addListener(_onChanged);
+    footLengthCtl.addListener(_onChanged);
   }
 
   @override
@@ -505,6 +539,7 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     bustCtl.removeListener(_onChanged);
     underbustCtl.removeListener(_onChanged);
     waistCtl.removeListener(_onChanged);
+    footLengthCtl.removeListener(_onChanged);
     bustCtl.dispose();
     underbustCtl.dispose();
     waistCtl.dispose();
@@ -512,6 +547,8 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     thighCtl.dispose();
     calfCtl.dispose();
     inseamCtl.dispose();
+    footLengthCtl.dispose();
+    shoeSizeCtl.dispose();
     shoulderCtl.dispose();
     weightCtl.dispose();
     heightCtl.dispose();
@@ -543,11 +580,13 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     final th = parseNum(thighCtl.text);
     final cf = parseNum(calfCtl.text);
     final ins = parseNum(inseamCtl.text);
+    final ft = parseNum(footLengthCtl.text);
+    final sh = shoeSizeCtl.text.trim().isEmpty ? null : shoeSizeCtl.text.trim();
     final s = parseNum(shoulderCtl.text);
     final wt = parseNum(weightCtl.text);
     final ht = parseNum(heightCtl.text);
 
-    if (b == null && u == null && w == null && h == null && th == null && cf == null && ins == null && s == null && wt == null && ht == null) {
+    if (b == null && u == null && w == null && h == null && th == null && cf == null && ins == null && s == null && wt == null && ht == null && ft == null && sh == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr('Please enter at least one measurement.'))),
       );
@@ -567,6 +606,8 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
       thigh: th,
       calf: cf,
       inseam: ins,
+      footLength: ft,
+      shoeSize: sh,
       weight: wt,
       height: ht,
       note: noteCtl.text.trim().isEmpty ? null : noteCtl.text.trim(),
@@ -586,11 +627,17 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
     final fmtDate = DateFormat('EEEE, d MMMM y', L10n.code);
     final b = parseNum(bustCtl.text);
     final u = parseNum(underbustCtl.text);
+    final ft = parseNum(footLengthCtl.text);
     BraSizeResult? liveBra;
     if (b != null && u != null && b > u) {
       final bCm = unit == 'in' ? b * 2.54 : b;
       final uCm = unit == 'in' ? u * 2.54 : u;
       liveBra = calculateBraSize(bustCm: bCm, underbustCm: uCm);
+    }
+    ShoeSizeResult? liveShoe;
+    if (ft != null && ft > 0) {
+      final ftCm = unit == 'in' ? ft * 2.54 : ft;
+      liveShoe = calculateShoeSize(ftCm);
     }
 
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -634,6 +681,36 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
                   ),
                   Text(
                     'Cup ${liveBra.cup} • ${tr('Diff')} +${fmt(liveBra.diffCm)} cm',
+                    style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7)),
+                  ),
+                ]),
+              ),
+            ],
+          ),
+        ),
+
+      // Live Shoe Size Preview Banner
+      if (liveShoe != null)
+        Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Pastel.mint.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Pastel.mint.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.snowshoeing_rounded, color: Pastel.mint),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    '${tr('Estimated Shoe Size')}: EU ${liveShoe.eu} (US W ${liveShoe.usWomen})',
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Colors.white),
+                  ),
+                  Text(
+                    'US Men ${liveShoe.usMen} • UK ${liveShoe.uk} • ${fmt(liveShoe.footCm)} cm',
                     style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7)),
                   ),
                 ]),
@@ -740,6 +817,31 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
             decoration: InputDecoration(
               labelText: tr('Shoulder ({0})', [unit]),
               hintText: unit == 'cm' ? '40' : '15.7',
+            ),
+          ),
+        ),
+      ]),
+      gap(10),
+
+      // Feet & Shoes
+      Row(children: [
+        Expanded(
+          child: TextField(
+            controller: footLengthCtl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: tr('Foot Length ({0})', [unit]),
+              hintText: unit == 'cm' ? '24.5' : '9.6',
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: shoeSizeCtl,
+            decoration: InputDecoration(
+              labelText: tr('Shoe Size (optional)'),
+              hintText: tr('e.g. EU 39 / 40'),
             ),
           ),
         ),

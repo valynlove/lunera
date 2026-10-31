@@ -58,12 +58,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.10.1'));
+      expect(UpdateCheckerService.currentVersion, equals('1.10.2'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.10.1'));
+      expect(AppChangelog.releases.first.version, equals('1.10.2'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -130,6 +130,7 @@ void main() {
         thigh: 52,
         calf: 34,
         inseam: 76,
+        footLength: 24.5,
       );
 
       final bra = m.braSize;
@@ -147,6 +148,10 @@ void main() {
       expect(m.thighCm, equals(52.0));
       expect(m.calfCm, equals(34.0));
       expect(m.inseamCm, equals(76.0));
+      expect(m.footLengthCm, equals(24.5));
+      expect(m.shoeSizeResult?.eu, equals('39'));
+      expect(m.shoeSizeResult?.usWomen, equals('8.5'));
+      expect(m.displayShoeSize, contains('EU 39'));
       expect(m.waistToHipRatio, closeTo(0.739, 0.01));
 
       final map = m.toMap();
@@ -156,8 +161,9 @@ void main() {
       expect(recon.thigh, equals(52.0));
       expect(recon.calf, equals(34.0));
       expect(recon.inseam, equals(76.0));
+      expect(recon.footLength, equals(24.5));
 
-      // Test backward-compatibility with legacy data (missing thigh, calf, inseam)
+      // Test backward-compatibility with legacy data (missing thigh, calf, inseam, footLength)
       final legacyMap = {
         'at': {r'$ts': '2026-10-31T00:00:00.000Z'},
         'unit': 'cm',
@@ -171,6 +177,8 @@ void main() {
       expect(legacyRecon.thigh, isNull);
       expect(legacyRecon.calf, isNull);
       expect(legacyRecon.inseam, isNull);
+      expect(legacyRecon.footLength, isNull);
+      expect(legacyRecon.shoeSize, isNull);
       expect(legacyRecon.bottomSize, equals('27–28 (S)'));
     });
   });

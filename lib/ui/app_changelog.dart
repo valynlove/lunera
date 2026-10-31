@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.10.1',
+      version: '1.10.2',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Multi-standard shoe size calculator and foot length tracking (EU/ID, US Women, US Men, UK) with live preview.',
+          textId: 'Kalkulator ukuran sepatu multi-standar & pelacakan panjang kaki (EU/ID, US Wanita, US Pria, UK) dengan pratinjau langsung.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.10.1',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

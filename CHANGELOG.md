@@ -4,6 +4,17 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2] - 2026-10-31
+
+### Added
+- **Multi-Standard Shoe Size Calculator & Tracking (`lib/models.dart` & `lib/ui/body.dart`):**
+  - Integrated Foot Length (*Panjang Telapak Kaki*) measurement and dual-standard **Shoe Size Calculator** (`calculateShoeSize`) converting foot length into EU/ID (e.g. `39`), US Women's (e.g. `8.5`), US Men's (e.g. `7`), and UK sizing.
+  - Added dedicated Shoe Size metric tile to the Estimated Clothing Fit grid in the *Size & Measures* tab.
+  - Added live shoe size preview banner in the measurement entry sheet with manual shoe size override support.
+  - Guaranteed 100% backward-compatibility for existing measurements stored on device and Cloud Firestore.
+
+---
+
 ## [1.10.1] - 2026-10-31
 
 ### Added

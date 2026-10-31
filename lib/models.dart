@@ -541,6 +541,58 @@ class BraSizeResult {
   final String? sisterLoose; // misal: "36A (80A)"
 }
 
+/// Hasil perhitungan ukuran sepatu multi-standar (EU/ID, US Women, US Men, UK)
+class ShoeSizeResult {
+  const ShoeSizeResult({
+    required this.eu,
+    required this.usWomen,
+    required this.usMen,
+    required this.uk,
+    required this.footCm,
+  });
+
+  final String eu; // misal: "39"
+  final String usWomen; // misal: "8.5"
+  final String usMen; // misal: "7"
+  final String uk; // misal: "6"
+  final double footCm;
+}
+
+/// Menghitung konversi ukuran sepatu berdasarkan panjang telapak kaki dalam cm
+ShoeSizeResult calculateShoeSize(double footCm) {
+  String eu, usW, usM, uk;
+  if (footCm < 22.0) {
+    eu = '34'; usW = '4'; usM = '2.5'; uk = '1.5';
+  } else if (footCm < 22.5) {
+    eu = '35'; usW = '5'; usM = '3.5'; uk = '2.5';
+  } else if (footCm < 23.0) {
+    eu = '36'; usW = '5.5'; usM = '4'; uk = '3';
+  } else if (footCm < 23.5) {
+    eu = '37'; usW = '6.5'; usM = '5'; uk = '4';
+  } else if (footCm < 24.0) {
+    eu = '37.5'; usW = '7'; usM = '5.5'; uk = '4.5';
+  } else if (footCm < 24.5) {
+    eu = '38'; usW = '7.5'; usM = '6'; uk = '5';
+  } else if (footCm < 25.0) {
+    eu = '39'; usW = '8.5'; usM = '7'; uk = '6';
+  } else if (footCm < 25.5) {
+    eu = '40'; usW = '9'; usM = '7.5'; uk = '6.5';
+  } else if (footCm < 26.0) {
+    eu = '40.5'; usW = '9.5'; usM = '8'; uk = '7';
+  } else if (footCm < 26.5) {
+    eu = '41'; usW = '10'; usM = '8.5'; uk = '7.5';
+  } else if (footCm < 27.0) {
+    eu = '42'; usW = '10.5'; usM = '9'; uk = '8';
+  } else if (footCm < 27.5) {
+    eu = '43'; usW = '11.5'; usM = '10'; uk = '9';
+  } else if (footCm < 28.0) {
+    eu = '44'; usW = '12'; usM = '10.5'; uk = '9.5';
+  } else {
+    eu = '45'; usW = '13'; usM = '11.5'; uk = '10.5';
+  }
+  return ShoeSizeResult(eu: eu, usWomen: usW, usMen: usM, uk: uk, footCm: footCm);
+}
+
 /// Menghitung ukuran bra berdasarkan lingkar dada (bust) dan bawah dada (underbust) dalam cm
 BraSizeResult calculateBraSize({required double bustCm, required double underbustCm}) {
   final diff = (bustCm - underbustCm).clamp(0.0, 100.0);
@@ -636,6 +688,8 @@ class BodyMeasurement {
     this.thigh,
     this.calf,
     this.inseam,
+    this.footLength,
+    this.shoeSize,
     this.weight,
     this.height,
     this.note,
@@ -652,6 +706,8 @@ class BodyMeasurement {
   final double? thigh; // Lingkar paha
   final double? calf; // Lingkar betis
   final double? inseam; // Panjang kaki bagian dalam (selangkangan ke mata kaki)
+  final double? footLength; // Panjang telapak kaki
+  final String? shoeSize; // Ukuran sepatu yang biasa dipakai / manual (misal: "39" atau "EU 39")
   final double? weight; // Berat badan (kg)
   final double? height; // Tinggi badan (cm)
   final String? note;
@@ -664,12 +720,28 @@ class BodyMeasurement {
   double? get thighCm => thigh == null ? null : (unit == 'in' ? thigh! * 2.54 : thigh);
   double? get calfCm => calf == null ? null : (unit == 'in' ? calf! * 2.54 : calf);
   double? get inseamCm => inseam == null ? null : (unit == 'in' ? inseam! * 2.54 : inseam);
+  double? get footLengthCm => footLength == null ? null : (unit == 'in' ? footLength! * 2.54 : footLength);
 
   /// Hitung ukuran bra / dada lengkap (US/UK, EU/ID, cup, sister sizes)
   BraSizeResult? get braSize {
     final b = bustCm, u = underbustCm;
     if (b == null || u == null || b < u) return null;
     return calculateBraSize(bustCm: b, underbustCm: u);
+  }
+
+  /// Hitung estimasi ukuran sepatu multi-standar (EU, US W, US M, UK)
+  ShoeSizeResult? get shoeSizeResult {
+    final f = footLengthCm;
+    if (f == null || f <= 0) return null;
+    return calculateShoeSize(f);
+  }
+
+  /// Teks ringkas ukuran sepatu untuk ditampilkan di kartu pakaian
+  String? get displayShoeSize {
+    if (shoeSize != null && shoeSize!.trim().isNotEmpty) return shoeSize!.trim();
+    final res = shoeSizeResult;
+    if (res == null) return null;
+    return 'EU ${res.eu} (US W ${res.usWomen})';
   }
 
   /// Estimasi ukuran atasan / baju
@@ -727,6 +799,8 @@ class BodyMeasurement {
     double? thigh,
     double? calf,
     double? inseam,
+    double? footLength,
+    String? shoeSize,
     double? weight,
     double? height,
     String? note,
@@ -743,6 +817,8 @@ class BodyMeasurement {
         thigh: thigh ?? this.thigh,
         calf: calf ?? this.calf,
         inseam: inseam ?? this.inseam,
+        footLength: footLength ?? this.footLength,
+        shoeSize: shoeSize ?? this.shoeSize,
         weight: weight ?? this.weight,
         height: height ?? this.height,
         note: note ?? this.note,
@@ -759,6 +835,8 @@ class BodyMeasurement {
         'thigh': thigh,
         'calf': calf,
         'inseam': inseam,
+        'footLength': footLength,
+        'shoeSize': shoeSize,
         'weight': weight,
         'height': height,
         'note': note,
@@ -776,6 +854,8 @@ class BodyMeasurement {
         thigh: (m['thigh'] as num?)?.toDouble(),
         calf: (m['calf'] as num?)?.toDouble(),
         inseam: (m['inseam'] as num?)?.toDouble(),
+        footLength: (m['footLength'] as num?)?.toDouble(),
+        shoeSize: m['shoeSize'],
         weight: (m['weight'] as num?)?.toDouble(),
         height: (m['height'] as num?)?.toDouble(),
         note: m['note'],
