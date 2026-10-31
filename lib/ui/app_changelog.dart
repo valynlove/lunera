@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.8',
+      version: '1.11.9',
       dateEn: 'October 31, 2026',
       dateId: '31 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Removed Asteria AI Chatbot feature to streamline application performance and maintain focus on lightweight, offline-first health tracking.',
+          textId: 'Menghapus fitur AI Chatbot Asteria untuk merampingkan performa aplikasi dan menjaga fokus pada pelacakan kesehatan offline-first yang ringan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.8',
+      dateEn: 'October 31, 2026',
+      dateId: '31 Oktober 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

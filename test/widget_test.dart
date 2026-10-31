@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lunera/asteria.dart';
 import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
 import 'package:lunera/profile.dart';
@@ -60,12 +59,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.8'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.9'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.8'));
+      expect(AppChangelog.releases.first.version, equals('1.11.9'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -250,33 +249,7 @@ void main() {
       expect(tabletCx, equals(78.75));
     });
 
-    test('Asteria models and session summary verification', () {
-      final now = DateTime(2026, 10, 31, 19, 0);
-      final userMsg = ChatMessage(role: 'user', text: 'Hari ini aku merasa cemas.', time: now);
-      final modelMsg = ChatMessage(role: 'model', text: 'Wajar merasa cemas, Olivia.', time: now);
-
-      expect(userMsg.isUser, isTrue);
-      expect(modelMsg.isUser, isFalse);
-      expect(userMsg.text, equals('Hari ini aku merasa cemas.'));
-
-      const summary = AsteriaSummary(
-        summary: 'Merasa cemas mengenai adaptasi transisi, namun mendapat afirmasi untuk bersabar.',
-        mood: 'anxious',
-      );
-      expect(summary.mood, equals('anxious'));
-      expect(summary.summary, contains('Merasa cemas'));
-
-      // Hybrid Key & Celestial Mode Resolution tests
-      expect(AsteriaService.resolveApiKey('custom-key'), equals('custom-key'));
-      expect(AsteriaService.resolveApiKey('custom-key', 'personal'), equals('custom-key'));
-      expect(AsteriaService.hasAvailableKey('custom-key'), isTrue);
-      expect(AsteriaService.isPersonalMode('custom-key', 'personal'), isTrue);
-      expect(AsteriaService.isPersonalMode('custom-key', 'shared'), isFalse);
-      expect(AsteriaService.isPersonalMode('', 'personal'), isFalse);
-      expect(AsteriaService.candidateEndpoints, isNotEmpty);
-      expect(AsteriaService.candidateEndpoints.first.model, equals('gemini-3.8-flash'));
-      expect(AsteriaService.candidateEndpoints.first.apiVersion, equals('v1beta'));
-
+    test('Prefs mode and key backward compatibility', () {
       const defaultPrefs = Prefs();
       expect(defaultPrefs.asteriaMode, equals('shared'));
       final personalPrefs = defaultPrefs.copy(asteriaMode: 'personal', geminiApiKey: 'my-key');
@@ -287,9 +260,6 @@ void main() {
       final reconstructed = Prefs.from(map);
       expect(reconstructed.asteriaMode, equals('personal'));
       expect(reconstructed.geminiApiKey, equals('my-key'));
-
-      const quotaEx = AsteriaQuotaException();
-      expect(quotaEx.toString(), contains('Asteria is resting'));
     });
   });
 }

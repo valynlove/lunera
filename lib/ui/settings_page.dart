@@ -9,7 +9,6 @@ import '../repo.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import 'app_changelog.dart';
-import 'asteria_chat.dart';
 import 'auth.dart';
 import 'data_page.dart';
 import 'site_map.dart';
@@ -227,54 +226,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               subtitle: Text(tr('Widgets only display the app name. Useful if your home screen is seen by others.')),
               value: p.widgetHide,
               onChanged: (v) => _save(p.copy(widgetHide: v)),
-            ),
-          ]),
-          _card(tr('Asteria AI Companion'), [
-            Text(tr('Reflective AI companion to share your thoughts, transition journey, and feelings.')),
-            gap(10),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            p.asteriaMode == 'personal' ? Icons.star_rounded : Icons.groups_rounded,
-                            size: 16,
-                            color: C.peony,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            p.asteriaMode == 'personal'
-                                ? tr('Personal Star (Own Key)')
-                                : tr('Shared Star (Default)'),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        p.asteriaMode == 'personal'
-                            ? (p.geminiApiKey.isEmpty
-                                ? tr('No private key configured')
-                                : tr('Connected via private key'))
-                            : tr('Connected via Lunera shared constellation'),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () => showAsteriaConnectionDialog(context, ref),
-                  icon: const Icon(Icons.tune_rounded, size: 16),
-                  label: Text(tr('Configure')),
-                ),
-              ],
             ),
           ]),
           _card(tr('About & Support'), [
