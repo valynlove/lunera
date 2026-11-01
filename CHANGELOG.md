@@ -4,6 +4,23 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.11] - 2026-11-01
+
+### Added
+- **Guided Calm Injection (`lib/ui/guided_injection.dart`, `lib/ui/home.dart`, `lib/ui/sheets.dart`):**
+  - Interactive 4-step guided injection modal specifically designed to ease injection anxiety, needle fatigue, and rushed administration.
+  - Step 1: Mindful grounding with an animated pulsing breathing orb, site rotation indicator, and calming prompts.
+  - Step 2: 30-second alcohol evaporation countdown timer with haptic cues to prevent stinging and skin irritation.
+  - Step 3: Technique guide comparing Intramuscular (90°, muscle relaxation tips) and Subcutaneous (45°–90°, skin fold pinching tips).
+  - Step 4: Heartwarming affirmation, dose recap, and seamless 1-tap logging with automatic supply deduction.
+- **Discreet Shipping & Pickup Assistant (`lib/ui/pickup_assistant_sheet.dart`, `lib/ui/supplies.dart`):**
+  - "Hold at Location / Ambil Sendiri di Agen Ekspedisi" template generator supporting J&T Express, JNE Express, SiCepat, Pos Indonesia, and generic couriers.
+  - Generates standardized shipping notes instructing logistics couriers to keep sensitive parcels at the drop point rather than delivering to family households.
+  - Integrated 1-tap clipboard copying with haptic feedback, real-time monospace preview, and practical safe pickup tips.
+  - Added a restock alert banner in the Supplies tab highlighting low items and providing instant access to the Pickup Assistant.
+
+---
+
 ## [1.11.10] - 2026-11-01
 
 ### Added

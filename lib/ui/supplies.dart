@@ -5,6 +5,7 @@ import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
 import '../l10n.dart';
+import 'pickup_assistant_sheet.dart';
 
 class SuppliesPage extends ConsumerWidget {
   const SuppliesPage({super.key});
@@ -13,16 +14,82 @@ class SuppliesPage extends ConsumerWidget {
     final items = <Supply>[...(ref.watch(suppliesProvider).value ?? <Supply>[])]..sort((a, b) => a.name.compareTo(b.name));
     final meds = items.where((s) => !s.generic).toList();
     final gens = items.where((s) => s.generic).toList();
+    final lowCount = items.where((s) => s.low).length;
     Widget head(String s) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 6, 0, 10),
         child: Text(s, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)));
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
       Row(children: [
         Expanded(child: Text(tr('Supplies'), style: display(40))),
+        pillButton(
+          tr('Pickup'),
+          () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => const PickupAssistantSheet(),
+          ),
+          icon: Icons.local_shipping_rounded,
+        ),
+        const SizedBox(width: 8),
         pillButton(tr('Add'), () => showSheet(context, const SupplySheet()), icon: Icons.add_rounded),
       ]),
       gap(18),
-      if (items.isEmpty) Padding(padding: const EdgeInsets.only(top: 40), child: Text(tr('No supplies yet. Track medication, syringes, needles, and other supplies here.'))),
+      if (items.isEmpty)
+        Padding(padding: const EdgeInsets.only(top: 40), child: Text(tr('No supplies yet. Track medication, syringes, needles, and other supplies here.')))
+      else
+        Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: (lowCount > 0 ? C.amber : C.peony).withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: (lowCount > 0 ? C.amber : C.peony).withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                lowCount > 0 ? Icons.inventory_2_outlined : Icons.local_shipping_outlined,
+                color: lowCount > 0 ? C.amber : C.peony,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lowCount > 0
+                          ? tr('{0} {0?item is|items are} running low', [lowCount])
+                          : tr('Discreet Shipping & Pickup Assistant'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      lowCount > 0
+                          ? tr('Generate a discreet "Hold at Agent" delivery order template.')
+                          : tr('Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => const PickupAssistantSheet(),
+                ),
+                child: Text(tr('Open')),
+              ),
+            ],
+          ),
+        ),
       if (meds.isNotEmpty) ...[head(tr('Medication')), for (final s in meds) _MedCard(s)],
       if (gens.isNotEmpty) ...[gap(8), head(tr('Equipment')), for (final s in gens) _GenericCard(s)],
     ]);

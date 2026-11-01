@@ -7,6 +7,7 @@ import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import '../l10n.dart';
+import 'guided_injection.dart';
 import 'site_map.dart';
 
 const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -161,6 +162,51 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
           ChoiceChip(label: Text(tr('Intramuscular (IM)')), selected: injType == 'im', onSelected: (_) => setState(() => injType = 'im')),
           ChoiceChip(label: Text(tr('Subcutaneous (SC)')), selected: injType == 'sc', onSelected: (_) => setState(() => injType = 'sc')),
         ]),
+        if (!editing) ...[
+          gap(10),
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              Navigator.pop(context);
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => CalmInjectionSheet(
+                  t: t,
+                  slot: widget.slot,
+                  supplies: widget.supplies,
+                  prefs: widget.prefs,
+                  suggestedPlace: widget.suggested,
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: C.peony.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: C.peony.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.self_improvement_rounded, color: C.peony, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr('Need guidance? Try Guided Calm Injection'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                        Text(tr('Interactive step-by-step breathing, prep, and slow injection guide.'), style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65))),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: C.peony.withValues(alpha: 0.7)),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
       if (!editing && meds.isNotEmpty) ...[
         gap(14),

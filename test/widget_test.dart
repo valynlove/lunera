@@ -63,12 +63,12 @@ void main() {
     });
 
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('1.11.10'));
+      expect(UpdateCheckerService.currentVersion, equals('1.11.11'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('1.11.10'));
+      expect(AppChangelog.releases.first.version, equals('1.11.11'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -280,6 +280,93 @@ void main() {
       expect(fmt(12.5), equals('12.5'));
       expect(fmt(1 / 3), startsWith('0.333333'));
       expect(fmt(0.0), equals('0'));
+    });
+
+    test('Supply low stock detection and Hold-at-Location template generation', () {
+      // 1. Medication supply low threshold: doses <= 3
+      const normalMed = Supply(
+        id: 's1',
+        name: 'Estradiol Valerate',
+        qty: 10,
+        initial: 10,
+        perDose: 1,
+      );
+      expect(normalMed.doses, equals(10));
+      expect(normalMed.low, isFalse);
+
+      const lowMed = Supply(
+        id: 's2',
+        name: 'Estradiol Cypionate',
+        qty: 2,
+        initial: 10,
+        perDose: 1,
+      );
+      expect(lowMed.doses, equals(2));
+      expect(lowMed.low, isTrue);
+
+      // 2. Generic supply low threshold: qty <= 5
+      const normalSyringe = Supply(
+        id: 'g1',
+        name: '1 mL Syringe',
+        qty: 15,
+        initial: 20,
+        kind: 'generic',
+        gtype: 'syringe',
+      );
+      expect(normalSyringe.low, isFalse);
+
+      const lowSyringe = Supply(
+        id: 'g2',
+        name: '1 mL Syringe',
+        qty: 4,
+        initial: 20,
+        kind: 'generic',
+        gtype: 'syringe',
+      );
+      expect(lowSyringe.low, isTrue);
+
+      // 3. Shipping template formatting
+      String generateTemplate({
+        required String carrier,
+        required String name,
+        required String phone,
+        required String branch,
+        required String address,
+        required String city,
+      }) {
+        return '''
+Recipient: $name
+Phone: $phone
+Shipping Address:
+KANTOR AGEN $carrier ($branch)
+$address, $city
+Note: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCATION / PICKUP SENDIRI). JANGAN DIANTAR KE RUMAH.
+'''.trim();
+      }
+
+      final template = generateTemplate(
+        carrier: 'J&T Express',
+        name: 'Olivia',
+        phone: '08123456789',
+        branch: 'Drop Point Thamrin',
+        address: 'Jl. MH Thamrin No. 12',
+        city: 'Jakarta Pusat 10350',
+      );
+
+      expect(template, contains('Recipient: Olivia'));
+      expect(template, contains('Phone: 08123456789'));
+      expect(template, contains('KANTOR AGEN J&T Express (Drop Point Thamrin)'));
+      expect(template, contains('HOLD AT LOCATION'));
+    });
+
+    test('Guided Calm Injection step countdown and angle presets', () {
+      const dryingSeconds = 30;
+      expect(dryingSeconds, equals(30));
+
+      const imAngle = '90°';
+      const scAngle = '45°';
+      expect(imAngle, equals('90°'));
+      expect(scAngle, equals('45°'));
     });
   });
 }

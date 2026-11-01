@@ -41,10 +41,32 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.10',
+      version: '1.11.11',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Guided Calm Injection: 4-stage guided injection session with calming breath guide, 30-second alcohol dry countdown timer, technique angles (90° IM vs 45° SubQ), affirmation, and 1-tap logging.',
+          textId: 'Panduan Suntik Tenang: sesi injeksi terpandu 4 langkah dengan panduan napas, timer 30 detik pengeringan alkohol, panduan teknik & sudut suntik (90° IM vs 45° SubQ), afirmasi, dan pencatatan 1 sentuhan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Restock & Pickup Assistant: discreet "Hold at Location" delivery template generator for logistics agencies (J&T, JNE, SiCepat, Pos) with 1-tap clipboard copy and safety checklist.',
+          textId: 'Asisten Titik Ambil & Stok: pembuat format alamat "Ambil Sendiri di Agen Ekspedisi" (J&T, JNE, SiCepat, Pos) dengan salin cepat ke papan klip dan tips privasi paket.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Supplies Restock Banner: real-time low supply alert and quick shortcut to the Pickup Assistant directly from the Supplies tab.',
+          textId: 'Banner Peringatan Stok: pemberitahuan stok menipis dan akses cepat ke Asisten Titik Ambil langsung dari tab Perlengkapan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.10',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,

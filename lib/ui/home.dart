@@ -10,6 +10,7 @@ import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import 'journal.dart';
+import 'guided_injection.dart';
 import 'sheets.dart';
 import '../l10n.dart';
 
@@ -172,7 +173,34 @@ class DoseCard extends ConsumerWidget {
           chip(scheduleText(t), Icons.event_repeat_rounded),
           if (t.adm.places && place.isNotEmpty) chip(tr('next: {0}', [tr(place)]), Icons.my_location_rounded),
         ]),
-        gap(18),
+        gap(16),
+        if (t.route == 'inj') ...[
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              side: BorderSide(color: C.peony.withValues(alpha: 0.35)),
+            ),
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => CalmInjectionSheet(
+                t: t,
+                slot: next,
+                supplies: supplies,
+                prefs: prefs,
+                suggestedPlace: place,
+              ),
+            ),
+            icon: Icon(Icons.self_improvement_rounded, size: 18, color: C.peony),
+            label: Text(
+              tr('Guided Calm Injection'),
+              style: TextStyle(fontWeight: FontWeight.w700, color: C.peony, fontSize: 13),
+            ),
+          ),
+          gap(10),
+        ],
         pillButton(
           t.route == 'inj' ? tr('Log injection') : tr('Log dose'),
           () => showSheet(context, DoseSheet(t: t, slot: next, supplies: supplies, prefs: prefs, suggested: place)),
