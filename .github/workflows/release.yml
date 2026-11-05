@@ -114,12 +114,37 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         run: flutter pub get
 
+      - name: Analyze & Run Tests
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          flutter analyze
+          flutter test
+
+      - name: Configure Android Release Signing
+        if: steps.check_release.outputs.exists == 'false'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ] || [ -z "$ANDROID_STORE_PASSWORD" ]; then
+            echo "::error::Missing Android signing secrets. Please set ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD, and ANDROID_STORE_PASSWORD in GitHub Actions Repository Secrets."
+            exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > android/app/release-keystore.jks
+
       - name: Build Release APK
         if: steps.check_release.outputs.exists == 'false'
+        env:
+          ANDROID_STORE_FILE: release-keystore.jks
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
           for i in 1 2 3; do
             echo "Attempt $i to build release APK..."
-            flutter build apk --release --dart-define=DEFAULT_GEMINI_API_KEY="${{ secrets.DEFAULT_GEMINI_API_KEY }}" && break || {
+            flutter build apk --release && break || {
               if [ $i -lt 3 ]; then
                 echo "Build attempt $i failed. Retrying in 15 seconds..."
                 sleep 15
@@ -129,6 +154,10 @@ jobs:
               fi
             }
           done
+
+      - name: Clean Up Signing Keystore
+        if: always() && steps.check_release.outputs.exists == 'false'
+        run: rm -f android/app/release-keystore.jks android/key.properties
 
       - name: Create GitHub Release with APK
         if: steps.check_release.outputs.exists == 'false'

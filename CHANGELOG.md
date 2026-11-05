@@ -4,6 +4,46 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.13] - 2026-11-05
+
+### Changed
+- **Modular Test Suite Architecture (`test/`):**
+  - Partitioned monolithic `widget_test.dart` into domain-specific, maintainable test files: `test/models_test.dart`, `test/sim_test.dart`, `test/schedule_test.dart`, `test/security_test.dart`, `test/notifications_test.dart`, and `test/repo_test.dart`.
+- **Update Checker Dialog Localization (`lib/update_checker.dart`, `lib/l10n_id.dart`):**
+  - Wrapped app update prompts, status messages, and action buttons in `tr()` with complete Indonesian translations.
+- **Project Structure & Module Cleanup (`lunera.iml`, `.idea/modules.xml`):**
+  - Renamed legacy IDE module descriptor `ritme.iml` to `lunera.iml` and updated project configuration while strictly preserving native Android package identity and backup schema compatibility.
+
+### Removed
+- **Redundant Root Android Widget Scaffolding (`android_widget/`):**
+  - Removed duplicate `android_widget/` folder from project root as all native Kotlin widget implementations, layouts, and resource snippet files are permanently wired inside `android/app/src/main/`.
+
+## [1.11.12] - 2026-11-05
+
+### Fixed
+- **Discreet Notifications for Low Supply & Expiry (`lib/notifications.dart`, `lib/l10n_id.dart`):**
+  - Extended lockscreen notification privacy masking (`discreetNotify`: *Wellness & Routine* and *Minimal*) to low-supply and medication expiry reminders so sensitive item names and medication labels never leak on the lockscreen.
+- **Persistent PIN & Decoy Calculator Brute-Force Protection (`lib/lock.dart`, `lib/ui/lock_screen.dart`):**
+  - Added persistent 5-attempt lockout tracking in `SharedPreferences` across the Moon PIN screen, stealth Decoy Calculator, and PIN verification sheet so app restarts cannot bypass cooldowns.
+  - Hardened Decoy Calculator `=` PIN verification to check single 6-digit candidates silently without breaking calculator stealth or counting normal math operations as failed guesses.
+
+### Changed
+- **Pure Celestial Dark Theme (`lib/main.dart`):**
+  - Streamlined theme architecture to Lunera's signature single dark sanctuary theme (Midnight & Pastel) with dynamic phase accents, eliminating redundant theme mode switching.
+- **Robust Backup Schema Validation (`lib/repo.dart`):**
+  - Enhanced JSON backup validation with per-row schema and date integrity checks across all data collections, while supporting both Lunera and legacy 'ritme' file formats.
+- **PBKDF2-HMAC-SHA256 PIN Key Derivation (`lib/lock.dart`):**
+  - Upgraded PIN hashing from single-round SHA-256 to 60,000-iteration PBKDF2-HMAC-SHA256 with constant-time verification and seamless automatic migration for existing legacy PIN hashes.
+- **Release Signing Security & CI Quality Gate (`android/app/build.gradle.kts`, `.github/workflows/release.yml`, `.gitignore`):**
+  - Removed tracked Android release keystore and credential files from Git version control while preserving local signing support.
+  - Updated GitHub Actions release workflow to enforce `flutter analyze` and `flutter test` before building and to load release signing credentials securely from GitHub Repository Secrets with automatic post-build cleanup.
+
+### Removed
+- **Legacy Asteria AI Leftovers (`lib/models.dart`, `lib/repo.dart`, `lib/l10n_id.dart`, `.github/workflows/release.yml`):**
+  - Removed unused `DEFAULT_GEMINI_API_KEY` build flag, `Prefs.geminiApiKey` / `Prefs.asteriaMode` persistence (while preserving legacy backup import compatibility), and 74 unused translation strings.
+
+---
+
 ## [1.11.11] - 2026-11-01
 
 ### Added

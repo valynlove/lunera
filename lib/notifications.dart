@@ -9,6 +9,55 @@ import 'repo.dart';
 import 'schedule.dart';
 import 'l10n.dart';
 
+String _verb(Therapy t) => switch (t.route) {
+      'inj' => tr('Time for your injection'),
+      'oral' || 'sublingual' || 'supp' => tr('Time to take your medication'),
+      'patch' => tr('Time to change your patch'),
+      _ => tr('Time for your medication'),
+    };
+
+/// Format judul & isi pengingat dosis sesuai mode privasi layar kunci.
+(String, String) doseNotificationText(Therapy t, Prefs prefs, {String place = ''}) {
+  if (prefs.discreetNotify == 'wellness') {
+    return (tr('Routine Reminder ✦'), tr('Time for your daily hydration and wellness routine.'));
+  }
+  if (prefs.discreetNotify == 'minimal') {
+    return ('Lunera ✦', tr('Gentle reminder.'));
+  }
+  return (
+    '${_verb(t)}: ${t.name}',
+    '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', ${tr('site: {0}', [tr(place)])}'}',
+  );
+}
+
+/// Format judul & isi pengingat stok menipis sesuai mode privasi layar kunci.
+(String, String) lowSupplyNotificationText(Supply s, Prefs prefs) {
+  if (prefs.discreetNotify == 'wellness') {
+    return (tr('Routine Supplies ✦'), tr('One of your daily wellness essentials is running low.'));
+  }
+  if (prefs.discreetNotify == 'minimal') {
+    return ('Lunera ✦', tr('Gentle reminder.'));
+  }
+  return (
+    tr('Running low'),
+    s.generic ? tr('{0}: {1} left', [s.name, fmt(s.qty)]) : tr('{0}: {1} {1?dose|doses} left', [s.name, s.doses]),
+  );
+}
+
+/// Format judul & isi pengingat masa simpan / kedaluwarsa sesuai mode privasi layar kunci.
+(String, String) expiryNotificationText(Supply s, int leadDays, Prefs prefs) {
+  if (prefs.discreetNotify == 'wellness') {
+    return (tr('Routine Supplies ✦'), tr('Check the shelf-life of your daily wellness essentials.'));
+  }
+  if (prefs.discreetNotify == 'minimal') {
+    return ('Lunera ✦', tr('Gentle reminder.'));
+  }
+  return (
+    leadDays == 0 ? tr('Medication expires today') : tr('Medication expiring soon'),
+    leadDays == 0 ? s.name : tr('{0}: {1} {1?day|days} left', [s.name, leadDays]),
+  );
+}
+
 /// Pengingat dosis lewat notifikasi lokal (Android dan iOS). Dijadwalkan ulang
 /// setiap terapi, catatan, atau pengaturan berubah, jadi tetap muncul saat offline.
 class AppNotifier {
@@ -67,13 +116,6 @@ class AppNotifier {
 
   int _id(Therapy t, DateTime at) => '${t.id}|${slotKey(at)}'.hashCode & 0x7fffffff;
 
-  String _verb(Therapy t) => switch (t.route) {
-        'inj' => tr('Time for your injection'),
-        'oral' || 'sublingual' || 'supp' => tr('Time to take your medication'),
-        'patch' => tr('Time to change your patch'),
-        _ => tr('Time for your medication'),
-      };
-
   Future<void> test([Prefs? prefs]) async {
     if (!supported) return;
     await init();
@@ -118,19 +160,7 @@ class AppNotifier {
     for (final s in slots.take(60)) {
       final t = s.t;
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
-
-      String title;
-      String body;
-      if (prefs.discreetNotify == 'wellness') {
-        title = tr('Routine Reminder ✦');
-        body = tr('Time for your daily hydration and wellness routine.');
-      } else if (prefs.discreetNotify == 'minimal') {
-        title = 'Lunera ✦';
-        body = tr('Gentle reminder.');
-      } else {
-        title = '${_verb(t)}: ${t.name}';
-        body = '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', ${tr('site: {0}', [tr(place)])}'}';
-      }
+      final (title, body) = doseNotificationText(t, prefs, place: place);
 
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
@@ -154,9 +184,9 @@ class AppNotifier {
     final firstMorning = now.hour < 9 ? DateTime(now.year, now.month, now.day, 9) : DateTime(now.year, now.month, now.day + 1, 9);
     for (final s in supplies) {
       if (s.low && !s.expired) {
+        final (title, body) = lowSupplyNotificationText(s, prefs);
         for (var d = 0; d < 3; d++) {
-          await at9(DateTime(firstMorning.year, firstMorning.month, firstMorning.day + d, 9), 'low|${s.id}|$d', tr('Running low'),
-              s.generic ? tr('{0}: {1} left', [s.name, fmt(s.qty)]) : tr('{0}: {1} {1?dose|doses} left', [s.name, s.doses]));
+          await at9(DateTime(firstMorning.year, firstMorning.month, firstMorning.day + d, 9), 'low|${s.id}|$d', title, body);
         }
       }
       final e = s.expiry;
@@ -164,7 +194,8 @@ class AppNotifier {
         for (final lead in const [14, 3, 0]) {
           final at = DateTime(e.year, e.month, e.day - lead, 9);
           if (!at.isAfter(now)) continue;
-          await at9(at, 'exp|${s.id}|$lead', lead == 0 ? tr('Medication expires today') : tr('Medication expiring soon'), lead == 0 ? s.name : tr('{0}: {1} {1?day|days} left', [s.name, lead]));
+          final (title, body) = expiryNotificationText(s, lead, prefs);
+          await at9(at, 'exp|${s.id}|$lead', title, body);
         }
       }
     }

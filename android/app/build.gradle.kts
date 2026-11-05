@@ -35,37 +35,32 @@ android {
         versionName = flutter.versionName
     }
 
+    val releaseStoreFile = run {
+        val keyFile = keystoreProperties.getProperty("storeFile") ?: System.getenv("ANDROID_STORE_FILE")
+        if (!keyFile.isNullOrBlank()) {
+            if (file(keyFile).exists()) file(keyFile)
+            else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
+            else null
+        } else null
+    }
+
     signingConfigs {
         create("release") {
-            val keyFile = keystoreProperties.getProperty("storeFile")
-            val targetFile = if (keyFile != null) {
-                if (file(keyFile).exists()) file(keyFile)
-                else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
-                else null
-            } else null
-
-            if (targetFile != null) {
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = targetFile
-                storePassword = keystoreProperties.getProperty("storePassword")
+            if (releaseStoreFile != null) {
+                keyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
+                storeFile = releaseStoreFile
+                storePassword = keystoreProperties.getProperty("storePassword") ?: System.getenv("ANDROID_STORE_PASSWORD")
             }
         }
     }
 
     buildTypes {
         release {
-            val keyFile = keystoreProperties.getProperty("storeFile")
-            val targetFile = if (keyFile != null) {
-                if (file(keyFile).exists()) file(keyFile)
-                else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
-                else null
-            } else null
-
-            if (targetFile != null) {
-                signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (releaseStoreFile != null) {
+                signingConfigs.getByName("release")
             } else {
-                signingConfig = signingConfigs.getByName("debug")
+                signingConfigs.getByName("debug")
             }
         }
     }

@@ -112,12 +112,13 @@ class LockScreen extends StatefulWidget {
 class _LockScreenState extends State<LockScreen> {
   String pin = '';
   String? msg;
-  int fails = 0;
-  DateTime? until;
 
   @override
   void initState() {
     super.initState();
+    if (Lock.instance.isLockedOut) {
+      msg = tr('Wait a moment before trying again.');
+    }
     if (Lock.instance.state.value.bio) WidgetsBinding.instance.addPostFrameCallback((_) => _bio());
   }
 
@@ -126,7 +127,7 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   void _changed(String v) {
-    if (until != null && DateTime.now().isBefore(until!)) {
+    if (Lock.instance.isLockedOut) {
       setState(() => msg = tr('Wait a moment before trying again.'));
       return;
     }
@@ -139,15 +140,11 @@ class _LockScreenState extends State<LockScreen> {
       widget.onUnlock();
       return;
     }
-    fails++;
     setState(() {
       pin = '';
-      msg = tr('Wrong PIN.');
-      if (fails >= 5) {
-        until = DateTime.now().add(const Duration(seconds: 30));
-        fails = 0;
-        msg = tr('Too many attempts. Try again in 30 seconds.');
-      }
+      msg = Lock.instance.isLockedOut
+          ? tr('Too many attempts. Try again in 30 seconds.')
+          : tr('Wrong PIN.');
     });
   }
 
@@ -301,9 +298,18 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
   }
 
   void _onEquals() {
-    // Secret Unlock Check (periksa display saat ini atau buffer 6-digit PIN)
-    if (Lock.instance.verify(_display) || (_pinBuffer.length == 6 && Lock.instance.verify(_pinBuffer))) {
-      widget.onUnlock();
+    // Secret Unlock Check: periksa kandidat 6-digit PIN hanya saat tidak ada operator aktif,
+    // menggunakan pembatasan percobaan persisten tanpa membongkar samaran kalkulator.
+    final candidate = decoyPinCandidate(display: _display, pinBuffer: _pinBuffer, operator: _operator);
+    if (candidate != null) {
+      if (Lock.instance.verify(candidate)) {
+        widget.onUnlock();
+        return;
+      }
+      setState(() {
+        _shouldReset = true;
+        _pinBuffer = '';
+      });
       return;
     }
 
@@ -575,6 +581,10 @@ class _PinFlowState extends State<_PinFlow> {
   String? first, msg;
 
   void _changed(String v) {
+    if (!widget.create && Lock.instance.isLockedOut) {
+      setState(() => msg = tr('Wait a moment before trying again.'));
+      return;
+    }
     setState(() {
       pin = v;
       msg = null;
@@ -586,7 +596,9 @@ class _PinFlowState extends State<_PinFlow> {
       } else {
         setState(() {
           pin = '';
-          msg = tr('Wrong PIN.');
+          msg = Lock.instance.isLockedOut
+              ? tr('Too many attempts. Try again in 30 seconds.')
+              : tr('Wrong PIN.');
         });
       }
     } else if (first == null) {

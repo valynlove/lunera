@@ -41,10 +41,50 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.11.13',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Codebase Modularization & Housekeeping: partitioned the test suite into focused domain test files, pruned root duplicate android_widget folder, renamed legacy project module, and localized app update dialog.',
+          textId: 'Modularisasi & Perapian Basis Kode: memisahkan suite pengujian ke file pengujian domain terarah, membersihkan folder duplikat android_widget di root, memperbarui konfigurasi modul proyek, dan melokalisasi dialog pembaruan aplikasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.12',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Discreet Supply & Expiry Alerts: extended lockscreen notification masking (Wellness & Routine and Minimal modes) to low-stock and medication expiry reminders so medication names remain private.',
+          textId: 'Privasi Pengingat Stok & Kedaluwarsa: memperluas penyamaran teks layar kunci (mode Hidrasi & Rutinitas serta Minimalis) ke pengingat stok menipis dan masa simpan obat agar nama obat tetap terlindungi.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'PBKDF2 PIN Hardening & Persistent Lockout: upgraded PIN hashing to 60,000-iteration PBKDF2-HMAC-SHA256 with automatic legacy migration and persistent brute-force cooldown across the Moon PIN pad and Decoy Calculator.',
+          textId: 'Penguatan PIN PBKDF2 & Batas Percobaan Persisten: meningkatkan enkripsi PIN ke PBKDF2-HMAC-SHA256 (60.000 iterasi) dengan migrasi otomatis serta jeda penguncian persisten di layar PIN dan Kalkulator Samaran.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Pure Celestial Dark Theme & Backup Validation: locked app styling to Lunera\'s signature nocturnal sanctuary with dynamic phase accents, and added strict per-row backup integrity checks.',
+          textId: 'Tema Tunggal Celestial Dark & Validasi Backup: mengunci tema aplikasi ke nuansa malam khas Lunera dengan aksen dinamis, serta memperketat validasi integritas data cadangan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Release Signing & CI Quality Gate: migrated Android release signing in CI to encrypted GitHub Secrets, enforced automated analyze/test checks before APK builds, and cleaned up legacy Asteria remnants.',
+          textId: 'Keamanan Rilis & Gate Pengujian CI: memindahkan penandatanganan APK rilis ke GitHub Secrets terenkripsi, mewajibkan lolos analisis & pengujian otomatis sebelum kompilasi, serta membersihkan sisa kode lama Asteria.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.11',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,

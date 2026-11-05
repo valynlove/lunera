@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'l10n.dart';
 import 'theme.dart';
 
 class AppUpdateInfo {
@@ -44,7 +45,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.11.11';
+  static const currentVersion = '1.11.13';
 
   static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
 
@@ -193,8 +194,10 @@ class UpdateCheckerService {
       showUpdateDialog(context, info);
     } else if (!silentIfUpToDate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You are using the latest version of Lunera (v$currentVersion). ✨'),
+        SnackBar(
+          content: Text(
+            tr('You are using the latest version of Lunera (v{0}). ✨', [currentVersion]),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -232,9 +235,9 @@ class UpdateCheckerService {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Update Available!',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                    Text(
+                      tr('Update Available!'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -254,9 +257,9 @@ class UpdateCheckerService {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'A new version of Lunera is ready with the latest improvements:',
-                style: TextStyle(fontSize: 13, height: 1.4),
+              Text(
+                tr('A new version of Lunera is ready with the latest improvements:'),
+                style: const TextStyle(fontSize: 13, height: 1.4),
               ),
               const SizedBox(height: 12),
               if (info.releaseNotes.isNotEmpty)
@@ -283,7 +286,7 @@ class UpdateCheckerService {
                 ),
               const SizedBox(height: 10),
               Text(
-                'Tap "Update Now" to download and install the new APK.',
+                tr('Tap "Update Now" to download and install the new APK.'),
                 style: TextStyle(
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
@@ -296,11 +299,11 @@ class UpdateCheckerService {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Later'),
+              child: Text(tr('Later')),
             ),
             FilledButton.icon(
               icon: const Icon(Icons.download_rounded, size: 18),
-              label: const Text('Update Now'),
+              label: Text(tr('Update Now')),
               style: FilledButton.styleFrom(
                 backgroundColor: C.peony,
                 foregroundColor: Colors.white,

@@ -394,8 +394,6 @@ class Prefs {
     this.notify = false,
     this.widgetHide = false,
     this.locale = 'en',
-    this.geminiApiKey = '',
-    this.asteriaMode = 'shared',
     this.discreetNotify = 'off',
   });
   final String accent; // kunci di `accents`
@@ -407,8 +405,6 @@ class Prefs {
   final List<String> places;
   final bool hrtCounter;
   final int dayStart; // menit sejak 00:00; hari "logis" mulai di jam ini
-  final String geminiApiKey;
-  final String asteriaMode; // 'shared' (Bintang Bersama) | 'personal' (Bintang Pribadi)
   final String discreetNotify; // 'off' | 'wellness' | 'minimal'
 
   String unitOf(String hormoneId) {
@@ -426,8 +422,6 @@ class Prefs {
     bool? notify,
     bool? widgetHide,
     String? locale,
-    String? geminiApiKey,
-    String? asteriaMode,
     String? discreetNotify,
   }) =>
       Prefs(
@@ -440,8 +434,6 @@ class Prefs {
         notify: notify ?? this.notify,
         widgetHide: widgetHide ?? this.widgetHide,
         locale: locale ?? this.locale,
-        geminiApiKey: geminiApiKey ?? this.geminiApiKey,
-        asteriaMode: asteriaMode ?? this.asteriaMode,
         discreetNotify: discreetNotify ?? this.discreetNotify,
       );
 
@@ -455,8 +447,6 @@ class Prefs {
         'notify': notify,
         'widgetHide': widgetHide,
         'locale': locale,
-        'geminiApiKey': geminiApiKey,
-        'asteriaMode': asteriaMode,
         'discreetNotify': discreetNotify,
       };
 
@@ -474,8 +464,6 @@ class Prefs {
         notify: m['notify'] ?? false,
         widgetHide: m['widgetHide'] ?? false,
         locale: m['locale'] ?? 'en',
-        geminiApiKey: m['geminiApiKey'] ?? '',
-        asteriaMode: m['asteriaMode'] ?? 'shared',
         discreetNotify: m['discreetNotify'] ?? 'off',
       );
 }

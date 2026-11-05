@@ -135,14 +135,48 @@ class Repo {
       data[n] = [for (final d in s.docs) {'id': d.id, ...d.data()}];
     }
     return const JsonEncoder.withIndent('  ', _enc).convert({
-      'metadata': {'app': 'ritme', 'version': 1, 'exported_at': DateTime.now().toIso8601String()},
+      // Kompatibilitas cadangan: mendukung tanda pengenal Lunera dan 'ritme' untuk backup lama.
+      'metadata': {'app': 'lunera', 'legacy_app': 'ritme', 'version': 1, 'exported_at': DateTime.now().toIso8601String()},
       'data': data,
     });
   }
 
+  static bool _isValidDate(dynamic d) {
+    if (d == null) return false;
+    if (d is Timestamp || d is DateTime) return true;
+    if (d is String) return DateTime.tryParse(d) != null;
+    if (d is Map && d.containsKey(r'$ts')) {
+      final ts = d[r'$ts'];
+      return ts is String && DateTime.tryParse(ts) != null;
+    }
+    return false;
+  }
+
+  static bool _isValidRow(String col, Map r) {
+    switch (col) {
+      case 'therapies':
+        return r['name'] is String && r['hormoneId'] is String;
+      case 'logs':
+        return r['therapyId'] is String && _isValidDate(r['at']);
+      case 'labs':
+        return r['hormoneId'] is String && _isValidDate(r['at']) && (r['value'] is num || num.tryParse('${r['value']}') != null);
+      case 'supplies':
+        return r['name'] is String && (r['qty'] is num || num.tryParse('${r['qty']}') != null);
+      case 'journal':
+      case 'measurements':
+        return _isValidDate(r['at']);
+      case 'targets':
+        return (r['low'] is num || num.tryParse('${r['low']}') != null) &&
+            (r['high'] is num || num.tryParse('${r['high']}') != null);
+      default:
+        return true;
+    }
+  }
+
   /// Memeriksa isi cadangan. Mengembalikan jumlah catatan, atau melempar FormatException.
   int validate(dynamic raw) {
-    if (raw is! Map || raw['metadata'] is! Map || raw['data'] is! Map || raw['metadata']['app'] != 'ritme') {
+    final app = (raw is Map && raw['metadata'] is Map) ? raw['metadata']['app'] : null;
+    if (raw is! Map || raw['metadata'] is! Map || raw['data'] is! Map || (app != 'lunera' && app != 'ritme')) {
       throw FormatException(tr('This is not a Lunera backup file.'));
     }
     var n = 0;
@@ -151,7 +185,9 @@ class Repo {
       if (rows == null) continue;
       if (rows is! List) throw FormatException(tr('The "{0}" section is invalid.', [k]));
       for (final r in rows) {
-        if (r is! Map || r['id'] is! String) throw FormatException(tr('The "{0}" section is corrupted.', [k]));
+        if (r is! Map || r['id'] is! String || !_isValidRow(k, r)) {
+          throw FormatException(tr('The "{0}" section is corrupted.', [k]));
+        }
       }
       n += rows.length;
     }
@@ -173,6 +209,10 @@ class Repo {
       for (final r in (raw['data'][n] as List? ?? const [])) {
         final row = _dec(r) as Map<String, dynamic>;
         final id = row.remove('id') as String;
+        if (n == 'prefs') {
+          row.remove('geminiApiKey');
+          row.remove('asteriaMode');
+        }
         ops.add((b) => b.set(_c(n).doc(id), row));
       }
     }

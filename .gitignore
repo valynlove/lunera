@@ -16,6 +16,10 @@ all_strings.txt
 # Local Environment & Secret Configuration
 local.properties
 **/android/local.properties
+key.properties
+**/android/key.properties
+*.jks
+*.keystore
 .artifacts/
 
 # IntelliJ / Android Studio related
