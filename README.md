@@ -4,14 +4,15 @@
 
 <img src="docs/images/logo.png" alt="Lunera Logo" width="130" style="border-radius: 28px;" />
 
-### *Every Phase, Your Own.*
+### _Every Phase, Your Own._
+
 **A Gentle, Elegant & Privacy-Focused Personal Health & Therapy Tracker**
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.22+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.3+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.11.13-6C5CE7.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.0.0-6C5CE7.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Download Latest APK](https://github.com/valynlove/lunera/releases/latest) • [📋 Changelog](CHANGELOG.md)
 
@@ -44,28 +45,30 @@
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Framework** | Flutter (Stable Channel) |
-| **Language** | Dart 3 |
-| **State Management** | Riverpod (`flutter_riverpod`) |
-| **Backend & Cloud** | Firebase Core, Firebase Auth, Cloud Firestore |
-| **Data Visualization** | `fl_chart` |
-| **Local Notifications** | `flutter_local_notifications`, `timezone`, `flutter_timezone` |
-| **Hardware & Security** | `local_auth` (Biometrics), `shared_preferences` |
-| **CI / CD Automation** | GitHub Actions (Auto APK Compilation & GitHub Release) |
-| **Landing Page** | HTML5, Modern CSS3, Vanilla JavaScript (GitHub Pages in `/docs`) |
+| Layer                   | Technology                                                       |
+| :---------------------- | :--------------------------------------------------------------- |
+| **Framework**           | Flutter (Stable Channel)                                         |
+| **Language**            | Dart 3                                                           |
+| **State Management**    | Riverpod (`flutter_riverpod`)                                    |
+| **Backend & Cloud**     | Firebase Core, Firebase Auth, Cloud Firestore                    |
+| **Data Visualization**  | `fl_chart`                                                       |
+| **Local Notifications** | `flutter_local_notifications`, `timezone`, `flutter_timezone`    |
+| **Hardware & Security** | `local_auth` (Biometrics), `shared_preferences`                  |
+| **CI / CD Automation**  | GitHub Actions (Auto APK Compilation & GitHub Release)           |
+| **Landing Page**        | HTML5, Modern CSS3, Vanilla JavaScript (GitHub Pages in `/docs`) |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (>= 3.3.0)
 - [Android Studio](https://developer.android.com/studio) or VS Code
 - Firebase Project configured with Authentication and Cloud Firestore
 
 ### Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/valynlove/lunera.git

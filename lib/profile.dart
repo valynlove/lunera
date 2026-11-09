@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,10 +11,19 @@ import 'theme.dart';
 
 /// Keadaan profil pengguna: nama panggilan dan foto profil.
 class ProfileState {
-  const ProfileState({this.nickname, this.photo});
+  const ProfileState({this.nickname, this.photo, this.photoImage});
+
+  factory ProfileState.withImage({String? nickname, Uint8List? photo}) => ProfileState(
+        nickname: nickname,
+        photo: photo,
+        photoImage: photo == null ? null : MemoryImage(photo),
+      );
 
   final String? nickname;
   final Uint8List? photo;
+  final MemoryImage? photoImage;
+
+  MemoryImage? get effectiveImage => photoImage ?? (photo == null ? null : MemoryImage(photo!));
 }
 
 /// Di-override di ProviderScope pada main.dart dengan instance SharedPreferences.
@@ -42,7 +51,7 @@ class ProfileController extends Notifier<ProfileState> {
     // Sinkronkan dari awan di latar belakang jika ada data yang lebih baru
     Future.microtask(() => restoreFromCloud(user.uid));
 
-    return ProfileState(
+    return ProfileState.withImage(
       nickname: p.getString(_nickKey(user.uid)),
       photo: b64 == null ? null : base64Decode(b64),
     );
@@ -62,7 +71,7 @@ class ProfileController extends Notifier<ProfileState> {
       await p.setString(_nickKey(uid), nick);
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
-    state = ProfileState(nickname: nick.isEmpty ? null : nick, photo: state.photo);
+    state = ProfileState.withImage(nickname: nick.isEmpty ? null : nick, photo: state.photo);
     await uploadToCloud(uid);
   }
 
@@ -77,7 +86,7 @@ class ProfileController extends Notifier<ProfileState> {
       await p.setString(_photoKey(uid), base64Encode(bytes));
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
-    state = ProfileState(nickname: state.nickname, photo: bytes);
+    state = ProfileState.withImage(nickname: state.nickname, photo: bytes);
     await uploadToCloud(uid);
   }
 
@@ -86,6 +95,7 @@ class ProfileController extends Notifier<ProfileState> {
 
   /// Unggah profil ke cloud Firestore
   Future<void> uploadToCloud(String uid) async {
+    Repo.scheduleDebounceSync();
     try {
       final p = ref.read(sharedPreferencesProvider);
       await _doc(uid).set({
@@ -120,7 +130,7 @@ class ProfileController extends Notifier<ProfileState> {
         await p.setString(_photoKey(uid), photo);
       }
       await p.setInt(_updatedKey(uid), remoteAt);
-      state = ProfileState(
+      state = ProfileState.withImage(
         nickname: nick,
         photo: photo == null ? null : base64Decode(photo),
       );
@@ -143,24 +153,32 @@ final displayNameProvider = Provider<String?>((ref) {
   return local[0].toUpperCase() + local.substring(1);
 });
 
-/// Widget avatar pengguna dengan dukungan foto dan inisial teks.
+/// Widget avatar pengguna dengan bingkai celestial Arcane Astral dan dukungan foto / inisial teks.
 class UserAvatar extends ConsumerWidget {
-  const UserAvatar({super.key, this.size = 48, this.onTap});
+  const UserAvatar({
+    super.key,
+    this.size = 48,
+    this.onTap,
+    this.heroTag,
+    this.showFrame = true,
+  });
 
   final double size;
   final VoidCallback? onTap;
+  final String? heroTag;
+  final bool showFrame;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final photo = ref.watch(profileProvider.select((s) => s.photo));
+    final photoImage = ref.watch(profileProvider.select((s) => s.effectiveImage));
     final name = ref.watch(displayNameProvider) ?? appName;
     final initial = (name.isEmpty ? appName.substring(0, 1) : String.fromCharCode(name.runes.first)).toUpperCase();
 
-    final avatar = CircleAvatar(
+    Widget avatar = CircleAvatar(
       radius: size / 2,
       backgroundColor: C.peony,
-      backgroundImage: photo == null ? null : MemoryImage(photo),
-      child: photo == null
+      backgroundImage: photoImage,
+      child: photoImage == null
           ? Text(
               initial,
               style: display(size * 0.42, color: Colors.white, weight: FontWeight.w800),
@@ -168,11 +186,50 @@ class UserAvatar extends ConsumerWidget {
           : null,
     );
 
+    if (showFrame) {
+      final frameSize = size * 1.35;
+      avatar = SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            avatar,
+            Positioned(
+              width: frameSize,
+              height: frameSize,
+              child: IgnorePointer(
+                child: Image.asset(
+                  'assets/images/avatar_frame_celestial.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (heroTag != null) {
+      avatar = Hero(tag: heroTag!, child: avatar);
+    }
+
     if (onTap == null) return avatar;
-    return InkWell(
-      customBorder: const CircleBorder(),
-      onTap: onTap,
-      child: avatar,
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.none,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap!();
+        },
+        child: avatar,
+      ),
     );
   }
 }

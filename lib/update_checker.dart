@@ -45,7 +45,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.11.13';
+  static const currentVersion = '2.0.0';
 
   static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
 
@@ -204,7 +204,7 @@ class UpdateCheckerService {
     }
   }
 
-  /// Menampilkan dialog pembaruan aplikasi berestetika Midnight UI.
+  /// Menampilkan dialog pembaruan aplikasi berestetika Arcane Astral & Midnight UI.
   static void showUpdateDialog(BuildContext context, AppUpdateInfo info) {
     _isShowingDialog = true;
     showDialog<void>(
@@ -212,109 +212,222 @@ class UpdateCheckerService {
       barrierDismissible: true,
       builder: (ctx) {
         final dark = Theme.of(ctx).brightness == Brightness.dark;
-        return AlertDialog(
-          backgroundColor: dark ? C.deepCard : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: C.peony.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+              decoration: BoxDecoration(
+                color: dark ? C.deepCard : Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: const Color(0xFFD6B277).withValues(alpha: dark ? 0.38 : 0.25),
+                  width: 1.2,
                 ),
-                child: Icon(
-                  Icons.rocket_launch_rounded,
-                  color: C.peony,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tr('Update Available!'),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                boxShadow: [
+                  BoxShadow(
+                    color: (dark ? const Color(0xFF060412) : Colors.black12).withValues(alpha: 0.45),
+                    blurRadius: 32,
+                    offset: const Offset(0, 10),
+                  ),
+                  if (dark)
+                    BoxShadow(
+                      color: C.peony.withValues(alpha: 0.15),
+                      blurRadius: 30,
+                      spreadRadius: -4,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'v${info.currentVersion} ➔ v${info.latestVersion}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.65),
-                        fontWeight: FontWeight.w600,
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Row with Glowing Emblem and Titles
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              C.peony.withValues(alpha: 0.32),
+                              const Color(0xFFF1BA79).withValues(alpha: 0.18),
+                              Colors.transparent,
+                            ],
+                          ),
+                          border: Border.all(
+                            color: const Color(0xFFD6B277).withValues(alpha: 0.48),
+                            width: 1.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: C.peony.withValues(alpha: 0.25),
+                              blurRadius: 16,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            color: dark ? const Color(0xFFF1BA79) : C.peony,
+                            size: 26,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tr('A new version of Lunera is ready with the latest improvements:'),
-                style: const TextStyle(fontSize: 13, height: 1.4),
-              ),
-              const SizedBox(height: 12),
-              if (info.releaseNotes.isNotEmpty)
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 180),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: dark ? C.midnight : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: C.peony.withValues(alpha: 0.25),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tr('Update Available!'),
+                              style: display(21, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 4),
+                            // Version Pill
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: dark ? const Color(0xFF19143F).withValues(alpha: 0.8) : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Pastel.lilac.withValues(alpha: 0.32),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'v${info.currentVersion}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: dark ? Colors.white60 : Colors.black54,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 12,
+                                    color: Color(0xFFF1BA79),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'v${info.latestVersion}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: dark ? const Color(0xFFF1BA79) : C.peony,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    tr('A new version of Lunera is ready with the latest improvements:'),
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.45,
+                      color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.85),
                     ),
                   ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      info.releaseNotes,
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.45,
-                        color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.85),
+                  const SizedBox(height: 12),
+                  if (info.releaseNotes.isNotEmpty)
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 180),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: dark ? const Color(0xFF100C29) : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: const Color(0xFFD6B277).withValues(alpha: dark ? 0.25 : 0.18),
+                        ),
+                      ),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Text(
+                            info.releaseNotes,
+                            style: TextStyle(
+                              fontSize: 12,
+                              height: 1.5,
+                              color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.88),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
+                  const SizedBox(height: 10),
+                  Text(
+                    tr('Tap "Update Now" to download and install the new APK.'),
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontStyle: FontStyle.italic,
+                      color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.55),
+                    ),
                   ),
-                ),
-              const SizedBox(height: 10),
-              Text(
-                tr('Tap "Update Now" to download and install the new APK.'),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
-                  color: Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.55),
-                ),
+                  const SizedBox(height: 20),
+                  // Actions Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          backgroundColor: dark ? const Color(0xFF282057).withValues(alpha: 0.35) : Colors.grey.shade50,
+                          side: BorderSide(
+                            color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.18),
+                          ),
+                        ),
+                        child: Text(
+                          tr('Later'),
+                          style: TextStyle(
+                            color: dark ? Colors.white70 : C.midnight,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.download_rounded, size: 18),
+                        label: Text(
+                          tr('Update Now'),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: C.peony,
+                          foregroundColor: Colors.white,
+                          elevation: 3,
+                          shadowColor: C.peony.withValues(alpha: 0.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          openUrl(info.downloadUrl);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          actionsAlignment: MainAxisAlignment.end,
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(tr('Later')),
-            ),
-            FilledButton.icon(
-              icon: const Icon(Icons.download_rounded, size: 18),
-              label: Text(tr('Update Now')),
-              style: FilledButton.styleFrom(
-                backgroundColor: C.peony,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                openUrl(info.downloadUrl);
-              },
-            ),
-          ],
         );
       },
     ).whenComplete(() {

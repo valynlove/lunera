@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models.dart';
@@ -9,11 +10,11 @@ import 'body.dart';
 import '../l10n.dart';
 
 Color moodColor(String? k) => switch (k) {
-      'happy' => C.lagoon,
-      'calm' => Color.lerp(C.lagoon, Colors.white, .45)!,
-      'low' => C.amber,
-      'anxious' => const Color(0xFFE5675A),
-      _ => const Color(0xFF9A98B8),
+      'happy' => C.amber, // Celestial Honey Gold
+      'calm' => Pastel.mint, // Sage Astral Mint
+      'low' => const Color(0xFF8F88B6), // Muted slate violet
+      'anxious' => const Color(0xFFF87171), // Soft coral red
+      _ => Pastel.lilac, // Arcane Lilac
     };
 
 /// Daftar jurnal dengan penyaring, dipakai di tab Kalender.
@@ -219,7 +220,6 @@ class MoodQuickCard extends ConsumerWidget {
     final entries = ref.watch(journalProvider).value ?? <JournalEntry>[];
     final now = DateTime.now();
     final today = entries.where((e) => e.hasMood && sameDay(e.at, now)).toList()..sort((a, b) => b.at.compareTo(a.at));
-    final fg = Theme.of(context).colorScheme.onSurface;
 
     Widget card(Widget child) => Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -231,17 +231,21 @@ class MoodQuickCard extends ConsumerWidget {
     if (today.isNotEmpty) {
       final e = today.first, m = moods[e.mood]!;
       return card(InkWell(
-        onTap: () => showSheet(context, JournalSheet(initial: e)),
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          showSheet(context, JournalSheet(initial: e));
+        },
         child: Row(children: [
           Icon(m.$2, color: C.peony, size: 30),
           const SizedBox(width: 14),
-          Expanded(child: Text(tr('Today you feel {0}', [tr(m.$1).toLowerCase()]), style: const TextStyle(fontWeight: FontWeight.w600))),
-          Icon(Icons.edit_outlined, size: 18, color: fg.withValues(alpha: .5)),
+          Expanded(child: Text(tr('Today you feel {0}', [tr(m.$1).toLowerCase()]), style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white))),
+          Icon(Icons.edit_outlined, size: 18, color: Pastel.mist.withValues(alpha: .85)),
         ]),
       ));
     }
     return card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(tr('How are you feeling today?'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+      Text(tr('How are you feeling today?'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
       gap(6),
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         for (final m in moods.entries)
@@ -249,8 +253,11 @@ class MoodQuickCard extends ConsumerWidget {
             message: tr(m.value.$1),
             child: IconButton(
               iconSize: 30,
-              onPressed: () => showSheet(context, JournalSheet(presetMood: m.key)),
-              icon: Icon(m.value.$2, color: fg.withValues(alpha: .7)),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                showSheet(context, JournalSheet(presetMood: m.key));
+              },
+              icon: Icon(m.value.$2, color: Pastel.mist.withValues(alpha: .88)),
             ),
           ),
       ]),

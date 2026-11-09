@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../lock.dart';
 import '../theme.dart';
 import 'auth.dart';
@@ -58,48 +59,164 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
       ]);
 }
 
-/// Papan angka dengan penanda 6 titik.
+/// Papan angka dengan penanda 6 titik bertema celestial.
 class PinPad extends StatelessWidget {
-  const PinPad({super.key, required this.value, required this.onChanged, this.length = 6, this.onBio});
+  const PinPad({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.length = 6,
+    this.onBio,
+  });
+
   final String value;
   final ValueChanged<String> onChanged;
   final int length;
   final VoidCallback? onBio;
 
-  Widget _key(Widget child, VoidCallback? tap) => Padding(
-        padding: const EdgeInsets.all(7),
+  Widget _key({
+    required Widget child,
+    VoidCallback? tap,
+    Color? highlightColor,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: SizedBox(
-          width: 72,
-          height: 72,
+          width: 74,
+          height: 74,
           child: Material(
-            color: Colors.white.withValues(alpha: tap == null ? 0 : .1),
-            shape: const CircleBorder(),
-            child: InkWell(customBorder: const CircleBorder(), onTap: tap, child: Center(child: child)),
+            color: tap == null
+                ? Colors.transparent
+                : Colors.white.withValues(alpha: 0.08),
+            shape: CircleBorder(
+              side: BorderSide(
+                color: tap == null
+                    ? Colors.transparent
+                    : Colors.white.withValues(alpha: 0.12),
+                width: 1.0,
+              ),
+            ),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              splashColor: (highlightColor ?? Pastel.lilac).withValues(alpha: 0.25),
+              highlightColor: (highlightColor ?? Pastel.lilac).withValues(alpha: 0.15),
+              onTap: tap == null
+                  ? null
+                  : () {
+                      HapticFeedback.lightImpact();
+                      tap();
+                    },
+              child: Center(child: child),
+            ),
           ),
         ),
       );
 
-  Widget _digit(int d) => _key(Text('$d', style: display(26, color: Colors.white)), value.length < length ? () => onChanged('$value$d') : null);
+  static const _subLetters = ['', '', 'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ'];
+
+  Widget _digit(int d) {
+    final canTap = value.length < length;
+    final letters = d >= 0 && d < _subLetters.length ? _subLetters[d] : '';
+    return _key(
+      tap: canTap ? () => onChanged('$value$d') : null,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '$d',
+            style: display(28, color: Colors.white, weight: FontWeight.w600),
+          ),
+          if (letters.isNotEmpty)
+            Text(
+              letters,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                color: Colors.white.withValues(alpha: 0.40),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   @override
-  Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          for (var i = 0; i < length; i++)
-            Container(
-              width: 14,
-              height: 14,
-              margin: const EdgeInsets.symmetric(horizontal: 7),
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: i < value.length ? 1 : .25)),
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Indikator 6 Titik PIN Bersinar
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < length; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  width: i < value.length ? 16 : 14,
+                  height: i < value.length ? 16 : 14,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: i < value.length
+                        ? Pastel.lilac
+                        : Colors.white.withValues(alpha: 0.15),
+                    border: Border.all(
+                      color: i < value.length
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.35),
+                      width: i < value.length ? 1.5 : 1.0,
+                    ),
+                    boxShadow: i < value.length
+                        ? [
+                            BoxShadow(
+                              color: Pastel.lilac.withValues(alpha: 0.65),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+            ],
+          ),
+          gap(28),
+          for (final row in const [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+          ])
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [for (final d in row) _digit(d)],
             ),
-        ]),
-        gap(24),
-        for (final row in const [[1, 2, 3], [4, 5, 6], [7, 8, 9]]) Row(mainAxisSize: MainAxisSize.min, children: [for (final d in row) _digit(d)]),
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          _key(const Icon(Icons.fingerprint_rounded, color: Colors.white), onBio),
-          _digit(0),
-          _key(const Icon(Icons.backspace_outlined, color: Colors.white), value.isEmpty ? null : () => onChanged(value.substring(0, value.length - 1))),
-        ]),
-      ]);
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _key(
+                tap: onBio,
+                highlightColor: Pastel.mint,
+                child: Icon(
+                  Icons.fingerprint_rounded,
+                  color: onBio != null ? Pastel.mint : Colors.transparent,
+                  size: 30,
+                ),
+              ),
+              _digit(0),
+              _key(
+                tap: value.isEmpty ? null : () => onChanged(value.substring(0, value.length - 1)),
+                child: Icon(
+                  Icons.backspace_outlined,
+                  color: value.isNotEmpty
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : Colors.transparent,
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
 }
 
 class LockScreen extends StatefulWidget {
@@ -170,21 +287,109 @@ class _LockScreenState extends State<LockScreen> {
     return Theme(
       data: buildTheme(Brightness.dark),
       child: Scaffold(
-        body: NightScene(
+        body: AuthScene(
+          darken: true,
           child: SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  const MoonLogo(size: 64),
-                  gap(10),
-                  Text(appName, style: wordmark(30, color: Colors.white)),
-                  gap(26),
-                  Text(tr('Enter PIN'), style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 16)),
-                  gap(18),
-                  PinPad(value: pin, onChanged: _changed, onBio: Lock.instance.state.value.bio ? _bio : null),
-                  SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
-                  TextButton(onPressed: _forgot, child: Text(tr('Forgot PIN?'), style: const TextStyle(color: Colors.white70))),
-                ]),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.06),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Pastel.lilac.withValues(alpha: 0.25),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Pastel.lilac.withValues(alpha: 0.20),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: const MoonLogo(size: 64),
+                    ),
+                    gap(12),
+                    Text(appName, style: wordmark(32, color: Colors.white)),
+                    gap(8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.lock_rounded, size: 14, color: Pastel.lilac),
+                          const SizedBox(width: 6),
+                          Text(
+                            tr('Enter PIN'),
+                            style: TextStyle(
+                              color: Pastel.mist.withValues(alpha: 0.95),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    gap(28),
+                    PinPad(
+                      value: pin,
+                      onChanged: _changed,
+                      onBio: Lock.instance.state.value.bio ? _bio : null,
+                    ),
+                    gap(8),
+                    SizedBox(
+                      height: 38,
+                      child: msg == null
+                          ? null
+                          : Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0x33FF5722),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: const Color(0x66FF5722)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.error_outline_rounded, size: 15, color: Color(0xFFFF8A80)),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      msg!,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFFCDD2),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                    ),
+                    gap(10),
+                    TextButton.icon(
+                      onPressed: _forgot,
+                      icon: const Icon(Icons.help_outline_rounded, size: 16, color: Colors.white60),
+                      label: Text(
+                        tr('Forgot PIN?'),
+                        style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -366,7 +571,10 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             child: InkWell(
               borderRadius: BorderRadius.circular(24),
-              onTap: onTap,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onTap();
+              },
               onLongPress: onLongPress,
               child: Center(
                 child: icon ??
@@ -621,23 +829,85 @@ class _PinFlowState extends State<_PinFlow> {
   Widget build(BuildContext context) => Theme(
         data: buildTheme(Brightness.dark),
         child: Scaffold(
-          body: NightScene(
+          body: AuthScene(
+            darken: true,
             child: SafeArea(
-              child: Column(children: [
-                Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded, color: Colors.white))),
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text(widget.create ? (first == null ? tr('Create a 6-digit PIN') : tr('Repeat PIN')) : widget.title, style: display(26, color: Colors.white)),
-                        gap(24),
-                        PinPad(value: pin, onChanged: _changed),
-                        SizedBox(height: 40, child: msg == null ? null : Center(child: Text(msg!, style: const TextStyle(color: Color(0xFFFFB3C7))))),
-                      ]),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded, color: Colors.white),
                     ),
                   ),
-                ),
-              ]),
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.06),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Pastel.lilac.withValues(alpha: 0.25),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: const Icon(Icons.dialpad_rounded, size: 36, color: Pastel.lilac),
+                            ),
+                            gap(16),
+                            Text(
+                              widget.create
+                                  ? (first == null ? tr('Create a 6-digit PIN') : tr('Repeat PIN'))
+                                  : widget.title,
+                              textAlign: TextAlign.center,
+                              style: display(26, color: Colors.white),
+                            ),
+                            gap(28),
+                            PinPad(value: pin, onChanged: _changed),
+                            gap(8),
+                            SizedBox(
+                              height: 38,
+                              child: msg == null
+                                  ? null
+                                  : Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0x33FF5722),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: const Color(0x66FF5722)),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.error_outline_rounded, size: 15, color: Color(0xFFFF8A80)),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              msg!,
+                                              style: const TextStyle(
+                                                color: Color(0xFFFFCDD2),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

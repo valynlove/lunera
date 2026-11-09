@@ -28,11 +28,120 @@ void main() {
       expect(pk, isNotNull);
       expect(pk!.en, equals('Valerate'));
       expect(pk.name, isNotEmpty);
+      expect(pk.hormoneId, equals('estradiol'));
+
+      // Test testosterone and progesterone profiles
+      final tPk = pkOf('t_enanthate');
+      expect(tPk, isNotNull);
+      expect(tPk!.hormoneId, equals('testosterone'));
+      expect(tPk.oral, isFalse);
+
+      final mpaPk = pkOf('mpa_susp');
+      expect(mpaPk, isNotNull);
+      expect(mpaPk!.hormoneId, equals('progesterone'));
+      expect(mpaPk.oral, isFalse);
+
+      // Test pkProfilesFor helper
+      final tInjProfiles = pkProfilesFor('testosterone', 'inj');
+      expect(tInjProfiles.map((p) => p.id), containsAll(['t_enanthate', 't_cypionate', 't_propionate', 't_undecanoate']));
+
+      final p4InjProfiles = pkProfilesFor('progesterone', 'inj');
+      expect(p4InjProfiles.map((p) => p.id), contains('mpa_susp'));
 
       // Test mgOf
       expect(mgOf(500, 'mcg'), equals(0.5));
       expect(mgOf(1, 'g'), equals(1000));
       expect(mgOf(5, 'mg'), equals(5));
+    });
+
+    test('Combination medication Therapy serialization and dual intakesFor', () {
+      // Legacy therapy (backward compatibility)
+      final legacyMap = <String, dynamic>{
+        'hormoneId': 'estradiol',
+        'name': 'EV 4mg',
+        'dose': 4.0,
+        'doseUnit': 'mg',
+        'start': '2026-10-01T08:00:00.000',
+        'everyDays': 7,
+      };
+      final legacy = Therapy.from('t_legacy', legacyMap);
+      expect(legacy.secondaryHormoneId, isNull);
+      expect(legacy.secondaryDose, isNull);
+      expect(legacy.secondaryPk, isNull);
+
+      // Combination therapy (e.g. Cyclofem 5mg EC + 25mg MPA)
+      final cyclofem = Therapy(
+        id: 't_cyclo',
+        hormoneId: 'estradiol',
+        name: 'Cyclofem (EC + MPA)',
+        dose: 5.0,
+        doseUnit: 'mg',
+        start: DateTime(2026, 10, 1),
+        route: 'inj',
+        pk: 'e2_cyp_susp',
+        secondaryHormoneId: 'progesterone',
+        secondaryDose: 25.0,
+        secondaryDoseUnit: 'mg',
+        secondaryPk: 'mpa_susp',
+      );
+      final cycloMap = cyclofem.toMap();
+      expect(cycloMap['secondaryHormoneId'], equals('progesterone'));
+      expect(cycloMap['secondaryDose'], equals(25.0));
+      expect(cycloMap['secondaryPk'], equals('mpa_susp'));
+
+      final reconstructed = Therapy.from('t_cyclo', cycloMap);
+      expect(reconstructed.secondaryHormoneId, equals('progesterone'));
+      expect(reconstructed.secondaryDose, equals(25.0));
+      expect(reconstructed.secondaryPk, equals('mpa_susp'));
+
+      // Test single dose log generates intakes for BOTH hormones
+      final log = DoseLog(id: 'l1', therapyId: 't_cyclo', at: DateTime(2026, 10, 15, 10, 0));
+      final e2Intakes = intakesFor('estradiol', [cyclofem], [log]);
+      expect(e2Intakes.length, equals(1));
+      expect(e2Intakes.first.dose, equals(5.0));
+      expect(e2Intakes.first.pk.id, equals('e2_cyp_susp'));
+
+      final p4Intakes = intakesFor('progesterone', [cyclofem], [log]);
+      expect(p4Intakes.length, equals(1));
+      expect(p4Intakes.first.dose, equals(25.0));
+      expect(p4Intakes.first.pk.id, equals('mpa_susp'));
+
+      // Other hormones return empty
+      expect(intakesFor('testosterone', [cyclofem], [log]), isEmpty);
+    });
+
+    test('Compound presets catalog and compound field in Therapy', () {
+      // Test compoundsFor by category
+      final e2Compounds = compoundsFor('estradiol');
+      expect(e2Compounds.map((c) => c.en), containsAll(['Estradiol valerate', 'Estradiol cypionate', 'Estradiol enanthate']));
+
+      final tCompounds = compoundsFor('testosterone');
+      expect(tCompounds.map((c) => c.en), containsAll(['Testosterone enanthate', 'Testosterone cypionate', 'Testosterone undecanoate (Nebido)']));
+
+      final p4Compounds = compoundsFor('progesterone');
+      expect(p4Compounds.map((c) => c.en), containsAll(['Medroxyprogesterone acetate (MPA)', 'Micronized progesterone']));
+
+      final blockerCompounds = compoundsFor('blocker');
+      expect(blockerCompounds.map((c) => c.en), containsAll(['Cyproterone acetate (CPA)', 'Spironolactone', 'Bicalutamide']));
+
+      // Test presetOf for blocker
+      final blockerPreset = presetOf('blocker');
+      expect(blockerPreset.en, equals('Anti-androgen (Blocker)'));
+
+      // Test Therapy with compound serialization
+      final progynova = Therapy(
+        id: 't_prog',
+        hormoneId: 'estradiol',
+        name: 'Progynova 2mg',
+        dose: 2.0,
+        doseUnit: 'mg',
+        start: DateTime(2026, 10, 1),
+        compound: 'e2_val_oral',
+      );
+      final map = progynova.toMap();
+      expect(map['compound'], equals('e2_val_oral'));
+      final restored = Therapy.from('t_prog', map);
+      expect(restored.compound, equals('e2_val_oral'));
     });
 
     test('DoseLog handles skipped doses properly', () {
@@ -49,10 +158,11 @@ void main() {
       expect(reconstructed.skipped, isTrue);
     });
 
-    test('ProfileState model initialization', () {
+    test('ProfileState model initialization and caching', () {
       const emptyState = ProfileState();
       expect(emptyState.nickname, isNull);
       expect(emptyState.photo, isNull);
+      expect(emptyState.effectiveImage, isNull);
 
       final state = ProfileState(
         nickname: 'Lunaria',
@@ -61,6 +171,15 @@ void main() {
       expect(state.nickname, equals('Lunaria'));
       expect(state.photo, isNotNull);
       expect(state.photo!.length, equals(3));
+      expect(state.effectiveImage, isNotNull);
+
+      final withImgState = ProfileState.withImage(
+        nickname: 'Aria',
+        photo: Uint8List.fromList([4, 5, 6]),
+      );
+      expect(withImgState.nickname, equals('Aria'));
+      expect(withImgState.photoImage, isNotNull);
+      expect(withImgState.effectiveImage, equals(withImgState.photoImage));
     });
 
     test('JournalEntry serialization and mood scores', () {

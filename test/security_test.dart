@@ -6,15 +6,18 @@ import 'package:lunera/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('Lunera Security & Authentication Tests', () {
-    test('AppLockState default values and decoyCalculator', () {
+    test('AppLockState default values, decoyCalculator, and privacyShield', () {
       const state = AppLockState();
       expect(state.enabled, isFalse);
       expect(state.delayMin, equals(1));
       expect(state.decoyCalculator, isFalse);
+      expect(state.privacyShield, isFalse);
 
-      const decoyState = AppLockState(enabled: true, decoyCalculator: true);
-      expect(decoyState.decoyCalculator, isTrue);
+      const secureState = AppLockState(enabled: true, decoyCalculator: true, privacyShield: true);
+      expect(secureState.decoyCalculator, isTrue);
+      expect(secureState.privacyShield, isTrue);
     });
 
     test('Decoy calculator number formatting and candidate extraction logic', () {

@@ -143,7 +143,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
               }
             }),
             therapyId: t.id,
-            logs: ref.watch(logsProvider).value ?? <DoseLog>[],
+            logs: ref.watch(logsProvider).valueOrNull ?? <DoseLog>[],
             prefs: widget.prefs,
           )
         else
@@ -254,7 +254,13 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
   }
 }
 
-const _mols = [('estradiol', 'Estradiol'), ('testosterone', 'Testosterone'), ('progesterone', 'Progesterone'), ('other', 'Other medication')];
+const _mols = [
+  ('estradiol', 'Estradiol'),
+  ('testosterone', 'Testosterone'),
+  ('progesterone', 'Progesterone'),
+  ('blocker', 'Anti-androgen (Blocker)'),
+  ('other', 'Other medication'),
+];
 const _kinds = [('interval', 'Every N days'), ('weekly', 'Weekly'), ('monthly', 'Monthly'), ('asneeded', 'As needed')];
 
 /// Terapi baru, atau ubah [initial].
@@ -271,6 +277,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
   late String route = widget.initial?.route ?? 'inj';
   late String kind = widget.initial?.kind ?? 'interval';
   late String? pk = widget.initial == null ? 'e2_enanthate' : widget.initial!.pk;
+  late String? compound = widget.initial == null ? null : (widget.initial!.compound ?? 'custom');
   late String injType = widget.initial?.injType ?? 'im';
   late bool rolling = widget.initial?.rolling ?? true;
   late String? supplyId = widget.initial?.supplyId;
@@ -283,11 +290,53 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
   late final every = TextEditingController(text: '${widget.initial?.everyDays ?? 7}');
   late final monthDay = TextEditingController(text: '${widget.initial?.monthDay ?? 1}');
 
-  String? _defaultPk() => hormone == 'estradiol' ? (route == 'inj' ? 'e2_enanthate' : (route == 'oral' ? 'e2_oral' : null)) : null;
+  late bool isCombination = widget.initial?.secondaryHormoneId != null;
+  late String secondaryHormone = widget.initial?.secondaryHormoneId ?? (hormone == 'estradiol' ? 'progesterone' : 'estradiol');
+  late String? secondaryCompound = widget.initial?.secondaryHormoneId == null ? null : (widget.initial!.secondaryCompound ?? 'custom');
+  late final secondaryDose = TextEditingController(text: widget.initial?.secondaryDose == null ? '' : fmt(widget.initial!.secondaryDose!));
+  late final secondaryUnit = TextEditingController(text: widget.initial?.secondaryDoseUnit ?? 'mg');
+  late String? secondaryPk = widget.initial?.secondaryPk ?? (widget.initial?.secondaryHormoneId != null ? null : _defaultPk(widget.initial?.secondaryHormoneId ?? 'progesterone'));
+
+  String? _defaultPk([String? h]) {
+    final targetH = h ?? hormone;
+    return switch (targetH) {
+      'estradiol' => route == 'inj' ? 'e2_enanthate' : (route == 'oral' ? 'e2_oral' : null),
+      'testosterone' => route == 'inj' ? 't_enanthate' : (route == 'gel' ? 't_gel' : null),
+      'progesterone' => route == 'inj' ? 'mpa_susp' : (route == 'oral' ? 'p4_oral' : (route == 'supp' ? 'p4_rectal' : null)),
+      _ => null,
+    };
+  }
+
+  void _selectCompound(CompoundPreset c) {
+    setState(() {
+      compound = c.id;
+      route = c.defaultRoute;
+      pk = c.pk ?? _defaultPk();
+      if (name.text.trim().isEmpty || compoundPresets.any((p) => p.name == name.text.trim() || p.en == name.text.trim())) {
+        name.text = c.name;
+      }
+      if (dose.text.trim().isEmpty && c.defaultDose != null) {
+        dose.text = fmt(c.defaultDose!);
+        unit.text = c.defaultUnit;
+      }
+    });
+  }
+
+  void _selectSecondaryCompound(CompoundPreset c) {
+    setState(() {
+      secondaryCompound = c.id;
+      secondaryPk = c.pk ?? _defaultPk(secondaryHormone);
+      if (secondaryDose.text.trim().isEmpty && c.defaultDose != null) {
+        secondaryDose.text = fmt(c.defaultDose!);
+        secondaryUnit.text = c.defaultUnit;
+      }
+    });
+  }
 
   void _setRoute(String r) => setState(() {
         route = r;
         pk = _defaultPk();
+        if (isCombination) secondaryPk = _defaultPk(secondaryHormone);
         if (widget.initial == null) {
           every.text = switch (r) { 'inj' => '7', 'patch' => '3', 'implant' => '90', _ => '1' };
         }
@@ -307,6 +356,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
   void _save() {
     final d = parseNum(dose.text), e = int.tryParse(every.text) ?? 0, md = int.tryParse(monthDay.text) ?? 0;
     if (d == null || d <= 0) return _err(tr('Enter a dose.'));
+    final secD = isCombination ? parseNum(secondaryDose.text) : null;
+    if (isCombination && (secD == null || secD <= 0)) {
+      return _err(tr('Enter a dose for the second active ingredient.'));
+    }
     if (kind == 'interval' && e < 1) return _err(tr('Repeat interval must be at least 1 day.'));
     if (kind == 'weekly' && weekdays.isEmpty) return _err(tr('Pick at least one day.'));
     if (kind == 'monthly' && (md < 1 || md > 31)) return _err(tr('Day must be 1 to 31.'));
@@ -323,12 +376,18 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
       rolling: kind == 'interval' && e > 1 && rolling,
       supplyId: supplyId,
       route: route,
-      pk: hormone == 'estradiol' ? pk : null,
+      pk: pk,
       kind: kind,
       weekdays: weekdays,
       monthDay: md < 1 ? 1 : md,
       times: kind == 'asneeded' ? const ['09:00'] : times,
       injType: route == 'inj' ? injType : null,
+      secondaryHormoneId: isCombination ? secondaryHormone : null,
+      secondaryDose: isCombination ? secD : null,
+      secondaryDoseUnit: isCombination ? (secondaryUnit.text.trim().isEmpty ? 'mg' : secondaryUnit.text.trim()) : null,
+      secondaryPk: isCombination ? secondaryPk : null,
+      compound: (compound == null || compound == 'custom') ? null : compound,
+      secondaryCompound: isCombination ? ((secondaryCompound == null || secondaryCompound == 'custom') ? null : secondaryCompound) : null,
     );
     final repo = ref.read(repoProvider);
     if (widget.initial == null) {
@@ -352,40 +411,176 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(editing ? tr('Edit therapy') : tr('New therapy'), style: display(28)),
       gap(16),
-      Wrap(spacing: 8, runSpacing: 4, children: [
-        for (final m in _mols)
-          ChoiceChip(
-            label: Text(tr(m.$2)),
-            selected: hormone == m.$1,
-            onSelected: (_) => setState(() {
-              hormone = m.$1;
+      DropdownButtonFormField<String>(
+        key: ValueKey('hormone-$hormone'),
+        initialValue: hormone,
+        dropdownColor: C.deepCard,
+        borderRadius: BorderRadius.circular(16),
+        isExpanded: true,
+        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+        decoration: InputDecoration(
+          labelText: tr('Therapy category'),
+          prefixIcon: const Icon(Icons.category_outlined, size: 20, color: C.lavender),
+        ),
+        items: [
+          for (final m in _mols)
+            DropdownMenuItem<String>(
+              value: m.$1,
+              child: Text(
+                tr(m.$2),
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+        ],
+        onChanged: (val) {
+          if (val != null && val != hormone) {
+            setState(() {
+              hormone = val;
+              compound = null;
               pk = _defaultPk();
-            }),
+              if (secondaryHormone == hormone) {
+                secondaryHormone = hormone == 'estradiol' ? 'progesterone' : 'estradiol';
+                secondaryCompound = null;
+                secondaryPk = _defaultPk(secondaryHormone);
+              }
+            });
+          }
+        },
+      ),
+      Builder(builder: (context) {
+        final available = compoundsFor(hormone);
+        if (available.isEmpty) return const SizedBox.shrink();
+        final selectedVal = (compound != null && (compound == 'custom' || available.any((c) => c.id == compound))) ? compound : null;
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: DropdownButtonFormField<String>(
+            key: ValueKey('$hormone-$compound'),
+            initialValue: selectedVal,
+            dropdownColor: C.deepCard,
+            borderRadius: BorderRadius.circular(16),
+            isExpanded: true,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+            hint: Text(tr('Select active compound'), style: const TextStyle(fontSize: 14)),
+            decoration: InputDecoration(
+              labelText: tr('Active compound'),
+              prefixIcon: const Icon(Icons.science_outlined, size: 20, color: C.lavender),
+            ),
+            items: [
+              for (final c in available)
+                DropdownMenuItem<String>(
+                  value: c.id,
+                  child: Text(
+                    c.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              DropdownMenuItem<String>(
+                value: 'custom',
+                child: Text(
+                  tr('Custom / Other'),
+                  style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                ),
+              ),
+            ],
+            onChanged: (val) {
+              if (val == null || val == 'custom') {
+                setState(() => compound = 'custom');
+              } else {
+                final c = available.firstWhere((item) => item.id == val);
+                _selectCompound(c);
+              }
+            },
           ),
-      ]),
-      gap(8),
-      Text(tr('How it\'s taken')),
-      Wrap(spacing: 8, runSpacing: 4, children: [
-        for (final r in routes) ChoiceChip(avatar: Icon(r.icon, size: 16), label: Text(r.label), selected: route == r.id, onSelected: (_) => _setRoute(r.id)),
-      ]),
-      if (hormone == 'estradiol' && (route == 'inj' || route == 'oral')) ...[
-        gap(8),
-        Text(route == 'oral' ? tr('Level simulation profile:') : tr('Estradiol ester (for level simulation):')),
-        Wrap(spacing: 8, runSpacing: 4, children: [
-          for (final p in pkProfiles.where((p) => p.oral == (route == 'oral')))
-            ChoiceChip(label: Text(p.name), selected: pk == p.id, onSelected: (_) => setState(() => pk = p.id)),
-          ChoiceChip(label: Text(tr('No simulation')), selected: pk == null, onSelected: (_) => setState(() => pk = null)),
-        ]),
-      ],
-      if (route == 'inj') ...[
-        gap(8),
-        Wrap(spacing: 8, children: [
-          ChoiceChip(label: Text(tr('Intramuscular (IM)')), selected: injType == 'im', onSelected: (_) => setState(() => injType = 'im')),
-          ChoiceChip(label: Text(tr('Subcutaneous (SC)')), selected: injType == 'sc', onSelected: (_) => setState(() => injType = 'sc')),
-        ]),
-      ],
+        );
+      }),
       gap(12),
-      TextField(controller: name, decoration: InputDecoration(labelText: hormone == 'other' ? tr('Medication name') : tr('Medication name (e.g. {0} valerate)', [presetOf(hormone).name]))),
+      TextField(
+        controller: name,
+        decoration: InputDecoration(
+          labelText: tr('Product / medication name'),
+          hintText: tr('e.g. brand on packaging (Progynova, Cyclofem, Androcur)'),
+          helperText: tr('You can enter your packaging brand or keep the compound name.'),
+        ),
+      ),
+      gap(12),
+      DropdownButtonFormField<String>(
+        key: ValueKey('route-$route'),
+        initialValue: route,
+        dropdownColor: C.deepCard,
+        borderRadius: BorderRadius.circular(16),
+        isExpanded: true,
+        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+        decoration: InputDecoration(
+          labelText: tr('How it\'s taken'),
+          prefixIcon: Icon(routeOf(route).icon, size: 20, color: C.lavender),
+        ),
+        items: [
+          for (final r in routes)
+            DropdownMenuItem<String>(
+              value: r.id,
+              child: Row(
+                children: [
+                  Icon(r.icon, size: 18, color: C.lavender),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(tr(r.label), overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14))),
+                ],
+              ),
+            ),
+        ],
+        onChanged: (val) {
+          if (val != null) _setRoute(val);
+        },
+      ),
+      Builder(builder: (_) {
+        if (compound != null && compound != 'custom') return const SizedBox.shrink();
+        final matchingPk = pkProfilesFor(hormone, route);
+        if (matchingPk.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: DropdownButtonFormField<String?>(
+            key: ValueKey('pk-$hormone-$route-$pk'),
+            initialValue: pk,
+            dropdownColor: C.deepCard,
+            borderRadius: BorderRadius.circular(16),
+            isExpanded: true,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+            decoration: InputDecoration(
+              labelText: route == 'inj' ? tr('Ester / simulation profile ({0}):', [presetOf(hormone).name]) : tr('Simulation profile ({0}):', [presetOf(hormone).name]),
+              prefixIcon: const Icon(Icons.auto_graph_rounded, size: 20, color: C.lavender),
+            ),
+            items: [
+              for (final p in matchingPk)
+                DropdownMenuItem<String?>(value: p.id, child: Text(p.name, style: const TextStyle(fontSize: 14))),
+              DropdownMenuItem<String?>(value: null, child: Text(tr('No simulation'), style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic))),
+            ],
+            onChanged: (val) => setState(() => pk = val),
+          ),
+        );
+      }),
+      if (route == 'inj') ...[
+        gap(10),
+        DropdownButtonFormField<String>(
+          key: ValueKey('inj-$injType'),
+          initialValue: injType,
+          dropdownColor: C.deepCard,
+          borderRadius: BorderRadius.circular(16),
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+          decoration: InputDecoration(
+            labelText: tr('Injection method'),
+            prefixIcon: const Icon(Icons.vaccines_rounded, size: 20, color: C.lavender),
+          ),
+          items: [
+            DropdownMenuItem(value: 'im', child: Text(tr('Intramuscular (IM)'), style: const TextStyle(fontSize: 14))),
+            DropdownMenuItem(value: 'sc', child: Text(tr('Subcutaneous (SC)'), style: const TextStyle(fontSize: 14))),
+          ],
+          onChanged: (val) {
+            if (val != null) setState(() => injType = val);
+          },
+        ),
+      ],
       gap(10),
       Row(children: [
         Expanded(flex: 2, child: TextField(controller: dose, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Dose')))),
@@ -393,24 +588,193 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
         Expanded(child: TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit')))),
       ]),
       if (route == 'patch') ...[
+        gap(10),
+        DropdownButtonFormField<String>(
+          key: ValueKey('patchUnit-${unit.text.trim()}'),
+          initialValue: unit.text.trim() == 'mg' ? 'mg' : tr('µg/day'),
+          dropdownColor: C.deepCard,
+          borderRadius: BorderRadius.circular(16),
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+          decoration: InputDecoration(
+            labelText: tr('Dose unit type'),
+            prefixIcon: const Icon(Icons.layers_rounded, size: 20, color: C.lavender),
+          ),
+          items: [
+            DropdownMenuItem(value: 'mg', child: Text(tr('Mass dose (mg)'), style: const TextStyle(fontSize: 14))),
+            DropdownMenuItem(value: tr('µg/day'), child: Text(tr('Release rate (µg/day)'), style: const TextStyle(fontSize: 14))),
+          ],
+          onChanged: (val) {
+            if (val != null) setState(() => unit.text = val);
+          },
+        ),
+      ],
+      gap(8),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(tr('Combination medication')),
+        subtitle: Text(tr('Contains a 2nd active ingredient (e.g. Cyclofem with Estradiol + Progestin)')),
+        value: isCombination,
+        onChanged: (v) => setState(() {
+          isCombination = v;
+          if (v && secondaryPk == null) {
+            secondaryPk = _defaultPk(secondaryHormone);
+          }
+        }),
+      ),
+      if (isCombination) ...[
         gap(8),
-        Wrap(spacing: 8, children: [
-          for (final u in ['mg', tr('µg/day')])
-            ChoiceChip(
-              label: Text(u == 'mg' ? tr('Mass dose (mg)') : tr('Release rate (µg/day)')),
-              selected: unit.text.trim() == u,
-              onSelected: (_) => setState(() => unit.text = u),
+        DropdownButtonFormField<String>(
+          key: ValueKey('secHormone-$secondaryHormone'),
+          initialValue: secondaryHormone,
+          dropdownColor: C.deepCard,
+          borderRadius: BorderRadius.circular(16),
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+          decoration: InputDecoration(
+            labelText: tr('Second active category'),
+            prefixIcon: const Icon(Icons.biotech_outlined, size: 20, color: C.lavender),
+          ),
+          items: [
+            for (final m in _mols.where((m) => m.$1 != hormone && m.$1 != 'other'))
+              DropdownMenuItem<String>(
+                value: m.$1,
+                child: Text(
+                  tr(m.$2),
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+          ],
+          onChanged: (val) {
+            if (val != null && val != secondaryHormone) {
+              setState(() {
+                secondaryHormone = val;
+                secondaryCompound = null;
+                secondaryPk = _defaultPk(secondaryHormone);
+              });
+            }
+          },
+        ),
+        Builder(builder: (context) {
+          final secAvailable = compoundsFor(secondaryHormone);
+          if (secAvailable.isEmpty) return const SizedBox.shrink();
+          final secSelectedVal = (secondaryCompound != null && (secondaryCompound == 'custom' || secAvailable.any((c) => c.id == secondaryCompound))) ? secondaryCompound : null;
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: DropdownButtonFormField<String>(
+              key: ValueKey('$secondaryHormone-$secondaryCompound'),
+              initialValue: secSelectedVal,
+              dropdownColor: C.deepCard,
+              borderRadius: BorderRadius.circular(16),
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+              hint: Text(tr('Select active compound'), style: const TextStyle(fontSize: 14)),
+              decoration: InputDecoration(
+                labelText: tr('Second active compound'),
+                prefixIcon: const Icon(Icons.biotech_outlined, size: 20, color: C.lavender),
+              ),
+              items: [
+                for (final c in secAvailable)
+                  DropdownMenuItem<String>(
+                    value: c.id,
+                    child: Text(
+                      c.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                DropdownMenuItem<String>(
+                  value: 'custom',
+                  child: Text(
+                    tr('Custom / Other'),
+                    style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                  ),
+                ),
+              ],
+              onChanged: (val) {
+                if (val == null || val == 'custom') {
+                  setState(() => secondaryCompound = 'custom');
+                } else {
+                  final c = secAvailable.firstWhere((item) => item.id == val);
+                  _selectSecondaryCompound(c);
+                }
+              },
             ),
+          );
+        }),
+        gap(10),
+        Row(children: [
+          Expanded(
+            flex: 2,
+            child: TextField(
+              controller: secondaryDose,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: tr('{0} dose', [presetOf(secondaryHormone).name])),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: TextField(controller: secondaryUnit, decoration: InputDecoration(labelText: tr('Unit')))),
         ]),
+        Builder(builder: (_) {
+          if (secondaryCompound != null && secondaryCompound != 'custom') return const SizedBox.shrink();
+          final matchingSecPk = pkProfilesFor(secondaryHormone, route);
+          if (matchingSecPk.isEmpty) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: DropdownButtonFormField<String?>(
+              key: ValueKey('secPk-$secondaryHormone-$route-$secondaryPk'),
+              initialValue: secondaryPk,
+              dropdownColor: C.deepCard,
+              borderRadius: BorderRadius.circular(16),
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+              decoration: InputDecoration(
+                labelText: route == 'inj' ? tr('Ester / simulation profile ({0}):', [presetOf(secondaryHormone).name]) : tr('Simulation profile ({0}):', [presetOf(secondaryHormone).name]),
+                prefixIcon: const Icon(Icons.auto_graph_rounded, size: 20, color: C.lavender),
+              ),
+              items: [
+                for (final p in matchingSecPk)
+                  DropdownMenuItem<String?>(value: p.id, child: Text(p.name, style: const TextStyle(fontSize: 14))),
+                DropdownMenuItem<String?>(value: null, child: Text(tr('No simulation'), style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic))),
+              ],
+              onChanged: (val) => setState(() => secondaryPk = val),
+            ),
+          );
+        }),
       ],
       gap(14),
-      Text(tr('Schedule')),
-      Wrap(spacing: 8, runSpacing: 4, children: [
-        for (final k in _kinds) ChoiceChip(label: Text(tr(k.$2)), selected: kind == k.$1, onSelected: (_) => setState(() {
-              kind = k.$1;
+      DropdownButtonFormField<String>(
+        key: ValueKey('kind-$kind'),
+        initialValue: kind,
+        dropdownColor: C.deepCard,
+        borderRadius: BorderRadius.circular(16),
+        isExpanded: true,
+        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+        decoration: InputDecoration(
+          labelText: tr('Schedule repeat'),
+          prefixIcon: const Icon(Icons.event_repeat_rounded, size: 20, color: C.lavender),
+        ),
+        items: [
+          for (final k in _kinds)
+            DropdownMenuItem<String>(
+              value: k.$1,
+              child: Text(
+                tr(k.$2),
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+        ],
+        onChanged: (val) {
+          if (val != null) {
+            setState(() {
+              kind = val;
               if (kind == 'weekly' && weekdays.isEmpty) weekdays = [DateTime.now().weekday];
-            })),
-      ]),
+            });
+          }
+        },
+      ),
       if (kind == 'interval') ...[
         gap(8),
         TextField(

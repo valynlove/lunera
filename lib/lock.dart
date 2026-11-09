@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
@@ -72,10 +73,12 @@ class AppLockState {
     this.bio = false,
     this.delayMin = 1,
     this.decoyCalculator = false,
+    this.privacyShield = false,
   });
   final bool enabled, bio;
   final int delayMin; // kunci lagi setelah ditinggalkan sekian menit (0 = segera)
   final bool decoyCalculator; // samarkan sebagai kalkulator fungsional
+  final bool privacyShield; // true = FLAG_SECURE aktif (sembunyikan preview app switcher dan cegah screenshot)
 }
 
 typedef LockState = AppLockState;
@@ -89,6 +92,20 @@ class Lock {
 
   static const int maxAttempts = 5;
   static const Duration lockoutDuration = Duration(seconds: 30);
+  static const _channel = MethodChannel('com.example.ritme/app_utils');
+
+  /// Atur perlindungan layar (FLAG_SECURE) ke native Android.
+  /// Pada debug mode, otomatis dilewati agar developer tetap bisa mengambil tangkapan layar untuk testing.
+  static Future<void> setSecureScreen(bool enabled, {bool forceInDebug = false}) async {
+    if (kIsWeb) return;
+    if (kDebugMode && enabled && !forceInDebug) {
+      debugPrint('[Lock] Privacy Shield is bypassed in debug mode to allow screenshots');
+      return;
+    }
+    try {
+      await _channel.invokeMethod('setSecureScreen', {'secure': enabled});
+    } catch (_) {}
+  }
 
   final state = ValueNotifier<AppLockState>(const AppLockState());
   bool sessionUnlocked = false; // sudah dibuka di proses ini (bertahan saat aplikasi dibangun ulang karena ganti bahasa)
@@ -134,6 +151,9 @@ class Lock {
   Future<void> load() async {
     _p = await SharedPreferences.getInstance();
     _emit();
+    if (state.value.privacyShield) {
+      await setSecureScreen(true);
+    }
     final uid = _uid;
     if (uid != null) {
       syncWithCloud(uid);
@@ -148,6 +168,7 @@ class Lock {
       bio: p.getBool('lock.bio') ?? false,
       delayMin: p.getInt('lock.delay') ?? 1,
       decoyCalculator: p.getBool('lock.decoy') ?? false,
+      privacyShield: p.getBool('lock.privacyShield') ?? false,
     );
   }
 
@@ -216,9 +237,19 @@ class Lock {
 
   Future<void> disable() async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    for (final k in const ['lock.salt', 'lock.hash', 'lock.bio', 'lock.decoy', 'lock.updatedAt', 'lock.fails', 'lock.until']) {
+    for (final k in const [
+      'lock.salt',
+      'lock.hash',
+      'lock.bio',
+      'lock.decoy',
+      'lock.privacyShield',
+      'lock.updatedAt',
+      'lock.fails',
+      'lock.until'
+    ]) {
       await _p?.remove(k);
     }
+    await setSecureScreen(false);
     _emit();
 
     final uid = _uid;
@@ -232,6 +263,12 @@ class Lock {
         debugPrint('Lock cloud sync disable failed: $e');
       }
     }
+  }
+
+  Future<void> setPrivacyShield(bool v) async {
+    await _p?.setBool('lock.privacyShield', v);
+    await setSecureScreen(v);
+    _emit();
   }
 
   Future<void> setBio(bool v) async {

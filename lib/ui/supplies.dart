@@ -19,21 +19,52 @@ class SuppliesPage extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(4, 6, 0, 10),
         child: Text(s, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)));
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
-      Row(children: [
-        Expanded(child: Text(tr('Supplies'), style: display(40))),
-        pillButton(
-          tr('Pickup'),
-          () => showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => const PickupAssistantSheet(),
+      Text(tr('Supplies'), style: display(40)),
+      const SizedBox(height: 14),
+      Row(
+        children: [
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () => showSheet(context, const SupplySheet()),
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: Text(tr('Add Supply')),
+              style: FilledButton.styleFrom(
+                backgroundColor: C.peony,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                elevation: 2,
+                shadowColor: C.peony.withValues(alpha: 0.35),
+              ),
+            ),
           ),
-          icon: Icons.local_shipping_rounded,
-        ),
-        const SizedBox(width: 8),
-        pillButton(tr('Add'), () => showSheet(context, const SupplySheet()), icon: Icons.add_rounded),
-      ]),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const PickupAssistantSheet(),
+              ),
+              icon: const Icon(Icons.local_shipping_outlined, size: 20),
+              label: Text(tr('Pickup Assistant')),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Pastel.lilac,
+                backgroundColor: const Color(0xFF19143F).withValues(alpha: 0.45),
+                side: BorderSide(
+                  color: const Color(0xFFD6B277).withValues(alpha: 0.35),
+                  width: 1.1,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+              ),
+            ),
+          ),
+        ],
+      ),
       gap(18),
       if (items.isEmpty)
         Padding(padding: const EdgeInsets.only(top: 40), child: Text(tr('No supplies yet. Track medication, syringes, needles, and other supplies here.')))

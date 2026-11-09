@@ -83,18 +83,20 @@ class _DataPageState extends ConsumerState<DataPage> {
   @override
   Widget build(BuildContext context) {
     final backups = ref.watch(backupsProvider).value ?? [];
+    final syncState = ref.watch(syncStateProvider);
+    final fg = Theme.of(context).colorScheme.onSurface;
     final fmtDate = DateFormat('d MMM y, HH:mm', L10n.code);
     return Scaffold(
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
             IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-            Expanded(child: Text('Data', style: display(32))),
+            Expanded(child: Text(tr('Data'), style: display(32))),
           ]),
           gap(12),
           _Panel(
             icon: Icons.wifi_off_rounded,
-            tag: 'Offline',
+            tag: tr('Offline'),
             title: tr('File on this device'),
             body: tr('Save all your data to a single JSON file, or restore from a file. No internet needed.'),
             actions: [
@@ -105,9 +107,42 @@ class _DataPageState extends ConsumerState<DataPage> {
           gap(14),
           _Panel(
             icon: Icons.cloud_done_rounded,
-            tag: 'Online',
+            tag: tr('Online'),
             title: tr('Cloud backup'),
             body: tr('Keep a copy of your data in your Firebase account. Useful for going back to an earlier state.'),
+            footer: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  if (syncState.status == SyncStatus.syncing) ...[
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: C.lagoon),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      tr('Syncing in background...'),
+                      style: TextStyle(fontSize: 12, color: C.lagoon, fontWeight: FontWeight.w600),
+                    ),
+                  ] else if (syncState.status == SyncStatus.synced && syncState.lastSynced != null) ...[
+                    Icon(Icons.check_circle_outline_rounded, size: 15, color: C.lagoon),
+                    const SizedBox(width: 6),
+                    Text(
+                      tr('All changes synced ({0})', [DateFormat('HH:mm').format(syncState.lastSynced!)]),
+                      style: TextStyle(fontSize: 12, color: C.lagoon, fontWeight: FontWeight.w600),
+                    ),
+                  ] else ...[
+                    Icon(Icons.cloud_queue_rounded, size: 15, color: fg.withValues(alpha: 0.5)),
+                    const SizedBox(width: 6),
+                    Text(
+                      tr('Auto-sync ready'),
+                      style: TextStyle(fontSize: 12, color: fg.withValues(alpha: 0.5)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
             actions: [
               pillButton(tr('Back up now'), busy ? () {} : () => _run(() async {
                     await ref.read(repoProvider)!.saveBackup();
@@ -141,10 +176,18 @@ class _DataPageState extends ConsumerState<DataPage> {
 }
 
 class _Panel extends StatelessWidget {
-  const _Panel({required this.icon, required this.tag, required this.title, required this.body, required this.actions});
+  const _Panel({
+    required this.icon,
+    required this.tag,
+    required this.title,
+    required this.body,
+    required this.actions,
+    this.footer,
+  });
   final IconData icon;
   final String tag, title, body;
   final List<Widget> actions;
+  final Widget? footer;
   @override
   Widget build(BuildContext context) {
     final fg = Theme.of(context).colorScheme.onSurface;
@@ -158,6 +201,7 @@ class _Panel extends StatelessWidget {
         ]),
         gap(10),
         Text(body),
+        if (footer != null) footer!,
         gap(16),
         Wrap(spacing: 10, runSpacing: 8, children: actions),
       ]),

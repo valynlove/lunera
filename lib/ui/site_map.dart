@@ -115,14 +115,17 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            PillTabs<int>(
-              items: [
-                (0, tr('Front')),
-                (1, tr('Back (Glutes)')),
-              ],
-              value: _view,
-              onChanged: (v) => setState(() => _view = v),
+            Expanded(
+              child: PillTabs<int>(
+                items: [
+                  (0, tr('Front')),
+                  (1, tr('Back (Glutes)')),
+                ],
+                value: _view,
+                onChanged: (v) => setState(() => _view = v),
+              ),
             ),
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
@@ -131,6 +134,7 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
                 border: Border.all(color: Colors.white10),
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(width: 8, height: 8, decoration: const BoxDecoration(color: Pastel.mint, shape: BoxShape.circle)),
                   const SizedBox(width: 5),
@@ -529,11 +533,10 @@ class SiteRotationSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prefs = ref.watch(prefsProvider).value ?? const Prefs();
-    final logs = ref.watch(logsProvider).value ?? <DoseLog>[];
+    final prefs = ref.watch(prefsProvider).valueOrNull ?? const Prefs();
+    final logs = ref.watch(logsProvider).valueOrNull ?? <DoseLog>[];
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+    return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

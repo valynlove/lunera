@@ -19,7 +19,7 @@ Setiap kali melakukan modifikasi kode, penambahan fitur, pembaruan UI, atau perb
 
 ### Aturan Penomoran Versi (Semantic Versioning)
 > [!IMPORTANT]
-> **Kebijakan Siklus Versi Aktif `v1.11.x`**: Untuk pembaruan rutin ke depan (perbaikan bug, penyesuaian UI, maupun fitur baru biasa), **cukup naikkan nomor patch `x` saja** (`1.11.(x+1)+B`). Nomor minor hanya boleh dinaikkan jika pengguna secara eksplisit menyebut atau meminta "big patch".
+> **Kebijakan Siklus Versi Aktif `v2.0.x`**: Untuk pembaruan rutin ke depan (perbaikan bug, penyesuaian UI, maupun fitur baru biasa), **cukup naikkan nomor patch `x` saja** (`2.0.(x+1)+B`). Nomor minor hanya boleh dinaikkan jika pengguna secara eksplisit menyebut atau meminta "big patch".
 
 - **Major Release (`(+1).0.0+B`)**: Perombakan arsitektur besar, perubahan skema database/backup tanpa backward-compatibility, atau perubahan fundamental pada alur aplikasi.
 - **Minor Release / Big Patch (`1.(Y+1).0+B`)**: Hanya dinaikkan jika pengguna secara eksplisit menyebut atau meminta "big patch".

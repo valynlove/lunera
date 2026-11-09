@@ -135,7 +135,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   toY: b.$3 ?? 0,
                   width: cycle > 14 ? 6 : 16,
                   borderRadius: BorderRadius.circular(6),
-                  color: b.$3 == null ? Colors.transparent : (b.$3! >= 3.5 ? C.lagoon : (b.$3! >= 2.5 ? fg.withValues(alpha: .4) : C.amber)),
+                  color: b.$3 == null ? Colors.transparent : (b.$3! >= 3.5 ? Pastel.mint : (b.$3! >= 2.5 ? fg.withValues(alpha: .4) : C.amber)),
                 ),
               ]),
           ],
@@ -160,7 +160,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
               ])),
               gap(10),
               Wrap(spacing: 8, runSpacing: 4, children: [
-                Chip(label: Text(tr('{0} taken', [taken])), side: BorderSide.none, backgroundColor: C.lagoon.withValues(alpha: .16)),
+                Chip(label: Text(tr('{0} taken', [taken])), side: BorderSide.none, backgroundColor: Pastel.mint.withValues(alpha: .18)),
                 Chip(label: Text(tr('{0} skipped', [skipped])), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07)),
                 Chip(label: Text(tr('{0} missed', [missed])), side: BorderSide.none, backgroundColor: C.amber.withValues(alpha: .18)),
               ]),

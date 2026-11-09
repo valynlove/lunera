@@ -68,25 +68,12 @@ class AppRoot extends ConsumerStatefulWidget {
 }
 
 class _AppRootState extends ConsumerState<AppRoot> {
-  static bool _shown = false; // layar pembuka tampil sekali per proses, termasuk saat bahasa berganti
-  bool minDone = _shown;
-
-  @override
-  void initState() {
-    super.initState();
-    if (_shown) return;
-    Future.delayed(const Duration(milliseconds: 2400), () {
-      _shown = true;
-      if (mounted) setState(() => minDone = true);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(userProvider.select((u) => u.isLoading));
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
-      child: minDone && !loading ? const AuthGate(key: ValueKey('gate')) : const SplashPage(key: ValueKey('splash')),
+      child: !loading ? const AuthGate(key: ValueKey('gate')) : const SplashPage(key: ValueKey('splash')),
     );
   }
 }
@@ -96,7 +83,7 @@ class AuthGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => ref.watch(userProvider).when(
         data: (u) => u == null ? const WelcomePage() : const LockGate(child: Shell()),
-        loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+        loading: () => const SplashPage(),
         error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
       );
 }

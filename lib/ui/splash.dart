@@ -1,72 +1,104 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../theme.dart';
 import '../l10n.dart';
+import '../theme.dart';
 
-/// Layar pembuka: langit malam, tagline, lalu logo dan nama di bawah.
-class SplashPage extends StatefulWidget {
+/// Minimal loading screen shown briefly while auth state resolves.
+class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
-  @override
-  State<SplashPage> createState() => _SplashPageState();
-}
-
-class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800))..forward();
-
-  Animation<double> _step(double a, double b) => CurvedAnimation(parent: _c, curve: Interval(a, b, curve: Curves.easeOutCubic));
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    final scene = _step(0, .35), tagline = _step(.25, .65), rule = _step(.55, .8), brand = _step(.65, 1);
     return Theme(
       data: buildTheme(Brightness.dark),
       child: Scaffold(
-        body: FadeTransition(
-          opacity: scene,
-          child: LakeScene(
-            child: SafeArea(
-              child: Stack(children: [
-                Align(
-                  alignment: const Alignment(0, -.12),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    FadeTransition(
-                      opacity: tagline,
-                      child: SlideTransition(
-                        position: Tween(begin: const Offset(0, .12), end: Offset.zero).animate(tagline),
-                        child: Text(
-                          tr('Every phase,\nyour own.'),
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.cormorantGaramond(fontSize: 40, height: 1.15, fontWeight: FontWeight.w400, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    gap(26),
-                    FadeTransition(opacity: rule, child: Container(width: 56, height: 1.5, color: Colors.white.withValues(alpha: .8))),
-                  ]),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 36),
-                    child: FadeTransition(
-                      opacity: brand,
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        const MoonLogo(size: 56),
-                        gap(8),
-                        Text(appName, style: wordmark(24, color: Colors.white)),
-                      ]),
-                    ),
+        backgroundColor: C.deep,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Cosmic backdrop
+            Image.asset(
+              'assets/images/arcane_astral_bg.jpg',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              errorBuilder: (_, __, ___) => const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF0F0E33), Color(0xFF14123A), Color(0xFF0B091E)],
                   ),
                 ),
-              ]),
+              ),
             ),
-          ),
+            // Atmospheric scrim
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF0F0E33).withValues(alpha: 0.62),
+                    const Color(0xFF14123A).withValues(alpha: 0.72),
+                    const Color(0xFF0B091E).withValues(alpha: 0.88),
+                  ],
+                  stops: const [0.0, 0.50, 1.0],
+                ),
+              ),
+            ),
+            // Centered logo + brand name + tagline
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          C.peony.withValues(alpha: 0.28),
+                          const Color(0xFFF1BA79).withValues(alpha: 0.14),
+                          Colors.transparent,
+                        ],
+                      ),
+                      border: Border.all(
+                        color: const Color(0xFFD6B277).withValues(alpha: 0.45),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: C.peony.withValues(alpha: 0.25),
+                          blurRadius: 36,
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: const Color(0xFFF1BA79).withValues(alpha: 0.18),
+                          blurRadius: 24,
+                        ),
+                      ],
+                    ),
+                    child: const Center(child: MoonLogo(size: 80)),
+                  ),
+                  const SizedBox(height: 28),
+                  Text(
+                    appName,
+                    style: wordmark(30, color: const Color(0xFFFCE3BD)),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    tr('Every Phase, Your Own.'),
+                    textAlign: TextAlign.center,
+                    style: display(
+                      18,
+                      color: Colors.white.withValues(alpha: 0.88),
+                      weight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

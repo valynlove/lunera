@@ -86,7 +86,12 @@ class WidgetSync {
   }
 
   static Future<void> _chart(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs) async {
-    final simIds = <String>{for (final t in ths) if (pkOf(t.pk) != null) t.hormoneId};
+    final simIds = <String>{
+      for (final t in ths) ...[
+        if (pkOf(t.pk) != null) t.hormoneId,
+        if (pkOf(t.secondaryPk) != null && t.secondaryHormoneId != null) t.secondaryHormoneId!,
+      ]
+    };
     String? hid;
     for (final h in simIds) {
       if (intakesFor(h, ths, logs).isNotEmpty) {

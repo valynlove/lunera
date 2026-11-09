@@ -63,6 +63,23 @@ void main() {
       };
       expect(() => repo.validate(corruptedData), throwsFormatException);
     });
+
+    test('SyncState model and debounce auto-sync queue transitions', () async {
+      const initial = SyncState();
+      expect(initial.status, equals(SyncStatus.idle));
+      expect(initial.lastSynced, isNull);
+      expect(initial.pendingCount, equals(0));
+
+      final syncing = initial.copyWith(
+        status: SyncStatus.syncing,
+        pendingCount: 2,
+      );
+      expect(syncing.status, equals(SyncStatus.syncing));
+      expect(syncing.pendingCount, equals(2));
+
+      Repo.scheduleDebounceSync();
+      expect(Repo.syncStateNotifier, isNotNull);
+    });
   });
 }
 

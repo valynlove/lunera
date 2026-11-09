@@ -7,53 +7,79 @@ const appName = 'Lunera';
 const tagline = 'Every Phase, Your Own.';
 
 class C {
-  static const ink = Color(0xFF1E1B4B);
-  static const mist = Color(0xFFF4F3FD);
-  static const amber = Color(0xFFF0B541);
-  static const deep = Color(0xFF0F122B);
-  static const deepCard = Color(0xFF16193E); // Velvet Midnight Surface
-  static const midnight = Color(0xFF0B0D21); // Atmospheric Canvas
-  static const lavender = Color(0xFFA997FF);
+  static const ink = Color(0xFF1E1742);
+  static const mist = Color(0xFFF4F1FD);
+  static const amber = Color(0xFFF1BA79); // Celestial Honey Gold (Arcane Astral)
+  static const gold = Color(0xFFF1BA79); // Celestial Gold alias
+  static const deep = Color(0xFF0F0C27); // Deep Astral Void
+  static const deepCard = Color(0xFF201A4B); // Velvet Arcane Surface
+  static const surface = deepCard; // Design token alias for theme standards
+  static const midnight = Color(0xFF120E2E); // Atmospheric Astral Canvas
+  static const lavender = Color(0xFFBCA5E8); // Soft Amethyst Lavender
+  static const indigo = Color(0xFF2C245E); // Mid-tone Slate Indigo
+  static const moonlight = Color(0xFFFCE3BD); // Starlight Cream Moonlight
 
-  static Color lagoon = const Color(0xFFA7F3D0); // aksen kedua (pastel mint)
-  static Color peony = const Color(0xFF7C6EE6); // aksen utama (celestial violet)
+  static Color lagoon = const Color(0xFFF1BA79); // aksen kedua (Celestial Honey Gold)
+  static Color peony = const Color(0xFF9E7CC6); // aksen utama (Mystical Amethyst)
 }
 
-/// Palet sentuhan pastel surgawi (Celestial Pastel) khas Lunera.
+/// Palet sentuhan pastel dan pendaran surgawi (Arcane Astral) khas Lunera.
 class Pastel {
-  static const lilac = Color(0xFFD8B4FE); // Moonlight Lilac: countdown, highlights, rilis aktif
-  static const rose = Color(0xFFFBCFE8); // Rose Quartz: suasana hati hangat, transisi tubuh
-  static const mint = Color(0xFFA7F3D0); // Sage Cloud Mint: dosis selesai, kepatuhan, stok aman
-  static const sky = Color(0xFFBAE6FD); // Periwinkle Twilight: ketenangan, kurva PK, titik lab
-  static const butter = Color(0xFFFEF08A); // Warm Butter Glow: pengingat stok, perhatian lembut
-  static const mist = Color(0xFFECE7FA); // Teks kontras lembut di atas permukaan gelap
-  static const glow = Color(0x33D8B4FE); // Efek pendaran lembut
+  static const lilac = Color(0xFFC4A1EC); // Arcane Lilac: countdown, highlights, rilis aktif
+  static const rose = Color(0xFFF7B5D5); // Rose Quartz: suasana hati hangat, transisi tubuh
+  static const mint = Color(0xFF8EE3C3); // Sage Astral Mint: dosis selesai, kepatuhan, within range
+  static const sky = Color(0xFFB5DCFD); // Periwinkle Twilight: ketenangan, kurva PK, titik lab
+  static const butter = Color(0xFFF1BA79); // Celestial Honey Gold: pengingat stok, bintang, perhatian lembut
+  static const cream = Color(0xFFFCE3BD); // Moonlight Cream: starlight peach, pendaran rembulan
+  static const mist = Color(0xFFEDE9FA); // Teks kontras lembut di atas permukaan gelap
+  static const glow = Color(0x339E7CC6); // Efek pendaran amethyst lembut
 }
 
 /// (nama, aksen kedua / pastel, aksen utama)
 const accents = <String, (String, Color, Color)>{
-  'lunera': ('Celestial Lilac & Mint', Color(0xFFA7F3D0), Color(0xFF7C6EE6)),
-  'rose': ('Rose Quartz & Peony', Color(0xFFFBCFE8), Color(0xFFD946EF)),
-  'lagoon': ('Lagoon Mint & Sky', Color(0xFFBAE6FD), Color(0xFF0D9488)),
+  'lunera': ('Arcane Astral & Honey Gold', Color(0xFFF1BA79), Color(0xFF9E7CC6)),
+  'rose': ('Rose Quartz & Peony', Color(0xFFF7B5D5), Color(0xFFD946EF)),
+  'lagoon': ('Lagoon Mint & Sky', Color(0xFFB5DCFD), Color(0xFF0D9488)),
   'solstice': ('Solstice Sunset & Gold', Color(0xFFFEF08A), Color(0xFFEA580C)),
 };
 
-void applyAccent(String id) {
-  final a = accents[id] ?? accents['lunera']!;
-  C.lagoon = a.$2;
-  C.peony = a.$3;
+void applyAccent([String? id]) {
+  // Selalu terkunci pada tema tunggal Arcane Astral
+  C.lagoon = const Color(0xFFF1BA79);
+  C.peony = const Color(0xFF9E7CC6);
 }
 
-TextStyle display(double size, {Color? color, FontWeight? weight}) => GoogleFonts.manrope(
+/// Warna representasi hormon sesuai palet Arcane Astral.
+Color hormoneColor(String hormoneId) {
+  switch (hormoneId.toLowerCase()) {
+    case 'progesterone':
+    case 'p4':
+      return C.amber; // Celestial Honey Gold (#F1BA79)
+    case 'testosterone':
+    case 't':
+      return Pastel.sky; // Periwinkle Twilight (#B5DCFD)
+    case 'estradiol':
+    case 'e2':
+    default:
+      return C.peony; // Mystical Amethyst (#9E7CC6)
+  }
+}
+
+TextStyle display(double size, {Color? color, FontWeight? weight}) => GoogleFonts.cormorantGaramond(
       fontSize: size,
-      fontWeight: weight ?? (size >= 40 ? FontWeight.w800 : FontWeight.w700),
-      height: 1.05,
-      letterSpacing: -size * 0.02,
+      fontWeight: weight ?? (size >= 36 ? FontWeight.w700 : FontWeight.w600),
+      height: 1.12,
+      letterSpacing: -size * 0.01,
       color: color,
     );
 
-TextStyle wordmark(double size, {Color? color}) =>
-    GoogleFonts.jost(fontSize: size, fontWeight: FontWeight.w300, letterSpacing: size * .14, height: 1, color: color);
+TextStyle wordmark(double size, {Color? color, FontWeight? weight}) => GoogleFonts.cinzel(
+      fontSize: size,
+      fontWeight: weight ?? FontWeight.w700,
+      letterSpacing: size * .10,
+      height: 1.05,
+      color: color,
+    );
 
 ThemeData buildTheme([Brightness b = Brightness.dark]) {
   const fg = Pastel.mist;
@@ -62,7 +88,7 @@ ThemeData buildTheme([Brightness b = Brightness.dark]) {
     secondary: C.lagoon,
     surface: C.deepCard,
     onSurface: fg,
-    outlineVariant: Colors.white.withValues(alpha: .08),
+    outlineVariant: const Color(0xFF45397A).withValues(alpha: .38),
   );
   final base = ThemeData(
     useMaterial3: true,
@@ -71,10 +97,10 @@ ThemeData buildTheme([Brightness b = Brightness.dark]) {
     scaffoldBackgroundColor: Colors.transparent,
   );
   return base.copyWith(
-    textTheme: GoogleFonts.figtreeTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
+    textTheme: GoogleFonts.manropeTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: fg.withValues(alpha: .06),
+      fillColor: const Color(0xFF282057).withValues(alpha: .45),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
     ),
     bottomSheetTheme: BottomSheetThemeData(
@@ -84,33 +110,54 @@ ThemeData buildTheme([Brightness b = Brightness.dark]) {
   );
 }
 
-/// Latar gradien seluruh aplikasi (Atmospheric Midnight Canvas).
+/// Latar seluruh aplikasi (Arcane Astral Wallpaper & Atmospheric Scrim).
 Widget appBackdrop(BuildContext context, Widget? child) {
-  return DecoratedBox(
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFF151838), Color(0xFF0B0D21)],
+  return Stack(
+    fit: StackFit.expand,
+    children: [
+      // 1. Wallpaper bawaan bertema Arcane Astral
+      Image.asset(
+        'assets/images/arcane_astral_bg.jpg',
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
       ),
-    ),
-    child: child,
+      // 2. Lapisan scrim peredup atmosferik agar kontras teks & kartu tetap tajam dan nyaman dibaca
+      DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFF19143F).withValues(alpha: 0.58),
+              const Color(0xFF110D2C).withValues(alpha: 0.72),
+              const Color(0xFF0B091E).withValues(alpha: 0.85),
+            ],
+            stops: const [0.0, 0.45, 1.0],
+          ),
+        ),
+      ),
+      // 3. Pohon antarmuka aplikasi utama
+      if (child != null) child,
+    ],
   );
 }
 
-/// Kartu: permukaan beludru malam dengan tepian bias rembulan dan bayangan halus.
+/// Kartu: permukaan beludru malam dengan bingkai bias emas rembulan tipis dan bayangan halus.
 BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = false}) {
   final t = Theme.of(c);
   return BoxDecoration(
     color: t.colorScheme.surface,
     borderRadius: BorderRadius.circular(radius),
     border: Border.all(
-      color: highlight ? Pastel.lilac.withValues(alpha: .35) : Colors.white.withValues(alpha: .08),
+      color: highlight
+          ? const Color(0xFFE8C589).withValues(alpha: 0.55)
+          : const Color(0xFFD6B277).withValues(alpha: 0.28),
       width: highlight ? 1.2 : 1.0,
     ),
     boxShadow: [
       BoxShadow(
-        color: (highlight ? C.peony : Colors.black).withValues(alpha: highlight ? .14 : .22),
+        color: (highlight ? C.amber : const Color(0xFF080618)).withValues(alpha: highlight ? .18 : .32),
         blurRadius: highlight ? 24 : 16,
         offset: const Offset(0, 4),
       ),
@@ -169,12 +216,20 @@ class PillTabs<T> extends StatelessWidget {
   }
 }
 
-/// Logo: bulan sabit dengan bintang.
+/// Logo: bulan sabit dengan bintang dan cincin orbit astrologi (Celestial Moon Emblem).
 class MoonLogo extends StatelessWidget {
   const MoonLogo({super.key, this.size = 72});
   final double size;
   @override
-  Widget build(BuildContext context) => SizedBox(width: size, height: size, child: CustomPaint(painter: _MoonPainter()));
+  Widget build(BuildContext context) => SizedBox(
+        width: size,
+        height: size,
+        child: Image.asset(
+          'assets/images/lunera_celestial_logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => CustomPaint(painter: _MoonPainter()),
+        ),
+      );
 }
 
 class MoonLogoSmall extends StatelessWidget {
@@ -182,7 +237,11 @@ class MoonLogoSmall extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(color: C.deep, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: C.deepCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFD6B277).withValues(alpha: .35)),
+        ),
         child: const MoonLogo(size: 28),
       );
 }
@@ -192,9 +251,9 @@ class _MoonPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / 48);
-    final paint = Paint()..color = const Color(0xFFE7E3FF);
+    final paint = Paint()..color = Pastel.cream;
     final ring = Paint()
-      ..color = const Color(0xFFE7E3FF).withValues(alpha: .85)
+      ..color = Pastel.lilac.withValues(alpha: .85)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.3
       ..strokeCap = StrokeCap.round;
@@ -234,6 +293,111 @@ class _MoonPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MoonPainter o) => false;
+}
+
+/// Bintang kompas astrologi 8-arah khas estetika Arcane Astral.
+class CompassStarPainter extends CustomPainter {
+  const CompassStarPainter({required this.color, this.glow = false});
+  final Color color;
+  final bool glow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2;
+
+    if (glow) {
+      final glowPaint = Paint()
+        ..color = color.withValues(alpha: 0.45)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      canvas.drawCircle(Offset(cx, cy), r * 0.75, glowPaint);
+    }
+
+    final path = Path();
+    const points = 8;
+    for (int i = 0; i < points * 2; i++) {
+      final angle = (i * math.pi / points) - math.pi / 2;
+      double radius;
+      if (i % 2 == 0) {
+        final isMajor = (i % 4 == 0);
+        radius = isMajor ? r : r * 0.58;
+      } else {
+        radius = r * 0.22;
+      }
+      final x = cx + radius * math.cos(angle);
+      final y = cy + radius * math.sin(angle);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, paint);
+
+    final centerDot = Paint()
+      ..color = Colors.white.withValues(alpha: 0.95)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(cx, cy), r * 0.12, centerDot);
+  }
+
+  @override
+  bool shouldRepaint(CompassStarPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.glow != glow;
+}
+
+/// Latar belakang atmosferik celestial kosmik untuk layar autentikasi dan kunci PIN (Arcane Astral & Scrim).
+class AuthScene extends StatelessWidget {
+  const AuthScene({super.key, required this.child, this.darken = false});
+
+  final Widget child;
+  final bool darken;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // 1. Gambar latar celestial kosmik
+        Image.asset(
+          'assets/images/arcane_astral_bg.jpg',
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+          errorBuilder: (_, __, ___) => const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF0F0E33), Color(0xFF14123A), Color(0xFF0B091E)],
+              ),
+            ),
+          ),
+        ),
+        // 2. Lapisan scrim atmosferik peredup agar teks & tombol tetap kontras dan nyaman dibaca
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                const Color(0xFF0F0E33).withValues(alpha: darken ? 0.68 : 0.38),
+                const Color(0xFF14123A).withValues(alpha: darken ? 0.76 : 0.50),
+                const Color(0xFF0B091E).withValues(alpha: darken ? 0.92 : 0.76),
+              ],
+              stops: const [0.0, 0.48, 1.0],
+            ),
+          ),
+        ),
+        // 3. Pohon antarmuka utama
+        child,
+      ],
+    );
+  }
 }
 
 /// Langit malam dengan bintang dan pegunungan, untuk layar masuk dan kunci.
@@ -276,10 +440,10 @@ class _NightPainter extends CustomPainter {
 
     canvas.drawPath(
         ridge([[0, 82], [140, 36], [260, 74], [430, 16], [620, 82], [790, 38], [990, 90], [1140, 50], [1320, 88], [1440, 62]]),
-        Paint()..color = const Color(0xFF1A1844));
+        Paint()..color = const Color(0xFF201A4B));
     canvas.drawPath(
         ridge([[0, 108], [180, 78], [330, 104], [550, 66], [750, 100], [990, 70], [1240, 102], [1440, 92]]),
-        Paint()..color = const Color(0xFF12112F));
+        Paint()..color = const Color(0xFF120E2E));
   }
 
   @override
@@ -295,6 +459,127 @@ Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
         child: SingleChildScrollView(child: w),
       ),
     );
+
+/// Kartu kontainer bergaya beludru malam dengan sudut membulat dan garis tepi halus sesuai tema Lunera.
+class AppCard extends StatelessWidget {
+  const AppCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.onTap,
+    this.highlight = false,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(22),
+      side: BorderSide(
+        color: highlight
+            ? const Color(0xFFE8C589).withValues(alpha: 0.55)
+            : const Color(0xFFD6B277).withValues(alpha: 0.28),
+        width: highlight ? 1.2 : 1.0,
+      ),
+    );
+
+    return Container(
+      decoration: ShapeDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        shape: shape,
+        shadows: [
+          BoxShadow(
+            color: (highlight ? C.peony : const Color(0xFF080618)).withValues(alpha: highlight ? .18 : .32),
+            blurRadius: highlight ? 24 : 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: shape,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// Judul section yang seragam di halaman pengaturan dan fitur (ala Wall o' Pay).
+class SectionHeader extends StatelessWidget {
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final String title;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                  letterSpacing: 0.2,
+                ),
+          ),
+          if (actionLabel != null && onAction != null)
+            InkWell(
+              onTap: onAction,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: Text(
+                  actionLabel!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: C.peony,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Badge ikon persegi membulat dengan aksen warna tematik (ala Wall o' Pay).
+Widget iconBadge(
+  IconData icon,
+  Color color, {
+  double size = 40,
+  double iconSize = 20,
+}) {
+  return Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.16),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: color.withValues(alpha: 0.25), width: 1.0),
+    ),
+    child: Icon(icon, color: color, size: iconSize),
+  );
+}
 
 Widget gap(double h) => SizedBox(height: h);
 

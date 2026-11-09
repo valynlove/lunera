@@ -41,10 +41,610 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.0.0',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Major 2.0.0 Release: Complete Arcane Astral aesthetic redesign, ornate celestial avatar frame, custom astral navigation icons, Decoy Calculator lock, Guided Calm Injection, and Restock Pickup Assistant.',
+          textId: 'Rilis Besar 2.0.0: Perombakan total estetika Arcane Astral, bingkai avatar celestial anggun, ikon navigasi astral kustom, Kunci Kalkulator Samaran, Asisten Injeksi Tenang, dan Asisten Pengambilan Stok.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined UI/UX across all screens: Home, Levels, Calendar, Supplies, Journal, Profile, and Settings with elevated contrast and tactile haptic feedback.',
+          textId: 'Penyederhanaan UI/UX di seluruh layar: Beranda, Kadar, Kalender, Perlengkapan, Jurnal, Profil, dan Pengaturan dengan kontras tinggi dan getaran haptic.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.49',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Enhanced More and Settings UI: elevated typography contrast across all setting tiles and descriptions, expanded header layout, and integrated tactile haptic feedback across switches, tabs, chips, and backup actions.',
+          textId: 'Peningkatan UI Pusat Fitur & Pengaturan: meningkatkan kontras tipografi pada seluruh ubin dan deskripsi pengaturan, memperluas tata letak header, serta mengintegrasikan getaran haptic pada sakelar, tab, chip, dan aksi cadangan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.48',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined Calendar & History UI: anchored the weekly day selector into a dedicated Arcane Astral card with an instant Today jump button, added daily completion status badges, introduced a serene rest-day empty state, and added tactile haptics across all interactions.',
+          textId: 'Penyederhanaan UI Kalender & Riwayat: menyatukan pemilih hari mingguan ke dalam kartu Arcane Astral khusus dengan tombol lompat instan Hari Ini, menambahkan lencana status penyelesaian harian, menghadirkan tampilan istirahat yang tenang saat tidak ada jadwal, dan menambahkan getaran haptic pada seluruh interaksi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.47',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Overhauled Levels screen UI: decluttered dense chart cards, eliminated duplicate hormone listings, streamlined compact level panels with target range badges, and added tactile haptic feedback throughout lab sheets and actions.',
+          textId: 'Pembaruan UI layar Level: merapikan kartu grafik yang padat, menghilangkan duplikasi kartu hormon, menyederhanakan panel level ringkas dengan lencana rentang target, dan menambahkan umpan balik getar haptic pada formulir dan aksi lab.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.46',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined Home dashboard layout: removed redundant slot lists, introduced a compact high-priority missed dose banner with dedicated review sheet, elevated text contrast, and added tactile haptic feedback.',
+          textId: 'Penyederhanaan tata letak beranda: menghilangkan daftar dosis berulang, menghadirkan banner ringkas dosis terlewat dengan sheet tinjauan khusus, meningkatkan kontras teks, dan menambahkan umpan balik getar haptic.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.45',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Restructured Supplies screen header: elevated the Supplies title onto its own line and positioned Add Supply and Pickup Assistant actions into a clean, balanced dual-button action row below.',
+          textId: 'Menata ulang header layar Stok: menempatkan judul Stok secara leluasa di baris tersendiri dan memindahkan tombol Tambah Stok serta Asisten Titik Ambil ke baris aksi ganda yang rapi di bawahnya.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.44',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined web landing page architecture and redesigned the interactive mobile mockup to faithfully match the authentic in-app Home and floating Arcane Astral dock.',
+          textId: 'Menyederhanakan arsitektur landing page web dan merancang ulang mockup ponsel interaktif agar merefleksikan tampilan Beranda dan dock floating Arcane Astral autentik.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.43',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Overhauled "About Lunera" into an immersive Arcane Astral modal sheet inspired by Wall o\' Pay, featuring illuminated brand aura, 4 Celestial Lore Pillars, Core Principles, Medical Disclaimer, and open-source project metadata.',
+          textId: 'Merombak "Tentang Lunera" menjadi modal sheet imersif berestetika Arcane Astral terinspirasi dari Wall o\' Pay, lengkap dengan aura merek bercahaya, 4 Pilar Lore Lunera, Prinsip Utama, Penafian Medis, dan metadata proyek open source.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.42',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Resolved English string leaks in Indonesian language mode by adding 40 missing translations across Settings, Profile, Body Measurements, and Home.',
+          textId: 'Mengatasi kebocoran teks Bahasa Inggris pada mode Bahasa Indonesia dengan menambahkan 40 terjemahan di Pengaturan, Profil, Ukuran Tubuh, dan Beranda.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.41',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Optimized splash screen display logic and extracted navigation bar and exit confirmation dialog components.',
+          textId: 'Mengoptimalkan logika tampilan layar pembuka serta mengekstrak komponen navigation bar dan dialog konfirmasi keluar.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.40',
+      dateEn: 'November 9, 2026',
+      dateId: '9 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Revamped the application splash and loading screen with the celestial Arcane Astral atmosphere, glowing starlight aura, pulsing loader indicator, and updated in-app celestial crescent moon emblem with orbital rings while preserving the current home screen launcher icon.',
+          textId: 'Merombak layar pembuka dan pemuatan aplikasi dengan atmosfer celestial Arcane Astral, aura starlight bercahaya, indikator pemuatan berdenyut halus, dan pembaruan lambang bulan sabit celestial dalam aplikasi dengan cincin orbit sembari mempertahankan ikon launcher layar utama saat ini.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.39',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Overhauled the official Web Landing Page and Showcase with the Arcane Astral aesthetic, integrating the celestial crescent moon emblem, 3-tier typography (Cinzel, Cormorant Garamond, Manrope), nocturnal glassmorphism, thin gold borders, and an interactive mobile mockup with the signature floating celestial navigation dock.',
+          textId: 'Merombak Web Landing Page dan Showcase resmi dengan estetika Arcane Astral, mengintegrasikan lambang bulan sabit celestial, tipografi 3-tingkat (Cinzel, Cormorant Garamond, Manrope), glassmorphism nocturnal berbingkai emas tipis, dan mockup ponsel dengan floating celestial dock khas Lunera.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.38',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Revamped the exit confirmation dialog and application update dialog with Lunera\'s celestial Arcane Astral aesthetic, featuring glowing orbit halo emblems, starlight borders, version transition chips, and refined action buttons.',
+          textId: 'Merombak kartu konfirmasi keluar dan kartu pembaruan aplikasi dengan estetika celestial Arcane Astral khas Lunera, dilengkapi lambang halo orbit bercahaya, bingkai bias emas starlight, lencana transisi versi, dan tombol aksi yang disempurnakan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.37',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Revamped the PIN Lock and PIN Creation screens with the celestial Arcane Astral theme, glowing animated dot indicators, frosted glass circular keys with letter guides, and streamlined security feedback badges.',
+          textId: 'Merombak layar Kunci PIN dan Pembuatan PIN dengan tema celestial Arcane Astral, indikator titik bercahaya dinamis, tombol kaca buram melingkar dengan panduan huruf, dan lencana status keamanan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.36',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Replaced legacy auth background with the high-resolution Arcane Astral celestial artwork (AuthScene) featuring deep atmospheric gradient scrims across Welcome, Sign In, and Sign Up screens.',
+          textId: 'Mengganti latar belakang layar autentikasi (Welcome, Sign In, Sign Up) dengan ilustrasi celestial Arcane Astral beresolusi tinggi (AuthScene) lengkap dengan scrim gradien atmosferik.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.35',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Integrated 3-tier typography system: Cinzel for brand wordmarks, Cormorant Garamond for decorative headings, and Manrope for the full Android UI.',
+          textId: 'Menerapkan sistem tipografi 3 lapis: Cinzel untuk logo merek, Cormorant Garamond untuk heading dekoratif, dan Manrope untuk seluruh UI Android.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Updated Android app launcher icon, web icons, splash screen, and in-app brand logos to the new celestial crescent moon emblem with orbital rings.',
+          textId: 'Memperbarui ikon peluncur aplikasi Android, ikon web, layar pembuka, dan logo aplikasi ke lambang bulan sabit kosmik berorbit cincin emas.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.34',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Added subtle celestial gold border tint to cards and refined the navbar capsule into a slimmer, more compact and proportional profile.',
+          textId: 'Menambahkan warna emas tipis pada bingkai kartu dan merampingkan ukuran kapsul navbar agar lebih kompak, proporsional, dan elegan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.33',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Removed container frame and background from the center Beranda (Home) navbar button, allowing the 56px celestial astrological artwork to display full-size with radiant glow.',
+          textId: 'Menghilangkan bingkai dan latar belakang kotak dari tombol Beranda tengah, menampilkan karya seni bintang astrologi kosmik 56px secara penuh dengan pendaran cahaya alami.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.32',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Customized navbar with celestial icon set and enlarged the center Beranda (Home) button into an elevated 58px floating orb with gold & amethyst halo glows inspired by Pay o\' Wall.',
+          textId: 'Mengkustomisasi navbar dengan kumpulan ikon kosmik celestial serta memperbesar tombol tengah Beranda menjadi lingkaran melayang 58px ber-halo emas & amestik ala Pay o\' Wall.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.31',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added full-bleed Arcane Astral wallpaper background artwork with an atmospheric dark gradient scrim to preserve text contrast and clinical card readability.',
+          textId: 'Menambahkan gambar latar belakang kosmik Arcane Astral dengan lapisan peredup gradien atmosferik untuk menjaga kontras teks dan kenyamanan membaca kartu klinis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.30',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Transformed all therapy selectors (category, administration route, injection method, patch unit, combination categories, and repeat schedule) into a clean, unified dropdown experience.',
+          textId: 'Mengubah seluruh pemilih di sheet terapi (kategori, rute konsumsi, metode suntik, satuan patch, kategori kombinasi, dan jadwal pengulangan) menjadi format dropdown yang rapi dan seragam.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.29',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined active compound selection in therapy sheet into a clean single-line dropdown with automatic route and profile configuration.',
+          textId: 'Menyederhanakan pemilihan senyawa aktif di sheet terapi menjadi dropdown 1 baris yang rapi dengan konfigurasi otomatis rute dan profil.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Cleaned up form height by hiding redundant pharmacokinetic simulation chips when a standard active compound is selected.',
+          textId: 'Memangkas tinggi formulir dengan menyembunyikan chip simulasi farmakokinetik saat senyawa aktif standar dipilih.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.28',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Standardized active pharmaceutical compound catalog for Estradiol, Testosterone, Progesterone, and Anti-androgens / Blockers.',
+          textId: 'Katalog senyawa aktif farmasi standar untuk Estradiol, Testosteron, Progesteron, dan Anti-androgen / Blocker.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Interactive active compound chips in therapy sheet with automatic administration route and pharmacokinetic preset configuration.',
+          textId: 'Chip pemilihan senyawa aktif interaktif di sheet terapi dengan konfigurasi otomatis rute konsumsi dan profil simulasi farmakokinetik.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Secondary active compound selection for combination medications (e.g. Cyclofem with Estradiol cypionate and Medroxyprogesterone acetate).',
+          textId: 'Dukungan pemilihan senyawa aktif kedua untuk obat kombinasi (contoh: Cyclofem dengan Estradiol cypionate dan Medroxyprogesterone acetate).',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Separated user-customized brand/product names (Progynova, Androcur, Utrogestan, etc.) from active chemical compounds.',
+          textId: 'Memisahkan nama produk/merk obat dari nama senyawa aktif kimia.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.27',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Removed heart symbol from Home greeting header and calibrated nickname typography and spacing to prevent colliding with right-side action buttons.',
+          textId: 'Menghapus simbol hati di header Beranda serta menyesuaikan ukuran dan jarak nama pengguna agar tidak bertabrakan dengan tombol aksi kanan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.26',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Redesigned More page profile header into a centered Arcane Astral hero card with glowing halo avatar, identity subtitle, and top-right Settings shortcut.',
+          textId: 'Mendesain ulang kartu profil di halaman More menjadi kartu hero Arcane Astral terpusat dengan avatar ber-halo kosmik, subtitle identitas, dan pintasan Pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Tapping user avatar on Home now navigates directly to ProfilePage.',
+          textId: 'Mengetuk foto profil di Beranda kini langsung mengalihkan ke halaman profil pengguna.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Swapped Home and Levels navigation bar positions: Home is now the central tab with the astrological star icon, while Levels moves to tab 0 with clinical insights iconography.',
+          textId: 'Menukar posisi Beranda dan Level di navbar: Beranda kini di tombol tengah dengan ikon bintang astrologi, sementara Level berada di tab 0 dengan ikon wawasan klinis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.25',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Reworked DoseCard into a compact, horizontal 100px dial card saving over 50% vertical space while keeping all rotation, countdown, and logging controls intact.',
+          textId: 'Merombak DoseCard menjadi kartu horizontal kompak berdiameter 100px yang menghemat lebih dari 50% ruang layar dengan tetap mempertahankan fitur countdown, lokasi rotasi, dan pencatatan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Reordered Home dashboard by clinical urgency: Alerts, Missed Doses, Active Cards, Today\'s Schedule, Hormone Trend, Mood Check-in, and Upcoming Schedule.',
+          textId: 'Menata ulang kartu Beranda berdasarkan prioritas klinis: Peringatan Stok, Dosis Terlewat, Kartu Terapi Aktif, Jadwal Hari Ini, Tren Hormon, Suasana Hati, dan Jadwal Mendatang.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.24',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Consolidated app appearance into a single unified Arcane Astral aesthetic, removing redundant phase accent chips from Settings and displaying an elegant 5-color palette showcase.',
+          textId: 'Menyatukan tampilan aplikasi ke dalam satu tema tunggal Arcane Astral, menghapus chip aksen fase di Pengaturan dan menampilkan kartu showcase 5-warna palet yang elegan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Locked theme accent enforcement to Arcane Astral while ensuring full backward compatibility for stored preferences and backup files.',
+          textId: 'Mengunci tema aplikasi secara permanen pada Arcane Astral dengan tetap menjaga kompatibilitas penuh untuk preferensi tersimpan dan berkas cadangan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.23',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Transformed bottom navigation into a floating frosted glass pill dock featuring an 8-point astrological Compass Starburst for the center Levels tab.',
+          textId: 'Mentransformasi bilah navigasi bawah menjadi floating frosted glass pill dock yang melayang, dilengkapi tombol bintang kompas astrologi 8-arah di tab tengah.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Polished Home hero greeting with delicate phase heart, starlight subtitle, and Arcane Astral typography hierarchy.',
+          textId: 'Menyempurnakan sapaan beranda dengan sentuhan hati fase rembulan, subjudul starlight, dan hierarki tipografi Arcane Astral.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.22',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Upgraded Hormone Trend and Levels visualizations with Arcane Astral dual-tone aesthetics: Estradiol in Mystical Amethyst, Progesterone in Celestial Honey Gold, and smooth gradient area shading.',
+          textId: 'Memperbarui visualisasi Tren Hormon dan Level dengan estetika dua warna Arcane Astral: Estradiol dalam Mystical Amethyst, Progesteron dalam Celestial Honey Gold, dan arsiran gradien halus.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Harmonized clinical target ranges, adherence indicators, and journal mood highlights with Sage Astral Mint and warm celestial amber tones.',
+          textId: 'Menyelaraskan rentang target klinis, indikator kepatuhan dosis, dan penanda suasana hati jurnal dengan Sage Astral Mint dan aksen amber hangat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.21',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Transformed Lunera\'s primary color system and visual aesthetic to Arcane Astral, featuring Deep Astral Midnight canvas, Velvet Arcane card surfaces, Mystical Amethyst primary accents, and Celestial Honey Gold warm highlights.',
+          textId: 'Mentransformasi sistem warna utama dan estetika visual Lunera menjadi Arcane Astral dengan kanvas Deep Astral Midnight, permukaan beludru kaca Velvet Arcane, aksen utama Mystical Amethyst, dan sentuhan hangat Celestial Honey Gold.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Upgraded theme design tokens and AppCard/cardBox starlight contours, with warm moonlight cream lunar logo accents and full agent aesthetic token compliance.',
+          textId: 'Memperbarui token desain tema dan kontur starlight pada AppCard/cardBox, dilengkapi aksen rembulan moonlight cream pada logo dan kepatuhan penuh standar token estetika.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.20',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Redesigned More tab into a dedicated Care & Feature Hub inspired by Wall o\' Pay, featuring organized card sections with colorful icon badges for Health & Journey, Care & Assistant Tools, and System.',
+          textId: 'Mendesain ulang tab Lainnya menjadi Pusat Fitur & Terapi (Feature Hub) bergaya Wall o\' Pay dengan kartu terkelompok dan badge ikon warna-warni.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Re-architected Settings page into an all-in-one control center integrating Preferences, Appearance, Reminders & privacy, Therapy units, live PIN & biometrics security status, and Cloud Firestore sync & backup.',
+          textId: 'Merombak halaman Pengaturan menjadi pusat kendali lengkap yang menyatukan Preferensi, Tampilan, Notifikasi, Satuan terapi, status Keamanan PIN/biometrik, dan sinkronisasi Cloud Firestore.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Introduced AppCard, SectionHeader, and iconBadge reusable design system components in theme.dart with nocturnal velvet styling and pastel accents.',
+          textId: 'Menambahkan komponen desain terpadu AppCard, SectionHeader, dan iconBadge di theme.dart dengan nuansa beludru malam dan aksen pastel.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.19',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed UI thread lockup and dark overlay crash when tapping "Log injection" caused by unbounded PillTabs layout constraints in InjectionSiteMap.',
+          textId: 'Memperbaiki aplikasi macet/ANR dan layar gelap saat menekan "Catat suntikan" akibat flex tak terbatas pada PillTabs di InjectionSiteMap.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Protected stream provider lookups in dose and rotation sheets with valueOrNull, avoiding unhandled Riverpod exception crashes.',
+          textId: 'Melindungi pembacaan stream provider pada lembar dosis dan rotasi menggunakan valueOrNull untuk mencegah crash.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Added scrollable viewport wrapper to SiteRotationSheet to avoid layout overflow on smaller screens.',
+          textId: 'Menambahkan wrapper scrollable pada SiteRotationSheet agar tidak overflow pada layar berukuran kecil.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.18',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Dedicated Debug & Release build variants: side-by-side install with .debug suffix and distinct app label "Lunera Dev".',
+          textId: 'Varian build Debug & Release terpisah: instalasi berdampingan dengan akhiran .debug dan nama aplikasi "Lunera Dev".',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Multi-client Firebase configuration in google-services.json for seamless release and debug development.',
+          textId: 'Konfigurasi multi-client Firebase di google-services.json untuk kelancaran pengembangan versi release dan debug.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Developer mode visual indicator in home screen and automatic Privacy Shield screenshot bypass in debug mode.',
+          textId: 'Indikator visual mode developer di layar utama dan bypass screenshot otomatis untuk Privacy Shield saat mode debug.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.17',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Privacy Shield (FLAG_SECURE): integrated native Android window security to hide app contents in Recent Apps and block screenshots for sensitive medical therapy records.',
+          textId: 'Perisai Privasi (FLAG_SECURE): mengintegrasikan keamanan layar native Android untuk menyamarkan konten aplikasi di Aplikasi Terkini dan mencegah tangkapan layar data medis.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Security Settings & Lifecycle Sync: added Privacy Shield toggle in Security settings with automatic startup state enforcement and cleanup on PIN disable.',
+          textId: 'Pengaturan Keamanan & Siklus Hidup: menambahkan saklar Perisai Privasi di menu Keamanan dengan penerapan otomatis saat mulai dan pelepasan saat PIN dinonaktifkan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.16',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Debounced Background Auto-Sync: introduced a 1,500ms debounce queue and reactive SyncState to coalesce rapid mutations into smooth background synchronization.',
+          textId: 'Auto-Sync Latar Belakang Berjeda Debounce: menghadirkan antrean debounce 1.500ms dan SyncState reaktif untuk menyatukan mutasi beruntun ke sinkronisasi awan yang mulus.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Non-Blocking Safe Writes: wrapped repository mutations in bounded 4-second timeout protection, guaranteeing instant offline persistence without UI freezes.',
+          textId: 'Operasi Tulis Aman Non-Blocking: membungkus mutasi repositori dengan proteksi batas waktu 4 detik, memastikan persistensi offline instan tanpa jeda antarmuka.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.15',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Interactive Profile Photo Cropper: introduced pure Flutter circular photo cropper with pan, pinch-to-zoom (0.8x-4.0x), 90° rotation, and rule-of-thirds grid guides.',
+          textId: 'Pemotong Foto Profil Interaktif: menghadirkan fitur crop foto melingkar murni Flutter dengan kontrol geser, zoom (0.8x-4.0x), rotasi 90°, dan garis pandu grid.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Full-Screen Photo Viewer & Action Sheet: added full-screen interactive photo viewer with Hero animation and a WhatsApp-styled photo picker sheet.',
+          textId: 'Penampil Foto Layar Penuh & Lembar Aksi: menambahkan penampil foto layar penuh dengan animasi Hero dan lembar pemilih foto bergaya modern.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Pre-Decoded Avatar Caching & Tactile Haptics: cached MemoryImage in profile state to eliminate redundant base64 decoding on redraws, and added light haptic feedback to PIN numpads and avatar touches.',
+          textId: 'Caching Avatar Ter-decode & Haptic Taktil: menyimpan MemoryImage di state profil untuk menghilangkan decoding base64 berulang saat redraw, serta getaran halus pada keypad PIN dan sentuhan avatar.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.14',
+      dateEn: 'November 8, 2026',
+      dateId: '8 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Multi-Hormone Pharmacokinetics & Regimens: expanded simulation models to support Testosterone (ng/dL) and Progesterone (ng/mL) alongside Estradiol curves.',
+          textId: 'Farmakokinetik Multi-Hormon & Regimen Universal: memperluas simulasi ke Testosteron (ng/dL) dan Progesteron (ng/mL) melengkapi kurva Estradiol.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Combination Medication Support: added dual-ingredient tracking for combination injections (e.g. Cyclofem) with simultaneous curve distribution.',
+          textId: 'Dukungan Obat Kombinasi: mendukung pelacakan obat kombinasi dua bahan aktif (mis. Cyclofem) secara simultan tanpa duplikasi stok.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.13',
       dateEn: 'November 5, 2026',
       dateId: '5 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

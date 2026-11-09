@@ -123,7 +123,8 @@ class _AuthShell extends StatelessWidget {
   Widget build(BuildContext context) => Theme(
         data: buildTheme(Brightness.dark),
         child: Scaffold(
-          body: NightScene(
+          body: AuthScene(
+            darken: true,
             child: SafeArea(
               child: Center(
                 child: ConstrainedBox(
@@ -165,8 +166,7 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) => Theme(
         data: buildTheme(Brightness.dark),
         child: Scaffold(
-          body: LakeScene(
-            moon: false,
+          body: AuthScene(
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 110),
@@ -191,7 +191,7 @@ class WelcomePage extends StatelessWidget {
                             builder: (_) => const SignUpPage()))),
                   ),
                   gap(8),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, children: [
                     Text(tr('Already have an account?'),
                         style: TextStyle(
                             color: Colors.white.withValues(alpha: .85))),
@@ -316,7 +316,7 @@ class _SignInState extends State<SignInPage> {
           gap(8),
           pillButton(_busy ? tr('Working...') : tr('Log in'), _go),
           gap(8),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, children: [
             Text(tr('Don\'t have an account?')),
             TextButton(
               onPressed: _busy
@@ -365,7 +365,7 @@ class _SignUpState extends State<SignUpPage> {
             controller: _u,
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
-                labelText: 'Username',
+                labelText: tr('Username'),
                 prefixText: '@',
                 helperText: tr(
                     'Lowercase letters, numbers, dots, underscores (3 to 20)')),
@@ -375,14 +375,14 @@ class _SignUpState extends State<SignUpPage> {
             controller: _e,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: InputDecoration(labelText: tr('Email')),
           ),
           gap(12),
           _PassField(controller: _p, onSubmit: _go),
           gap(20),
           pillButton(_busy ? tr('Working...') : tr('Sign up'), _go),
           gap(8),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, children: [
             Text(tr('Already have an account?')),
             TextButton(
               onPressed: _busy

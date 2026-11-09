@@ -4,6 +4,438 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-11-09
+
+### Added
+- **Major Milestone: Arcane Astral Redesign & System Transformation:**
+  - **Arcane Astral Design System (`lib/theme.dart`):** Complete visual renaissance introducing a celestial midnight universe, featuring midnight velvet backgrounds (`#0A0A14`), glowing astral halos, twilight purple/indigo gradients, warm celestial gold and starlight accents (`Pastel.gold`, `Pastel.star`), Cinzel decorative brand wordmark, Cormorant Garamond display headings, and Plus Jakarta Sans body typography.
+  - **Ornate Celestial Profile Avatar Frame (`assets/images/avatar_frame_celestial.png`, `lib/profile.dart`):** Circular avatar framing with golden crescent moon crest, astral filigree, hanging stars, amethyst lotus accents, and centered auto-scaling overlays across Home, More, and Profile headers.
+  - **Brand New Iconography & Astral Navigation (`assets/icons/`, `lib/ui/shell.dart`):** Custom illuminated celestial tab icons (`nav_home`, `nav_levels`, `nav_calendar`, `nav_supplies`, `nav_more`) paired with smooth page transitions and glowing indicator pills.
+  - **Decoy Calculator Lock & Discreet Privacy Shield (`lib/ui/lock_screen.dart`, `lib/lock.dart`):** Fully functional covert calculator camouflage concealing the PIN lock screen, PBKDF2-HMAC-SHA256 salted PIN hashing, biometric authentication, and discreet push notification masking for private doses and health alerts.
+  - **Guided Calm Injection Assistant (`lib/ui/sheets.dart`):** Guided step-by-step injection ceremony with breathing rhythm circles, tactile countdown timers, angle guides, and site rest status.
+  - **Restock Pickup Assistant (`lib/ui/supplies.dart`):** Smart logistics assistant generating Hold-at-Location courier templates and discreet pharmacy pickup notes.
+  - **Comprehensive Lore & About Lunera Modal (`lib/ui/about_sheet.dart`):** Interactive modal sheet presenting Lunera's guiding philosophy, core design pillars, offline-first health architecture, and developer provenance.
+
+### Changed
+- **Comprehensive UI/UX Streamlining Across All Application Hubs:**
+  - **Home Dashboard (`lib/ui/home.dart`):** Streamlined hero layout with glowing dosage dials, priority overdue banners, quick mood logging, and direct calendar bridge links.
+  - **Hormone Levels & PK Simulations (`lib/ui/levels.dart`):** Decluttered pharmacokinetic graphs, target range indicator chips, separated blood test history, and deep-dive hormone profile views.
+  - **Supplies & Inventory Hub (`lib/ui/supplies.dart`):** Unified inventory cards with low-stock badges, expiration tracking, and rapid restock actions.
+  - **Calendar & Timeline (`lib/ui/calendar.dart`, `lib/ui/history.dart`):** Arcane Astral weekly day selector card with instant "Today" shortcut, daily completion chips, serene rest-day empty states, and high-contrast log histories.
+  - **More Hub & Settings (`lib/ui/more.dart`, `lib/ui/settings_page.dart`):** Expansive feature hub with elevated typography contrast, categorized system preferences, dual backup management (Offline JSON & Cloud Firestore), and tactile haptic feedback across all controls.
+  - **Authentication & Splash Scenes (`lib/ui/splash.dart`, `lib/ui/auth.dart`):** Celestial starry lake horizon entrance sequence and glassmorphic authentication cards.
+- **Modernized Web Landing Page & Showcase (`docs/`):**
+  - Updated showcase landing page with Arcane Astral theme aesthetic, interactive tab previews, responsive typography, and direct APK download links for v2.0.0.
+
+### Fixed
+- Stabilized biometric grace periods during file picker and image selection.
+- Refined contrast ratios for accessibility and legibility across all dark velvet surfaces.
+- Hardened offline JSON validation and backward-compatible restore logic.
+
+## [1.11.50] - 2026-11-09
+
+### Added
+- **Ornate Celestial Profile Avatar Frame (`assets/images/avatar_frame_celestial.png`, `lib/profile.dart`):**
+  - Integrated an enchanting fantasy circular avatar frame featuring a golden crescent moon crest, starry astral filigree, delicate hanging stars, amethyst lotus flowers, and a radiant star gem brooch.
+  - Enhanced `UserAvatar` with automatic frame overlay scaling (`size * 1.35`) and centered alignment, framing both custom profile photos and fallback initial avatars seamlessly across Home, More, and Profile pages.
+  - Harmonized ambient glow in More page hero profile card by removing harsh static borders and allowing the celestial frame to shine naturally with warm honey gold and amethyst halos.
+
+## [1.11.49] - 2026-11-09
+
+### Changed
+- **Enhanced More and Settings UI (`lib/ui/more.dart`, `lib/ui/settings_page.dart`):**
+  - **Expansive Feature Hub Header**: Updated `More` title to full `display(40)` Cormorant Garamond typography.
+  - **Elevated Typography Contrast**: Replaced low-opacity muted subtitle text throughout all settings and hub tiles with high-contrast `Pastel.mist` (85% opacity) and crisp white titles for effortless legibility on dark velvet surfaces.
+  - **Tactile Haptic Feedback**: Embedded subtle haptic pulses across all interactive controls: navigation tiles, tab selectors, reminder switches, unit choice chips, site rotation buttons, and cloud backup actions.
+
+## [1.11.48] - 2026-11-09
+
+### Changed
+- **Streamlined Calendar & History UI (`lib/ui/calendar.dart`, `lib/ui/history.dart`):**
+  - **Weekly Navigator Card**: Anchored the week selector and month navigation bar inside a dedicated Arcane Astral card (`cardBox`) with glowing day indicators, subtle today borders, and an instant "Today" shortcut button to jump back when browsing past or future dates.
+  - **Selected Day Status Header**: Added clear daily completion badges (`Completed` in mint, `{0} pending` in amber) beside the localized date header.
+  - **Serene Empty State**: Replaced bare empty text with a peaceful Arcane Astral night-sky card (`iconBadge(Icons.nightlight_round, Pastel.lilac)`) indicating rest days with comforting guidance.
+  - **History & Log Tile Refinements**: Elevated typography contrast on dosage log cards (`Colors.white` title, `Pastel.mist` subtitle), styled empty history with an icon badge, and added tactile haptic feedback (`HapticFeedback.selectionClick`, `lightImpact`, `mediumImpact`) across tab changes, date taps, week navigation, and log actions.
+- **Indonesian Localization (`lib/l10n_id.dart`):**
+  - Added translations for `Today, {0}`, `Previous week`, `Next week`, `Completed`, `{0} pending`, `No doses scheduled`, `Enjoy your rest day or log a dose manually if needed.`, `No history entries yet`, and `Doses you log will show up here with full administration history.`.
+
+## [1.11.47] - 2026-11-09
+
+### Changed
+- **Decluttered & Streamlined Levels Screen UI (`lib/ui/levels.dart`):**
+  - Expansive header layout: separated `Levels` title onto its own line with Cormorant Garamond typography and placed `Add Lab Result` (with glowing `C.peony`) and `Insights` into a balanced dual action bar.
+  - Eliminated duplicate hormone cards: prevented hormones with active PK simulations from redundantly rendering standalone lab summary cards beneath their simulation panels, reserving `Blood Tests & Lab Markers` exclusively for non-simulated blood markers.
+  - Simplified compact `LevelPanel`: streamlined the primary chart cards by tucking calibration options, retrospective date paginators, and deep clinical disclaimers into the dedicated full-page `HormonePage`, keeping the main dashboard clean and focused.
+  - Added target range indicator badges (`In range`, `Below target`, `Above target`) and latest lab result quick info directly inside the simulation panel header.
+  - Elevated card styling and contrast across lab result histories and added tactile haptic feedback (`HapticFeedback.selectionClick`, `lightImpact`, `mediumImpact`) across chart controls, time range pill tabs, date pickers, and lab sheets.
+- **Indonesian Localization (`lib/l10n_id.dart`):**
+  - Added translations for `Add Lab Result`, `Blood Tests & Lab Markers`, `No level data yet`, `Lab Results History`, `View lab history & calibrate`, `Latest lab: {0} {1} ({2})`, `estimated`, and `target`.
+
+## [1.11.46] - 2026-11-09
+
+### Changed
+- **Streamlined Home Dashboard (`lib/ui/home.dart`):**
+  - Eliminated visual clutter and redundant slot repetition: removed duplicate today's slot tiles beneath active dose dials and decommissioned bottom 7-day schedule list in favor of an elegant, focused bridge link to the dedicated Calendar tab.
+  - Replaced expansive missed dose tiles with a sleek, high-priority `_OverdueAlertBanner` paired with a focused `_showOverdueSheet` for catching up on or skipping missed doses in one place.
+  - Compacted supply alert notifications into an informative, single-line alert banner with direct access to the Supplies tab.
+- **Enhanced Contrast & Visual Accessibility (`lib/ui/home.dart`, `lib/ui/journal.dart`, `lib/ui/calendar.dart`):**
+  - Elevated secondary text and icon opacities across dark velvet cards using `Pastel.mist` and `Pastel.cream` with high contrast ratios for effortless legibility.
+- **Tactile Haptic Feedback & Micro-Interactions:**
+  - Added subtle haptic pulses across dose logging (`HapticFeedback.lightImpact`), dial interactions, quick mood logging, skip confirmations, and bottom navigation tab transitions (`HapticFeedback.selectionClick`).
+- **Hero Avatar Transition:**
+  - Connected the Home screen avatar to the Profile page using a smooth Hero animation transition.
+
+## [1.11.45] - 2026-11-09
+
+### Changed
+- **Supplies Screen Header & Dual Action Bar Relocation (`lib/ui/supplies.dart`):**
+  - Restructured the header of `SuppliesPage` by moving the action buttons out of the title row, giving the `Supplies` title expansive breathing room with its classic Cormorant Garamond typography.
+  - Positioned the primary `Add Supply` button (`FilledButton.icon` in glowing amethyst `C.peony`) and secondary `Pickup Assistant` button (`OutlinedButton.icon` with delicate `#D6B277` starlight border and frosted indigo backing) into a balanced, dual-button action row immediately below the header.
+  - Updated Indonesian localization with dedicated keys for `Add Supply` (`Tambah Stok`).
+
+## [1.11.44] - 2026-11-09
+
+### Changed
+- **Web Landing Page Architecture & In-App UI Revamp (`docs/index.html`, `docs/style.css`, `docs/script.js`):**
+  - **Removed Brand Identity Section:** Decommissioned the dedicated `#brand` section and its navigation anchor, streamlining the landing page experience towards core clinical features, interactive showcases, and downloads.
+  - **Revamped Hero Mockup to Match In-App Home Screen (`lib/ui/home.dart` & `lib/ui/shell.dart`):**
+    - Redesigned the hero mobile mockup from the ground up to faithfully reflect Lunera's actual UI components.
+    - Added the personalized greeting header ("Good evening, Lunera"), daily wellness motto ("Take a moment for yourself today."), real-time dynamic date, quick action add button (`+`), and glowing circular `UserAvatar`.
+    - Transformed the medication card into Lunera's authentic `DoseCard` structure: dual-column layout with a 100x100 precision dial on the left (completed days in mint, active cycle in lavender, idle days pudar, center countdown), alongside therapy dosage badge (`7.5 mg`), recurrence tag (`Every 7 days`), and dynamic site rotation hint (`next: Right thigh`).
+    - Added full-fidelity action buttons: primary "Log injection" stadium button paired with the "Guided Calm Injection" companion button.
+    - Updated the floating Arcane Astral dock to match the exact in-app tab order: *Levels*, *Calendar*, raised glowing *Home* center star, *Supplies*, and *More*.
+  - **Dynamic Time-of-Day Greeting (`docs/script.js`):** Mockup greeting automatically adapts between "Good morning,", "Good afternoon,", and "Good evening," according to the visitor's local system time.
+
+### Added
+- **Featured Injection Site Map & Guided Calm Injections on Web Showcase (`docs/index.html`, `docs/style.css`):**
+  - Added dedicated clinical feature cards for **Interactive Injection Site Map & Tissue Rest** and **Guided Calm Injections** in the core Features Grid.
+  - Added a new interactive **Site Rotation & Tissue Rest** preview card in the Showcase section displaying site recovery metrics and optimal injection rotation recommendations.
+
+## [1.11.43] - 2026-11-09
+
+### Added
+- **"About Lunera" Immersive Arcane Astral Modal Sheet (`lib/ui/about_sheet.dart`, `lib/ui/settings_page.dart`, `lib/ui/more.dart`):**
+  - Re-architected "About Lunera" from a basic 3-line alert dialog into a rich, full-fledged draggable modal bottom sheet inspired by Wall o' Pay.
+  - **Brand Header Card:** Displays the illuminated celestial crescent moon emblem (`MoonLogo(size: 76)`), Cinzel wordmark, version tag (`v1.11.43 • Release`), and italicized brand tagline.
+  - **Mission / Lore Quote Card:** Features a highlighted blockquote with starlight gold quotes celebrating mindful hormone tracking and body harmony.
+  - **4 Celestial Lore Pillars:** Detailed cards explaining the philosophy behind Lunera's identity—*The Moon Phase Rhythms*, *The Celestial Sanctuary*, *The Guiding Star*, and *The Arcane Astral Canvas*.
+  - **Core Principles:** Clearly breaks down Offline-First Architecture, Biometric & Privacy Guard, Clinical Pharmacokinetics, and Smart Site Rotation.
+  - **Medical Disclaimer & Project Metadata:** Outlines responsible clinical guidance and provides clickable links to the open-source repository and direct access to the Version Changelog sheet.
+  - Integrated into both `SettingsPage` (under About & Support) and `MorePage` (under System).
+
+## [1.11.42] - 2026-11-09
+
+### Fixed
+- **Bilingual Leak Prevention & Full Localization Audit (`lib/l10n_id.dart`, `lib/ui/`):**
+  - Resolved English string leaks in Indonesian language mode by adding 40 missing translations across Settings, Profile, Body Measurements, and Home (e.g. `'Preferences'`, `'Reminders & Privacy'`, `'Sample Data'`, `'Home Screen Widgets'`, `'Active'`, `'Sign out'`, `'Height (cm)'`, `'Notes (optional)'`, and disclaimer texts).
+  - Fixed malformed plural key `'{0?d} ago'` in Home dial card (`lib/ui/home.dart`) by updating it to `'{0?day|days} ago'` with full singular/plural support in both English and Indonesian.
+  - Fixed double-escaped newlines in `lib/l10n_id.dart` that prevented data merge and courier pickup tip strings from matching their lookup keys.
+  - Wrapped previously hardcoded labels in `tr()`: Data header and panel tags (`lib/ui/data_page.dart`), profile error toast and nickname hint (`lib/ui/profile_page.dart`), and signup text field labels (`lib/ui/auth.dart`).
+  - Restored `Every Phase, Your Own.` brand tagline on `SplashPage` (`lib/ui/splash.dart`) to ensure visual and test suite consistency.
+
+## [1.11.41] - 2026-11-09
+
+### Changed
+- Removed the forced 2.4-second splash screen delay on app launch. The splash screen now only appears while Firebase Auth is loading, then immediately transitions to the main content.
+- Simplified `SplashPage` from 262 lines (dual animation controllers, sequenced intro, pulse glow, starlight loading bar) to a ~75-line static `StatelessWidget` with logo halo and brand name — appropriate for its now sub-second display time.
+- Extracted `_NavBar` widget from `Shell` for clearer separation of navigation bar rendering.
+- Extracted `_ExitDialog` widget from `Shell` for cleaner exit confirmation dialog ownership.
+
+## [1.11.40] - 2026-11-09
+
+### Changed
+- **Revamped Arcane Astral Splash & Loading Screen (`lib/ui/splash.dart`, `lib/main.dart`):**
+  - Replaced the legacy vector lake/mountain splash screen with an enchanting celestial nocturnal loading sequence featuring the Arcane Astral cosmic backdrop (`arcane_astral_bg.jpg`) and atmospheric scrims.
+  - Added an illuminated circular orbital aura with dual-radial gradients (amethyst and celestial honey gold) and subtle breathing pulse animation.
+  - Featured the Cinzel brand wordmark (`appName`), gold starlight ornament (`✦`), and Cormorant Garamond tagline (`tr('Every Phase, Your Own.')`).
+  - Implemented an animated starlight shimmer loading bar with glowing pill gradient for seamless loading feedback.
+  - Updated `AuthGate` in `lib/main.dart` so intermediate loading states render the celestial `SplashPage` rather than a blank scaffold with a raw spinner.
+- **Updated In-App Celestial Crescent Moon Emblem (`assets/images/lunera_celestial_logo.png`, `lib/theme.dart`):**
+  - Integrated the new high-resolution celestial crescent moon emblem with starry interior, golden crescent contour, and orbital rings for all in-app logo usages (`MoonLogo`, `WelcomePage`, `SignInPage`, `LockScreen`, and settings dialogs).
+  - Preserved the existing Android home screen launcher icons (`ic_launcher.png`) untouched per user instructions.
+
+## [1.11.39] - 2026-11-08
+
+### Changed
+- **Web Landing Page & Showcase Arcane Astral Overhaul (`docs/index.html`, `docs/style.css`, `docs/script.js`):**
+  - Revamped the public landing page and GitHub Pages showcase to fully match Lunera's Arcane Astral design system.
+  - Replaced legacy flat crescent SVG with the celestial planetary moon emblem (`docs/images/logo.png`, `docs/images/icon.png`) with luminous halo filter.
+  - Integrated the 3-tier typography system: **Cinzel** for the brand wordmark, **Cormorant Garamond** for hero titles, display headers, greetings, and cycle numbers, and **Manrope** for clinical body, cards, and specifications.
+  - Styled cards with nocturnal glassmorphism, thin celestial gold borders (`#D6B277`), and atmospheric background scrims over `arcane_astral_bg.jpg`.
+  - Added an interactive mobile-style mockup featuring the signature floating navigation dock with 5 custom celestial icons (`nav_calendar.png`, `nav_levels.png`, `nav_home.png`, `nav_supplies.png`, `nav_more.png`) and the enlarged frameless central Beranda star.
+  - Updated the brand visual identity and color palette specimen to showcase Celestial Gold, Nocturnal Midnight, Surface Indigo, Pastel Lavender, and Mint.
+
+## [1.11.38] - 2026-11-08
+
+### Changed
+- **Revamped Celestial Exit & Application Update Cards (`lib/ui/shell.dart`, `lib/update_checker.dart`):**
+  - Revamped the exit confirmation modal dialog (`_showExitDialog` in `lib/ui/shell.dart`) into an Arcane Astral celestial card featuring velvet midnight surface (`C.deepCard`), delicate starlight gold borders (`#D6B277`), a glowing halo power emblem with dual-radial gradients, soft reassuring copy, and refined frosted/glowing action buttons.
+  - Upgraded the application update dialog (`showUpdateDialog` in `lib/update_checker.dart`) into an Arcane Astral release announcement card featuring glowing starburst badge, version transition chip (`vCurrent ➔ vLatest`), velvet scrollable release notes container with custom scrollbar, and glowing `Update Now` download action button.
+
+## [1.11.37] - 2026-11-08
+
+### Changed
+- **Revamped Celestial PIN Security & Lock Screen (`LockScreen`, `PinPad`, `_PinFlow` in `lib/ui/lock_screen.dart`):**
+  - Replaced legacy `NightScene` in PIN unlock and PIN setup screens with the celestial Arcane Astral backdrop (`AuthScene`) featuring atmospheric starlight scrims.
+  - Upgraded `PinPad` with glowing animated celestial orb indicators (scaling up to 16px with lilac blur glow when entered).
+  - Redesigned circular keypad keys with delicate frosted-glass borders, tactile haptic response, starlight highlight splashes, and international letter markings (ABC, DEF, etc.).
+  - Added soft glowing halo container around the brand moon emblem and streamlined error message badges with warning icons.
+
+## [1.11.36] - 2026-11-08
+
+### Changed
+- **Arcane Astral Celestial Authentication Background (`AuthScene` in `lib/ui/auth.dart`):**
+  - Replaced legacy `LakeScene` and `NightScene` in authentication views (`WelcomePage`, `SignInPage`, and `SignUpPage`) with the high-resolution Arcane Astral celestial artwork (`assets/images/arcane_astral_bg.jpg`).
+  - Implemented `AuthScene` with deep atmospheric gradient scrims and contrast compensation, ensuring optimal typography readability, form accessibility, and seamless visual consistency with Lunera's nocturnal sanctuary design language.
+
+## [1.11.35] - 2026-11-08
+
+### Changed
+- **Arcane Astral Typography Hierarchy (`lib/theme.dart`, `lib/ui/splash.dart`):**
+  - Integrated **Cinzel** for the Lunera brand logo, wordmarks, and splash screen brand identity.
+  - Applied **Cormorant Garamond** across decorative headings, hero numbers, and page titles (`display()`).
+  - Switched the entire Android UI body, input fields, labels, and chips to **Manrope** (`manropeTextTheme`) for clinical clarity.
+- **New Celestial Crescent Moon App Icon & Splash Screen Artwork (`android/app/src/main/res/`, `assets/images/`, `lib/theme.dart`, `web/`, `docs/`):**
+  - Updated all Android launcher mipmap icons (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi) to the new high-resolution celestial crescent moon emblem with orbital rings.
+  - Updated web icons, favicons, and documentation brand images.
+  - Upgraded in-app `MoonLogo` to render the celestial emblem across Splash, Lock Screen, Welcome, and About dialogues with graceful vector fallback.
+
+## [1.11.34] - 2026-11-08
+
+### Changed
+- **Subtle Celestial Gold Card Borders & Slimmer Navbar Dock (`lib/theme.dart`, `lib/ui/shell.dart`, `lib/ui/more.dart`):**
+  - Updated card border styling (`cardBox`, `AppCard`, and hero profile card) with a refined, delicate gold starlight tint (`#D6B277`).
+  - Slimmed down the floating navbar capsule: reduced outer vertical padding, reduced inner padding, set a sleeker 26px corner radius, and proportioned icons for a more compact and elegant profile.
+
+## [1.11.33] - 2026-11-08
+
+### Changed
+- **Frameless Full Celestial Home Navbar Icon (`lib/ui/shell.dart`):**
+  - Removed artificial container border, background, and double-ring frame from the center Beranda (Home) button.
+  - Rendered the celestial 8-point astrological star artwork full-size at 56x56 with active scaling and ethereal gold/peony halo drop-shadows.
+
+## [1.11.32] - 2026-11-08
+
+### Changed
+- **Custom Celestial Navbar Icons & Prominent Center Home Button (`lib/ui/shell.dart`, `assets/icons/`, `pubspec.yaml`):**
+  - Integrated high-resolution sliced celestial icon assets across all navigation tabs (Line Chart for Levels, Celestial Calendar for Calendar, Medication Pill for Supplies, and Profile Silhouette for More).
+  - Redesigned and enlarged the center Beranda (Home) button into a 58px floating circular orb (elevated by 12px) with gold & amethyst halo glows, inspired by the center-docked action button from Pay o' Wall.
+  - Added graceful asset fallback handling for headless test runners and widget test suites.
+
+## [1.11.31] - 2026-11-08
+
+### Added
+- **Arcane Astral Wallpaper Backdrop (`assets/images/`, `lib/theme.dart`, `pubspec.yaml`):**
+  - Integrated full-bleed Arcane Astral celestial artwork featuring an astrological clockwork dome, crescent moon, and temple sanctuary.
+  - Layered with an atmospheric dark scrim gradient (0.58 to 0.85 opacity) ensuring cards, dials, and text retain optimal contrast and eye comfort.
+  - Registered asset bundle directory in `pubspec.yaml` with graceful fallback handling for headless test environments.
+
+## [1.11.30] - 2026-11-08
+
+### Changed
+- **Unified All-Dropdown Therapy Form Experience (`lib/ui/sheets.dart`):**
+  - Fully transformed therapy category, administration route, injection method, patch unit type, combination categories, and repeat schedule into cohesive, styled `DropdownButtonFormField` controls.
+  - Eliminated visual clutter and vertical scroll sprawl across the modal sheet, replacing multi-line wrapping choice chips with tidy, single-row inputs.
+  - Converted custom pharmacokinetic simulation profile selectors into styled dropdowns when custom formulas are used.
+  - Added Indonesian localization keys for therapy categories, injection methods, and repeat schedule definitions.
+
+## [1.11.29] - 2026-11-08
+
+### Changed
+- **Streamlined Therapy Sheet with Active Compound Dropdown (`lib/ui/sheets.dart`):**
+  - Replaced sprawling multi-row choice chips for active compounds with a clean, single-line `DropdownButtonFormField`.
+  - Retained fast one-tap category chips at the top while dynamically updating the active compound dropdown options.
+  - Automatically hid redundant pharmacokinetic (`pk`) simulation profile chips when a standard preset compound is selected, dramatically reducing vertical form clutter.
+  - Applied the same streamlined single-line dropdown to secondary active compounds in combination medications.
+
+## [1.11.28] - 2026-11-08
+
+### Added
+- **Standardized Active Compound Presets (`lib/models.dart`):**
+  - Introduced `CompoundPreset` catalog (`compoundPresets`, `compoundsFor()`, `compoundOf()`) providing predefined active chemical compounds and esters across Estradiol, Testosterone, Progesterone, and Anti-androgens / Blockers.
+  - Added Anti-androgen / Blocker category (`blocker`) to therapy molecule classification and presets.
+  - Extended `Therapy` model with optional `compound` and `secondaryCompound` attributes, fully serialized across JSON and Firestore backups.
+- **Active Compound Picker & Brand Name Separation (`lib/ui/sheets.dart`):**
+  - Added interactive active compound chips in `TherapySheet` displayed directly under category selection.
+  - Selecting an active compound automatically configures standard administration routes, default simulation profile (`pk`), and initial product name.
+  - Added secondary active compound chip selection for combination treatments (e.g., Cyclofem containing Estradiol cypionate and Medroxyprogesterone acetate).
+  - Clarified separation between user-customized Product/Brand names (e.g. Progynova, Androcur, Utrogestan) and active pharmaceutical ingredients.
+- **Bilingual Terminology & Localization (`lib/l10n_id.dart`):**
+  - Added comprehensive Indonesian translations for all active chemical compounds, anti-androgen options, and form labels.
+- **Unit Testing Suite (`test/models_test.dart`):**
+  - Added comprehensive unit tests covering active compound catalog retrieval across all categories and serialization fidelity in `Therapy`.
+
+## [1.11.27] - 2026-11-08
+
+### Changed
+- **Home Header Refinements (`lib/ui/home.dart`):**
+  - Removed the decorative heart symbol `(♡)` from the greeting banner to keep the user nickname clean.
+  - Scaled user display name font size to 22pt with single-line truncation and added 12px right padding to prevent overlapping with header action buttons on compact screens.
+
+## [1.11.26] - 2026-11-08
+
+### Changed
+- **Arcane Astral Profile Hero Card on More Page (`lib/ui/more.dart`):**
+  - Redesigned the profile header into a centered cosmic hero card featuring a glowing celestial halo avatar, bold typography, identity subtitle, and top-right quick Settings gear action.
+- **Direct Profile Navigation from Home Avatar (`lib/ui/home.dart`):**
+  - Tapping the user avatar in the Home page header now navigates directly to `ProfilePage` for instant identity management.
+- **Reordered Navigation Bar & Star Icon Assignment (`lib/ui/shell.dart`, `lib/repo.dart`):**
+  - Swapped positions of Home and Levels in the floating navigation dock.
+  - Beranda (Home) is now the prominent center button adorned with the 8-point astrological star (`CompassStarPainter`).
+  - Levels is now positioned as tab 0 featuring clinical insights iconography (`Icons.insights_rounded`).
+  - Updated default active shell tab to Home (index 2) and adjusted intra-app navigation links accordingly.
+
+## [1.11.25] - 2026-11-08
+
+### Changed
+- **Compact Dose Cards & Prioritized Home Feed (`lib/ui/home.dart`):**
+  - Re-engineered `DoseCard` into a compact, horizontal 100px dial card, reducing vertical height by over 50% while preserving cycle countdown, site recommendations, and direct logging actions.
+  - Upgraded `DialPainter` and `HourDialPainter` with responsive tick scaling to render crisply at compact dimensions.
+  - Restructured Home dashboard cards by clinical urgency and daily action priority:
+    1. Supply and Expiry Alerts (`AlertsCard`)
+    2. Missed / Overdue Doses (`section(tr('Missed'))`)
+    3. Active Therapy Action Cards (`DoseCard`)
+    4. Today's Scheduled Slots (`section(tr('Today'))`)
+    5. Clinical Pharmacokinetics Trends (`WeekCard`)
+    6. Daily Emotional Check-in (`MoodQuickCard`)
+    7. Upcoming 7-Day Lookahead (`section(tr('Next 7 days'))`)
+
+## [1.11.24] - 2026-11-08
+
+### Changed
+- **Unified Signature Aesthetic & Phase Accent Deprecation (`lib/ui/settings_page.dart`, `lib/theme.dart`):**
+  - Consolidated app styling into the single bespoke **Arcane Astral** aesthetic, removing the redundant Phase Accent picker chips from Settings.
+  - Redesigned the Appearance card in Settings with an elegant preview showcase highlighting the 5 core swatches of the Arcane Astral palette.
+  - Locked `applyAccent` to permanently enforce the signature Mystical Amethyst and Celestial Honey Gold theme systemwide while preserving database backward compatibility.
+
+## [1.11.23] - 2026-11-08
+
+### Changed
+- **Arcane Astral Floating Navigation & Compass Starburst (`lib/ui/shell.dart`, `lib/theme.dart`, `lib/ui/home.dart`):**
+  - Transformed bottom navigation into a floating frosted glass pill dock with 32px rounded curvature, deep velvet starlight shadows, and starlight purple contour borders.
+  - Introduced custom `CompassStarPainter` rendering an 8-point astrological celestial compass star for the center Levels tab with active starlight halo and cream highlights.
+  - Polished Home screen hero greeting with delicate phase heart (`♡`), starlight subtitle (*"Take a moment for yourself today."*), and improved typography hierarchy.
+
+## [1.11.22] - 2026-11-08
+
+### Changed
+- **Arcane Astral Hormone Trend & Clinical Visualizations (`lib/theme.dart`, `lib/ui/home.dart`, `lib/ui/levels.dart`, `lib/ui/journal.dart`):**
+  - Introduced `hormoneColor(hormoneId)` theme token mapping Estradiol (E2) to Mystical Amethyst (`#9E7CC6`), Progesterone (P4) to Celestial Honey Gold (`#F1BA79`), and Testosterone to Periwinkle Astral Sky (`#B5DCFD`).
+  - Upgraded Home `WeekCard` to **Hormone Trend** with multi-hormone concurrent curve rendering, color-coded legend, starlight now-line, and one-tap quick jump to the Levels tab.
+  - Modernized hormone sparklines and PK simulation curves with smooth curved interpolation and gradient shading.
+  - Harmonized clinical target ranges and adherence indicators to Sage Astral Mint (`Pastel.mint`, `#8EE3C3`) for *"Within range"* and logged doses.
+  - Updated journal `moodColor` to align with Arcane Astral warm amber highlights for joyful moods.
+
+## [1.11.21] - 2026-11-08
+
+### Changed
+- **Arcane Astral Design System & Color Palette (`lib/theme.dart`):**
+  - Transformed Lunera's primary color system to the bespoke **Arcane Astral** palette (*Fantasy • Classic • Sophisticated*).
+  - Upgraded atmospheric canvas to Deep Astral Midnight (`#120E2E` – `#19143F`) and surfaces to Velvet Arcane Glass (`#201A4B`) with luminous starlight contours (`#45397A`).
+  - Introduced **Mystical Amethyst** (`#9E7CC6`) as the signature primary accent alongside **Celestial Honey Gold** (`#F1BA79`) and **Moonlight Cream** (`#FCE3BD`).
+  - Refined `Pastel` and `C` design tokens with full compliance for `C.surface`, `C.midnight`, `C.lavender`, `C.indigo`, and `C.moonlight`.
+  - Enhanced `MoonLogo` with warm moonlight cream lunar body and arcane lilac orbit ring.
+
+## [1.11.20] - 2026-11-08
+
+### Added
+- **Wall o' Pay-Inspired Care & Feature Hub (`MorePage`):**
+  - Redesigned the 5th tab (`MorePage`) into a clean, purpose-driven Feature Hub organizing Lunera's health and therapy capabilities into distinct, thematic card sections with colored icon badges (`iconBadge`).
+  - Added **Health & Journey** section grouping *Insights & Patterns*, *Body & Changes (Journal Physical Milestones)*, and *Site Rotation & Health (Anatomical Map & Tissue Resting Tracker)*.
+  - Added **Care & Assistant Tools** section featuring *Guided Calm Injection* (interactive step-by-step calming injection procedure with breathing exercise and 30-second drying timer) and *Discreet Pickup Assistant* (Hold-at-Location courier address generator for privacy).
+  - Added **System** section providing a single, clear entry point into the comprehensive *Settings* control center.
+- **Unified Design System Components (`lib/theme.dart`):**
+  - Introduced `AppCard`, `SectionHeader`, and `iconBadge` reusable components in `lib/theme.dart` matching Lunera's nocturnal velvet surface (`C.deepCard`), moonlight borders, and pastel accent highlights (`Pastel.lilac`, `Pastel.rose`, `Pastel.mint`, `Pastel.sky`, `Pastel.butter`).
+
+### Changed
+- **Comprehensive Settings & Control Center (`SettingsPage`):**
+  - Re-architected `SettingsPage` to adopt Wall o' Pay's all-in-one settings structure, consolidating preferences and system controls without redundant sub-screens.
+  - Integrated live **Security & Privacy Lock** card showing real-time App PIN & Biometric status, timeout duration, and decoy calculator indicator.
+  - Integrated **Cloud Sync & Storage** section displaying live Firebase Cloud Firestore status, auto-sync indicator, and one-tap cloud backup creation.
+  - Integrated **Manual Backup & Export** section with direct JSON backup file export & import (merge/replace options) and links to snapshot history.
+  - Consolidated Preferences (Language), Appearance (Phase accents), Reminders & Notification Privacy (lockscreen masking), Therapy & Clinical units, and About & Support (version check with NEW badge, changelog, GitHub repo, medical disclaimer).
+
+## [1.11.19] - 2026-11-08
+
+### Fixed
+- **Injection Site Map Layout & Modal Sheet Stability:**
+  - Fixed an unconstrained horizontal layout assertion failure (`RenderFlex children have non-zero flex but incoming width constraints are unbounded`) inside `InjectionSiteMap` when embedding `PillTabs` within a parent `Row`.
+  - Wrapped `PillTabs` in `Expanded` and set `MainAxisSize.min` on the rotation health summary pill to prevent layout crashes that caused UI thread freezes (Android ANR / "Lunera Dev isn't responding") and dark opacity overlay hangs when opening the "Log injection" sheet.
+  - Replaced unsafe `AsyncValue.value` reads with `valueOrNull` in `DoseSheet` and `SiteRotationSheet` to safeguard against unhandled Riverpod stream error states.
+  - Wrapped `SiteRotationSheet` in a `SingleChildScrollView` to prevent viewport bottom overflows on compact displays.
+  - Added comprehensive automated widget tests covering `InjectionSiteMap`, `DoseSheet` site rotation interactions, `SiteRotationSheet`, and `CalmInjectionSheet`.
+
+## [1.11.18] - 2026-11-08
+
+### Added
+- **Dedicated Debug & Release Build Variants (Side-by-Side Installation):**
+  - Configured `applicationIdSuffix = ".debug"` and `versionNameSuffix = "-debug"` in `android/app/build.gradle.kts`, enabling side-by-side installation of the debug build (`com.example.ritme.debug`) alongside the production release (`com.example.ritme`).
+  - Added multi-client Firebase configuration in `android/app/google-services.json` supporting both release and debug package identifiers.
+  - Implemented distinct Android app launcher labels via resource overlays: "Lunera Dev" for debug builds and "Lunera" for production releases.
+- **In-App Developer Indicators & Flexible Privacy Shield:**
+  - Added a subtle `DEV` pill badge in `HomePage` during debug mode (`kDebugMode`).
+  - Updated `SettingsPage` to distinguish debug builds from production releases.
+  - Added automatic Privacy Shield (`FLAG_SECURE`) bypass in `Lock.setSecureScreen` during debug mode, allowing developers to capture screenshots and record tests unimpeded.
+
+## [1.11.17] - 2026-11-08
+
+### Added
+- **Android Privacy Shield (`FLAG_SECURE`):**
+  - Added native Android window protection in `MainActivity.kt` via MethodChannel (`setSecureScreen`), preventing sensitive medical data leakage in Recent Apps / App Switcher previews and blocking screenshots.
+  - Added `privacyShield` state to `AppLockState` and persistence in `lib/lock.dart`, automatically applying `FLAG_SECURE` upon application startup.
+  - Added a dedicated "Privacy Shield" toggle in `SecurityPage` (`lib/ui/security_page.dart`) with Indonesian translation support.
+
+### Changed
+- **Device Security Parity & Cleanup:**
+  - Synchronized secure screen lifecycle so disabling app security automatically releases `FLAG_SECURE`.
+
+## [1.11.16] - 2026-11-08
+
+### Added
+- **Debounced Background Auto-Sync Queue (`lib/repo.dart`):**
+  - Implemented centralized background auto-sync scheduling with a 1,500ms debounce interval (`scheduleDebounceSync`), coalescing rapid successive writes into a smooth background sync cycle.
+  - Added reactive `SyncState` and `syncStateProvider` to track synchronization status (`idle`, `syncing`, `synced`, `error`), pending mutation counts, and last synced timestamp.
+- **Auto-Sync Status Indicator in Data Management (`lib/ui/data_page.dart`):**
+  - Integrated real-time background sync status pill and timestamp in `DataPage` with full Indonesian localization.
+
+### Changed
+- **Non-Blocking Safe Writes (`lib/repo.dart`):**
+  - Wrapped all repository write mutations (`addTherapy`, `logDose`, `adjustSupply`, `addJournal`, `addMeasurement`, etc.) in `_safeWrite`, enforcing a 4-second bounded timeout so offline usage commits instantly to Firestore's local cache without freezing the UI thread.
+
+## [1.11.15] - 2026-11-08
+
+### Added
+- **Interactive Profile Photo Cropper (`lib/ui/profile_page.dart`):**
+  - Added pure Flutter circular avatar cropper (`ProfilePhotoCropPage`) featuring pan gestures, pinch-to-zoom (0.8x to 4.0x), 90-degree clockwise rotation, and rule-of-thirds grid guides without external heavy native image cropping libraries.
+  - Implemented `_WhatsAppCropOverlayPainter` with circular mask, guideline grid, and corner focus brackets.
+- **Full-Screen Photo Viewer & Action Sheet (`lib/ui/profile_page.dart`):**
+  - Added `ProfilePhotoViewPage` for full-screen photo viewing with zoom, pan, and smooth `Hero(tag: 'profile_photo_hero')` transition from the profile avatar.
+  - Added modern modal bottom sheet with quick actions for Camera, Gallery, View Photo, and Remove Photo.
+- **Indonesian Localization Support (`lib/l10n_id.dart`):**
+  - Added comprehensive Indonesian translations for profile photo cropping, viewing, camera/gallery selection, and confirmation dialogues.
+
+### Changed
+- **Pre-Decoded Avatar MemoryImage Caching (`lib/profile.dart`):**
+  - Cached pre-decoded `MemoryImage` directly within `ProfileState` (`effectiveImage`) to eliminate redundant base64 decoding on repeated widget builds and list scrolling.
+- **Enhanced UserAvatar (`lib/profile.dart`):**
+  - Added `heroTag` support to `UserAvatar` and integrated light haptic feedback on avatar interactions.
+- **Tactile Keypad Haptics (`lib/ui/lock_screen.dart`):**
+  - Integrated `HapticFeedback.lightImpact()` across the Moon PIN pad and stealth Decoy Calculator buttons for responsive tactile feedback on every digit tap.
+
+## [1.11.14] - 2026-11-08
+
+### Added
+- **Multi-Hormone Pharmacokinetic Simulations (`lib/sim.dart`):**
+  - Expanded pharmacokinetic simulation models to support **Testosterone** (`t_enanthate`, `t_cypionate`, `t_propionate`, `t_undecanoate`, `t_gel`) in `ng/dL` and **Progesterone/Progestins** (`p4_oral`, `p4_rectal`, `mpa_susp`) in `ng/mL`, making hormone level curves universal across transfeminine, transmasculine, and TRT regimens.
+  - Added helper `pkProfilesFor(hormoneId, route)` to filter simulation profiles dynamically according to selected hormone and administration route.
+- **Combination Medication Support (`lib/models.dart`, `lib/ui/sheets.dart`, `lib/sim.dart`):**
+  - Added support for dual-component combination medications (such as Cyclofem / Novafem with 5 mg Estradiol Cypionate + 25 mg Medroxyprogesterone Acetate) with `secondaryHormoneId`, `secondaryDose`, `secondaryDoseUnit`, and `secondaryPk`.
+  - Updated `intakesFor()` to automatically distribute a single logged dose across both target hormone curves simultaneously with zero double-counting in inventory or reminders.
+  - Added "Combination medication" toggle and secondary active ingredient configuration in `TherapySheet`.
+- **Adaptive Level Displays (`lib/ui/levels.dart`, `lib/ui/home.dart`, `lib/widget_sync.dart`):**
+  - Updated `WeekCard` on Home screen and `LevelPanel` to adaptively display the primary active hormone (Estradiol, Testosterone, or Progesterone) and properly format decimal values for progestins in `ng/mL`.
+  - Updated `widget_sync.dart` to recognize secondary combination hormone curves in Android home screen widgets.
+
 ## [1.11.13] - 2026-11-05
 
 ### Changed

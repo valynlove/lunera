@@ -32,7 +32,68 @@ const presets = <HormonePreset>[
   HormonePreset('fsh', 'FSH', {'IU/L': 1, 'mIU/mL': 1}),
   HormonePreset('prolactin', 'Prolactin', {'ng/mL': 1, 'mIU/L': 1 / 21.2}),
 ];
-HormonePreset presetOf(String id) => presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
+HormonePreset presetOf(String id) {
+  if (id == 'blocker') return const HormonePreset('blocker', 'Anti-androgen (Blocker)', {'mg': 1});
+  return presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
+}
+
+/// Senyawa aktif (kandungan kimia/ester obat) yang umum digunakan.
+class CompoundPreset {
+  const CompoundPreset({
+    required this.id,
+    required this.hormoneId,
+    required this.en,
+    this.defaultRoute = 'oral',
+    this.defaultDose,
+    this.defaultUnit = 'mg',
+    this.pk,
+  });
+
+  final String id;
+  final String hormoneId; // estradiol | testosterone | progesterone | blocker | other
+  final String en;
+  String get name => tr(en);
+  final String defaultRoute;
+  final double? defaultDose;
+  final String defaultUnit;
+  final String? pk;
+}
+
+const compoundPresets = <CompoundPreset>[
+  // Estradiol (E2)
+  CompoundPreset(id: 'ev_inj', hormoneId: 'estradiol', en: 'Estradiol valerate', defaultRoute: 'inj', defaultDose: 4, pk: 'e2_valerate'),
+  CompoundPreset(id: 'ec_inj', hormoneId: 'estradiol', en: 'Estradiol cypionate', defaultRoute: 'inj', defaultDose: 5, pk: 'e2_cypionate'),
+  CompoundPreset(id: 'een_inj', hormoneId: 'estradiol', en: 'Estradiol enanthate', defaultRoute: 'inj', defaultDose: 5, pk: 'e2_enanthate'),
+  CompoundPreset(id: 'eun_inj', hormoneId: 'estradiol', en: 'Estradiol undecylate', defaultRoute: 'inj', defaultDose: 10, pk: 'e2_undecylate'),
+  CompoundPreset(id: 'eb_inj', hormoneId: 'estradiol', en: 'Estradiol benzoate', defaultRoute: 'inj', defaultDose: 2, pk: 'e2_benzoate'),
+  CompoundPreset(id: 'e2_hemi', hormoneId: 'estradiol', en: 'Estradiol hemihydrate', defaultRoute: 'oral', defaultDose: 2, pk: 'e2_oral'),
+  CompoundPreset(id: 'e2_val_oral', hormoneId: 'estradiol', en: 'Estradiol valerate (oral)', defaultRoute: 'oral', defaultDose: 2, pk: 'e2_oral'),
+  CompoundPreset(id: 'e2_gel', hormoneId: 'estradiol', en: 'Estradiol gel (transdermal)', defaultRoute: 'gel', defaultDose: 1),
+
+  // Testosterone (T)
+  CompoundPreset(id: 'te_inj', hormoneId: 'testosterone', en: 'Testosterone enanthate', defaultRoute: 'inj', defaultDose: 100, pk: 't_enanthate'),
+  CompoundPreset(id: 'tc_inj', hormoneId: 'testosterone', en: 'Testosterone cypionate', defaultRoute: 'inj', defaultDose: 100, pk: 't_cypionate'),
+  CompoundPreset(id: 'tu_inj', hormoneId: 'testosterone', en: 'Testosterone undecanoate (Nebido)', defaultRoute: 'inj', defaultDose: 1000, pk: 't_undecanoate'),
+  CompoundPreset(id: 'tp_inj', hormoneId: 'testosterone', en: 'Testosterone propionate', defaultRoute: 'inj', defaultDose: 50, pk: 't_propionate'),
+  CompoundPreset(id: 't_gel_comp', hormoneId: 'testosterone', en: 'Bioidentical testosterone (gel)', defaultRoute: 'gel', defaultDose: 50, pk: 't_gel'),
+
+  // Progesterone & Progestins (P4)
+  CompoundPreset(id: 'mpa_comp', hormoneId: 'progesterone', en: 'Medroxyprogesterone acetate (MPA)', defaultRoute: 'inj', defaultDose: 25, pk: 'mpa_susp'),
+  CompoundPreset(id: 'p4_micron', hormoneId: 'progesterone', en: 'Micronized progesterone', defaultRoute: 'oral', defaultDose: 200, pk: 'p4_oral'),
+  CompoundPreset(id: 'dydro', hormoneId: 'progesterone', en: 'Dydrogesterone', defaultRoute: 'oral', defaultDose: 10),
+  CompoundPreset(id: '17ohpc', hormoneId: 'progesterone', en: 'Hydroxyprogesterone caproate', defaultRoute: 'inj', defaultDose: 250),
+
+  // Anti-Androgens / Blockers
+  CompoundPreset(id: 'cpa', hormoneId: 'blocker', en: 'Cyproterone acetate (CPA)', defaultRoute: 'oral', defaultDose: 10),
+  CompoundPreset(id: 'spiro', hormoneId: 'blocker', en: 'Spironolactone', defaultRoute: 'oral', defaultDose: 50),
+  CompoundPreset(id: 'bica', hormoneId: 'blocker', en: 'Bicalutamide', defaultRoute: 'oral', defaultDose: 50),
+  CompoundPreset(id: 'fina', hormoneId: 'blocker', en: 'Finasteride', defaultRoute: 'oral', defaultDose: 1),
+  CompoundPreset(id: 'duta', hormoneId: 'blocker', en: 'Dutasteride', defaultRoute: 'oral', defaultDose: 0.5),
+  CompoundPreset(id: 'gnrh', hormoneId: 'blocker', en: 'Leuprorelin (GnRH agonist)', defaultRoute: 'inj', defaultDose: 3.75),
+];
+
+List<CompoundPreset> compoundsFor(String hormoneId) => compoundPresets.where((c) => c.hormoneId == hormoneId).toList();
+CompoundPreset? compoundOf(String? id) => id == null ? null : compoundPresets.where((c) => c.id == id).firstOrNull;
 
 /// Cara pemakaian obat. `places`: butuh lokasi (suntik, patch).
 class AdminRoute {
@@ -93,6 +154,12 @@ class Therapy {
     this.weekdays = const [1],
     this.monthDay = 1,
     this.kind = 'interval',
+    this.secondaryHormoneId,
+    this.secondaryDose,
+    this.secondaryDoseUnit,
+    this.secondaryPk,
+    this.compound,
+    this.secondaryCompound,
   });
   final String id;
   final String hormoneId;
@@ -110,6 +177,16 @@ class Therapy {
   final List<int> weekdays; // jika kind == 'weekly' (1 = Senin .. 7 = Minggu)
   final int monthDay; // jika kind == 'monthly' (1 .. 31)
   final String kind; // interval | weekly | monthly | asneeded
+
+  // Komponen aktif kedua (untuk obat kombinasi seperti Cyclofem)
+  final String? secondaryHormoneId;
+  final double? secondaryDose;
+  final String? secondaryDoseUnit;
+  final String? secondaryPk;
+
+  // Kandungan senyawa aktif yang dipilih
+  final String? compound;
+  final String? secondaryCompound;
 
   bool get asNeeded => kind == 'asneeded';
   bool get daily => kind == 'interval' && everyDays == 1;
@@ -132,6 +209,13 @@ class Therapy {
     List<int>? weekdays,
     int? monthDay,
     String? kind,
+    String? secondaryHormoneId,
+    double? secondaryDose,
+    String? secondaryDoseUnit,
+    String? secondaryPk,
+    bool clearSecondary = false,
+    String? compound,
+    String? secondaryCompound,
   }) =>
       Therapy(
         id: id,
@@ -150,6 +234,12 @@ class Therapy {
         weekdays: weekdays ?? this.weekdays,
         monthDay: monthDay ?? this.monthDay,
         kind: kind ?? this.kind,
+        secondaryHormoneId: clearSecondary ? null : (secondaryHormoneId ?? this.secondaryHormoneId),
+        secondaryDose: clearSecondary ? null : (secondaryDose ?? this.secondaryDose),
+        secondaryDoseUnit: clearSecondary ? null : (secondaryDoseUnit ?? this.secondaryDoseUnit),
+        secondaryPk: clearSecondary ? null : (secondaryPk ?? this.secondaryPk),
+        compound: compound ?? this.compound,
+        secondaryCompound: secondaryCompound ?? this.secondaryCompound,
       );
 
   Map<String, dynamic> toMap() => {
@@ -168,6 +258,12 @@ class Therapy {
         'weekdays': weekdays,
         'monthDay': monthDay,
         'kind': kind,
+        if (secondaryHormoneId != null) 'secondaryHormoneId': secondaryHormoneId,
+        if (secondaryDose != null) 'secondaryDose': secondaryDose,
+        if (secondaryDoseUnit != null) 'secondaryDoseUnit': secondaryDoseUnit,
+        if (secondaryPk != null) 'secondaryPk': secondaryPk,
+        if (compound != null) 'compound': compound,
+        if (secondaryCompound != null) 'secondaryCompound': secondaryCompound,
       };
 
   factory Therapy.from(String id, Map<String, dynamic> m) => Therapy(
@@ -187,6 +283,12 @@ class Therapy {
         weekdays: m['weekdays'] is List && (m['weekdays'] as List).isNotEmpty ? [for (final x in m['weekdays'] as List) (x as num).toInt()] : const [1],
         monthDay: (m['monthDay'] as num?)?.toInt() ?? 1,
         kind: m['kind'] ?? ((m['everyDays'] as num?) != null ? 'interval' : 'interval'),
+        secondaryHormoneId: m['secondaryHormoneId'],
+        secondaryDose: (m['secondaryDose'] as num?)?.toDouble(),
+        secondaryDoseUnit: m['secondaryDoseUnit'],
+        secondaryPk: m['secondaryPk'],
+        compound: m['compound'],
+        secondaryCompound: m['secondaryCompound'],
       );
 }
 

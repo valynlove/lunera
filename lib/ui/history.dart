@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models.dart';
@@ -33,16 +34,33 @@ class LogTile extends ConsumerWidget {
       child: ListTile(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         leading: Icon(l.skipped ? Icons.skip_next_rounded : (t?.adm.icon ?? Icons.medication_rounded), color: l.skipped ? fg.withValues(alpha: .45) : C.lagoon),
-        title: Text(t?.name ?? tr('Therapy deleted'), style: TextStyle(fontWeight: FontWeight.w700, color: l.skipped ? fg.withValues(alpha: .55) : null)),
-        subtitle: Text(l.note == null ? detail : '$detail\n${l.note}'),
+        title: Text(
+          t?.name ?? tr('Therapy deleted'),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: l.skipped ? fg.withValues(alpha: .55) : Colors.white,
+          ),
+        ),
+        subtitle: Text(
+          l.note == null ? detail : '$detail\n${l.note}',
+          style: TextStyle(
+            color: Pastel.mist.withValues(alpha: 0.85),
+            fontSize: 12,
+          ),
+        ),
         isThreeLine: l.note != null,
         onTap: () async {
+          HapticFeedback.selectionClick();
           final ids = {for (final s in supplies) s.id};
           if (l.skipped) {
-            if (await confirm(context, tr('Undo "skip" for this dose?'), ok: tr('Undo')) && context.mounted) ref.read(repoProvider)?.deleteLog(l, ids);
+            if (await confirm(context, tr('Undo "skip" for this dose?'), ok: tr('Undo')) && context.mounted) {
+              HapticFeedback.lightImpact();
+              ref.read(repoProvider)?.deleteLog(l, ids);
+            }
           } else if (t != null) {
             showSheet(context, DoseSheet(t: t!, edit: l, supplies: supplies, prefs: prefs));
           } else if (await confirm(context, tr('The therapy for this entry was deleted. Delete the entry?')) && context.mounted) {
+            HapticFeedback.mediumImpact();
             ref.read(repoProvider)?.deleteLog(l, ids);
           }
         },
@@ -85,7 +103,14 @@ class HistoryPage extends ConsumerWidget {
       rows.add(LogTile(l: l, t: byId[l.therapyId], supplies: supplies, prefs: prefs));
     }
 
-    final add = pillButton(tr('Log'), () => _add(context, ths, supplies, prefs, logs), icon: Icons.add_rounded);
+    final add = pillButton(
+      tr('Log'),
+      () {
+        HapticFeedback.lightImpact();
+        _add(context, ths, supplies, prefs, logs);
+      },
+      icon: Icons.add_rounded,
+    );
     return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
       if (embedded)
         Align(alignment: Alignment.centerRight, child: add)
@@ -108,7 +133,23 @@ class HistoryPage extends ConsumerWidget {
             ),
           ]),
         ),
-      if (logs.isEmpty) Padding(padding: const EdgeInsets.only(top: 40), child: Text(tr('No entries yet. Doses you log will show up here.'))),
+      if (logs.isEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Column(
+            children: [
+              iconBadge(Icons.history_rounded, Pastel.lilac, size: 56, iconSize: 28),
+              const SizedBox(height: 16),
+              Text(tr('No history entries yet'), style: display(24)),
+              const SizedBox(height: 6),
+              Text(
+                tr('Doses you log will show up here with full administration history.'),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Pastel.mist.withValues(alpha: 0.8), fontSize: 13),
+              ),
+            ],
+          ),
+        ),
       ...rows,
     ]);
   }

@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "1.11.13";
+const APP_VERSION = "2.0.0";
 
 // Mobile Navigation Toggle
 function setupMobileNav() {
@@ -64,15 +64,30 @@ function fetchLatestReleaseVersion() {
     });
 }
 
-// Format today's date in hero mockup
+// Format today's date in hero mockup matching Lunera app DateFormat('EEEE, d MMMM y')
 function updateMockupDate() {
   const dateEl = document.getElementById("phone-date-display");
   if (dateEl) {
     const now = new Date();
-    const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
     try {
       dateEl.textContent = now.toLocaleDateString('en-US', options);
     } catch (_) {}
+  }
+}
+
+// Set time-of-day greeting matching Lunera app logic
+function updateMockupGreeting() {
+  const greetEl = document.getElementById("phone-greet-display");
+  if (greetEl) {
+    const hour = new Date().getHours();
+    let greeting = "Good evening,";
+    if (hour < 12) {
+      greeting = "Good morning,";
+    } else if (hour < 17) {
+      greeting = "Good afternoon,";
+    }
+    greetEl.textContent = greeting;
   }
 }
 
@@ -81,4 +96,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMobileNav();
   fetchLatestReleaseVersion();
   updateMockupDate();
+  updateMockupGreeting();
 });
