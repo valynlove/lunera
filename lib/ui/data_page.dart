@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import '../repo.dart';
 import '../theme.dart';
 import '../l10n.dart';
+import '../lock.dart';
 
 class DataPage extends ConsumerStatefulWidget {
   const DataPage({super.key});
@@ -75,7 +76,7 @@ class _DataPageState extends ConsumerState<DataPage> {
   Future<void> _importFile() => _run(() async {
         const group = XTypeGroup(label: 'JSON', extensions: ['json']);
         final onAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-        final f = await openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]);
+        final f = await Lock.instance.suppressLockDuring(() => openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
         if (f == null) return;
         await _importRaw(jsonDecode(utf8.decode(await f.readAsBytes())));
       });

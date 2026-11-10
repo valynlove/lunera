@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="lunera_midnight">#0F122B</color>
+    <!-- Lunera Splash Screen: 35% proportion blend of #26334F onto base void (#0F0C27) = #171A35 -->
+    <color name="lunera_midnight">#171A35</color>
+    <color name="splash_color">#171A35</color>
 </resources>

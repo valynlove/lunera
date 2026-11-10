@@ -41,20 +41,30 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.0.0',
-      dateEn: 'November 9, 2026',
-      dateId: '9 November 2026',
+      version: '2.1.0',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
       isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,
-          textEn: 'Major 2.0.0 Release: Complete Arcane Astral aesthetic redesign, ornate celestial avatar frame, custom astral navigation icons, Decoy Calculator lock, Guided Calm Injection, and Restock Pickup Assistant.',
-          textId: 'Rilis Besar 2.0.0: Perombakan total estetika Arcane Astral, bingkai avatar celestial anggun, ikon navigasi astral kustom, Kunci Kalkulator Samaran, Asisten Injeksi Tenang, dan Asisten Pengambilan Stok.',
+          textEn: 'Major 2.1.0 Milestone: Arcane Astral celestial redesign, ornate avatar frame, 42 custom celestial sprite icons, Decoy Calculator lock, Wall o\' Pay PIN keypad, and full combination medication support.',
+          textId: 'Pencapaian Besar 2.1.0: Perombakan celestial Arcane Astral, bingkai avatar anggun, 42 ikon sprite celestial kustom, Kunci Kalkulator Samaran, papan PIN Wall o\' Pay, dan dukungan penuh obat kombinasi.',
         ),
         ChangeItem(
           type: ChangeType.changed,
-          textEn: 'Streamlined UI/UX across all screens: Home, Levels, Calendar, Supplies, Journal, Profile, and Settings with elevated contrast and tactile haptic feedback.',
-          textId: 'Penyederhanaan UI/UX di seluruh layar: Beranda, Kadar, Kalender, Perlengkapan, Jurnal, Profil, dan Pengaturan dengan kontras tinggi dan getaran haptic.',
+          textEn: 'Dreamy Celestial Splash & Launch Screen: Full-screen celestial starry backdrop with glowing crescent moon crest, starlight divider, and solid #171A35 cold-start background.',
+          textId: 'Layar Splash & Pembuka Celestial: Latar belakang langit berbintang penuh dengan lambang bulan sabit bercahaya, pembatas bintang, dan layar pembuka solid #171A35.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined UI/UX & Clinical Flow: Minimalist Levels cards, streamlined injection site selection chips, Guided Calm Injection assistant, Restock Pickup assistant, and immersive About Lunera sheet.',
+          textId: 'Penyederhanaan UI/UX & Alur Klinis: Kartu Kadar minimalis, chip pemilihan lokasi injeksi praktis, Asisten Injeksi Tenang, Asisten Pengambilan Stok, dan lembar Tentang Lunera yang mendalam.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Hardened Security & Layout Resilience: Fixed screen-off biometric collision, protected external dialogs with grace windows, eliminated route transition flicker, and resolved all RenderFlex overflows.',
+          textId: 'Peningkatan Keamanan & Ketahanan Tampilan: Mengatasi tabrakan biometrik saat layar mati, melindungi dialog eksternal dengan masa tenggang, menghilangkan kedipan transisi rute, dan memperbaiki seluruh error overflow.',
         ),
       ],
     ),

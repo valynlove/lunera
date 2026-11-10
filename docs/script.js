@@ -1,29 +1,15 @@
 /**
  * Lunera — Landing Page Interactive Logic
- * Signature Celestial Midnight & Pastel Theme
+ * Signature Celestial Midnight & Astral Gold Theme
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "2.1.0";
 
-// Mobile Navigation Toggle
-function setupMobileNav() {
-  const toggle = document.getElementById("mobile-toggle");
-  const nav = document.getElementById("nav-links");
-  if (toggle && nav) {
-    toggle.addEventListener("click", () => {
-      nav.classList.toggle("active");
-    });
-    nav.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", () => {
-        nav.classList.remove("active");
-      });
-    });
-  }
-}
-
-// Fetch latest release tag from GitHub API to keep download buttons dynamically up-to-date
+// Fetch latest release tag and APK asset link from GitHub API
 function fetchLatestReleaseVersion() {
+  const directApkUrl = `https://github.com/${LUNERA_REPO}/releases/latest/download/Lunera.apk`;
+
   fetch(`https://api.github.com/repos/${LUNERA_REPO}/releases/latest`)
     .then(res => {
       if (!res.ok) throw new Error("GitHub API unavailable or rate-limited");
@@ -36,51 +22,56 @@ function fetchLatestReleaseVersion() {
           el.textContent = tag;
         });
 
-        const heroDownloadText = document.getElementById("hero-download-text");
+        const heroDownloadText = document.getElementById("hero-download-btn");
         if (heroDownloadText) {
-          heroDownloadText.textContent = `Download for Android (${tag})`;
+          heroDownloadText.textContent = `⬇ Download APK (${tag})`;
         }
 
-        const specsVersion = document.getElementById("specs-version-val");
-        if (specsVersion) {
-          specsVersion.textContent = `${tag}`;
+        const ctaDownloadText = document.getElementById("cta-download-btn");
+        if (ctaDownloadText) {
+          ctaDownloadText.textContent = `⬇ Download APK (${tag})`;
         }
 
-        // Update APK asset links if found
+        // Point to direct APK asset link if explicitly found
         const apkAsset = data.assets?.find(a => a.name.endsWith('.apk'));
-        if (apkAsset) {
-          document.querySelectorAll(".apk-download-btn").forEach(link => {
-            link.href = apkAsset.browser_download_url;
-          });
-        }
+        const downloadUrl = apkAsset ? apkAsset.browser_download_url : directApkUrl;
+        document.querySelectorAll(".apk-download-btn").forEach(link => {
+          link.href = downloadUrl;
+        });
       }
     })
     .catch(() => {
-      // Graceful fallback to baked-in APP_VERSION
-      const heroDownloadText = document.getElementById("hero-download-text");
+      // Graceful fallback to baked-in APP_VERSION and direct APK link
+      const heroDownloadText = document.getElementById("hero-download-btn");
       if (heroDownloadText) {
-        heroDownloadText.textContent = `Download for Android (v${APP_VERSION})`;
+        heroDownloadText.textContent = `⬇ Download APK (v${APP_VERSION})`;
       }
+      document.querySelectorAll(".apk-download-btn").forEach(link => {
+        link.href = directApkUrl;
+      });
     });
 }
 
-// Format today's date in hero mockup matching Lunera app DateFormat('EEEE, d MMMM y')
-function updateMockupDate() {
+// Set time-of-day greeting and live date in phone mockup
+function updateMockupGreeting() {
+  const now = new Date();
+
   const dateEl = document.getElementById("phone-date-display");
   if (dateEl) {
-    const now = new Date();
     const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-    try {
-      dateEl.textContent = now.toLocaleDateString('en-US', options);
-    } catch (_) {}
+    dateEl.textContent = now.toLocaleDateString('en-US', options);
   }
-}
 
-// Set time-of-day greeting matching Lunera app logic
-function updateMockupGreeting() {
+  const timeEl = document.getElementById("phone-time-display");
+  if (timeEl) {
+    const hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    timeEl.textContent = `${hours}:${minutes}`;
+  }
+
   const greetEl = document.getElementById("phone-greet-display");
   if (greetEl) {
-    const hour = new Date().getHours();
+    const hour = now.getHours();
     let greeting = "Good evening,";
     if (hour < 12) {
       greeting = "Good morning,";
@@ -91,10 +82,32 @@ function updateMockupGreeting() {
   }
 }
 
+// Active Nav state on scroll
+function setupActiveNav() {
+  const sections = document.querySelectorAll("header[id], section[id]");
+  const navLinks = document.querySelectorAll("nav ul a");
+
+  window.addEventListener("scroll", () => {
+    let current = "home";
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 140;
+      if (window.scrollY >= sectionTop) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove("on");
+      if (link.getAttribute("href") === `#${current}`) {
+        link.classList.add("on");
+      }
+    });
+  });
+}
+
 // Init on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
-  setupMobileNav();
   fetchLatestReleaseVersion();
-  updateMockupDate();
   updateMockupGreeting();
+  setupActiveNav();
 });

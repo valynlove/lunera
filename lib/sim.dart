@@ -96,8 +96,9 @@ List<Intake> intakesFor(String hormoneId, List<Therapy> ths, List<DoseLog> logs)
       out.add(Intake(l.at, mgOf(l.dose ?? t.dose, t.doseUnit), pkPrimary));
     }
     final pkSecondary = pkOf(t.secondaryPk);
-    if (pkSecondary != null && t.secondaryHormoneId == hormoneId && t.secondaryDose != null) {
-      out.add(Intake(l.at, mgOf(t.secondaryDose!, t.secondaryDoseUnit ?? 'mg'), pkSecondary));
+    final secDose = l.secondaryDose ?? t.secondaryDose;
+    if (pkSecondary != null && t.secondaryHormoneId == hormoneId && secDose != null) {
+      out.add(Intake(l.at, mgOf(secDose, t.secondaryDoseUnit ?? 'mg'), pkSecondary));
     }
   }
   return out;

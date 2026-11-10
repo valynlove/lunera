@@ -4,33 +4,36 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2026-11-09
+## [2.1.0] - 2026-11-10
 
 ### Added
-- **Major Milestone: Arcane Astral Redesign & System Transformation:**
-  - **Arcane Astral Design System (`lib/theme.dart`):** Complete visual renaissance introducing a celestial midnight universe, featuring midnight velvet backgrounds (`#0A0A14`), glowing astral halos, twilight purple/indigo gradients, warm celestial gold and starlight accents (`Pastel.gold`, `Pastel.star`), Cinzel decorative brand wordmark, Cormorant Garamond display headings, and Plus Jakarta Sans body typography.
+- **Major Milestone: Arcane Astral Redesign & System Overhaul:**
+  - **Arcane Astral Design System (`lib/theme.dart`, `docs/style.css`):** Complete visual renaissance introducing a celestial midnight universe fused with Trans Pride palette tokens: Atmospheric Deep Indigo (`#17264D`), Midnight Slate (`#26334F`), Ice Blue (`#DDF6FF`), Lavender (`#B9A9E8`), Champagne Gold (`#E8D3A5`), Sky Cyan (`#5BC8E8` for Testosterone), Blush Pink (`#F1A4B8` for Estradiol), glowing astral halos, Cinzel decorative brand wordmark, Cormorant Garamond display headings, and Plus Jakarta Sans body typography.
+  - **Dreamy Celestial Splash & Launch Experience (`lib/ui/splash.dart`, `lib/main.dart`, `android/app/src/main/res/`):** Full-screen starry night backdrop (`arcane_astral_bg.jpg`), glowing celestial crescent moon emblem with orbital rings, LUNERA wordmark, starlight diamond divider, and inspiring tagline `"YOUR JOURNEY, YOUR PACE."` with a smooth 1.5-second entrance cross-fade, paired with a solid `#171A35` cold-launch theme.
+  - **Authentic Celestial Iconography Suite (`assets/icons/celestial/`, `assets/icons/`, `lib/ui/shell.dart`, `docs/images/icons/`):** 42 authentic celestial sprite icons sliced to 160×160 square transparent canvases with symmetrical padding, powering the bottom navigation dock, feature highlights, and lore storytelling.
   - **Ornate Celestial Profile Avatar Frame (`assets/images/avatar_frame_celestial.png`, `lib/profile.dart`):** Circular avatar framing with golden crescent moon crest, astral filigree, hanging stars, amethyst lotus accents, and centered auto-scaling overlays across Home, More, and Profile headers.
-  - **Brand New Iconography & Astral Navigation (`assets/icons/`, `lib/ui/shell.dart`):** Custom illuminated celestial tab icons (`nav_home`, `nav_levels`, `nav_calendar`, `nav_supplies`, `nav_more`) paired with smooth page transitions and glowing indicator pills.
-  - **Decoy Calculator Lock & Discreet Privacy Shield (`lib/ui/lock_screen.dart`, `lib/lock.dart`):** Fully functional covert calculator camouflage concealing the PIN lock screen, PBKDF2-HMAC-SHA256 salted PIN hashing, biometric authentication, and discreet push notification masking for private doses and health alerts.
-  - **Guided Calm Injection Assistant (`lib/ui/sheets.dart`):** Guided step-by-step injection ceremony with breathing rhythm circles, tactile countdown timers, angle guides, and site rest status.
+  - **Decoy Calculator Lock & Wall o' Pay Keypad (`lib/ui/lock_screen.dart`, `lib/lock.dart`):** Covert functional calculator camouflage concealing the PIN lock screen, paired with Wall o' Pay-inspired 72×72 circular keypad buttons, gold starlight borders (`#E8D3A5`), 14px glowing starlight indicators with 180ms easeOutCubic transitions, and discreet masked push notifications.
+  - **Combination Medication Support (`lib/models.dart`, `lib/ui/sheets.dart`, `lib/sim.dart`, `lib/ui/history.dart`):** Per-dose `secondaryDose` overrides in `DoseLog`, dual dosage inputs in `DoseSheet`, inline "+ Add combination medication" configuration, and dual-curve pharmacokinetic simulation for combination therapies.
+  - **Guided Calm Injection Assistant (`lib/ui/guided_injection.dart`, `lib/ui/sheets.dart`):** Step-by-step injection ceremony with breathing circles, countdown timers, angle guides, and responsive scrollable layouts.
   - **Restock Pickup Assistant (`lib/ui/supplies.dart`):** Smart logistics assistant generating Hold-at-Location courier templates and discreet pharmacy pickup notes.
-  - **Comprehensive Lore & About Lunera Modal (`lib/ui/about_sheet.dart`):** Interactive modal sheet presenting Lunera's guiding philosophy, core design pillars, offline-first health architecture, and developer provenance.
+  - **Immersive "About Lunera" Sheet (`lib/ui/about_sheet.dart`):** Full-fledged modal sheet presenting Lunera's guiding philosophy, circled cosmic MoonLogo, 4 Lore Pillars (Moon Phase Rhythms, Celestial Sanctuary, Guiding Star, Arcane Astral Canvas), core architectural principles, and open-source changelog access.
 
 ### Changed
 - **Comprehensive UI/UX Streamlining Across All Application Hubs:**
-  - **Home Dashboard (`lib/ui/home.dart`):** Streamlined hero layout with glowing dosage dials, priority overdue banners, quick mood logging, and direct calendar bridge links.
-  - **Hormone Levels & PK Simulations (`lib/ui/levels.dart`):** Decluttered pharmacokinetic graphs, target range indicator chips, separated blood test history, and deep-dive hormone profile views.
-  - **Supplies & Inventory Hub (`lib/ui/supplies.dart`):** Unified inventory cards with low-stock badges, expiration tracking, and rapid restock actions.
+  - **Home Dashboard (`lib/ui/home.dart`):** Compact hero layout with precision radial cycle dial, overdue alert banners, quick mood logging, and direct calendar bridge links.
+  - **Hormone Levels & PK Simulations (`lib/ui/levels.dart`):** Streamlined minimal feed cards with sparklines and target status badges, moving deep analytical charts and period filters to the full `HormonePage`.
+  - **Dose Logging & Injection Site Selection (`lib/ui/sheets.dart`):** Replaced bulky interactive body maps in `DoseSheet` ("Catat Suntikan" & "Ubah Catatan") with lightweight, responsive site chips (`Wrap` of `FilterChip`), reserving the full 2D interactive anatomical silhouette map for `SiteRotationSheet`.
+  - **Settings & More Hub (`lib/ui/settings_page.dart`, `lib/ui/more.dart`):** Removed redundant appearance cards, priority-ordered settings sections, streamlined hormone units into compact choice chips, elevated contrast on all subtitles (`Pastel.mist`), and tactile haptic feedback across all controls.
   - **Calendar & Timeline (`lib/ui/calendar.dart`, `lib/ui/history.dart`):** Arcane Astral weekly day selector card with instant "Today" shortcut, daily completion chips, serene rest-day empty states, and high-contrast log histories.
-  - **More Hub & Settings (`lib/ui/more.dart`, `lib/ui/settings_page.dart`):** Expansive feature hub with elevated typography contrast, categorized system preferences, dual backup management (Offline JSON & Cloud Firestore), and tactile haptic feedback across all controls.
-  - **Authentication & Splash Scenes (`lib/ui/splash.dart`, `lib/ui/auth.dart`):** Celestial starry lake horizon entrance sequence and glassmorphic authentication cards.
-- **Modernized Web Landing Page & Showcase (`docs/`):**
-  - Updated showcase landing page with Arcane Astral theme aesthetic, interactive tab previews, responsive typography, and direct APK download links for v2.0.0.
+- **Revamped Landing Page & Web Showcase (`docs/`):**
+  - Modernized showcase with dual-layer smartphone hardware chassis architecture (Phone A: Home Screen, Phone B: Levels Screen) with Wall o' Pay-style metallic titanium rims, OLED display bezels, diagonal sheen reflection, and canonical in-app demo data.
+  - Full-width solid acrylic midnight surface with deep backdrop blur and 2.5px radiant celestial gold horizon separators for both header and footer.
+  - Direct APK download integration pointing to official GitHub Releases.
 
 ### Fixed
-- Stabilized biometric grace periods during file picker and image selection.
-- Refined contrast ratios for accessibility and legibility across all dark velvet surfaces.
-- Hardened offline JSON validation and backward-compatible restore logic.
+- **Biometric & PIN Lock Lifecycle Stabilization (`lib/lock.dart`, `lib/ui/lock_screen.dart`):** Eliminated OS prompt collisions during screen-off (`stickyAuth: false`), added auto-lock suppression (`suppressLockDuring`) with a 3-second grace window during photo picking and file backup/restore, and sub-second debounce protection.
+- **Seamless Page Route Transitions (`lib/theme.dart`):** Configured transparent transition scrims and backgrounds, preventing the background wallpaper from flashing opaque purple during route navigation.
+- **Layout Overflow Resilience (`lib/ui/site_map.dart`, `lib/ui/guided_injection.dart`, `lib/ui/levels.dart`):** Wrapped titles, technique chips, site rotation chips, and health status indicators in `Wrap`, `Expanded`, and ellipsis to eliminate RenderFlex overflow on narrow devices and localized text.
 
 ## [1.11.50] - 2026-11-09
 

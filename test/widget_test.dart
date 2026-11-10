@@ -18,6 +18,7 @@ import 'package:lunera/ui/levels.dart';
 import 'package:lunera/ui/lock_screen.dart';
 import 'package:lunera/ui/more.dart';
 import 'package:lunera/ui/pickup_assistant_sheet.dart';
+import 'package:lunera/ui/profile_page.dart';
 import 'package:lunera/ui/settings_page.dart';
 import 'package:lunera/ui/sheets.dart';
 import 'package:lunera/ui/site_map.dart';
@@ -31,12 +32,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.0.0'));
+      expect(UpdateCheckerService.currentVersion, equals('2.1.0'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.0.0'));
+      expect(AppChangelog.releases.first.version, equals('2.1.0'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -70,7 +71,7 @@ void main() {
       expect(find.byType(InjectionSiteMap), findsOneWidget);
     });
 
-    testWidgets('DoseSheet with injection site map renders and toggles views cleanly', (tester) async {
+    testWidgets('DoseSheet renders compact site chips without bulky body map', (tester) async {
       final therapy = Therapy(
         id: 't1',
         hormoneId: 'estradiol',
@@ -102,25 +103,25 @@ void main() {
         ),
       );
       expect(find.byType(DoseSheet), findsOneWidget);
-      expect(find.byType(InjectionSiteMap), findsOneWidget);
-
-      // Tap on Back tab to verify back view layout
-      await tester.tap(find.text('Back (Glutes)'));
-      await tester.pumpAndSettle();
-      expect(find.text('Left buttock'), findsOneWidget);
-
-      // Toggle to chips view
-      await tester.tap(find.text('Show chips'));
-      await tester.pumpAndSettle();
       expect(find.byType(InjectionSiteMap), findsNothing);
+      expect(find.text('Site'), findsOneWidget);
+      expect(find.byType(FilterChip), findsWidgets);
+      expect(find.text('Left thigh'), findsOneWidget);
 
-      // Toggle back to body map
-      await tester.tap(find.text('Show body map'));
+      // Tap on another chip to toggle selection
+      await tester.tap(find.text('Right thigh'));
       await tester.pumpAndSettle();
-      expect(find.byType(InjectionSiteMap), findsOneWidget);
+      expect(find.byType(FilterChip), findsWidgets);
     });
 
-    testWidgets('SiteRotationSheet renders cleanly in modal sheet format', (tester) async {
+    testWidgets('SiteRotationSheet renders cleanly without overflow on narrow screens and Indonesian locale', (tester) async {
+      L10n.notifier.value = 'id';
+      addTearDown(() => L10n.notifier.value = 'en');
+      tester.view.physicalSize = const Size(320, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       const prefs = Prefs(places: defaultPlaces);
 
       await tester.pumpWidget(
@@ -138,6 +139,7 @@ void main() {
       );
       expect(find.byType(SiteRotationSheet), findsOneWidget);
       expect(find.byType(InjectionSiteMap), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('CalmInjectionSheet renders guide and step timer cleanly', (tester) async {
@@ -201,6 +203,11 @@ void main() {
       expect(find.text(tr('Care & Assistant Tools')), findsOneWidget);
       expect(find.text(tr('System')), findsOneWidget);
       expect(find.text(tr('Settings')), findsOneWidget);
+
+      // Tap profile card in MorePage: opens ProfilePage with zero-duration transition
+      await tester.tap(find.byType(UserAvatar));
+      await tester.pump();
+      expect(find.byType(ProfilePage), findsOneWidget);
     });
 
     testWidgets('SettingsPage renders settings sections and preferences cleanly', (tester) async {
@@ -222,11 +229,11 @@ void main() {
         ),
       );
       expect(find.byType(SettingsPage), findsOneWidget);
-      expect(find.text(tr('Preferences')), findsOneWidget);
-      expect(find.text(tr('Appearance')), findsOneWidget);
-      expect(find.text(tr('Reminders & Privacy')), findsOneWidget);
       expect(find.text(tr('Therapy & Clinical')), findsOneWidget);
+      expect(find.text(tr('Reminders & Privacy')), findsOneWidget);
       expect(find.text(tr('Security & Privacy')), findsOneWidget);
+      expect(find.text(tr('Preferences')), findsOneWidget);
+      expect(find.text(tr('Appearance')), findsNothing);
     });
 
     testWidgets('WelcomePage renders AuthScene celestial background and brand actions', (tester) async {
@@ -439,7 +446,7 @@ void main() {
       expect(exitResult, isFalse);
     });
 
-    testWidgets('SplashPage renders celestial Arcane Astral sequence, MoonLogo, and brand wordmark', (tester) async {
+    testWidgets('SplashPage renders celestial Arcane Astral sequence, moon emblem, and wordmark', (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -452,16 +459,12 @@ void main() {
         ),
       );
 
-      // Verify immediate render
+      // Verify immediate render of celestial splash elements
       expect(find.byType(SplashPage), findsOneWidget);
-      expect(find.byType(MoonLogo), findsOneWidget);
-      expect(find.text(appName), findsOneWidget);
-      expect(find.text(tr('Every Phase, Your Own.')), findsOneWidget);
-
-      // Advance animation partially
-      await tester.pump(const Duration(milliseconds: 1000));
-      expect(find.byType(MoonLogo), findsOneWidget);
-      expect(find.text(appName), findsOneWidget);
+      expect(find.text(appName.toUpperCase()), findsOneWidget);
+      expect(find.text(tr('YOUR JOURNEY, YOUR PACE.')), findsOneWidget);
+      expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+      expect(find.byType(Image), findsWidgets);
     });
 
     testWidgets('AboutLuneraSheet renders lore pillars, core principles, and metadata cleanly', (tester) async {
@@ -745,6 +748,101 @@ void main() {
       expect(find.byType(UserAvatar), findsOneWidget);
       expect(find.byType(CircleAvatar), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('DoseSheet and LogTile support combination medication inputs and display', (tester) async {
+      L10n.notifier.value = 'en';
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final cycloTherapy = Therapy(
+        id: 't_cyclo',
+        name: 'Cyclofem',
+        hormoneId: 'estradiol',
+        dose: 5.0,
+        doseUnit: 'mg',
+        start: DateTime(2026, 10, 1),
+        route: 'inj',
+        pk: 'e2_cyp_susp',
+        secondaryHormoneId: 'progesterone',
+        secondaryDose: 25.0,
+        secondaryDoseUnit: 'mg',
+        secondaryPk: 'mpa_susp',
+        secondaryCompound: 'mpa_susp',
+      );
+
+      final comboLog = DoseLog(
+        id: 'l_combo',
+        therapyId: 't_cyclo',
+        at: DateTime(2026, 10, 15, 14, 0),
+        dose: 5.0,
+        secondaryDose: 25.0,
+        places: ['Right Thigh'],
+      );
+
+      // Test LogTile renders combined dose format
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: LogTile(
+                l: comboLog,
+                t: cycloTherapy,
+                supplies: const [],
+                prefs: const Prefs(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cyclofem'), findsOneWidget);
+      expect(find.textContaining('5 mg + 25 mg'), findsOneWidget);
+
+      // Test DoseSheet renders combination dose input
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DoseSheet(
+                  t: cycloTherapy,
+                  edit: comboLog,
+                  supplies: const [],
+                  prefs: const Prefs(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit entry'), findsOneWidget);
+      expect(find.text('Combination medication'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
+      expect(find.text('25'), findsOneWidget);
+    });
+
+    testWidgets('Theme configures transparent page transitions to eliminate purple transition flash', (tester) async {
+      final theme = buildTheme(Brightness.dark);
+      expect(theme.pageTransitionsTheme, isNotNull);
+
+      // Verify builders have transparent backgrounds/fallbacks
+      final androidBuilder = theme.pageTransitionsTheme.builders[TargetPlatform.android];
+      expect(androidBuilder, isA<PredictiveBackPageTransitionsBuilder>());
+      expect((androidBuilder as PredictiveBackPageTransitionsBuilder).fallbackColor, Colors.transparent);
+
+      final windowsBuilder = theme.pageTransitionsTheme.builders[TargetPlatform.windows];
+      expect(windowsBuilder, isA<ZoomPageTransitionsBuilder>());
+      expect((windowsBuilder as ZoomPageTransitionsBuilder).backgroundColor, Colors.transparent);
+
+      final linuxBuilder = theme.pageTransitionsTheme.builders[TargetPlatform.linux];
+      expect(linuxBuilder, isA<ZoomPageTransitionsBuilder>());
+      expect((linuxBuilder as ZoomPageTransitionsBuilder).backgroundColor, Colors.transparent);
     });
   });
 }

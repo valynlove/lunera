@@ -139,6 +139,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                       color: Colors.white,
                       letterSpacing: 0.2,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ),

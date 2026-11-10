@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../l10n.dart';
 import '../theme.dart';
 
-/// Minimal loading screen shown briefly while auth state resolves.
+/// Celestial Arcane Astral splash screen inspired by the Lunera sanctuary aesthetic.
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 
@@ -11,11 +12,11 @@ class SplashPage extends StatelessWidget {
     return Theme(
       data: buildTheme(Brightness.dark),
       child: Scaffold(
-        backgroundColor: C.deep,
+        backgroundColor: const Color(0xFF141936),
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Cosmic backdrop
+            // Celestial dreamy background
             Image.asset(
               'assets/images/arcane_astral_bg.jpg',
               fit: BoxFit.cover,
@@ -25,77 +26,148 @@ class SplashPage extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0xFF0F0E33), Color(0xFF14123A), Color(0xFF0B091E)],
+                    colors: [
+                      Color(0xFF17264D),
+                      Color(0xFF131D38),
+                      Color(0xFF0F172A),
+                    ],
                   ),
                 ),
               ),
             ),
-            // Atmospheric scrim
+
+            // Soft starlight gradient scrim for contrast and depth
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF0F0E33).withValues(alpha: 0.62),
-                    const Color(0xFF14123A).withValues(alpha: 0.72),
-                    const Color(0xFF0B091E).withValues(alpha: 0.88),
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.30),
                   ],
-                  stops: const [0.0, 0.50, 1.0],
+                  stops: const [0.0, 0.45, 1.0],
                 ),
               ),
             ),
-            // Centered logo + brand name + tagline
+
+            // Center: Celestial Crescent Moon Emblem + Wordmark + Star Divider + Tagline
             Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          C.peony.withValues(alpha: 0.28),
-                          const Color(0xFFF1BA79).withValues(alpha: 0.14),
-                          Colors.transparent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Glowing Celestial Crescent Moon with orbit rings
+                    Container(
+                      width: 104,
+                      height: 104,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFD6B277).withValues(alpha: 0.40),
+                            blurRadius: 42,
+                            spreadRadius: 6,
+                          ),
+                          BoxShadow(
+                            color: C.peony.withValues(alpha: 0.32),
+                            blurRadius: 30,
+                          ),
                         ],
                       ),
-                      border: Border.all(
-                        color: const Color(0xFFD6B277).withValues(alpha: 0.45),
-                        width: 1.5,
+                      child: Image.asset(
+                        'assets/icons/celestial/moon_crescent.png',
+                        fit: BoxFit.contain,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: C.peony.withValues(alpha: 0.25),
-                          blurRadius: 36,
-                          spreadRadius: 2,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // LUNERA Wordmark
+                    Text(
+                      appName.toUpperCase(),
+                      style: wordmark(
+                        34,
+                        color: Colors.white,
+                      ).copyWith(
+                        letterSpacing: 5.5,
+                        shadows: [
+                          Shadow(
+                            color: const Color(0xFFF1BA79).withValues(alpha: 0.65),
+                            blurRadius: 18,
+                          ),
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.7),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Celestial Star Divider
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 1,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                const Color(0xFFE8D3A5).withValues(alpha: 0.75),
+                              ],
+                            ),
+                          ),
                         ),
-                        BoxShadow(
-                          color: const Color(0xFFF1BA79).withValues(alpha: 0.18),
-                          blurRadius: 24,
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Icon(
+                            Icons.auto_awesome,
+                            size: 13,
+                            color: Color(0xFFE8D3A5),
+                          ),
+                        ),
+                        Container(
+                          width: 48,
+                          height: 1,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFFE8D3A5).withValues(alpha: 0.75),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    child: const Center(child: MoonLogo(size: 80)),
-                  ),
-                  const SizedBox(height: 28),
-                  Text(
-                    appName,
-                    style: wordmark(30, color: const Color(0xFFFCE3BD)),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    tr('Every Phase, Your Own.'),
-                    textAlign: TextAlign.center,
-                    style: display(
-                      18,
-                      color: Colors.white.withValues(alpha: 0.88),
-                      weight: FontWeight.w500,
+                    const SizedBox(height: 20),
+
+                    // Tagline: YOUR JOURNEY, YOUR PACE.
+                    Text(
+                      tr('YOUR JOURNEY, YOUR PACE.'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Cinzel',
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 3.2,
+                        color: Color(0xFFF4EBDA),
+                        shadows: [
+                          Shadow(
+                            color: Colors.black54,
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

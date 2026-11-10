@@ -27,11 +27,13 @@ class MorePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     User? user;
     try {
-      user = ref.watch(userProvider).valueOrNull ?? FirebaseAuth.instance.currentUser;
+      user = ref.watch(userProvider).valueOrNull ??
+          FirebaseAuth.instance.currentUser;
     } catch (_) {
       user = null;
     }
-    final username = (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
+    final username =
+        (user?.displayName?.isNotEmpty ?? false) ? user!.displayName! : null;
     final displayName = ref.watch(displayNameProvider);
 
     final therapies = ref.watch(therapiesProvider).valueOrNull ?? <Therapy>[];
@@ -57,13 +59,19 @@ class MorePage extends ConsumerWidget {
         leading: iconBadge(icon, color),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, color: Colors.white),
+          style: const TextStyle(
+              fontWeight: FontWeight.w700, fontSize: 14.5, color: Colors.white),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(fontSize: 12, color: Pastel.mist.withValues(alpha: 0.85), height: 1.25),
+          style: TextStyle(
+              fontSize: 12,
+              color: Pastel.mist.withValues(alpha: 0.85),
+              height: 1.25),
         ),
-        trailing: trailing ?? const Icon(Icons.chevron_right_rounded, size: 20, color: Pastel.lilac),
+        trailing: trailing ??
+            const Icon(Icons.chevron_right_rounded,
+                size: 20, color: Pastel.lilac),
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
@@ -75,7 +83,9 @@ class MorePage extends ConsumerWidget {
       final injections = therapies.where((t) => t.route == 'inj').toList();
       if (injections.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('No injection therapies found. Add one in Home first.'))),
+          SnackBar(
+              content: Text(
+                  tr('No injection therapies found. Add one in Home first.'))),
         );
         return;
       }
@@ -109,7 +119,8 @@ class MorePage extends ConsumerWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: iconBadge(Icons.medication_rounded, Pastel.sky),
-                    title: Text(inj.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    title: Text(inj.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text('${fmt(inj.dose)} ${inj.doseUnit}'),
                     onTap: () {
                       HapticFeedback.lightImpact();
@@ -129,7 +140,8 @@ class MorePage extends ConsumerWidget {
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+              TextButton(
+                  onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
             ],
           ),
         );
@@ -161,17 +173,17 @@ class MorePage extends ConsumerWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF28205A),
-                Color(0xFF1B1544),
+                Color(0xFF26334F),
+                Color(0xFF17264D),
               ],
             ),
             border: Border.all(
-              color: const Color(0xFFD6B277).withValues(alpha: 0.35),
+              color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF070516).withValues(alpha: 0.55),
+                color: const Color(0xFF091122).withValues(alpha: 0.55),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -201,7 +213,14 @@ class MorePage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(28),
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  openPage(const ProfilePage());
+                  Navigator.of(context).push(
+                    PageRouteBuilder<void>(
+                      pageBuilder: (context, _, __) =>
+                          const ProfilePage(enableHero: false),
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
+                    ),
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -244,7 +263,9 @@ class MorePage extends ConsumerWidget {
                         Text(
                           username != null
                               ? '@$username'
-                              : (user?.email != null ? user!.email! : tr('Lunera User')),
+                              : (user?.email != null
+                                  ? user!.email!
+                                  : tr('Lunera User')),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 13,
@@ -279,7 +300,8 @@ class MorePage extends ConsumerWidget {
                 icon: Icons.accessibility_new_rounded,
                 color: Pastel.rose,
                 title: tr('Body & Changes'),
-                subtitle: tr('Timeline of physical milestones from your journal'),
+                subtitle:
+                    tr('Timeline of physical milestones from your journal'),
                 onTap: () => openPage(const BodyPage()),
               ),
               const Divider(height: 1, indent: 68),
@@ -287,7 +309,8 @@ class MorePage extends ConsumerWidget {
                 icon: Icons.healing_rounded,
                 color: Pastel.mint,
                 title: tr('Site Rotation & Health'),
-                subtitle: tr('Interactive body map & injection tissue resting tracker'),
+                subtitle: tr(
+                    'Interactive body map & injection tissue resting tracker'),
                 onTap: () => showSheet(context, const SiteRotationSheet()),
               ),
             ],
@@ -304,7 +327,8 @@ class MorePage extends ConsumerWidget {
                 icon: Icons.self_improvement_rounded,
                 color: Pastel.sky,
                 title: tr('Guided Calm Injection'),
-                subtitle: tr('Step-by-step calming procedure with breathing timer'),
+                subtitle:
+                    tr('Step-by-step calming procedure with breathing timer'),
                 onTap: startGuidedInjection,
               ),
               const Divider(height: 1, indent: 68),
@@ -312,7 +336,8 @@ class MorePage extends ConsumerWidget {
                 icon: Icons.local_shipping_outlined,
                 color: Pastel.butter,
                 title: tr('Discreet Pickup Assistant'),
-                subtitle: tr('Format package for pickup at courier branch (Hold at Location)'),
+                subtitle: tr(
+                    'Format package for pickup at courier branch (Hold at Location)'),
                 onTap: openPickupAssistant,
               ),
             ],

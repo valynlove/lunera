@@ -8,9 +8,16 @@ import '../sim.dart';
 import '../theme.dart';
 import '../l10n.dart';
 import 'guided_injection.dart';
-import 'site_map.dart';
 
 const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const _mols = [
+  ('estradiol', 'Estradiol'),
+  ('testosterone', 'Testosterone'),
+  ('progesterone', 'Progesterone'),
+  ('blocker', 'Anti-androgen (Blocker)'),
+  ('other', 'Other medication'),
+];
 
 /// Catat dosis baru (dari jadwal [slot] atau tambahan) atau ubah catatan [edit].
 class DoseSheet extends ConsumerStatefulWidget {
@@ -27,6 +34,10 @@ class DoseSheet extends ConsumerStatefulWidget {
 
 class _DoseSheetState extends ConsumerState<DoseSheet> {
   late final amount = TextEditingController(text: fmt(widget.edit?.dose ?? widget.t.dose));
+  late final secondaryAmount = TextEditingController(
+    text: fmt(widget.edit?.secondaryDose ?? widget.t.secondaryDose ?? 0),
+  );
+  late final secondaryUnit = TextEditingController(text: widget.t.secondaryDoseUnit ?? 'mg');
   late final wasted = TextEditingController(text: widget.edit?.wasted == null ? '' : fmt(widget.edit!.wasted!));
   late final dead = TextEditingController(text: widget.edit?.dead == null ? '' : fmt(widget.edit!.dead!));
   late final note = TextEditingController(text: widget.edit?.note ?? '');
@@ -35,7 +46,44 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
   late String injType = widget.edit?.injType ?? widget.t.injType ?? 'im';
   late String? supplyId = widget.supplies.any((s) => s.id == widget.t.supplyId) ? widget.t.supplyId : null;
   final generics = <String>{};
-  bool _showMap = true;
+
+  late bool isCombination = widget.t.secondaryHormoneId != null || widget.edit?.secondaryDose != null;
+  late String secondaryHormone = widget.t.secondaryHormoneId ?? (widget.t.hormoneId == 'estradiol' ? 'progesterone' : 'estradiol');
+  late String? secondaryCompound = widget.t.secondaryCompound;
+  late String? secondaryPk = widget.t.secondaryPk ?? (widget.t.secondaryHormoneId != null ? null : _defaultPk(secondaryHormone));
+  bool saveToTherapy = true;
+
+  String? _defaultPk([String? h]) {
+    final targetH = h ?? secondaryHormone;
+    return switch (targetH) {
+      'estradiol' => widget.t.route == 'inj' ? 'e2_enanthate' : (widget.t.route == 'oral' ? 'e2_oral' : null),
+      'testosterone' => widget.t.route == 'inj' ? 't_enanthate' : (widget.t.route == 'gel' ? 't_gel' : null),
+      'progesterone' => widget.t.route == 'inj' ? 'mpa_susp' : (widget.t.route == 'oral' ? 'p4_oral' : (widget.t.route == 'supp' ? 'p4_rectal' : null)),
+      _ => null,
+    };
+  }
+
+  void _selectSecondaryCompound(CompoundPreset c) {
+    setState(() {
+      secondaryCompound = c.id;
+      secondaryPk = c.pk ?? _defaultPk(secondaryHormone);
+      if (secondaryAmount.text.trim().isEmpty || secondaryAmount.text.trim() == '0') {
+        if (c.defaultDose != null) secondaryAmount.text = fmt(c.defaultDose!);
+      }
+      if (c.defaultUnit.isNotEmpty) secondaryUnit.text = c.defaultUnit;
+    });
+  }
+
+  @override
+  void dispose() {
+    amount.dispose();
+    secondaryAmount.dispose();
+    secondaryUnit.dispose();
+    wasted.dispose();
+    dead.dispose();
+    note.dispose();
+    super.dispose();
+  }
 
   Future<void> _pick() async {
     final d = await showDatePicker(context: context, initialDate: at, firstDate: DateTime(2000), lastDate: DateTime.now());
@@ -59,6 +107,16 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Enter the dose amount.'))));
       return;
     }
+    double? secAmt;
+    if (isCombination) {
+      secAmt = parseNum(secondaryAmount.text);
+      if (secAmt == null || secAmt <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('Enter a dose for the second active ingredient.'))),
+        );
+        return;
+      }
+    }
     final w = parseNum(wasted.text), dd = parseNum(dead.text);
     final usage = <String, double>{};
     if (widget.edit == null) {
@@ -75,6 +133,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       at: at,
       places: t.adm.places ? places : const [],
       dose: amt,
+      secondaryDose: isCombination ? secAmt : null,
       note: note.text.trim().isEmpty ? null : note.text.trim(),
       wasted: w,
       dead: dd,
@@ -88,6 +147,20 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
     } else {
       repo?.updateLog(log);
     }
+
+    if (isCombination && (t.secondaryHormoneId == null || t.secondaryHormoneId != secondaryHormone)) {
+      if (saveToTherapy) {
+        final secUnitStr = secondaryUnit.text.trim().isEmpty ? 'mg' : secondaryUnit.text.trim();
+        final updatedTherapy = t.copy(
+          secondaryHormoneId: secondaryHormone,
+          secondaryDose: secAmt,
+          secondaryDoseUnit: secUnitStr,
+          secondaryPk: secondaryPk,
+          secondaryCompound: secondaryCompound,
+        );
+        repo?.updateTherapy(updatedTherapy);
+      }
+    }
     Navigator.pop(context);
   }
 
@@ -100,14 +173,236 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
   @override
   Widget build(BuildContext context) {
     final t = widget.t, editing = widget.edit != null;
+    final fg = Theme.of(context).colorScheme.onSurface;
     final meds = widget.supplies.where((s) => !s.generic).toList();
     final gens = widget.supplies.where((s) => s.generic).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? tr('Edit entry') : (t.route == 'inj' ? tr('Log injection') : tr('Log dose')), style: display(28)),
-      gap(4),
-      Text(widget.slot == null ? t.name : tr('{0}, scheduled {1}', [t.name, DateFormat('HH:mm').format(widget.slot!.at)])),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(editing ? tr('Edit entry') : (t.route == 'inj' ? tr('Log injection') : tr('Log dose')), style: display(28)),
+                gap(4),
+                Text(widget.slot == null ? t.name : tr('{0}, scheduled {1}', [t.name, DateFormat('HH:mm').format(widget.slot!.at)])),
+              ],
+            ),
+          ),
+          if (!editing)
+            IconButton(
+              tooltip: tr('Edit therapy settings'),
+              icon: const Icon(Icons.tune_rounded, color: C.lavender, size: 22),
+              onPressed: () {
+                Navigator.pop(context);
+                showSheet(context, TherapySheet(supplies: widget.supplies, initial: widget.t));
+              },
+            ),
+        ],
+      ),
       gap(16),
-      TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Dose ({0})', [t.doseUnit]))),
+      TextField(
+        controller: amount,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: InputDecoration(
+          labelText: isCombination
+              ? tr('{0} dose ({1})', [presetOf(t.hormoneId).name, t.doseUnit])
+              : tr('Dose ({0})', [t.doseUnit]),
+          prefixIcon: const Icon(Icons.medication_rounded, size: 20, color: C.lavender),
+          helperText: t.compound != null ? compoundPresets.where((p) => p.id == t.compound).firstOrNull?.name : null,
+        ),
+      ),
+      if (isCombination) ...[
+        gap(10),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: C.deepCard,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: C.lavender.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.biotech_outlined, size: 18, color: C.lavender),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tr('Combination medication'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Colors.white),
+                    ),
+                  ),
+                  if (t.secondaryHormoneId == null)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => setState(() => isCombination = false),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Text(
+                          tr('Remove'),
+                          style: TextStyle(fontSize: 12, color: Pastel.rose.withValues(alpha: 0.9), fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              if (t.secondaryHormoneId == null) ...[
+                gap(8),
+                DropdownButtonFormField<String>(
+                  key: ValueKey('doseSheetSecHormone-$secondaryHormone'),
+                  initialValue: secondaryHormone,
+                  dropdownColor: C.deepCard,
+                  borderRadius: BorderRadius.circular(16),
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+                  decoration: InputDecoration(
+                    labelText: tr('Second active category'),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  items: [
+                    for (final m in _mols.where((m) => m.$1 != t.hormoneId && m.$1 != 'other'))
+                      DropdownMenuItem<String>(
+                        value: m.$1,
+                        child: Text(tr(m.$2), overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14)),
+                      ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null && val != secondaryHormone) {
+                      setState(() {
+                        secondaryHormone = val;
+                        secondaryCompound = null;
+                        secondaryPk = _defaultPk(secondaryHormone);
+                      });
+                    }
+                  },
+                ),
+                Builder(builder: (context) {
+                  final secAvailable = compoundsFor(secondaryHormone);
+                  if (secAvailable.isEmpty) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: DropdownButtonFormField<String?>(
+                      key: ValueKey('doseSheetSecCompound-$secondaryHormone-$secondaryCompound'),
+                      initialValue: secondaryCompound ?? 'custom',
+                      dropdownColor: C.deepCard,
+                      borderRadius: BorderRadius.circular(16),
+                      isExpanded: true,
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+                      decoration: InputDecoration(
+                        labelText: tr('Second active compound:'),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      items: [
+                        for (final c in secAvailable)
+                          DropdownMenuItem<String?>(value: c.id, child: Text(c.name, style: const TextStyle(fontSize: 14))),
+                        DropdownMenuItem<String?>(value: 'custom', child: Text(tr('Custom / Other'), style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic))),
+                      ],
+                      onChanged: (val) {
+                        if (val == null || val == 'custom') {
+                          setState(() => secondaryCompound = 'custom');
+                        } else {
+                          final c = secAvailable.firstWhere((item) => item.id == val);
+                          _selectSecondaryCompound(c);
+                        }
+                      },
+                    ),
+                  );
+                }),
+              ],
+              gap(8),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: secondaryAmount,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: tr('{0} dose', [presetOf(secondaryHormone).name]),
+                        helperText: secondaryCompound != null && secondaryCompound != 'custom'
+                            ? compoundPresets.where((p) => p.id == secondaryCompound).firstOrNull?.name
+                            : null,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: secondaryUnit,
+                      decoration: InputDecoration(
+                        labelText: tr('Unit'),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (t.secondaryHormoneId == null) ...[
+                gap(6),
+                InkWell(
+                  onTap: () => setState(() => saveToTherapy = !saveToTherapy),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: Checkbox(
+                          value: saveToTherapy,
+                          activeColor: C.lavender,
+                          onChanged: (v) => setState(() => saveToTherapy = v ?? true),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          tr('Save combination settings to therapy'),
+                          style: TextStyle(fontSize: 12, color: fg.withValues(alpha: 0.85)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ] else if (!editing) ...[
+        gap(8),
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => setState(() {
+            isCombination = true;
+            secondaryPk ??= _defaultPk(secondaryHormone);
+          }),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: C.lavender.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: C.lavender.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add_circle_outline_rounded, size: 16, color: C.lavender),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    tr('Add combination medication (second active ingredient)'),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: C.lavender),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
       gap(10),
       OutlinedButton.icon(
         onPressed: _pick,
@@ -116,45 +411,16 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       ),
       if (t.adm.places && widget.prefs.places.isNotEmpty) ...[
         gap(14),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(tr('Site'), style: const TextStyle(fontWeight: FontWeight.w700)),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                foregroundColor: Pastel.lilac,
-              ),
-              onPressed: () => setState(() => _showMap = !_showMap),
-              icon: Icon(_showMap ? Icons.view_headline_rounded : Icons.accessibility_new_rounded, size: 18),
-              label: Text(_showMap ? tr('Show chips') : tr('Show body map'), style: const TextStyle(fontSize: 12)),
-            ),
-          ],
-        ),
+        Text(tr('Site'), style: const TextStyle(fontWeight: FontWeight.w700)),
         gap(6),
-        if (_showMap)
-          InjectionSiteMap(
-            selectedSites: places,
-            onSiteToggled: (p) => setState(() {
-              if (places.contains(p)) {
-                places.remove(p);
-              } else {
-                places.add(p);
-              }
-            }),
-            therapyId: t.id,
-            logs: ref.watch(logsProvider).valueOrNull ?? <DoseLog>[],
-            prefs: widget.prefs,
-          )
-        else
-          Wrap(spacing: 8, runSpacing: 4, children: [
-            for (final p in widget.prefs.places)
-              FilterChip(
-                label: Text(tr(p)),
-                selected: places.contains(p),
-                onSelected: (v) => setState(() => v ? places.add(p) : places.remove(p)),
-              ),
-          ]),
+        Wrap(spacing: 8, runSpacing: 4, children: [
+          for (final p in widget.prefs.places)
+            FilterChip(
+              label: Text(tr(p)),
+              selected: places.contains(p),
+              onSelected: (v) => setState(() => v ? places.add(p) : places.remove(p)),
+            ),
+        ]),
       ],
       if (t.route == 'inj') ...[
         gap(8),
@@ -229,38 +495,50 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
             ),
         ]),
       ],
-      ExpansionTile(
-        shape: const Border(),
-        collapsedShape: const Border(),
-        tilePadding: EdgeInsets.zero,
-        title: Text(tr('Advanced')),
-        children: [
-          if (t.route == 'inj') ...[
-            TextField(controller: wasted, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Wasted (mL)'))),
-            gap(10),
-            TextField(controller: dead, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Needle dead space (µL)'))),
-            gap(10),
+      if (editing) ...[
+        gap(10),
+        TextField(
+          controller: note,
+          maxLines: 2,
+          decoration: InputDecoration(
+            labelText: tr('Note (optional)'),
+            prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: C.lavender),
+          ),
+        ),
+      ] else ...[
+        ExpansionTile(
+          shape: const Border(),
+          collapsedShape: const Border(),
+          tilePadding: EdgeInsets.zero,
+          title: Text(tr('Advanced')),
+          children: [
+            if (t.route == 'inj') ...[
+              TextField(controller: wasted, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Wasted (mL)'))),
+              gap(10),
+              TextField(controller: dead, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Needle dead space (µL)'))),
+              gap(10),
+            ],
+            TextField(controller: note, maxLines: 2, decoration: InputDecoration(labelText: tr('Notes'))),
+            gap(8),
           ],
-          TextField(controller: note, maxLines: 2, decoration: InputDecoration(labelText: tr('Notes'))),
-          gap(8),
-        ],
-      ),
-      gap(12),
+        ),
+      ],
+      gap(14),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: Text(tr('Delete'))),
+        if (editing)
+          TextButton.icon(
+            onPressed: _delete,
+            icon: const Icon(Icons.delete_outline_rounded, size: 20),
+            label: Text(tr('Delete')),
+            style: TextButton.styleFrom(foregroundColor: Pastel.rose),
+          ),
+        if (editing) const SizedBox(width: 8),
         Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save'), _save)),
       ]),
     ]);
   }
 }
 
-const _mols = [
-  ('estradiol', 'Estradiol'),
-  ('testosterone', 'Testosterone'),
-  ('progesterone', 'Progesterone'),
-  ('blocker', 'Anti-androgen (Blocker)'),
-  ('other', 'Other medication'),
-];
 const _kinds = [('interval', 'Every N days'), ('weekly', 'Weekly'), ('monthly', 'Monthly'), ('asneeded', 'As needed')];
 
 /// Terapi baru, atau ubah [initial].

@@ -299,6 +299,7 @@ class DoseLog {
     required this.at,
     this.places = const [],
     this.dose,
+    this.secondaryDose,
     this.note,
     this.wasted,
     this.dead,
@@ -313,6 +314,7 @@ class DoseLog {
   final DateTime at;
   final List<String> places; // lokasi pemakaian obat
   final double? dose;
+  final double? secondaryDose;
   final String? note;
   final double? wasted, dead; // obat terbuang
   final String? injType, slot;
@@ -327,6 +329,7 @@ class DoseLog {
     DateTime? at,
     List<String>? places,
     double? dose,
+    double? secondaryDose,
     String? note,
     double? wasted,
     double? dead,
@@ -341,6 +344,7 @@ class DoseLog {
         at: at ?? this.at,
         places: places ?? this.places,
         dose: dose ?? this.dose,
+        secondaryDose: secondaryDose ?? this.secondaryDose,
         note: note ?? this.note,
         wasted: wasted ?? this.wasted,
         dead: dead ?? this.dead,
@@ -355,6 +359,7 @@ class DoseLog {
         'at': _t(at),
         'places': places,
         'dose': dose,
+        if (secondaryDose != null) 'secondaryDose': secondaryDose,
         'note': note,
         'wasted': wasted,
         'dead': dead,
@@ -372,6 +377,7 @@ class DoseLog {
             ? [for (final x in m['places'] as List) _key(x as String)]
             : (m['site'] is String && m['site'] != '' && m['site'] != 'oral' ? [_key(m['site'] as String)] : <String>[]),
         dose: (m['dose'] as num?)?.toDouble(),
+        secondaryDose: (m['secondaryDose'] as num?)?.toDouble(),
         note: m['note'],
         wasted: (m['wasted'] as num?)?.toDouble(),
         dead: (m['dead'] as num?)?.toDouble(),

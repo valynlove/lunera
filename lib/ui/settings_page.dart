@@ -23,8 +23,8 @@ import 'security_page.dart';
 import 'site_map.dart';
 
 /// Halaman Pengaturan lengkap (Settings Center) Lunera yang mengadopsi struktur terorganisir
-/// ala Wall o' Pay: Preferensi, Tampilan, Notifikasi, Terapi, Keamanan PIN/Biometrik,
-/// Sinkronisasi Cloud Firestore, Backup JSON, Data Sampel, dan Informasi Aplikasi.
+/// berdasarkan skala prioritas: Terapi & Klinis, Pengingat & Notifikasi, Keamanan PIN/Biometrik,
+/// Sinkronisasi Cloud, Backup JSON, Preferensi & Widget, Akun, Data Sampel, dan Informasi Aplikasi.
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
@@ -33,14 +33,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  final custom = TextEditingController();
   bool _busyCloud = false;
-
-  @override
-  void dispose() {
-    custom.dispose();
-    super.dispose();
-  }
 
   void _save(Prefs p) => ref.read(repoProvider)?.setPrefs(p);
 
@@ -65,7 +58,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Future<void> _importFile() async {
     const group = XTypeGroup(label: 'JSON', extensions: ['json']);
     final onAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    final f = await openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]);
+    final f = await Lock.instance.suppressLockDuring(() => openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
     if (f == null) return;
     try {
       final raw = jsonDecode(utf8.decode(await f.readAsBytes()));
@@ -151,7 +144,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       user = null;
     }
     final ds = TimeOfDay(hour: p.dayStart ~/ 60, minute: p.dayStart % 60);
-    final extra = [for (final x in p.places) if (!placePresets.contains(x)) x];
     final updateInfo = ref.watch(availableUpdateProvider);
     final syncState = ref.watch(syncStateProvider);
 
@@ -159,113 +151,108 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final muted = Pastel.mist.withValues(alpha: 0.85);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(tr('Settings')),
-        centerTitle: false,
-        leading: IconButton(
-          onPressed: () {
-            HapticFeedback.selectionClick();
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-      ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
           children: [
-            // 1. Preferences (Language)
-            SectionHeader(title: tr('Preferences')),
+            // Cohesive Page Header matching other pages
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    tr('Settings'),
+                    style: display(32, color: Colors.white, weight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            ),
+            gap(16),
+
+            // 1. Therapy & Clinical (Priority 1: Core Domain)
+            SectionHeader(title: tr('Therapy & Clinical')),
             AppCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tr('Language'), style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 10),
-                  PillTabs<String>(
-                    items: const [('en', 'English'), ('id', 'Bahasa Indonesia')],
-                    value: L10n.code,
-                    onChanged: (c) {
+                  Text(tr('Hormone Level Units'), style: theme.textTheme.labelLarge),
+                  gap(10),
+                  for (final h in presets) ...[
+                    Row(
+                      children: [
+                        Text(h.name, style: theme.textTheme.bodySmall?.copyWith(color: muted, fontWeight: FontWeight.w600)),
+                        const Spacer(),
+                        for (final u in h.units.keys)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: ChoiceChip(
+                              label: Text(u, style: const TextStyle(fontSize: 12)),
+                              selected: p.unitOf(h.id) == u,
+                              visualDensity: VisualDensity.compact,
+                              onSelected: (_) {
+                                HapticFeedback.selectionClick();
+                                _save(p.copy(units: {...p.units, h.id: u}));
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                    gap(8),
+                  ],
+                  const Divider(height: 20),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Pastel.lilac.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.accessibility_new_rounded, size: 20, color: Pastel.lilac),
+                    ),
+                    title: Text(tr('Injection Site Rotation & Health'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    subtitle: Text(tr('Inspect zone health, rest countdowns, and rotation history.'), style: TextStyle(fontSize: 12, color: muted)),
+                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    onTap: () {
                       HapticFeedback.selectionClick();
-                      L10n.set(c);
-                      _save(p.copy(locale: c));
+                      showSheet(context, const SiteRotationSheet());
+                    },
+                  ),
+                  const Divider(height: 20),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(tr('Day starts at')),
+                    subtitle: Text(tr('Doses past midnight are counted toward yesterday.')),
+                    trailing: Text(ds.format(context), style: const TextStyle(fontWeight: FontWeight.w700)),
+                    onTap: () async {
+                      HapticFeedback.selectionClick();
+                      final t = await showTimePicker(context: context, initialTime: ds);
+                      if (t != null) _save(p.copy(dayStart: t.hour * 60 + t.minute));
+                    },
+                  ),
+                  const Divider(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(tr('Count HRT therapy duration')),
+                    subtitle: Text(tr('Show on History tab.')),
+                    value: p.hrtCounter,
+                    onChanged: (v) {
+                      HapticFeedback.selectionClick();
+                      _save(p.copy(hrtCounter: v));
                     },
                   ),
                 ],
               ),
             ),
 
-            // 2. Appearance
-            SectionHeader(title: tr('Appearance')),
-            AppCard(
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: C.midnight.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Pastel.lilac.withValues(alpha: 0.25)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: C.peony.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: C.peony.withValues(alpha: 0.3)),
-                      ),
-                      child: const Icon(Icons.auto_awesome_rounded, color: Pastel.lilac, size: 22),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr('Arcane Astral'),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            tr('Signature Arcane Astral sanctuary with mystical amethyst and honey gold highlights.'),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Pastel.mist.withValues(alpha: 0.75),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              for (final col in [
-                                const Color(0xFF120E2E),
-                                const Color(0xFF201A4B),
-                                const Color(0xFF9E7CC6),
-                                const Color(0xFFF1BA79),
-                                const Color(0xFFFCE3BD),
-                              ])
-                                Container(
-                                  width: 16,
-                                  height: 16,
-                                  margin: const EdgeInsets.only(right: 6),
-                                  decoration: BoxDecoration(
-                                    color: col,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.15),
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 3. Reminders & Privacy
+            // 2. Reminders & Privacy (Priority 2: Medication Adherence & Notification Protection)
             SectionHeader(title: tr('Reminders & Privacy')),
             AppCard(
               padding: EdgeInsets.zero,
@@ -345,142 +332,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
 
-            // 4. Therapy & Clinical
-            SectionHeader(title: tr('Therapy & Clinical')),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr('Hormone Level Units'), style: theme.textTheme.labelLarge),
-                  gap(8),
-                  for (final h in presets) ...[
-                    Text(h.name, style: theme.textTheme.bodySmall?.copyWith(color: muted)),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        for (final u in h.units.keys)
-                          ChoiceChip(
-                            label: Text(u),
-                            selected: p.unitOf(h.id) == u,
-                            onSelected: (_) {
-                              HapticFeedback.selectionClick();
-                              _save(p.copy(units: {...p.units, h.id: u}));
-                            },
-                          ),
-                      ],
-                    ),
-                    gap(6),
-                  ],
-                  const Divider(height: 24),
-                  Text(tr('Injection & Patch Sites'), style: theme.textTheme.labelLarge),
-                  gap(4),
-                  Text(
-                    tr('Selection order determines next suggested site, alternating from top to bottom.'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                  ),
-                  gap(10),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      side: BorderSide(color: Pastel.lilac.withValues(alpha: 0.3)),
-                    ),
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      showSheet(context, const SiteRotationSheet());
-                    },
-                    icon: const Icon(Icons.accessibility_new_rounded, size: 18, color: Pastel.lilac),
-                    label: Text(tr('View Site Rotation & Health'), style: const TextStyle(color: Pastel.lilac, fontWeight: FontWeight.w600)),
-                  ),
-                  gap(10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      for (final x in [...placePresets, ...extra])
-                        FilterChip(
-                          label: Text(tr(x)),
-                          selected: p.places.contains(x),
-                          onSelected: (v) {
-                            HapticFeedback.selectionClick();
-                            _save(p.copy(places: v ? [...p.places, x] : ([...p.places]..remove(x))));
-                          },
-                        ),
-                    ],
-                  ),
-                  gap(10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: custom,
-                          decoration: InputDecoration(labelText: tr('Other location')),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filledTonal(
-                        onPressed: () {
-                          final v = custom.text.trim();
-                          if (v.isEmpty || p.places.contains(v)) return;
-                          HapticFeedback.lightImpact();
-                          _save(p.copy(places: [...p.places, v]));
-                          custom.clear();
-                        },
-                        icon: const Icon(Icons.add_rounded),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Count HRT therapy duration')),
-                    subtitle: Text(tr('Show on History tab.')),
-                    value: p.hrtCounter,
-                    onChanged: (v) {
-                      HapticFeedback.selectionClick();
-                      _save(p.copy(hrtCounter: v));
-                    },
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Day starts at')),
-                    subtitle: Text(tr('Doses past midnight are counted toward yesterday.')),
-                    trailing: Text(ds.format(context), style: const TextStyle(fontWeight: FontWeight.w700)),
-                    onTap: () async {
-                      HapticFeedback.selectionClick();
-                      final t = await showTimePicker(context: context, initialTime: ds);
-                      if (t != null) _save(p.copy(dayStart: t.hour * 60 + t.minute));
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // 5. Home Screen Widgets
-            SectionHeader(title: tr('Home Screen Widgets')),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr('Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                  ),
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Hide details on widgets')),
-                    subtitle: Text(tr('Widgets only display the app name. Useful if your home screen is seen by others.')),
-                    value: p.widgetHide,
-                    onChanged: (v) {
-                      HapticFeedback.selectionClick();
-                      _save(p.copy(widgetHide: v));
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // 6. Security & Privacy
+            // 3. Security & Privacy (Priority 3: Access Control & Biometrics)
             SectionHeader(title: tr('Security & Privacy')),
             ValueListenableBuilder<AppLockState>(
               valueListenable: Lock.instance.state,
@@ -523,7 +375,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               },
             ),
 
-            // 7. Cloud Sync & Storage
+            // 4. Cloud Sync & Storage (Priority 4: Real-Time Synchronization)
             SectionHeader(title: tr('Cloud Sync & Storage')),
             AppCard(
               padding: const EdgeInsets.all(16),
@@ -682,7 +534,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
 
-            // 8. Manual Backup & Export
+            // 5. Manual Backup & Export (Priority 5: Offline Sovereign Exports)
             SectionHeader(title: tr('Manual Backup & Export')),
             AppCard(
               padding: EdgeInsets.zero,
@@ -748,7 +600,73 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
 
-            // 9. Sample Data
+            // 6. Preferences & Widgets (Priority 6: General Configuration)
+            SectionHeader(title: tr('Preferences')),
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tr('Language'), style: theme.textTheme.labelLarge),
+                  const SizedBox(height: 10),
+                  PillTabs<String>(
+                    items: const [('en', 'English'), ('id', 'Bahasa Indonesia')],
+                    value: L10n.code,
+                    onChanged: (c) {
+                      HapticFeedback.selectionClick();
+                      L10n.set(c);
+                      _save(p.copy(locale: c));
+                    },
+                  ),
+                  const Divider(height: 24),
+                  Text(tr('Home Screen Widgets'), style: theme.textTheme.labelLarge),
+                  gap(4),
+                  Text(
+                    tr('Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(tr('Hide details on widgets')),
+                    subtitle: Text(tr('Widgets only display the app name. Useful if your home screen is seen by others.')),
+                    value: p.widgetHide,
+                    onChanged: (v) {
+                      HapticFeedback.selectionClick();
+                      _save(p.copy(widgetHide: v));
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // 7. Account (Priority 7: User Profile & Session)
+            SectionHeader(title: tr('Account')),
+            AppCard(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(Icons.logout_rounded, C.amber),
+                    title: Text(
+                      tr('Sign out'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      user?.email ?? user?.displayName ?? tr('Guest'),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      Navigator.pop(context);
+                      signOutAll();
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // 8. Sample Data (Priority 8: Development & Testing Utility)
             SectionHeader(title: tr('Sample Data')),
             AppCard(
               child: Column(
@@ -786,34 +704,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
 
-            // 10. Account
-            SectionHeader(title: tr('Account')),
-            AppCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.logout_rounded, C.amber),
-                    title: Text(
-                      tr('Sign out'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      user?.email ?? user?.displayName ?? tr('Guest'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      Navigator.pop(context);
-                      signOutAll();
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // 11. About & Support
+            // 9. About & Support (Priority 9: Documentation, Updates & Transparency)
             SectionHeader(title: tr('About & Support')),
             AppCard(
               padding: EdgeInsets.zero,

@@ -20,50 +20,61 @@ class LogTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hhmm = DateFormat('HH:mm').format(l.at);
+    final primaryDoseStr = '${fmt(l.dose ?? t?.dose ?? 0)} ${t?.doseUnit ?? ''}'.trim();
+    final hasSecondary = t?.secondaryHormoneId != null || l.secondaryDose != null;
+    final secDoseVal = l.secondaryDose ?? t?.secondaryDose;
+    final secDoseStr = (hasSecondary && secDoseVal != null)
+        ? ' + ${fmt(secDoseVal)} ${t?.secondaryDoseUnit ?? 'mg'}'
+        : '';
+    final doseSummary = '$primaryDoseStr$secDoseStr';
     final detail = l.skipped
         ? tr('Skipped, scheduled {0}', [hhmm])
         : [
             hhmm,
-            '${fmt(l.dose ?? t?.dose ?? 0)} ${t?.doseUnit ?? ''}'.trim(),
+            doseSummary,
             if (l.places.isNotEmpty) l.places.map(tr).join(', '),
           ].join(', ');
     final fg = Theme.of(context).colorScheme.onSurface;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: cardBox(context, radius: 22),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        leading: Icon(l.skipped ? Icons.skip_next_rounded : (t?.adm.icon ?? Icons.medication_rounded), color: l.skipped ? fg.withValues(alpha: .45) : C.lagoon),
-        title: Text(
-          t?.name ?? tr('Therapy deleted'),
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: l.skipped ? fg.withValues(alpha: .55) : Colors.white,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(22),
+        child: ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          leading: Icon(l.skipped ? Icons.skip_next_rounded : (t?.adm.icon ?? Icons.medication_rounded), color: l.skipped ? fg.withValues(alpha: .45) : C.lagoon),
+          title: Text(
+            t?.name ?? tr('Therapy deleted'),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: l.skipped ? fg.withValues(alpha: .55) : Colors.white,
+            ),
           ),
-        ),
-        subtitle: Text(
-          l.note == null ? detail : '$detail\n${l.note}',
-          style: TextStyle(
-            color: Pastel.mist.withValues(alpha: 0.85),
-            fontSize: 12,
+          subtitle: Text(
+            l.note == null ? detail : '$detail\n${l.note}',
+            style: TextStyle(
+              color: Pastel.mist.withValues(alpha: 0.85),
+              fontSize: 12,
+            ),
           ),
-        ),
-        isThreeLine: l.note != null,
-        onTap: () async {
-          HapticFeedback.selectionClick();
-          final ids = {for (final s in supplies) s.id};
-          if (l.skipped) {
-            if (await confirm(context, tr('Undo "skip" for this dose?'), ok: tr('Undo')) && context.mounted) {
-              HapticFeedback.lightImpact();
+          isThreeLine: l.note != null,
+          onTap: () async {
+            HapticFeedback.selectionClick();
+            final ids = {for (final s in supplies) s.id};
+            if (l.skipped) {
+              if (await confirm(context, tr('Undo "skip" for this dose?'), ok: tr('Undo')) && context.mounted) {
+                HapticFeedback.lightImpact();
+                ref.read(repoProvider)?.deleteLog(l, ids);
+              }
+            } else if (t != null) {
+              showSheet(context, DoseSheet(t: t!, edit: l, supplies: supplies, prefs: prefs));
+            } else if (await confirm(context, tr('The therapy for this entry was deleted. Delete the entry?')) && context.mounted) {
+              HapticFeedback.mediumImpact();
               ref.read(repoProvider)?.deleteLog(l, ids);
             }
-          } else if (t != null) {
-            showSheet(context, DoseSheet(t: t!, edit: l, supplies: supplies, prefs: prefs));
-          } else if (await confirm(context, tr('The therapy for this entry was deleted. Delete the entry?')) && context.mounted) {
-            HapticFeedback.mediumImpact();
-            ref.read(repoProvider)?.deleteLog(l, ids);
-          }
-        },
+          },
+        ),
       ),
     );
   }

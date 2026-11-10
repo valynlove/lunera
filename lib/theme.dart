@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l10n.dart';
@@ -7,61 +8,61 @@ const appName = 'Lunera';
 const tagline = 'Every Phase, Your Own.';
 
 class C {
-  static const ink = Color(0xFF1E1742);
-  static const mist = Color(0xFFF4F1FD);
-  static const amber = Color(0xFFF1BA79); // Celestial Honey Gold (Arcane Astral)
-  static const gold = Color(0xFFF1BA79); // Celestial Gold alias
-  static const deep = Color(0xFF0F0C27); // Deep Astral Void
-  static const deepCard = Color(0xFF201A4B); // Velvet Arcane Surface
+  static const ink = Color(0xFF17264D); // Deep Indigo
+  static const mist = Color(0xFFDDF6FF); // Ice Blue
+  static const amber = Color(0xFFE8D3A5); // Champagne
+  static const gold = Color(0xFFE8D3A5); // Champagne alias
+  static const deep = Color(0xFF17264D); // Deep Indigo Canvas (#17264D)
+  static const deepCard = Color(0xFF26334F); // Midnight Surface (#26334F)
   static const surface = deepCard; // Design token alias for theme standards
-  static const midnight = Color(0xFF120E2E); // Atmospheric Astral Canvas
-  static const lavender = Color(0xFFBCA5E8); // Soft Amethyst Lavender
-  static const indigo = Color(0xFF2C245E); // Mid-tone Slate Indigo
-  static const moonlight = Color(0xFFFCE3BD); // Starlight Cream Moonlight
+  static const midnight = Color(0xFF17264D); // Atmospheric Deep Indigo Canvas
+  static const lavender = Color(0xFFB9A9E8); // Soft Lavender (#B9A9E8)
+  static const indigo = Color(0xFF26334F); // Midnight Slate (#26334F)
+  static const moonlight = Color(0xFFE8D3A5); // Champagne Moonlight (#E8D3A5)
 
-  static Color lagoon = const Color(0xFFF1BA79); // aksen kedua (Celestial Honey Gold)
-  static Color peony = const Color(0xFF9E7CC6); // aksen utama (Mystical Amethyst)
+  static Color lagoon = const Color(0xFF5BC8E8); // aksen kedua (Sky Cyan)
+  static Color peony = const Color(0xFFB9A9E8); // aksen utama (Lavender)
 }
 
-/// Palet sentuhan pastel dan pendaran surgawi (Arcane Astral) khas Lunera.
+/// Palet sentuhan pastel dan pendaran surgawi (Arcane Astral × Trans Pride) khas Lunera.
 class Pastel {
-  static const lilac = Color(0xFFC4A1EC); // Arcane Lilac: countdown, highlights, rilis aktif
-  static const rose = Color(0xFFF7B5D5); // Rose Quartz: suasana hati hangat, transisi tubuh
+  static const lilac = Color(0xFFB9A9E8); // Lavender: countdown, highlights, rilis aktif
+  static const rose = Color(0xFFF1A4B8); // Blush Pink: suasana hati hangat, transisi tubuh
   static const mint = Color(0xFF8EE3C3); // Sage Astral Mint: dosis selesai, kepatuhan, within range
-  static const sky = Color(0xFFB5DCFD); // Periwinkle Twilight: ketenangan, kurva PK, titik lab
-  static const butter = Color(0xFFF1BA79); // Celestial Honey Gold: pengingat stok, bintang, perhatian lembut
-  static const cream = Color(0xFFFCE3BD); // Moonlight Cream: starlight peach, pendaran rembulan
-  static const mist = Color(0xFFEDE9FA); // Teks kontras lembut di atas permukaan gelap
-  static const glow = Color(0x339E7CC6); // Efek pendaran amethyst lembut
+  static const sky = Color(0xFF5BC8E8); // Sky Cyan: ketenangan, kurva PK, titik lab
+  static const butter = Color(0xFFE8D3A5); // Champagne: pengingat stok, bintang, perhatian lembut
+  static const cream = Color(0xFFE8D3A5); // Champagne: pendaran rembulan & ornamen
+  static const mist = Color(0xFFDDF6FF); // Ice Blue: teks kontras lembut di atas permukaan gelap
+  static const glow = Color(0x33B9A9E8); // Efek pendaran lavender lembut
 }
 
 /// (nama, aksen kedua / pastel, aksen utama)
 const accents = <String, (String, Color, Color)>{
-  'lunera': ('Arcane Astral & Honey Gold', Color(0xFFF1BA79), Color(0xFF9E7CC6)),
-  'rose': ('Rose Quartz & Peony', Color(0xFFF7B5D5), Color(0xFFD946EF)),
-  'lagoon': ('Lagoon Mint & Sky', Color(0xFFB5DCFD), Color(0xFF0D9488)),
-  'solstice': ('Solstice Sunset & Gold', Color(0xFFFEF08A), Color(0xFFEA580C)),
+  'lunera': ('Celestial Bloom & Sky Cyan', Color(0xFF5BC8E8), Color(0xFFB9A9E8)),
+  'rose': ('Blush Pink & Lavender', Color(0xFFF1A4B8), Color(0xFFB9A9E8)),
+  'lagoon': ('Sky Cyan & Ice Blue', Color(0xFFDDF6FF), Color(0xFF5BC8E8)),
+  'solstice': ('Champagne & Cotton Candy', Color(0xFFFFDCE9), Color(0xFFE8D3A5)),
 };
 
 void applyAccent([String? id]) {
-  // Selalu terkunci pada tema tunggal Arcane Astral
-  C.lagoon = const Color(0xFFF1BA79);
-  C.peony = const Color(0xFF9E7CC6);
+  // Selalu terkunci pada tema tunggal Arcane Astral × Trans Pride
+  C.lagoon = const Color(0xFF5BC8E8);
+  C.peony = const Color(0xFFB9A9E8);
 }
 
-/// Warna representasi hormon sesuai palet Arcane Astral.
+/// Warna representasi hormon sesuai palet Arcane Astral × Trans Pride.
 Color hormoneColor(String hormoneId) {
   switch (hormoneId.toLowerCase()) {
     case 'progesterone':
     case 'p4':
-      return C.amber; // Celestial Honey Gold (#F1BA79)
+      return C.amber; // Champagne (#E8D3A5)
     case 'testosterone':
     case 't':
-      return Pastel.sky; // Periwinkle Twilight (#B5DCFD)
+      return Pastel.sky; // Sky Cyan (#5BC8E8)
     case 'estradiol':
     case 'e2':
     default:
-      return C.peony; // Mystical Amethyst (#9E7CC6)
+      return Pastel.rose; // Blush Pink (#F1A4B8)
   }
 }
 
@@ -88,19 +89,37 @@ ThemeData buildTheme([Brightness b = Brightness.dark]) {
     secondary: C.lagoon,
     surface: C.deepCard,
     onSurface: fg,
-    outlineVariant: const Color(0xFF45397A).withValues(alpha: .38),
+    outlineVariant: const Color(0xFF384970).withValues(alpha: .38),
   );
   final base = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: scheme,
     scaffoldBackgroundColor: Colors.transparent,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(
+          fallbackColor: Colors.transparent,
+        ),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(
+          backgroundColor: Colors.transparent,
+        ),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(
+          backgroundColor: Colors.transparent,
+        ),
+        TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(
+          backgroundColor: Colors.transparent,
+        ),
+      },
+    ),
   );
   return base.copyWith(
     textTheme: GoogleFonts.manropeTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF282057).withValues(alpha: .45),
+      fillColor: const Color(0xFF1E2A44).withValues(alpha: .50),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
     ),
     bottomSheetTheme: BottomSheetThemeData(
@@ -129,9 +148,9 @@ Widget appBackdrop(BuildContext context, Widget? child) {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF19143F).withValues(alpha: 0.58),
-              const Color(0xFF110D2C).withValues(alpha: 0.72),
-              const Color(0xFF0B091E).withValues(alpha: 0.85),
+              const Color(0xFF17264D).withValues(alpha: 0.55),
+              const Color(0xFF131D38).withValues(alpha: 0.70),
+              const Color(0xFF0F172A).withValues(alpha: 0.86),
             ],
             stops: const [0.0, 0.45, 1.0],
           ),
@@ -151,13 +170,13 @@ BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = fals
     borderRadius: BorderRadius.circular(radius),
     border: Border.all(
       color: highlight
-          ? const Color(0xFFE8C589).withValues(alpha: 0.55)
-          : const Color(0xFFD6B277).withValues(alpha: 0.28),
+          ? const Color(0xFFE8D3A5).withValues(alpha: 0.58)
+          : const Color(0xFFE8D3A5).withValues(alpha: 0.22),
       width: highlight ? 1.2 : 1.0,
     ),
     boxShadow: [
       BoxShadow(
-        color: (highlight ? C.amber : const Color(0xFF080618)).withValues(alpha: highlight ? .18 : .32),
+        color: (highlight ? C.amber : const Color(0xFF091122)).withValues(alpha: highlight ? .18 : .32),
         blurRadius: highlight ? 24 : 16,
         offset: const Offset(0, 4),
       ),
@@ -224,10 +243,12 @@ class MoonLogo extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
         width: size,
         height: size,
-        child: Image.asset(
-          'assets/images/lunera_celestial_logo.png',
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => CustomPaint(painter: _MoonPainter()),
+        child: ClipOval(
+          child: Image.asset(
+            'assets/images/lunera_celestial_logo.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => CustomPaint(painter: _MoonPainter()),
+          ),
         ),
       );
 }
@@ -240,7 +261,7 @@ class MoonLogoSmall extends StatelessWidget {
         decoration: BoxDecoration(
           color: C.deepCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFD6B277).withValues(alpha: .35)),
+          border: Border.all(color: const Color(0xFFE8D3A5).withValues(alpha: .35)),
         ),
         child: const MoonLogo(size: 28),
       );
@@ -385,9 +406,9 @@ class AuthScene extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFF0F0E33).withValues(alpha: darken ? 0.68 : 0.38),
-                const Color(0xFF14123A).withValues(alpha: darken ? 0.76 : 0.50),
-                const Color(0xFF0B091E).withValues(alpha: darken ? 0.92 : 0.76),
+                const Color(0xFF17264D).withValues(alpha: darken ? 0.68 : 0.38),
+                const Color(0xFF131D38).withValues(alpha: darken ? 0.76 : 0.50),
+                const Color(0xFF0F172A).withValues(alpha: darken ? 0.92 : 0.76),
               ],
               stops: const [0.0, 0.48, 1.0],
             ),
@@ -481,8 +502,8 @@ class AppCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       side: BorderSide(
         color: highlight
-            ? const Color(0xFFE8C589).withValues(alpha: 0.55)
-            : const Color(0xFFD6B277).withValues(alpha: 0.28),
+            ? const Color(0xFFE8D3A5).withValues(alpha: 0.58)
+            : const Color(0xFFE8D3A5).withValues(alpha: 0.22),
         width: highlight ? 1.2 : 1.0,
       ),
     );
@@ -493,7 +514,7 @@ class AppCard extends StatelessWidget {
         shape: shape,
         shadows: [
           BoxShadow(
-            color: (highlight ? C.peony : const Color(0xFF080618)).withValues(alpha: highlight ? .18 : .32),
+            color: (highlight ? C.peony : const Color(0xFF091122)).withValues(alpha: highlight ? .18 : .32),
             blurRadius: highlight ? 24 : 16,
             offset: const Offset(0, 4),
           ),

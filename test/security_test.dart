@@ -81,6 +81,30 @@ void main() {
       expect(Lock.instance.isLockedOut, isFalse);
     });
 
+    test('Lock suppression and grace period protects external activities cleanly', () async {
+      expect(Lock.instance.isLockSuppressed, isFalse);
+
+      // Running within suppressLockDuring marks lock as suppressed
+      final result = await Lock.instance.suppressLockDuring(() async {
+        expect(Lock.instance.isLockSuppressed, isTrue);
+        return 42;
+      }, gracePeriod: const Duration(milliseconds: 80));
+
+      expect(result, equals(42));
+      // Immediately after completion, grace window keeps lock suppressed
+      expect(Lock.instance.isLockSuppressed, isTrue);
+
+      // Wait for grace period to expire
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      expect(Lock.instance.isLockSuppressed, isFalse);
+
+      // Manual extension of grace window
+      Lock.instance.extendGracePeriod(const Duration(milliseconds: 80));
+      expect(Lock.instance.isLockSuppressed, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      expect(Lock.instance.isLockSuppressed, isFalse);
+    });
+
     test('Prefs backward compatibility ignores removed legacy Asteria keys cleanly', () {
       final legacyMap = <String, dynamic>{
         'locale': 'id',

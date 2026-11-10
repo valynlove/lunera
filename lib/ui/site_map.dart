@@ -112,20 +112,20 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // View Selector & Health Summary
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            Expanded(
-              child: PillTabs<int>(
-                items: [
-                  (0, tr('Front')),
-                  (1, tr('Back (Glutes)')),
-                ],
-                value: _view,
-                onChanged: (v) => setState(() => _view = v),
-              ),
+            PillTabs<int>(
+              items: [
+                (0, tr('Front')),
+                (1, tr('Back (Glutes)')),
+              ],
+              value: _view,
+              onChanged: (v) => setState(() => _view = v),
             ),
-            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
@@ -406,12 +406,16 @@ class _SiteCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 5),
-                  Text(
-                    stat.statusText,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: stat.statusColor,
+                  Flexible(
+                    child: Text(
+                      stat.statusText,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: stat.statusColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -544,7 +548,14 @@ class SiteRotationSheet extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(tr('Injection Site Rotation'), style: display(22)),
+              Expanded(
+                child: Text(
+                  tr('Injection Site Rotation'),
+                  style: display(22),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
             ],
           ),

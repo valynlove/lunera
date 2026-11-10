@@ -68,12 +68,25 @@ class AppRoot extends ConsumerStatefulWidget {
 }
 
 class _AppRootState extends ConsumerState<AppRoot> {
+  bool _minSplashDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) setState(() => _minSplashDone = true);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(userProvider.select((u) => u.isLoading));
+    final showSplash = loading || !_minSplashDone;
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      child: !loading ? const AuthGate(key: ValueKey('gate')) : const SplashPage(key: ValueKey('splash')),
+      duration: const Duration(milliseconds: 600),
+      switchInCurve: Curves.easeIn,
+      switchOutCurve: Curves.easeOut,
+      child: !showSplash ? const AuthGate(key: ValueKey('gate')) : const SplashPage(key: ValueKey('splash')),
     );
   }
 }

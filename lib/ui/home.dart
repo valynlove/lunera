@@ -24,9 +24,13 @@ class HomePage extends ConsumerWidget {
     final ths = ref.watch(therapiesProvider).value ?? <Therapy>[];
     final supplies = ref.watch(suppliesProvider).value ?? <Supply>[];
     final prefs = ref.watch(prefsProvider).value ?? const Prefs();
-    final logs = <DoseLog>[...(ref.watch(logsProvider).value ?? <DoseLog>[])]..sort((a, b) => b.at.compareTo(a.at));
+    final logs = <DoseLog>[...(ref.watch(logsProvider).value ?? <DoseLog>[])]
+      ..sort((a, b) => b.at.compareTo(a.at));
     final slots = buildSlots(ths, logs, prefs);
-    final overdue = [for (final s in slots) if (s.status == 'overdue') s];
+    final overdue = [
+      for (final s in slots)
+        if (s.status == 'overdue') s
+    ];
 
     final displayName = ref.watch(displayNameProvider);
     final greet = greeting();
@@ -66,11 +70,14 @@ class HomePage extends ConsumerWidget {
                       if (kDebugMode) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: C.peony.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: C.peony.withValues(alpha: 0.4), width: 1),
+                            border: Border.all(
+                                color: C.peony.withValues(alpha: 0.4),
+                                width: 1),
                           ),
                           child: Text(
                             'DEV',
@@ -87,7 +94,8 @@ class HomePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    DateFormat('EEEE, d MMMM y', L10n.code).format(DateTime.now()),
+                    DateFormat('EEEE, d MMMM y', L10n.code)
+                        .format(DateTime.now()),
                     style: TextStyle(
                       fontSize: 11.5,
                       color: Pastel.cream.withValues(alpha: 0.85),
@@ -125,7 +133,8 @@ class HomePage extends ConsumerWidget {
         if (overdue.isNotEmpty)
           _OverdueAlertBanner(
             overdue: overdue,
-            onReview: () => _showOverdueSheet(context, overdue, logs, supplies, prefs),
+            onReview: () =>
+                _showOverdueSheet(context, overdue, logs, supplies, prefs),
           ),
         AlertsCard(supplies: supplies),
 
@@ -154,7 +163,12 @@ class HomePage extends ConsumerWidget {
         else ...[
           // Hero Dose Cards
           for (final t in ths)
-            DoseCard(t: t, slots: slots, logs: logs, supplies: supplies, prefs: prefs),
+            DoseCard(
+                t: t,
+                slots: slots,
+                logs: logs,
+                supplies: supplies,
+                prefs: prefs),
 
           // 7-day Hormone Trend Curve
           WeekCard(ths: ths, logs: logs),
@@ -172,11 +186,13 @@ class HomePage extends ConsumerWidget {
                 ref.read(tabProvider.notifier).state = 1;
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_month_rounded, size: 16, color: Pastel.lilac),
+                    const Icon(Icons.calendar_month_rounded,
+                        size: 16, color: Pastel.lilac),
                     const SizedBox(width: 8),
                     Text(
                       tr('View full schedule in Calendar'),
@@ -187,7 +203,8 @@ class HomePage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.chevron_right_rounded, size: 16, color: Pastel.lilac),
+                    const Icon(Icons.chevron_right_rounded,
+                        size: 16, color: Pastel.lilac),
                   ],
                 ),
               ),
@@ -200,7 +217,13 @@ class HomePage extends ConsumerWidget {
 }
 
 class DoseCard extends ConsumerWidget {
-  const DoseCard({super.key, required this.t, required this.slots, required this.logs, required this.supplies, required this.prefs});
+  const DoseCard(
+      {super.key,
+      required this.t,
+      required this.slots,
+      required this.logs,
+      required this.supplies,
+      required this.prefs});
   final Therapy t;
   final List<Slot> slots;
   final List<DoseLog> logs; // terbaru di depan
@@ -224,26 +247,48 @@ class DoseCard extends ConsumerWidget {
       final since = last == null ? 0 : daysBetween(last.at, now);
       painter = DialPainter(14, since.clamp(0, 14), idle);
       center = [
-        Text(last == null ? '-' : '$since', style: display(32, color: Colors.white)),
-        Text(last == null ? tr('no entries') : tr('{0?day|days} ago', [since]), style: TextStyle(fontSize: 10, color: Pastel.cream.withValues(alpha: 0.85), fontWeight: FontWeight.w600)),
+        Text(last == null ? '-' : '$since',
+            style: display(32, color: Colors.white)),
+        Text(last == null ? tr('no entries') : tr('{0?day|days} ago', [since]),
+            style: TextStyle(
+                fontSize: 10,
+                color: Pastel.cream.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w600)),
       ];
     } else if (t.daily) {
-      final td = [for (final s in mine) if (sameDay(s.at, today)) s];
+      final td = [
+        for (final s in mine)
+          if (sameDay(s.at, today)) s
+      ];
       final done = td.where((s) => !s.pending).length;
       final nextToday = td.where((s) => s.pending).firstOrNull;
-      painter = HourDialPainter({for (final s in td) s.at.hour: s.status}, idle);
+      painter =
+          HourDialPainter({for (final s in td) s.at.hour: s.status}, idle);
       center = td.isEmpty
           ? [Text(tr('Day off'), style: display(18, color: Colors.white))]
           : nextToday == null
               ? [
-                  const Icon(Icons.check_circle_rounded, color: Pastel.mint, size: 26),
+                  const Icon(Icons.check_circle_rounded,
+                      color: Pastel.mint, size: 26),
                   const SizedBox(height: 2),
-                  Text(tr('{0}/{1}', [done, td.length]), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(tr('{0}/{1}', [done, td.length]),
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white)),
                 ]
               : [
-                  Text(hhmm.format(nextToday.at), style: display(20, color: nextToday.status == 'late' ? C.peony : Colors.white)),
+                  Text(hhmm.format(nextToday.at),
+                      style: display(20,
+                          color: nextToday.status == 'late'
+                              ? C.peony
+                              : Colors.white)),
                   const SizedBox(height: 2),
-                  Text(tr('{0}/{1}', [done, td.length]), style: TextStyle(fontSize: 10, color: Pastel.cream.withValues(alpha: 0.85), fontWeight: FontWeight.w600)),
+                  Text(tr('{0}/{1}', [done, td.length]),
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: Pastel.cream.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w600)),
                 ];
     } else {
       final cycle = cycleOf(t), n = cycle.clamp(4, 60);
@@ -255,12 +300,19 @@ class DoseCard extends ConsumerWidget {
           ? [
               Text(tr('Today'), style: display(20, color: C.amber)),
               if (next != null)
-                Text(hhmm.format(next.at), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
+                Text(hhmm.format(next.at),
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
             ]
           : [
-              Text('${left.abs()}', style: display(32, color: late ? C.peony : Colors.white)),
+              Text('${left.abs()}',
+                  style: display(32, color: late ? C.peony : Colors.white)),
               Text(
-                late ? tr('{0?day|days} late', [left.abs()]) : tr('{0?day|days} left', [left.abs()]),
+                late
+                    ? tr('{0?day|days} late', [left.abs()])
+                    : tr('{0?day|days} left', [left.abs()]),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
@@ -287,7 +339,14 @@ class DoseCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(50),
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    showSheet(context, DoseSheet(t: t, slot: next, supplies: supplies, prefs: prefs, suggested: place));
+                    showSheet(
+                        context,
+                        DoseSheet(
+                            t: t,
+                            slot: next,
+                            supplies: supplies,
+                            prefs: prefs,
+                            suggested: place));
                   },
                   child: SizedBox(
                     width: 100,
@@ -295,8 +354,10 @@ class DoseCard extends ConsumerWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        CustomPaint(size: const Size(100, 100), painter: painter),
-                        Column(mainAxisSize: MainAxisSize.min, children: center),
+                        CustomPaint(
+                            size: const Size(100, 100), painter: painter),
+                        Column(
+                            mainAxisSize: MainAxisSize.min, children: center),
                       ],
                     ),
                   ),
@@ -313,10 +374,13 @@ class DoseCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             t.name,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -324,12 +388,15 @@ class DoseCard extends ConsumerWidget {
                         InkWell(
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            showSheet(context, TherapySheet(supplies: supplies, initial: t));
+                            showSheet(context,
+                                TherapySheet(supplies: supplies, initial: t));
                           },
                           borderRadius: BorderRadius.circular(8),
                           child: Padding(
                             padding: const EdgeInsets.all(4),
-                            child: Icon(Icons.edit_outlined, size: 16, color: Pastel.mist.withValues(alpha: 0.8)),
+                            child: Icon(Icons.edit_outlined,
+                                size: 16,
+                                color: Pastel.mist.withValues(alpha: 0.8)),
                           ),
                         ),
                       ],
@@ -340,11 +407,13 @@ class DoseCard extends ConsumerWidget {
                       runSpacing: 4,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: C.peony.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: C.peony.withValues(alpha: 0.45)),
+                            border: Border.all(
+                                color: C.peony.withValues(alpha: 0.45)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -353,13 +422,17 @@ class DoseCard extends ConsumerWidget {
                               const SizedBox(width: 4),
                               Text(
                                 '${fmt(t.dose)} ${t.doseUnit}',
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white),
                               ),
                             ],
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
@@ -367,11 +440,16 @@ class DoseCard extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.event_repeat_rounded, size: 12, color: Pastel.cream.withValues(alpha: 0.85)),
+                              Icon(Icons.event_repeat_rounded,
+                                  size: 12,
+                                  color: Pastel.cream.withValues(alpha: 0.85)),
                               const SizedBox(width: 4),
                               Text(
                                 scheduleText(t),
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Pastel.mist.withValues(alpha: 0.9)),
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Pastel.mist.withValues(alpha: 0.9)),
                               ),
                             ],
                           ),
@@ -382,12 +460,16 @@ class DoseCard extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.my_location_rounded, size: 13, color: Pastel.mint),
+                          const Icon(Icons.my_location_rounded,
+                              size: 13, color: Pastel.mint),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
                               tr('next: {0}', [tr(place)]),
-                              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Pastel.mint),
+                              style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Pastel.mint),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -407,19 +489,32 @@ class DoseCard extends ConsumerWidget {
                 child: FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    showSheet(context, DoseSheet(t: t, slot: next, supplies: supplies, prefs: prefs, suggested: place));
+                    showSheet(
+                        context,
+                        DoseSheet(
+                            t: t,
+                            slot: next,
+                            supplies: supplies,
+                            prefs: prefs,
+                            suggested: place));
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: C.peony,
                     foregroundColor: Colors.white,
                     shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                    textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 11),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 13),
                     elevation: 2,
                     shadowColor: C.peony.withValues(alpha: 0.4),
                   ),
                   icon: const Icon(Icons.check_rounded, size: 18),
-                  label: Text(t.route == 'inj' ? tr('Log injection') : tr('Log dose')),
+                  label: Text(
+                    t.route == 'inj' ? tr('Log injection') : tr('Log dose'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
               if (t.route == 'inj') ...[
@@ -446,7 +541,8 @@ class DoseCard extends ConsumerWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.self_improvement_rounded, size: 20, color: Pastel.lilac),
+                  icon: const Icon(Icons.self_improvement_rounded,
+                      size: 20, color: Pastel.lilac),
                 ),
               ],
               if (next != null && !t.asNeeded) ...[
@@ -457,11 +553,15 @@ class DoseCard extends ConsumerWidget {
                     skipSlot(context, ref, next);
                   },
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   ),
                   child: Text(
                     tr('Skip'),
-                    style: TextStyle(fontSize: 12, color: Pastel.mist.withValues(alpha: 0.8), fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Pastel.mist.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -475,8 +575,13 @@ class DoseCard extends ConsumerWidget {
 
 /// Tandai satu jadwal sebagai sengaja dilewati.
 Future<void> skipSlot(BuildContext context, WidgetRef ref, Slot s) async {
-  if (!await confirm(context, tr('Skip this dose? It won\'t count as taken and its reminder will stop.'), ok: tr('Skip'))) return;
-  ref.read(repoProvider)?.logDose(DoseLog(id: '', therapyId: s.t.id, at: s.at, skipped: true, slot: slotKey(s.at)));
+  if (!await confirm(context,
+      tr('Skip this dose? It won\'t count as taken and its reminder will stop.'),
+      ok: tr('Skip'))) {
+    return;
+  }
+  ref.read(repoProvider)?.logDose(DoseLog(
+      id: '', therapyId: s.t.id, at: s.at, skipped: true, slot: slotKey(s.at)));
 }
 
 /// Satu tick per hari dalam siklus.
@@ -497,12 +602,14 @@ class DialPainter extends CustomPainter {
         ..strokeWidth = math.max(2.0, w)
         ..strokeCap = StrokeCap.round
         ..color = i == cur ? C.peony : (i < elapsed ? Pastel.mint : idle);
-      canvas.drawLine(c + Offset(math.cos(a), math.sin(a)) * (r - len), c + Offset(math.cos(a), math.sin(a)) * (r - 2), p);
+      canvas.drawLine(c + Offset(math.cos(a), math.sin(a)) * (r - len),
+          c + Offset(math.cos(a), math.sin(a)) * (r - 2), p);
     }
   }
 
   @override
-  bool shouldRepaint(DialPainter o) => o.n != n || o.elapsed != elapsed || o.idle != idle;
+  bool shouldRepaint(DialPainter o) =>
+      o.n != n || o.elapsed != elapsed || o.idle != idle;
 }
 
 /// 24 tick = 24 jam. Jam yang punya jadwal ditandai: selesai (mint), terlambat (peony), menunggu (amber pudar).
@@ -529,7 +636,8 @@ class HourDialPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round
         ..color = color;
       final len = (st == null ? 14.0 : 26.0) * scale;
-      canvas.drawLine(c + Offset(math.cos(a), math.sin(a)) * (r - len), c + Offset(math.cos(a), math.sin(a)) * (r - 2), p);
+      canvas.drawLine(c + Offset(math.cos(a), math.sin(a)) * (r - len),
+          c + Offset(math.cos(a), math.sin(a)) * (r - 2), p);
     }
   }
 
@@ -538,7 +646,12 @@ class HourDialPainter extends CustomPainter {
 }
 
 class SlotTile extends ConsumerWidget {
-  const SlotTile({super.key, required this.s, required this.logs, required this.supplies, required this.prefs});
+  const SlotTile(
+      {super.key,
+      required this.s,
+      required this.logs,
+      required this.supplies,
+      required this.prefs});
   final Slot s;
   final List<DoseLog> logs;
   final List<Supply> supplies;
@@ -548,7 +661,9 @@ class SlotTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = s.t, fg = Theme.of(context).colorScheme.onSurface;
     final late = s.status == 'overdue' || s.status == 'late';
-    final label = sameDay(s.at, logicalToday(prefs)) ? DateFormat('HH:mm').format(s.at) : DateFormat('EEE d MMM, HH:mm', L10n.code).format(s.at);
+    final label = sameDay(s.at, logicalToday(prefs))
+        ? DateFormat('HH:mm').format(s.at)
+        : DateFormat('EEE d MMM, HH:mm', L10n.code).format(s.at);
     void open() {
       HapticFeedback.lightImpact();
       showSheet(
@@ -563,24 +678,41 @@ class SlotTile extends ConsumerWidget {
         ),
       );
     }
+
     Future<void> undoSkip() async {
       HapticFeedback.mediumImpact();
-      if (await confirm(context, tr('Undo "skip" for this dose?'), ok: tr('Undo'))) ref.read(repoProvider)?.deleteLog(s.log!, {});
+      if (await confirm(context, tr('Undo "skip" for this dose?'),
+          ok: tr('Undo'))) {
+        ref.read(repoProvider)?.deleteLog(s.log!, {});
+      }
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: cardBox(context, radius: 22).copyWith(
-        border: late && s.pending ? Border.all(color: C.peony.withValues(alpha: .5), width: 1.5) : null,
+        border: late && s.pending
+            ? Border.all(color: C.peony.withValues(alpha: .5), width: 1.5)
+            : null,
       ),
       child: ListTile(
         onTap: s.skipped ? undoSkip : open,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        leading: Icon(s.skipped ? Icons.skip_next_rounded : t.adm.icon, color: s.taken ? C.lagoon : (s.skipped ? fg.withValues(alpha: .45) : (late ? C.peony : fg))),
-        title: Text(t.name, style: TextStyle(fontWeight: FontWeight.w700, color: s.skipped ? fg.withValues(alpha: .7) : Colors.white)),
+        leading: Icon(s.skipped ? Icons.skip_next_rounded : t.adm.icon,
+            color: s.taken
+                ? C.lagoon
+                : (s.skipped
+                    ? fg.withValues(alpha: .45)
+                    : (late ? C.peony : fg))),
+        title: Text(t.name,
+            style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: s.skipped ? fg.withValues(alpha: .7) : Colors.white)),
         subtitle: Text(
-          s.skipped ? tr('Skipped, scheduled {0}', [label]) : '$label, ${fmt(t.dose)} ${t.doseUnit}',
-          style: TextStyle(color: Pastel.mist.withValues(alpha: 0.85), fontSize: 12),
+          s.skipped
+              ? tr('Skipped, scheduled {0}', [label])
+              : '$label, ${fmt(t.dose)} ${t.doseUnit}',
+          style: TextStyle(
+              color: Pastel.mist.withValues(alpha: 0.85), fontSize: 12),
         ),
         trailing: s.taken
             ? Icon(Icons.check_circle_rounded, color: C.lagoon)
@@ -599,7 +731,8 @@ class SlotTile extends ConsumerWidget {
                       onPressed: open,
                       style: FilledButton.styleFrom(
                         visualDensity: VisualDensity.compact,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(tr('Log')),
                     ),
@@ -618,12 +751,25 @@ class AlertsCard extends ConsumerWidget {
     final alerts = <(IconData, String)>[];
     for (final s in supplies) {
       if (s.expired) {
-        alerts.add((Icons.error_outline_rounded, tr('{0} has expired', [s.name])));
+        alerts.add(
+            (Icons.error_outline_rounded, tr('{0} has expired', [s.name])));
         continue;
       }
-      if (s.low) alerts.add((Icons.inventory_2_outlined, s.generic ? tr('{0} has {1} left', [s.name, fmt(s.qty)]) : tr('{0} has {1} {1?dose|doses} left', [s.name, s.doses])));
+      if (s.low) {
+        alerts.add((
+          Icons.inventory_2_outlined,
+          s.generic
+              ? tr('{0} has {1} left', [s.name, fmt(s.qty)])
+              : tr('{0} has {1} {1?dose|doses} left', [s.name, s.doses])
+        ));
+      }
       final d = s.daysToExpiry;
-      if (d != null && d <= 30) alerts.add((Icons.event_busy_outlined, tr('{0} expires in {1} {1?day|days}', [s.name, d])));
+      if (d != null && d <= 30) {
+        alerts.add((
+          Icons.event_busy_outlined,
+          tr('{0} expires in {1} {1?day|days}', [s.name, d])
+        ));
+      }
     }
     if (alerts.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -639,12 +785,14 @@ class AlertsCard extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: cardBox(context, radius: 20).copyWith(
-              border: Border.all(color: C.amber.withValues(alpha: .65), width: 1.2),
+              border:
+                  Border.all(color: C.amber.withValues(alpha: .65), width: 1.2),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                iconBadge(Icons.inventory_2_rounded, C.amber, size: 36, iconSize: 18),
+                iconBadge(Icons.inventory_2_rounded, C.amber,
+                    size: 36, iconSize: 18),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -654,20 +802,26 @@ class AlertsCard extends ConsumerWidget {
                         alerts.length == 1
                             ? tr('Supply alert ({0})', [alerts.length])
                             : tr('Supply alerts ({0})', [alerts.length]),
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Pastel.butter),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Pastel.butter),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         alerts.first.$2,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11, color: Pastel.mist.withValues(alpha: 0.85)),
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: Pastel.mist.withValues(alpha: 0.85)),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.chevron_right_rounded, size: 18, color: C.amber.withValues(alpha: 0.8)),
+                Icon(Icons.chevron_right_rounded,
+                    size: 18, color: C.amber.withValues(alpha: 0.8)),
               ],
             ),
           ),
@@ -715,7 +869,8 @@ class _OverdueAlertBanner extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                iconBadge(Icons.warning_amber_rounded, C.peony, size: 36, iconSize: 20),
+                iconBadge(Icons.warning_amber_rounded, C.peony,
+                    size: 36, iconSize: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -747,10 +902,14 @@ class _OverdueAlertBanner extends StatelessWidget {
                   },
                   style: FilledButton.styleFrom(
                     visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text(tr('Review'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                  child: Text(tr('Review'),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 12)),
                 ),
               ],
             ),
@@ -783,7 +942,7 @@ void _showOverdueSheet(
           color: C.deepCard,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(
-            color: const Color(0xFFD6B277).withValues(alpha: 0.35),
+            color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
             width: 1.2,
           ),
         ),
@@ -804,7 +963,8 @@ void _showOverdueSheet(
             const SizedBox(height: 16),
             Row(
               children: [
-                iconBadge(Icons.warning_amber_rounded, C.peony, size: 36, iconSize: 20),
+                iconBadge(Icons.warning_amber_rounded, C.peony,
+                    size: 36, iconSize: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -912,15 +1072,23 @@ class WeekCard extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                iconBadge(Icons.auto_graph_rounded, C.peony, size: 28, iconSize: 16),
-                const SizedBox(width: 8),
-                Text(
-                  tr('Hormone Trend'),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
-                ),
-              ],
+            Expanded(
+              child: Row(
+                children: [
+                  iconBadge(Icons.auto_graph_rounded, C.peony,
+                      size: 28, iconSize: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tr('Hormone Trend'),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
             InkWell(
               onTap: () {
@@ -935,10 +1103,14 @@ class WeekCard extends ConsumerWidget {
                   children: [
                     Text(
                       tr('See Detail'),
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Pastel.lilac),
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Pastel.lilac),
                     ),
                     const SizedBox(width: 2),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Pastel.lilac),
+                    const Icon(Icons.arrow_forward_ios_rounded,
+                        size: 10, color: Pastel.lilac),
                   ],
                 ),
               ),
@@ -964,7 +1136,11 @@ class WeekCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    h == 'estradiol' ? 'Estradiol (E2)' : (h == 'progesterone' ? 'Progesterone (P4)' : presetOf(h).name),
+                    h == 'estradiol'
+                        ? 'Estradiol (E2)'
+                        : (h == 'progesterone'
+                            ? 'Progesterone (P4)'
+                            : presetOf(h).name),
                     style: TextStyle(
                       fontSize: 11,
                       color: Pastel.mist.withValues(alpha: 0.88),
@@ -988,7 +1164,11 @@ class WeekCard extends ConsumerWidget {
             borderData: FlBorderData(show: false),
             lineTouchData: const LineTouchData(enabled: false),
             extraLinesData: ExtraLinesData(verticalLines: [
-              VerticalLine(x: 3, color: Pastel.lilac.withValues(alpha: .40), strokeWidth: 1.5, dashArray: [4, 4]),
+              VerticalLine(
+                  x: 3,
+                  color: Pastel.lilac.withValues(alpha: .40),
+                  strokeWidth: 1.5,
+                  dashArray: [4, 4]),
             ]),
             lineBarsData: lines,
           )),
@@ -996,7 +1176,10 @@ class WeekCard extends ConsumerWidget {
         gap(4),
         Text(
           summaryTexts.join('  •  '),
-          style: TextStyle(fontSize: 11, color: Pastel.mist.withValues(alpha: 0.85), fontWeight: FontWeight.w500),
+          style: TextStyle(
+              fontSize: 11,
+              color: Pastel.mist.withValues(alpha: 0.85),
+              fontWeight: FontWeight.w500),
         ),
       ]),
     );

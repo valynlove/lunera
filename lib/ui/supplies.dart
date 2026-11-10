@@ -11,119 +11,155 @@ class SuppliesPage extends ConsumerWidget {
   const SuppliesPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = <Supply>[...(ref.watch(suppliesProvider).value ?? <Supply>[])]..sort((a, b) => a.name.compareTo(b.name));
+    final items = <Supply>[...(ref.watch(suppliesProvider).value ?? <Supply>[])]
+      ..sort((a, b) => a.name.compareTo(b.name));
     final meds = items.where((s) => !s.generic).toList();
     final gens = items.where((s) => s.generic).toList();
     final lowCount = items.where((s) => s.low).length;
     Widget head(String s) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 6, 0, 10),
-        child: Text(s, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)));
-    return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
-      Text(tr('Supplies'), style: display(40)),
-      const SizedBox(height: 14),
-      Row(
+        child: Text(s,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700)));
+    return ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: () => showSheet(context, const SupplySheet()),
-              icon: const Icon(Icons.add_rounded, size: 20),
-              label: Text(tr('Add Supply')),
-              style: FilledButton.styleFrom(
-                backgroundColor: C.peony,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-                elevation: 2,
-                shadowColor: C.peony.withValues(alpha: 0.35),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => const PickupAssistantSheet(),
-              ),
-              icon: const Icon(Icons.local_shipping_outlined, size: 20),
-              label: Text(tr('Pickup Assistant')),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Pastel.lilac,
-                backgroundColor: const Color(0xFF19143F).withValues(alpha: 0.45),
-                side: BorderSide(
-                  color: const Color(0xFFD6B277).withValues(alpha: 0.35),
-                  width: 1.1,
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
-              ),
-            ),
-          ),
-        ],
-      ),
-      gap(18),
-      if (items.isEmpty)
-        Padding(padding: const EdgeInsets.only(top: 40), child: Text(tr('No supplies yet. Track medication, syringes, needles, and other supplies here.')))
-      else
-        Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: (lowCount > 0 ? C.amber : C.peony).withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: (lowCount > 0 ? C.amber : C.peony).withValues(alpha: 0.25)),
-          ),
-          child: Row(
+          Text(tr('Supplies'), style: display(40)),
+          const SizedBox(height: 14),
+          Row(
             children: [
-              Icon(
-                lowCount > 0 ? Icons.inventory_2_outlined : Icons.local_shipping_outlined,
-                color: lowCount > 0 ? C.amber : C.peony,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      lowCount > 0
-                          ? tr('{0} {0?item is|items are} running low', [lowCount])
-                          : tr('Discreet Shipping & Pickup Assistant'),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      lowCount > 0
-                          ? tr('Generate a discreet "Hold at Agent" delivery order template.')
-                          : tr('Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.'),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
+                child: FilledButton.icon(
+                  onPressed: () => showSheet(context, const SupplySheet()),
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: Text(tr('Add Supply'),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: C.peony,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 13.5),
+                    elevation: 2,
+                    shadowColor: C.peony.withValues(alpha: 0.35),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => const PickupAssistantSheet(),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const PickupAssistantSheet(),
+                  ),
+                  icon: const Icon(Icons.local_shipping_outlined, size: 20),
+                  label: Text(tr('Pickup Assistant'),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Pastel.lilac,
+                    backgroundColor:
+                        const Color(0xFF17264D).withValues(alpha: 0.45),
+                    side: BorderSide(
+                      color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
+                      width: 1.1,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13.5),
+                  ),
                 ),
-                child: Text(tr('Open')),
               ),
             ],
           ),
-        ),
-      if (meds.isNotEmpty) ...[head(tr('Medication')), for (final s in meds) _MedCard(s)],
-      if (gens.isNotEmpty) ...[gap(8), head(tr('Equipment')), for (final s in gens) _GenericCard(s)],
-    ]);
+          gap(18),
+          if (items.isEmpty)
+            Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Text(tr(
+                    'No supplies yet. Track medication, syringes, needles, and other supplies here.')))
+          else
+            Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color:
+                    (lowCount > 0 ? C.amber : C.peony).withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: (lowCount > 0 ? C.amber : C.peony)
+                        .withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    lowCount > 0
+                        ? Icons.inventory_2_outlined
+                        : Icons.local_shipping_outlined,
+                    color: lowCount > 0 ? C.amber : C.peony,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          lowCount > 0
+                              ? tr('{0} {0?item is|items are} running low',
+                                  [lowCount])
+                              : tr('Discreet Shipping & Pickup Assistant'),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 13),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          lowCount > 0
+                              ? tr(
+                                  'Generate a discreet "Hold at Agent" delivery order template.')
+                              : tr(
+                                  'Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () => showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const PickupAssistantSheet(),
+                    ),
+                    child: Text(tr('Open')),
+                  ),
+                ],
+              ),
+            ),
+          if (meds.isNotEmpty) ...[
+            head(tr('Medication')),
+            for (final s in meds) _MedCard(s)
+          ],
+          if (gens.isNotEmpty) ...[
+            gap(8),
+            head(tr('Equipment')),
+            for (final s in gens) _GenericCard(s)
+          ],
+        ]);
   }
 }
 
@@ -146,28 +182,49 @@ class _MedCard extends ConsumerWidget {
           onTap: () => showSheet(context, SupplySheet(initial: s)),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Expanded(child: Text(s.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
-                IconButton.filledTonal(onPressed: () => repo?.adjustSupply(s.id, -1), icon: const Icon(Icons.remove_rounded)),
-                Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Text('${fmt(s.qty)} ${s.unitLabel}', style: display(20))),
-                IconButton.filledTonal(onPressed: () => repo?.adjustSupply(s.id, 1), icon: const Icon(Icons.add_rounded)),
+                Expanded(
+                    child: Text(s.name,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700))),
+                IconButton.filledTonal(
+                    onPressed: () => repo?.adjustSupply(s.id, -1),
+                    icon: const Icon(Icons.remove_rounded)),
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text('${fmt(s.qty)} ${s.unitLabel}',
+                        style: display(20))),
+                IconButton.filledTonal(
+                    onPressed: () => repo?.adjustSupply(s.id, 1),
+                    icon: const Icon(Icons.add_rounded)),
               ]),
               gap(14),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
-                  value: s.initial <= 0 ? 0 : (s.qty / s.initial).clamp(0.0, 1.0),
+                  value:
+                      s.initial <= 0 ? 0 : (s.qty / s.initial).clamp(0.0, 1.0),
                   minHeight: 10,
                   color: color,
                   backgroundColor: color.withValues(alpha: .18),
                 ),
               ),
               gap(10),
-              Text(low ? tr('{0} {0?dose|doses} left, restock soon', [s.doses]) : tr('{0} {0?dose|doses} left', [s.doses])),
+              Text(low
+                  ? tr('{0} {0?dose|doses} left, restock soon', [s.doses])
+                  : tr('{0} {0?dose|doses} left', [s.doses])),
               if (s.expiry != null)
-                Text(tr(expired ? 'Expired since {0}' : 'Expires {0}', [DateFormat('d MMM y', L10n.code).format(s.expiry!)]),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: expired ? C.peony : null)),
+                Text(
+                    tr(expired ? 'Expired since {0}' : 'Expires {0}',
+                        [DateFormat('d MMM y', L10n.code).format(s.expiry!)]),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: expired ? C.peony : null)),
             ]),
           ),
         ),
@@ -194,12 +251,22 @@ class _GenericCard extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 10, 10, 10),
             child: Row(children: [
-              Icon(genericTypes[s.gtype]?.$2 ?? Icons.inventory_2_rounded, color: low ? C.amber : C.lagoon),
+              Icon(genericTypes[s.gtype]?.$2 ?? Icons.inventory_2_rounded,
+                  color: low ? C.amber : C.lagoon),
               const SizedBox(width: 14),
-              Expanded(child: Text(s.name, style: const TextStyle(fontWeight: FontWeight.w700))),
-              IconButton.filledTonal(onPressed: () => repo?.adjustSupply(s.id, -1), icon: const Icon(Icons.remove_rounded)),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Text(fmt(s.qty), style: display(20, color: low ? C.amber : null))),
-              IconButton.filledTonal(onPressed: () => repo?.adjustSupply(s.id, 1), icon: const Icon(Icons.add_rounded)),
+              Expanded(
+                  child: Text(s.name,
+                      style: const TextStyle(fontWeight: FontWeight.w700))),
+              IconButton.filledTonal(
+                  onPressed: () => repo?.adjustSupply(s.id, -1),
+                  icon: const Icon(Icons.remove_rounded)),
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(fmt(s.qty),
+                      style: display(20, color: low ? C.amber : null))),
+              IconButton.filledTonal(
+                  onPressed: () => repo?.adjustSupply(s.id, 1),
+                  icon: const Icon(Icons.add_rounded)),
             ]),
           ),
         ),
@@ -220,10 +287,16 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
   late bool generic = widget.initial?.generic ?? false;
   late String gtype = widget.initial?.gtype ?? 'syringe';
   late final name = TextEditingController(text: widget.initial?.name ?? '');
-  late final qty = TextEditingController(text: widget.initial == null ? '' : fmt(widget.initial!.qty));
-  late final per = TextEditingController(text: fmt(widget.initial?.perDose ?? 1));
-  late final label = TextEditingController(text: widget.initial?.unitLabel ?? 'vial');
-  late final dpu = TextEditingController(text: widget.initial?.dosePerUnit == null ? '' : fmt(widget.initial!.dosePerUnit!));
+  late final qty = TextEditingController(
+      text: widget.initial == null ? '' : fmt(widget.initial!.qty));
+  late final per =
+      TextEditingController(text: fmt(widget.initial?.perDose ?? 1));
+  late final label =
+      TextEditingController(text: widget.initial?.unitLabel ?? 'vial');
+  late final dpu = TextEditingController(
+      text: widget.initial?.dosePerUnit == null
+          ? ''
+          : fmt(widget.initial!.dosePerUnit!));
   late DateTime? expiry = widget.initial?.expiry;
 
   void _save() {
@@ -278,49 +351,95 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
       gap(16),
       if (!editing)
         Wrap(spacing: 8, children: [
-          ChoiceChip(label: Text(tr('Medication')), selected: !generic, onSelected: (_) => setState(() => generic = false)),
-          ChoiceChip(label: Text(tr('Equipment')), selected: generic, onSelected: (_) => setState(() => generic = true)),
+          ChoiceChip(
+              label: Text(tr('Medication')),
+              selected: !generic,
+              onSelected: (_) => setState(() => generic = false)),
+          ChoiceChip(
+              label: Text(tr('Equipment')),
+              selected: generic,
+              onSelected: (_) => setState(() => generic = true)),
         ]),
       gap(12),
       if (generic) ...[
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final e in genericTypes.entries)
-            ChoiceChip(avatar: Icon(e.value.$2, size: 16), label: Text(tr(e.value.$1)), selected: gtype == e.key, onSelected: (_) => setState(() => gtype = e.key)),
+            ChoiceChip(
+                avatar: Icon(e.value.$2, size: 16),
+                label: Text(tr(e.value.$1)),
+                selected: gtype == e.key,
+                onSelected: (_) => setState(() => gtype = e.key)),
         ]),
         gap(10),
-        TextField(controller: name, decoration: InputDecoration(labelText: tr('Name (optional)'))),
+        TextField(
+            controller: name,
+            decoration: InputDecoration(labelText: tr('Name (optional)'))),
         gap(10),
-        TextField(controller: qty, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Quantity'))),
+        TextField(
+            controller: qty,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: tr('Quantity'))),
       ] else ...[
-        TextField(controller: name, decoration: InputDecoration(labelText: tr('Name (e.g. Estradiol valerate 40 mg/mL)'))),
+        TextField(
+            controller: name,
+            decoration: InputDecoration(
+                labelText: tr('Name (e.g. Estradiol valerate 40 mg/mL)'))),
         gap(10),
         Row(children: [
-          Expanded(child: TextField(controller: qty, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Quantity')))),
+          Expanded(
+              child: TextField(
+                  controller: qty,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(labelText: tr('Quantity')))),
           const SizedBox(width: 10),
-          Expanded(child: TextField(controller: label, decoration: InputDecoration(labelText: tr('Unit (vial, mL, pill)')))),
+          Expanded(
+              child: TextField(
+                  controller: label,
+                  decoration:
+                      InputDecoration(labelText: tr('Unit (vial, mL, pill)')))),
         ]),
         gap(10),
-        TextField(controller: per, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Used per dose (unit above)'))),
+        TextField(
+            controller: per,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration:
+                InputDecoration(labelText: tr('Used per dose (unit above)'))),
         gap(10),
         TextField(
           controller: dpu,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: tr('Strength: mg per unit (optional)'), helperText: tr('E.g. 40 for 40 mg/mL. If filled in, usage is calculated from the dose (mg).')),
+          decoration: InputDecoration(
+              labelText: tr('Strength: mg per unit (optional)'),
+              helperText: tr(
+                  'E.g. 40 for 40 mg/mL. If filled in, usage is calculated from the dose (mg).')),
         ),
         gap(10),
         OutlinedButton.icon(
           onPressed: () async {
-            final d = await showDatePicker(context: context, initialDate: expiry ?? DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2100));
+            final d = await showDatePicker(
+                context: context,
+                initialDate: expiry ?? DateTime.now(),
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2100));
             if (d != null) setState(() => expiry = d);
           },
           icon: const Icon(Icons.event_rounded, size: 18),
-          label: Text(expiry == null ? tr('Expiry date (optional)') : DateFormat('d MMM y', L10n.code).format(expiry!)),
+          label: Text(expiry == null
+              ? tr('Expiry date (optional)')
+              : DateFormat('d MMM y', L10n.code).format(expiry!)),
         ),
       ],
       gap(20),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: Text(tr('Delete'))),
-        Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save supply'), _save)),
+        if (editing)
+          TextButton.icon(
+              onPressed: _delete,
+              icon: const Icon(Icons.delete_outline_rounded),
+              label: Text(tr('Delete'))),
+        Expanded(
+            child: pillButton(
+                editing ? tr('Save changes') : tr('Save supply'), _save)),
       ]),
     ]);
   }

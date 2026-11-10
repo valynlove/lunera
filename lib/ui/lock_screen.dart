@@ -40,7 +40,12 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
     final st = Lock.instance.state.value;
     if (s == AppLifecycleState.paused) leftAt = DateTime.now();
     if (s == AppLifecycleState.resumed && st.enabled && leftAt != null && !locked) {
-      if (DateTime.now().difference(leftAt!) >= Duration(minutes: st.delayMin)) {
+      if (Lock.instance.isLockSuppressed) {
+        leftAt = DateTime.now();
+        return;
+      }
+      final requiredDelay = st.delayMin == 0 ? const Duration(seconds: 3) : Duration(minutes: st.delayMin);
+      if (DateTime.now().difference(leftAt!) >= requiredDelay) {
         Lock.instance.sessionUnlocked = false;
         setState(() => locked = true);
       }
@@ -59,7 +64,7 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
       ]);
 }
 
-/// Papan angka dengan penanda 6 titik bertema celestial.
+/// Papan angka dengan penanda 6 titik bertema celestial (terinspirasi dari konsep Wall o' Pay).
 class PinPad extends StatelessWidget {
   const PinPad({
     super.key,
@@ -67,76 +72,62 @@ class PinPad extends StatelessWidget {
     required this.onChanged,
     this.length = 6,
     this.onBio,
+    this.biometricIcon = Icons.fingerprint_rounded,
+    this.biometricTooltip,
   });
 
   final String value;
   final ValueChanged<String> onChanged;
   final int length;
   final VoidCallback? onBio;
+  final IconData biometricIcon;
+  final String? biometricTooltip;
 
   Widget _key({
     required Widget child,
     VoidCallback? tap,
     Color? highlightColor,
-  }) =>
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: SizedBox(
-          width: 74,
-          height: 74,
-          child: Material(
-            color: tap == null
-                ? Colors.transparent
-                : Colors.white.withValues(alpha: 0.08),
-            shape: CircleBorder(
-              side: BorderSide(
-                color: tap == null
-                    ? Colors.transparent
-                    : Colors.white.withValues(alpha: 0.12),
-                width: 1.0,
-              ),
-            ),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              splashColor: (highlightColor ?? Pastel.lilac).withValues(alpha: 0.25),
-              highlightColor: (highlightColor ?? Pastel.lilac).withValues(alpha: 0.15),
-              onTap: tap == null
-                  ? null
-                  : () {
-                      HapticFeedback.lightImpact();
-                      tap();
-                    },
-              child: Center(child: child),
+  }) {
+    const shape = CircleBorder();
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: SizedBox(
+        width: 72,
+        height: 72,
+        child: Material(
+          color: Colors.white.withValues(alpha: tap == null ? 0 : 0.08),
+          shape: CircleBorder(
+            side: BorderSide(
+              color: tap == null
+                  ? Colors.transparent
+                  : const Color(0xFFE8D3A5).withValues(alpha: 0.22),
+              width: 1.0,
             ),
           ),
+          child: InkWell(
+            customBorder: shape,
+            splashColor: (highlightColor ?? Pastel.lilac).withValues(alpha: 0.25),
+            highlightColor: (highlightColor ?? Pastel.lilac).withValues(alpha: 0.15),
+            onTap: tap == null
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    tap();
+                  },
+            child: Center(child: child),
+          ),
         ),
-      );
-
-  static const _subLetters = ['', '', 'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ'];
+      ),
+    );
+  }
 
   Widget _digit(int d) {
     final canTap = value.length < length;
-    final letters = d >= 0 && d < _subLetters.length ? _subLetters[d] : '';
     return _key(
       tap: canTap ? () => onChanged('$value$d') : null,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '$d',
-            style: display(28, color: Colors.white, weight: FontWeight.w600),
-          ),
-          if (letters.isNotEmpty)
-            Text(
-              letters,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-                color: Colors.white.withValues(alpha: 0.40),
-              ),
-            ),
-        ],
+      child: Text(
+        '$d',
+        style: display(26, color: Colors.white, weight: FontWeight.w700),
       ),
     );
   }
@@ -145,32 +136,26 @@ class PinPad extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Indikator 6 Titik PIN Bersinar
+          // Indikator 6 Titik PIN Bersinar ala Wall o' Pay
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var i = 0; i < length; i++)
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 180),
                   curve: Curves.easeOutCubic,
-                  width: i < value.length ? 16 : 14,
-                  height: i < value.length ? 16 : 14,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                  width: 14,
+                  height: 14,
+                  margin: const EdgeInsets.symmetric(horizontal: 7),
+                  decoration: ShapeDecoration(
                     color: i < value.length
                         ? Pastel.lilac
-                        : Colors.white.withValues(alpha: 0.15),
-                    border: Border.all(
-                      color: i < value.length
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.35),
-                      width: i < value.length ? 1.5 : 1.0,
-                    ),
-                    boxShadow: i < value.length
+                        : Colors.white.withValues(alpha: 0.20),
+                    shape: const CircleBorder(),
+                    shadows: i < value.length
                         ? [
                             BoxShadow(
-                              color: Pastel.lilac.withValues(alpha: 0.65),
+                              color: Pastel.lilac.withValues(alpha: 0.55),
                               blurRadius: 12,
                               spreadRadius: 1,
                             ),
@@ -196,10 +181,13 @@ class PinPad extends StatelessWidget {
               _key(
                 tap: onBio,
                 highlightColor: Pastel.mint,
-                child: Icon(
-                  Icons.fingerprint_rounded,
-                  color: onBio != null ? Pastel.mint : Colors.transparent,
-                  size: 30,
+                child: Tooltip(
+                  message: biometricTooltip ?? tr('Unlock with biometric'),
+                  child: Icon(
+                    biometricIcon,
+                    color: onBio != null ? Pastel.mint : Colors.transparent,
+                    size: 28,
+                  ),
                 ),
               ),
               _digit(0),
@@ -208,7 +196,7 @@ class PinPad extends StatelessWidget {
                 child: Icon(
                   Icons.backspace_outlined,
                   color: value.isNotEmpty
-                      ? Colors.white.withValues(alpha: 0.85)
+                      ? Colors.white.withValues(alpha: 0.90)
                       : Colors.transparent,
                   size: 22,
                 ),
@@ -229,6 +217,7 @@ class LockScreen extends StatefulWidget {
 class _LockScreenState extends State<LockScreen> {
   String pin = '';
   String? msg;
+  bool _bioRunning = false;
 
   @override
   void initState() {
@@ -240,7 +229,13 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   Future<void> _bio() async {
-    if (await Lock.instance.authBio() && mounted) widget.onUnlock();
+    if (_bioRunning || !mounted) return;
+    _bioRunning = true;
+    try {
+      if (await Lock.instance.authBio() && mounted) widget.onUnlock();
+    } finally {
+      if (mounted) _bioRunning = false;
+    }
   }
 
   void _changed(String v) {

@@ -18,13 +18,15 @@ class LevelsPage extends ConsumerWidget {
   const LevelsPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final labs = <Lab>[...(ref.watch(labsProvider).value ?? <Lab>[])]..sort((a, b) => a.at.compareTo(b.at));
+    final labs = <Lab>[...(ref.watch(labsProvider).value ?? <Lab>[])]
+      ..sort((a, b) => a.at.compareTo(b.at));
     final ths = ref.watch(therapiesProvider).value ?? <Therapy>[];
     // Hormon yang punya terapi dengan profil simulasi (injeksi atau oral), termasuk komponen sekunder obat kombinasi.
     final simIds = <String>{
       for (final t in ths) ...[
         if (pkOf(t.pk) != null) t.hormoneId,
-        if (pkOf(t.secondaryPk) != null && t.secondaryHormoneId != null) t.secondaryHormoneId!,
+        if (pkOf(t.secondaryPk) != null && t.secondaryHormoneId != null)
+          t.secondaryHormoneId!,
       ]
     };
     final byH = <String, List<Lab>>{};
@@ -51,13 +53,16 @@ class LevelsPage extends ConsumerWidget {
                   showSheet(context, const LabSheet());
                 },
                 icon: const Icon(Icons.add_rounded, size: 20),
-                label: Text(tr('Add Lab Result')),
+                label: Text(tr('Add Lab Result'),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
                 style: FilledButton.styleFrom(
                   backgroundColor: C.peony,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 13.5),
                   elevation: 2,
                   shadowColor: C.peony.withValues(alpha: 0.35),
                 ),
@@ -68,20 +73,25 @@ class LevelsPage extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () {
                   HapticFeedback.selectionClick();
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InsightsPage()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const InsightsPage()));
                 },
                 icon: const Icon(Icons.insights_rounded, size: 20),
-                label: Text(tr('Insights')),
+                label: Text(tr('Insights'),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Pastel.lilac,
-                  backgroundColor: const Color(0xFF19143F).withValues(alpha: 0.45),
+                  backgroundColor:
+                      const Color(0xFF17264D).withValues(alpha: 0.45),
                   side: BorderSide(
-                    color: const Color(0xFFD6B277).withValues(alpha: 0.35),
+                    color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
                     width: 1.1,
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 13.5),
                 ),
               ),
             ),
@@ -95,14 +105,16 @@ class LevelsPage extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 60),
             child: Column(
               children: [
-                iconBadge(Icons.insights_rounded, Pastel.sky, size: 56, iconSize: 28),
+                iconBadge(Icons.insights_rounded, Pastel.sky,
+                    size: 56, iconSize: 28),
                 const SizedBox(height: 16),
                 Text(tr('No level data yet'), style: display(26)),
                 const SizedBox(height: 8),
                 Text(
                   tr('Log a dose or add your first blood test result to view hormone curves.'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Pastel.mist.withValues(alpha: 0.85), fontSize: 13),
+                  style: TextStyle(
+                      color: Pastel.mist.withValues(alpha: 0.85), fontSize: 13),
                 ),
                 const SizedBox(height: 20),
                 pillButton(
@@ -131,9 +143,9 @@ class LevelsPage extends ConsumerWidget {
               child: Text(
                 tr('Blood Tests & Lab Markers'),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
               ),
             ),
             for (final h in labOnlyHormones)
@@ -152,7 +164,9 @@ Widget _spark(List<double> ys, [Color? color]) => LineChart(LineChartData(
       lineTouchData: const LineTouchData(enabled: false),
       lineBarsData: [
         LineChartBarData(
-          spots: [for (var i = 0; i < ys.length; i++) FlSpot(i.toDouble(), ys[i])],
+          spots: [
+            for (var i = 0; i < ys.length; i++) FlSpot(i.toDouble(), ys[i])
+          ],
           isCurved: true,
           curveSmoothness: 0.35,
           preventCurveOverShooting: true,
@@ -181,10 +195,13 @@ class _LevelCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = presetOf(hormoneId), last = labs.last;
-    final u = (ref.watch(prefsProvider).value ?? const Prefs()).unitOf(hormoneId);
+    final u =
+        (ref.watch(prefsProvider).value ?? const Prefs()).unitOf(hormoneId);
     final f = p.units[u] ?? 1.0;
     final prev = labs.length > 1 ? labs[labs.length - 2] : null;
-    final delta = prev == null || prev.base == 0 ? null : (last.base - prev.base) / prev.base * 100;
+    final delta = prev == null || prev.base == 0
+        ? null
+        : (last.base - prev.base) / prev.base * 100;
     final recent = labs.length > 6 ? labs.sublist(labs.length - 6) : labs;
     final band = ref.watch(targetsProvider).value?[hormoneId];
     final hColor = hormoneColor(hormoneId);
@@ -201,8 +218,11 @@ class _LevelCard extends ConsumerWidget {
           border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
         ),
         child: Text(
-          inRange ? tr('In range') : (last.base < band[0] ? tr('Below target') : tr('Above target')),
-          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: color),
+          inRange
+              ? tr('In range')
+              : (last.base < band[0] ? tr('Below target') : tr('Above target')),
+          style: TextStyle(
+              fontSize: 11.5, fontWeight: FontWeight.w700, color: color),
         ),
       );
     }
@@ -216,50 +236,96 @@ class _LevelCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(28),
           onTap: () {
             HapticFeedback.selectionClick();
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => HormonePage(hormoneId)));
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => HormonePage(hormoneId)));
           },
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Row(children: [
               Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: hColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(color: hColor.withValues(alpha: 0.5), blurRadius: 6, spreadRadius: 1),
-                          ],
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: hColor,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: hColor.withValues(alpha: 0.5),
+                                    blurRadius: 6,
+                                    spreadRadius: 1),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              p.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(p.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    tr('Lab result, {0}', [_date(last.at)]),
-                    style: TextStyle(fontSize: 12, color: Pastel.mist.withValues(alpha: 0.85)),
-                  ),
-                  gap(12),
-                  Text.rich(TextSpan(text: fmt(last.base / f), style: display(40, color: Colors.white), children: [
-                    TextSpan(text: ' $u', style: TextStyle(fontSize: 14, color: Pastel.cream.withValues(alpha: 0.88), fontWeight: FontWeight.w500)),
-                  ])),
-                  if (delta != null) ...[
-                    gap(6),
-                    Text(
-                      tr('{0} {1}% from previous test', [delta >= 0 ? '↑' : '↓', delta.abs().toStringAsFixed(0)]),
-                      style: TextStyle(fontSize: 11.5, color: Pastel.mist.withValues(alpha: 0.90), fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                  if (status != null) status,
-                ]),
+                      const SizedBox(height: 4),
+                      Text(
+                        tr('Lab result, {0}', [_date(last.at)]),
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Pastel.mist.withValues(alpha: 0.85)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      gap(8),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text.rich(TextSpan(
+                            text: fmt(last.base / f),
+                            style: display(36, color: Colors.white),
+                            children: [
+                              TextSpan(
+                                  text: ' $u',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: Pastel.cream.withValues(alpha: 0.88),
+                                      fontWeight: FontWeight.w500)),
+                            ])),
+                      ),
+                      if (delta != null) ...[
+                        gap(4),
+                        Text(
+                          tr('{0} {1}% from previous test', [
+                            delta >= 0 ? '↑' : '↓',
+                            delta.abs().toStringAsFixed(0)
+                          ]),
+                          style: TextStyle(
+                              fontSize: 11.5,
+                              color: Pastel.mist.withValues(alpha: 0.90),
+                              fontWeight: FontWeight.w500),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      if (status != null) status,
+                    ]),
               ),
-              SizedBox(width: 110, height: 60, child: _spark([for (final l in recent) l.base], hColor)),
+              const SizedBox(width: 12),
+              SizedBox(
+                  width: 100,
+                  height: 60,
+                  child: _spark([for (final l in recent) l.base], hColor)),
             ]),
           ),
         ),
@@ -291,10 +357,13 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     final fg = theme.colorScheme.onSurface, surface = theme.colorScheme.surface;
     final ths = ref.watch(therapiesProvider).value ?? <Therapy>[];
     final logs = ref.watch(logsProvider).value ?? <DoseLog>[];
-    final labs = (ref.watch(labsProvider).value ?? <Lab>[]).where((l) => l.hormoneId == widget.hormoneId).toList()
+    final labs = (ref.watch(labsProvider).value ?? <Lab>[])
+        .where((l) => l.hormoneId == widget.hormoneId)
+        .toList()
       ..sort((a, b) => a.at.compareTo(b.at));
     final band = ref.watch(targetsProvider).value?[widget.hormoneId];
-    final u = (ref.watch(prefsProvider).value ?? const Prefs()).unitOf(widget.hormoneId);
+    final u = (ref.watch(prefsProvider).value ?? const Prefs())
+        .unitOf(widget.hormoneId);
     final f = p.units[u] ?? 1.0; // nilai tampil = nilai dasar / f
     final intakes = intakesFor(widget.hormoneId, ths, logs);
     final hasSim = intakes.isNotEmpty;
@@ -302,14 +371,18 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     Widget box(List<Widget> kids) => Container(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
           decoration: cardBox(context),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: kids),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: kids),
         );
 
     if (!hasSim && labs.isEmpty) {
       return box([
-        Text(tr('Estimated {0}', [p.name]), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        Text(tr('Estimated {0}', [p.name]),
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700)),
         gap(8),
-        Text(tr('Log your first dose on the Home tab to see estimated levels.')),
+        Text(
+            tr('Log your first dose on the Home tab to see estimated levels.')),
       ]);
     }
 
@@ -321,39 +394,58 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     final DateTime from, to;
     if (d == 0) {
       from = labs.first.at.subtract(const Duration(days: 1));
-      to = (labs.last.at.isAfter(now) ? labs.last.at : now).add(const Duration(days: 1));
+      to = (labs.last.at.isAfter(now) ? labs.last.at : now)
+          .add(const Duration(days: 1));
     } else {
       final end = now.subtract(Duration(days: off * d));
       from = end.subtract(Duration(days: d));
       to = end.add(Duration(days: off == 0 ? (hasSim ? 14 : 1) : 1));
     }
     final total = to.difference(from).inMinutes / 1440;
-    final sim = simSpots(intakes, from, to, scale: scale / f, n: math.max(40, math.min(1200, (total * 8).round())));
+    final sim = simSpots(intakes, from, to,
+        scale: scale / f, n: math.max(40, math.min(1200, (total * 8).round())));
     final dots = [
       for (final l in labs)
-        if (!l.at.isBefore(from) && !l.at.isAfter(to)) FlSpot(l.at.difference(from).inMinutes / 1440, l.base / f),
+        if (!l.at.isBefore(from) && !l.at.isAfter(to))
+          FlSpot(l.at.difference(from).inMinutes / 1440, l.base / f),
     ];
     final bandD = band == null ? null : [band[0] / f, band[1] / f];
-    final ys = <double>[...sim.map((s) => s.y), ...dots.map((s) => s.y), ...?bandD];
+    final ys = <double>[
+      ...sim.map((s) => s.y),
+      ...dots.map((s) => s.y),
+      ...?bandD
+    ];
     final top = (ys.isEmpty ? 10.0 : ys.reduce(math.max)) * 1.15 + 1;
-    final nowX = (now.difference(from).inMinutes / 1440).clamp(0.0, total).toDouble();
+    final nowX =
+        (now.difference(from).inMinutes / 1440).clamp(0.0, total).toDouble();
     final journal = ref.watch(journalProvider).value ?? <JournalEntry>[];
-    final moodEntries = [for (final e in journal) if (e.mood != null && !e.at.isBefore(from) && !e.at.isAfter(to)) e]..sort((a, b) => a.at.compareTo(b.at));
-    final moodSpots = [for (final e in moodEntries) FlSpot(e.at.difference(from).inMinutes / 1440, top * .05)];
+    final moodEntries = [
+      for (final e in journal)
+        if (e.mood != null && !e.at.isBefore(from) && !e.at.isAfter(to)) e
+    ]..sort((a, b) => a.at.compareTo(b.at));
+    final moodSpots = [
+      for (final e in moodEntries)
+        FlSpot(e.at.difference(from).inMinutes / 1440, top * .05)
+    ];
     final drawMood = showMood && moodSpots.isNotEmpty;
-    final moodBar = drawMood ? (sim.isNotEmpty ? 1 : 0) + (dots.isNotEmpty ? 1 : 0) : -1;
+    final moodBar =
+        drawMood ? (sim.isNotEmpty ? 1 : 0) + (dots.isNotEmpty ? 1 : 0) : -1;
 
     final chart = LineChart(LineChartData(
       minX: 0,
       maxX: total,
       minY: 0,
       maxY: top,
-      gridData: FlGridData(drawVerticalLine: false, getDrawingHorizontalLine: (_) => FlLine(color: fg.withValues(alpha: .08), strokeWidth: 1)),
+      gridData: FlGridData(
+          drawVerticalLine: false,
+          getDrawingHorizontalLine: (_) =>
+              FlLine(color: fg.withValues(alpha: .08), strokeWidth: 1)),
       borderData: FlBorderData(show: false),
       titlesData: FlTitlesData(
         topTitles: const AxisTitles(),
         rightTitles: const AxisTitles(),
-        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+        leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
@@ -361,7 +453,10 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             interval: math.max(total / 4, 1),
             getTitlesWidget: (v, m) => Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(DateFormat('d MMM', L10n.code).format(from.add(Duration(minutes: (v * 1440).round()))), style: const TextStyle(fontSize: 11)),
+              child: Text(
+                  DateFormat('d MMM', L10n.code)
+                      .format(from.add(Duration(minutes: (v * 1440).round()))),
+                  style: const TextStyle(fontSize: 11)),
             ),
           ),
         ),
@@ -369,21 +464,31 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
       rangeAnnotations: bandD == null
           ? null
           : RangeAnnotations(horizontalRangeAnnotations: [
-              HorizontalRangeAnnotation(y1: bandD[0], y2: bandD[1], color: Pastel.mint.withValues(alpha: .12)),
+              HorizontalRangeAnnotation(
+                  y1: bandD[0],
+                  y2: bandD[1],
+                  color: Pastel.mint.withValues(alpha: .12)),
             ]),
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
           getTooltipItems: (touched) => [
             for (final s in touched)
               LineTooltipItem(
-                s.barIndex == moodBar ? tr(moods[moodEntries[s.spotIndex].mood]?.$1 ?? '') : fmt(s.y),
-                const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                s.barIndex == moodBar
+                    ? tr(moods[moodEntries[s.spotIndex].mood]?.$1 ?? '')
+                    : fmt(s.y),
+                const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w700),
               ),
           ],
         ),
       ),
       extraLinesData: ExtraLinesData(verticalLines: [
-        VerticalLine(x: nowX, color: Pastel.lilac.withValues(alpha: .40), strokeWidth: 1.8, dashArray: [4, 4]),
+        VerticalLine(
+            x: nowX,
+            color: Pastel.lilac.withValues(alpha: .40),
+            strokeWidth: 1.8,
+            dashArray: [4, 4]),
       ]),
       lineBarsData: [
         if (sim.isNotEmpty)
@@ -430,7 +535,11 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             spots: moodSpots,
             color: Colors.transparent,
             barWidth: 0,
-            dotData: FlDotData(getDotPainter: (s, pc, b, i) => FlDotCirclePainter(radius: 5, color: moodColor(moodEntries[i].mood), strokeWidth: 0)),
+            dotData: FlDotData(
+                getDotPainter: (s, pc, b, i) => FlDotCirclePainter(
+                    radius: 5,
+                    color: moodColor(moodEntries[i].mood),
+                    strokeWidth: 0)),
           ),
       ],
     ));
@@ -447,6 +556,182 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     if (band != null && lastLab != null) {
       inRange = lastLab.base >= band[0] && lastLab.base <= band[1];
     }
+
+    if (widget.compact) {
+      final sparkPoints = sim.isNotEmpty
+          ? [for (final s in sim) s.y]
+          : [for (final l in labs) l.base / f];
+      return Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: cardBox(context),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(28),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(28),
+            onTap: () {
+              HapticFeedback.selectionClick();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => HormonePage(widget.hormoneId)));
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: hColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: hColor.withValues(alpha: 0.6),
+                                      blurRadius: 6,
+                                      spreadRadius: 1),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                p.name,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          hasSim
+                              ? tr('Estimated level now')
+                              : (lastLab != null
+                                  ? tr('Lab result, {0}', [_date(lastLab.at)])
+                                  : tr('No recent data')),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Pastel.mist.withValues(alpha: 0.85),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        gap(8),
+                        if (est != null)
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text.rich(
+                              TextSpan(
+                                text: estText,
+                                style: display(36, color: Colors.white),
+                                children: [
+                                  TextSpan(
+                                    text: ' $u',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Pastel.cream.withValues(alpha: 0.88),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else if (lastLab != null)
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text.rich(
+                              TextSpan(
+                                text: fmt(lastLab.base / f),
+                                style: display(36, color: Colors.white),
+                                children: [
+                                  TextSpan(
+                                    text: ' $u',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Pastel.cream.withValues(alpha: 0.88),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        if (lastLab != null && hasSim) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            tr('Latest lab: {0} {1} ({2})',
+                                [fmt(lastLab.base / f), u, _date(lastLab.at)]),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: Pastel.mist.withValues(alpha: 0.75),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (band != null && lastLab != null && inRange != null) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: (inRange ? Pastel.mint : C.amber)
+                                  .withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: (inRange ? Pastel.mint : C.amber)
+                                    .withValues(alpha: 0.45),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              inRange
+                                  ? tr('In range')
+                                  : (lastLab.base < band[0]
+                                      ? tr('Below target')
+                                      : tr('Above target')),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: inRange ? Pastel.mint : C.amber,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  if (sparkPoints.isNotEmpty)
+                    SizedBox(
+                      width: 100,
+                      height: 60,
+                      child: _spark(sparkPoints, hColor),
+                    )
+                  else
+                    const Icon(Icons.arrow_forward_ios_rounded,
+                        size: 16, color: Pastel.lilac),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return box([
       Row(
         children: [
@@ -457,7 +742,10 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
               color: hColor,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: hColor.withValues(alpha: 0.6), blurRadius: 6, spreadRadius: 1),
+                BoxShadow(
+                    color: hColor.withValues(alpha: 0.6),
+                    blurRadius: 6,
+                    spreadRadius: 1),
               ],
             ),
           ),
@@ -475,15 +763,21 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
               decoration: BoxDecoration(
-                color: (inRange ? Pastel.mint : C.amber).withValues(alpha: 0.18),
+                color:
+                    (inRange ? Pastel.mint : C.amber).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: (inRange ? Pastel.mint : C.amber).withValues(alpha: 0.45),
+                  color:
+                      (inRange ? Pastel.mint : C.amber).withValues(alpha: 0.45),
                   width: 1,
                 ),
               ),
               child: Text(
-                inRange ? tr('In range') : (lastLab.base < band[0] ? tr('Below target') : tr('Above target')),
+                inRange
+                    ? tr('In range')
+                    : (lastLab.base < band[0]
+                        ? tr('Below target')
+                        : tr('Above target')),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -498,22 +792,36 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
               tooltip: tr('Open details'),
               onPressed: () {
                 HapticFeedback.selectionClick();
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => HormonePage(widget.hormoneId)));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => HormonePage(widget.hormoneId)));
               },
-              icon: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Pastel.lilac),
+              icon: const Icon(Icons.arrow_forward_ios_rounded,
+                  size: 14, color: Pastel.lilac),
             ),
         ],
       ),
       if (est != null) ...[
         gap(4),
-        Text.rich(TextSpan(text: estText, style: display(38, color: Colors.white), children: [
-          TextSpan(text: tr(' {0} now', [u]), style: TextStyle(fontSize: 13.5, color: Pastel.cream.withValues(alpha: 0.88), fontWeight: FontWeight.w500)),
-        ])),
+        Text.rich(TextSpan(
+            text: estText,
+            style: display(38, color: Colors.white),
+            children: [
+              TextSpan(
+                  text: tr(' {0} now', [u]),
+                  style: TextStyle(
+                      fontSize: 13.5,
+                      color: Pastel.cream.withValues(alpha: 0.88),
+                      fontWeight: FontWeight.w500)),
+            ])),
         if (lastLab != null) ...[
           const SizedBox(height: 2),
           Text(
-            tr('Latest lab: {0} {1} ({2})', [fmt(lastLab.base / f), u, _date(lastLab.at)]),
-            style: TextStyle(fontSize: 11.5, color: Pastel.mist.withValues(alpha: 0.85), fontWeight: FontWeight.w500),
+            tr('Latest lab: {0} {1} ({2})',
+                [fmt(lastLab.base / f), u, _date(lastLab.at)]),
+            style: TextStyle(
+                fontSize: 11.5,
+                color: Pastel.mist.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w500),
           ),
         ],
         gap(10),
@@ -530,8 +838,12 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
           Expanded(
             child: Center(
               child: Text(
-                tr('{0} to {1}', [DateFormat('d MMM', L10n.code).format(from), _date(to)]),
-                style: TextStyle(fontSize: 12, color: Pastel.mist.withValues(alpha: 0.88), fontWeight: FontWeight.w500),
+                tr('{0} to {1}',
+                    [DateFormat('d MMM', L10n.code).format(from), _date(to)]),
+                style: TextStyle(
+                    fontSize: 12,
+                    color: Pastel.mist.withValues(alpha: 0.88),
+                    fontWeight: FontWeight.w500),
               ),
             ),
           ),
@@ -549,8 +861,25 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
       gap(12),
       PillTabs<int>(
         items: [
-          for (final w in [if (!widget.compact) 7, 30, 90, 180, 365, if (!hasSim && labs.isNotEmpty) 0])
-            (w, switch (w) { 0 => tr('All'), 7 => tr('1 wk'), 30 => tr('1 mo'), 90 => tr('3 mo'), 180 => tr('6 mo'), _ => tr('1 yr') }),
+          for (final w in [
+            if (!widget.compact) 7,
+            30,
+            90,
+            180,
+            365,
+            if (!hasSim && labs.isNotEmpty) 0
+          ])
+            (
+              w,
+              switch (w) {
+                0 => tr('All'),
+                7 => tr('1 wk'),
+                30 => tr('1 mo'),
+                90 => tr('3 mo'),
+                180 => tr('6 mo'),
+                _ => tr('1 yr')
+              }
+            ),
         ],
         value: d,
         onChanged: (w) {
@@ -561,7 +890,8 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
           });
         },
       ),
-      if (!widget.compact && ((hasSim && nCal > 0) || moodEntries.isNotEmpty)) ...[
+      if (!widget.compact &&
+          ((hasSim && nCal > 0) || moodEntries.isNotEmpty)) ...[
         gap(8),
         Wrap(spacing: 8, runSpacing: 4, children: [
           if (hasSim && nCal > 0)
@@ -586,24 +916,61 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         ]),
       ],
       gap(10),
-      Row(
+      Wrap(
+        spacing: 14,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (hasSim) ...[
-            Container(width: 14, height: 3, decoration: BoxDecoration(color: hColor, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(width: 5),
-            Text(tr('estimated'), style: TextStyle(fontSize: 11.5, color: Pastel.mist.withValues(alpha: 0.85), fontWeight: FontWeight.w500)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                    width: 14,
+                    height: 3,
+                    decoration: BoxDecoration(
+                        color: hColor, borderRadius: BorderRadius.circular(2))),
+                const SizedBox(width: 5),
+                Text(tr('estimated'),
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        color: Pastel.mist.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w500)),
+              ],
+            ),
           ],
           if (dots.isNotEmpty) ...[
-            const SizedBox(width: 14),
-            Icon(Icons.circle_outlined, size: 12, color: hColor),
-            const SizedBox(width: 5),
-            Text(tr('lab result'), style: TextStyle(fontSize: 11.5, color: Pastel.mist.withValues(alpha: 0.85), fontWeight: FontWeight.w500)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.circle_outlined, size: 12, color: hColor),
+                const SizedBox(width: 5),
+                Text(tr('lab result'),
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        color: Pastel.mist.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w500)),
+              ],
+            ),
           ],
           if (bandD != null) ...[
-            const SizedBox(width: 14),
-            Container(width: 10, height: 10, decoration: BoxDecoration(color: Pastel.mint.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(2))),
-            const SizedBox(width: 5),
-            Text(tr('target'), style: TextStyle(fontSize: 11.5, color: Pastel.mist.withValues(alpha: 0.85), fontWeight: FontWeight.w500)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                        color: Pastel.mint.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(2))),
+                const SizedBox(width: 5),
+                Text(tr('target'),
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        color: Pastel.mist.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w500)),
+              ],
+            ),
           ],
         ],
       ),
@@ -614,16 +981,22 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             borderRadius: BorderRadius.circular(12),
             onTap: () {
               HapticFeedback.selectionClick();
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => HormonePage(widget.hormoneId)));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => HormonePage(widget.hormoneId)));
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(tr('View lab history & calibrate'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Pastel.lilac)),
+                  Text(tr('View lab history & calibrate'),
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Pastel.lilac)),
                   const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward_rounded, size: 13, color: Pastel.lilac),
+                  const Icon(Icons.arrow_forward_rounded,
+                      size: 13, color: Pastel.lilac),
                 ],
               ),
             ),
@@ -634,7 +1007,8 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
           gap(8),
           Text(
             tr('Estimates use an average model, not lab results. Everyone\'s levels differ, and dosing decisions stay with your doctor.'),
-            style: TextStyle(fontSize: 11, color: Pastel.mist.withValues(alpha: 0.75)),
+            style: TextStyle(
+                fontSize: 11, color: Pastel.mist.withValues(alpha: 0.75)),
           ),
         ],
         if (drawMood) ...[
@@ -644,7 +1018,10 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
               Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(Icons.circle, size: 10, color: moodColor(m.key)),
                 const SizedBox(width: 4),
-                Text(tr(m.value.$1), style: TextStyle(fontSize: 11, color: Pastel.mist.withValues(alpha: 0.85))),
+                Text(tr(m.value.$1),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Pastel.mist.withValues(alpha: 0.85))),
               ]),
           ]),
         ],
@@ -660,10 +1037,13 @@ class HormonePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = presetOf(hormoneId);
-    final labs = (ref.watch(labsProvider).value ?? <Lab>[]).where((l) => l.hormoneId == hormoneId).toList()
+    final labs = (ref.watch(labsProvider).value ?? <Lab>[])
+        .where((l) => l.hormoneId == hormoneId)
+        .toList()
       ..sort((a, b) => b.at.compareTo(a.at));
     final band = ref.watch(targetsProvider).value?[hormoneId];
-    final u = (ref.watch(prefsProvider).value ?? const Prefs()).unitOf(hormoneId);
+    final u =
+        (ref.watch(prefsProvider).value ?? const Prefs()).unitOf(hormoneId);
     return Scaffold(
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.all(20), children: [
@@ -686,12 +1066,17 @@ class HormonePage extends ConsumerWidget {
             ),
           ]),
           gap(8),
-          Text(tr('Chart in {0} (change in Settings). The green area is the target you set with your doctor.', [u]), style: Theme.of(context).textTheme.bodySmall),
+          Text(
+              tr('Chart in {0} (change in Settings). The green area is the target you set with your doctor.',
+                  [u]),
+              style: Theme.of(context).textTheme.bodySmall),
           gap(16),
           LevelPanel(hormoneId),
           gap(20),
           if (labs.isNotEmpty) ...[
-            Text(tr('Lab Results History'), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
+            Text(tr('Lab Results History'),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700, color: Colors.white)),
             gap(10),
             Container(
               decoration: cardBox(context, radius: 20),
@@ -700,21 +1085,31 @@ class HormonePage extends ConsumerWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: labs.length,
-                separatorBuilder: (_, __) => Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+                separatorBuilder: (_, __) => Divider(
+                    height: 1, color: Colors.white.withValues(alpha: 0.08)),
                 itemBuilder: (context, i) {
                   final l = labs[i];
                   return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       showSheet(context, LabSheet(initial: l));
                     },
-                    title: Text('${fmt(l.value)} ${l.unit}', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                    title: Text('${fmt(l.value)} ${l.unit}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, color: Colors.white)),
                     subtitle: Text(
-                      _date(l.at) + (l.note == null || l.note!.isEmpty ? '' : '\n${l.note}'),
-                      style: TextStyle(color: Pastel.mist.withValues(alpha: 0.85), fontSize: 12),
+                      _date(l.at) +
+                          (l.note == null || l.note!.isEmpty
+                              ? ''
+                              : '\n${l.note}'),
+                      style: TextStyle(
+                          color: Pastel.mist.withValues(alpha: 0.85),
+                          fontSize: 12),
                     ),
-                    trailing: const Icon(Icons.edit_outlined, size: 18, color: Pastel.lilac),
+                    trailing: const Icon(Icons.edit_outlined,
+                        size: 18, color: Pastel.lilac),
                   );
                 },
               ),
@@ -725,28 +1120,45 @@ class HormonePage extends ConsumerWidget {
     );
   }
 
-  Future<void> _target(BuildContext c, WidgetRef ref, HormonePreset p, String u, List<double>? band) async {
+  Future<void> _target(BuildContext c, WidgetRef ref, HormonePreset p, String u,
+      List<double>? band) async {
     final f = p.units[u] ?? 1.0;
-    final lo = TextEditingController(text: band == null ? '' : fmt(band[0] / f));
-    final hi = TextEditingController(text: band == null ? '' : fmt(band[1] / f));
+    final lo =
+        TextEditingController(text: band == null ? '' : fmt(band[0] / f));
+    final hi =
+        TextEditingController(text: band == null ? '' : fmt(band[1] / f));
     final ok = await showDialog<bool>(
       context: c,
       builder: (d) => AlertDialog(
         title: Text(tr('{0} target ({1})', [p.name, u])),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: lo, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Lower limit'))),
+          TextField(
+              controller: lo,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: tr('Lower limit'))),
           gap(8),
-          TextField(controller: hi, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Upper limit'))),
+          TextField(
+              controller: hi,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: tr('Upper limit'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(tr('Save target'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: Text(tr('Cancel'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(tr('Save target'))),
         ],
       ),
     );
     final a = parseNum(lo.text), b = parseNum(hi.text);
     if (ok == true && a != null && b != null) {
-      ref.read(repoProvider)?.setTarget(p.id, math.min(a, b) * f, math.max(a, b) * f);
+      ref
+          .read(repoProvider)
+          ?.setTarget(p.id, math.min(a, b) * f, math.max(a, b) * f);
     }
   }
 }
@@ -763,7 +1175,8 @@ class LabSheet extends ConsumerStatefulWidget {
 class _LabSheetState extends ConsumerState<LabSheet> {
   late var h = presetOf(widget.initial?.hormoneId ?? 'estradiol');
   late String? unit = widget.initial?.unit;
-  late final value = TextEditingController(text: widget.initial == null ? '' : fmt(widget.initial!.value));
+  late final value = TextEditingController(
+      text: widget.initial == null ? '' : fmt(widget.initial!.value));
   late final note = TextEditingController(text: widget.initial?.note ?? '');
   late DateTime at = widget.initial?.at ?? DateTime.now();
 
@@ -771,7 +1184,13 @@ class _LabSheetState extends ConsumerState<LabSheet> {
     final v = parseNum(value.text);
     if (v == null) return;
     HapticFeedback.lightImpact();
-    final lab = Lab(id: widget.initial?.id ?? '', hormoneId: h.id, at: at, value: v, unit: unit ?? h.base, note: note.text.trim());
+    final lab = Lab(
+        id: widget.initial?.id ?? '',
+        hormoneId: h.id,
+        at: at,
+        value: v,
+        unit: unit ?? h.base,
+        note: note.text.trim());
     final repo = ref.read(repoProvider);
     if (widget.initial != null) {
       repo?.updateLab(lab);
@@ -785,7 +1204,8 @@ class _LabSheetState extends ConsumerState<LabSheet> {
         unit = null;
         value.clear();
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('{0} saved. Enter the next hormone.', [saved]))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr('{0} saved. Enter the next hormone.', [saved]))));
     } else {
       Navigator.pop(context);
     }
@@ -796,7 +1216,8 @@ class _LabSheetState extends ConsumerState<LabSheet> {
     final u = unit ?? h.base;
     final editing = widget.initial != null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? tr('Edit lab result') : tr('New lab result'), style: display(28)),
+      Text(editing ? tr('Edit lab result') : tr('New lab result'),
+          style: display(28)),
       gap(16),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final p in presets)
@@ -815,7 +1236,10 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           ),
       ]),
       gap(12),
-      TextField(controller: value, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Value'))),
+      TextField(
+          controller: value,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(labelText: tr('Value'))),
       gap(8),
       Wrap(spacing: 8, children: [
         for (final k in h.units.keys)
@@ -832,30 +1256,45 @@ class _LabSheetState extends ConsumerState<LabSheet> {
       OutlinedButton.icon(
         onPressed: () async {
           HapticFeedback.selectionClick();
-          final d = await showDatePicker(context: context, initialDate: at, firstDate: DateTime(2000), lastDate: DateTime.now());
+          final d = await showDatePicker(
+              context: context,
+              initialDate: at,
+              firstDate: DateTime(2000),
+              lastDate: DateTime.now());
           if (d != null) setState(() => at = d);
         },
         icon: const Icon(Icons.calendar_today_rounded, size: 18),
         label: Text(tr('Test date: {0}', [_date(at)])),
       ),
       gap(10),
-      TextField(controller: note, decoration: InputDecoration(labelText: tr('Note (optional)'))),
+      TextField(
+          controller: note,
+          decoration: InputDecoration(labelText: tr('Note (optional)'))),
       gap(20),
       Row(children: [
         if (editing)
           TextButton.icon(
             onPressed: () async {
               HapticFeedback.mediumImpact();
-              if (!await confirm(context, tr('Delete this lab result?')) || !context.mounted) return;
+              if (!await confirm(context, tr('Delete this lab result?')) ||
+                  !context.mounted) {
+                return;
+              }
               ref.read(repoProvider)?.deleteLab(widget.initial!.id);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.delete_outline_rounded),
             label: Text(tr('Delete')),
           ),
-        Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save'), () => _save())),
+        Expanded(
+            child: pillButton(
+                editing ? tr('Save changes') : tr('Save'), () => _save())),
       ]),
-      if (!editing) Center(child: TextButton(onPressed: () => _save(again: true), child: Text(tr('Save and add another hormone')))),
+      if (!editing)
+        Center(
+            child: TextButton(
+                onPressed: () => _save(again: true),
+                child: Text(tr('Save and add another hormone')))),
     ]);
   }
 }

@@ -116,6 +116,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
       therapyId: t.id,
       at: now,
       dose: t.dose,
+      secondaryDose: t.secondaryDose,
       places: [_selectedPlace],
       injType: _injType,
       slot: widget.slot == null ? null : slotKey(widget.slot!.at),
@@ -146,135 +147,145 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         border: dark ? Border.all(color: Colors.white.withValues(alpha: 0.12)) : null,
       ),
-      padding: EdgeInsets.fromLTRB(
-        22,
-        18,
-        22,
-        MediaQuery.of(context).viewInsets.bottom + 28,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Drag indicator
-          Center(
-            child: Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            22,
+            16,
+            22,
+            MediaQuery.of(context).viewInsets.bottom + 20,
           ),
-          gap(14),
-
-          // Header
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: C.peony.withValues(alpha: 0.16),
-                  shape: BoxShape.circle,
+              // Drag indicator
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-                child: Icon(Icons.self_improvement_rounded, color: C.peony, size: 22),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(tr('Guided Calm Injection'), style: display(18)),
-                    Text(
-                      tr('Step {0} of 4 • {1}', [_currentStep + 1, widget.t.name]),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+              gap(14),
+
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: C.peony.withValues(alpha: 0.16),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.self_improvement_rounded, color: C.peony, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr('Guided Calm Injection'), style: display(18), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          tr('Step {0} of 4 • {1}', [_currentStep + 1, widget.t.name]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+              gap(12),
+
+              // Step Progress Bar
+              Row(
+                children: [
+                  for (int i = 0; i < 4; i++)
+                    Expanded(
+                      child: Container(
+                        height: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                        decoration: BoxDecoration(
+                          color: i <= _currentStep
+                              ? C.peony
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded, size: 20),
-              ),
-            ],
-          ),
-          gap(14),
+              gap(16),
 
-          // Step Progress Bar
-          Row(
-            children: [
-              for (int i = 0; i < 4; i++)
-                Expanded(
-                  child: Container(
-                    height: 5,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      color: i <= _currentStep
-                          ? C.peony
-                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(3),
+              // Active Step Content
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: _buildStepContent(),
+              ),
+              gap(18),
+
+              // Navigation buttons
+              Row(
+                children: [
+                  if (_currentStep > 0)
+                    Expanded(
+                      flex: 1,
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => _currentStep--),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(tr('Back'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                  if (_currentStep > 0) const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton(
+                      onPressed: () {
+                        if (_currentStep < 3) {
+                          setState(() => _currentStep++);
+                          if (_currentStep == 1 && !_timerRunning && _secondsLeft == 30) {
+                            _startDryingTimer();
+                          }
+                        } else {
+                          _completeAndLog();
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: C.peony,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: Text(
+                        _currentStep == 3 ? tr('Complete & Log Dose') : tr('Continue'),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          gap(20),
-
-          // Active Step Content
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child: _buildStepContent(),
-          ),
-          gap(22),
-
-          // Navigation buttons
-          Row(
-            children: [
-              if (_currentStep > 0)
-                Expanded(
-                  flex: 1,
-                  child: OutlinedButton(
-                    onPressed: () => setState(() => _currentStep--),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                    child: Text(tr('Back')),
-                  ),
-                ),
-              if (_currentStep > 0) const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: FilledButton(
-                  onPressed: () {
-                    if (_currentStep < 3) {
-                      setState(() => _currentStep++);
-                      if (_currentStep == 1 && !_timerRunning && _secondsLeft == 30) {
-                        _startDryingTimer();
-                      }
-                    } else {
-                      _completeAndLog();
-                    }
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: C.peony,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: Text(
-                    _currentStep == 3 ? tr('Complete & Log Dose') : tr('Continue'),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -432,15 +443,16 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
     return Column(
       key: const ValueKey(2),
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             ChoiceChip(
               label: Text(tr('Intramuscular (90°)')),
               selected: _injType == 'im',
               onSelected: (_) => setState(() => _injType = 'im'),
             ),
-            const SizedBox(width: 8),
             ChoiceChip(
               label: Text(tr('Subcutaneous (45°)')),
               selected: _injType == 'sc',
@@ -526,14 +538,12 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
             color: C.peony.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${fmt(widget.t.dose)} ${widget.t.doseUnit} • ${tr(_selectedPlace)}',
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-              ),
-            ],
+          child: Text(
+            '${fmt(widget.t.dose)} ${widget.t.doseUnit} • ${tr(_selectedPlace)}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

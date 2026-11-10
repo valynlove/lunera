@@ -8,13 +8,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../l10n.dart';
+import '../lock.dart';
 import '../profile.dart';
 import '../repo.dart';
 import '../theme.dart';
 
 /// Halaman manajemen profil: Foto profil, nama panggilan (nickname), serta info akun.
 class ProfilePage extends ConsumerStatefulWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, this.enableHero = true});
+
+  final bool enableHero;
 
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
@@ -44,31 +47,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Future<void> _pickPhoto(ImageSource source) async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(
-        source: source,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 90,
-      );
-      if (picked == null) return;
-      final bytes = await picked.readAsBytes();
-      if (!mounted) return;
-      await _startCrop(bytes);
-    } catch (_) {
-      // Fallback untuk platform desktop / file selector
+    await Lock.instance.suppressLockDuring(() async {
       try {
-        const typeGroup = XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
-        final file = await openFile(acceptedTypeGroups: [typeGroup]);
-        if (file == null) return;
-        final bytes = await file.readAsBytes();
+        final picker = ImagePicker();
+        final picked = await picker.pickImage(
+          source: source,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          imageQuality: 90,
+        );
+        if (picked == null) return;
+        final bytes = await picked.readAsBytes();
         if (!mounted) return;
         await _startCrop(bytes);
-      } catch (e) {
-        if (mounted) _toast(tr('Could not pick a photo: {0}', [e]));
+      } catch (_) {
+        // Fallback untuk platform desktop / file selector
+        try {
+          const typeGroup = XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
+          final file = await openFile(acceptedTypeGroups: [typeGroup]);
+          if (file == null) return;
+          final bytes = await file.readAsBytes();
+          if (!mounted) return;
+          await _startCrop(bytes);
+        } catch (e) {
+          if (mounted) _toast(tr('Could not pick a photo: {0}', [e]));
+        }
       }
-    }
+    });
   }
 
   Future<void> _startCrop(Uint8List bytes) async {
@@ -231,7 +236,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 UserAvatar(
                   size: 112,
-                  heroTag: 'profile_photo_hero',
+                  heroTag: widget.enableHero ? 'profile_photo_hero' : null,
                   onTap: () {
                     if (hasPhoto) {
                       _viewPhoto();
@@ -751,37 +756,17 @@ class ProfilePhotoViewPage extends ConsumerWidget {
   const ProfilePhotoViewPage({super.key});
 
   Future<void> _pickAndCrop(BuildContext context, WidgetRef ref, ImageSource source) async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(
-        source: source,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 90,
-      );
-      if (picked == null) return;
-      final bytes = await picked.readAsBytes();
-      if (!context.mounted) return;
-
-      final cropped = await Navigator.of(context).push<Uint8List>(
-        MaterialPageRoute(
-          builder: (_) => ProfilePhotoCropPage(imageBytes: bytes),
-        ),
-      );
-      if (cropped == null) return;
-      await ref.read(profileProvider.notifier).setPhoto(cropped);
-      if (context.mounted) {
-        HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('Profile photo updated.'))),
-        );
-      }
-    } catch (_) {
+    await Lock.instance.suppressLockDuring(() async {
       try {
-        const typeGroup = XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
-        final file = await openFile(acceptedTypeGroups: [typeGroup]);
-        if (file == null) return;
-        final bytes = await file.readAsBytes();
+        final picker = ImagePicker();
+        final picked = await picker.pickImage(
+          source: source,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          imageQuality: 90,
+        );
+        if (picked == null) return;
+        final bytes = await picked.readAsBytes();
         if (!context.mounted) return;
 
         final cropped = await Navigator.of(context).push<Uint8List>(
@@ -797,14 +782,36 @@ class ProfilePhotoViewPage extends ConsumerWidget {
             SnackBar(content: Text(tr('Profile photo updated.'))),
           );
         }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(tr('Could not pick a photo: {0}', [e]))),
+      } catch (_) {
+        try {
+          const typeGroup = XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
+          final file = await openFile(acceptedTypeGroups: [typeGroup]);
+          if (file == null) return;
+          final bytes = await file.readAsBytes();
+          if (!context.mounted) return;
+
+          final cropped = await Navigator.of(context).push<Uint8List>(
+            MaterialPageRoute(
+              builder: (_) => ProfilePhotoCropPage(imageBytes: bytes),
+            ),
           );
+          if (cropped == null) return;
+          await ref.read(profileProvider.notifier).setPhoto(cropped);
+          if (context.mounted) {
+            HapticFeedback.mediumImpact();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(tr('Profile photo updated.'))),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(tr('Could not pick a photo: {0}', [e]))),
+            );
+          }
         }
       }
-    }
+    });
   }
 
   Future<void> _confirmRemove(BuildContext context, WidgetRef ref) async {

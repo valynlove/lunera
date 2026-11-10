@@ -123,12 +123,12 @@ class _ExitDialog extends StatelessWidget {
             color: dark ? C.deepCard : Colors.white,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: const Color(0xFFD6B277).withValues(alpha: dark ? 0.38 : 0.25),
+              color: const Color(0xFFE8D3A5).withValues(alpha: dark ? 0.38 : 0.25),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: (dark ? const Color(0xFF060412) : Colors.black12).withValues(alpha: 0.45),
+                color: (dark ? const Color(0xFF091122) : Colors.black12).withValues(alpha: 0.45),
                 blurRadius: 32,
                 offset: const Offset(0, 10),
               ),
@@ -152,12 +152,12 @@ class _ExitDialog extends StatelessWidget {
                   gradient: RadialGradient(
                     colors: [
                       C.peony.withValues(alpha: 0.28),
-                      const Color(0xFFF1BA79).withValues(alpha: 0.16),
+                      const Color(0xFF5BC8E8).withValues(alpha: 0.16),
                       Colors.transparent,
                     ],
                   ),
                   border: Border.all(
-                    color: const Color(0xFFD6B277).withValues(alpha: 0.45),
+                    color: const Color(0xFFE8D3A5).withValues(alpha: 0.45),
                     width: 1.2,
                   ),
                   boxShadow: [
@@ -273,15 +273,15 @@ class _NavBar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1B1544).withValues(alpha: 0.94),
+            color: const Color(0xFF17264D).withValues(alpha: 0.94),
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
-              color: const Color(0xFFD6B277).withValues(alpha: 0.35),
+              color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
               width: 1.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF070516).withValues(alpha: 0.55),
+                color: const Color(0xFF091122).withValues(alpha: 0.55),
                 blurRadius: 24,
                 offset: const Offset(0, 6),
               ),
@@ -379,7 +379,7 @@ class _NavBar extends StatelessWidget {
                                 color: i == k ? C.peony.withValues(alpha: .22) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(14),
                                 border: i == k
-                                    ? Border.all(color: const Color(0xFFD6B277).withValues(alpha: .50), width: 1.0)
+                                    ? Border.all(color: const Color(0xFFE8D3A5).withValues(alpha: .50), width: 1.0)
                                     : null,
                                 boxShadow: i == k
                                     ? [

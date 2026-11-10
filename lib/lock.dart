@@ -112,6 +112,48 @@ class Lock {
   final _auth = LocalAuthentication();
   SharedPreferences? _p;
 
+  bool _isAuthenticating = false;
+  bool get isAuthenticating => _isAuthenticating;
+
+  int _externalActivityDepth = 0;
+  DateTime? _suppressLockUntil;
+
+  /// Status apakah penguncian otomatis sedang ditangguhkan sementara
+  /// (misalnya saat pengguna sedang berada di picker foto profil, kamera, atau dialog file eksternal).
+  bool get isLockSuppressed {
+    if (_externalActivityDepth > 0) return true;
+    final until = _suppressLockUntil;
+    if (until != null) {
+      return DateTime.now().isBefore(until);
+    }
+    return false;
+  }
+
+  /// Tangguhkan penguncian otomatis sementara selama aksi eksternal berlangsung
+  /// (seperti memilih foto profil, mengambil foto dengan kamera, atau mengimpor file backup).
+  /// Setelah aksi selesai, diberikan grace window tambahan (default 3 detik) agar Flutter
+  /// dapat kembali fokus ke layar tanpa memicu kunci seketika.
+  Future<T> suppressLockDuring<T>(
+    Future<T> Function() action, {
+    Duration gracePeriod = const Duration(seconds: 3),
+  }) async {
+    _externalActivityDepth++;
+    try {
+      return await action();
+    } finally {
+      _externalActivityDepth--;
+      _suppressLockUntil = DateTime.now().add(gracePeriod);
+    }
+  }
+
+  /// Perpanjang jeda waktu penangguhan kunci (grace period) secara manual.
+  void extendGracePeriod([Duration duration = const Duration(seconds: 3)]) {
+    final target = DateTime.now().add(duration);
+    if (_suppressLockUntil == null || target.isAfter(_suppressLockUntil!)) {
+      _suppressLockUntil = target;
+    }
+  }
+
   String? get _uid {
     try {
       return FirebaseAuth.instance.currentUser?.uid;
@@ -320,16 +362,25 @@ class Lock {
   }
 
   /// Gagal (termasuk belum disiapkan di Android) dianggap tidak lolos; PIN tetap bisa dipakai.
+  /// Dilindungi mutex _isAuthenticating dan stickyAuth: false agar tidak memicu prompt spam
+  /// atau tabrakan background lifecycle saat layar mati/hidup.
   Future<bool> authBio() async {
+    if (kIsWeb || _isAuthenticating) return false;
+    _isAuthenticating = true;
     try {
       final ok = await _auth.authenticate(
         localizedReason: tr('Open {0}', [appName]),
-        options: const AuthenticationOptions(biometricOnly: true, stickyAuth: true),
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: false,
+        ),
       );
       if (ok) _clearFailures();
       return ok;
     } catch (_) {
       return false;
+    } finally {
+      _isAuthenticating = false;
     }
   }
 

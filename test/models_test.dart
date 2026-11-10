@@ -108,6 +108,24 @@ void main() {
 
       // Other hormones return empty
       expect(intakesFor('testosterone', [cyclofem], [log]), isEmpty);
+
+      // Test dose log with overridden secondaryDose
+      final logOverride = DoseLog(
+        id: 'l2',
+        therapyId: 't_cyclo',
+        at: DateTime(2026, 10, 20, 10, 0),
+        dose: 10.0,
+        secondaryDose: 50.0,
+      );
+      final mapOverride = logOverride.toMap();
+      expect(mapOverride['secondaryDose'], equals(50.0));
+      final reconstructedLog = DoseLog.from('l2', mapOverride);
+      expect(reconstructedLog.secondaryDose, equals(50.0));
+
+      final e2OverrideIntakes = intakesFor('estradiol', [cyclofem], [logOverride]);
+      expect(e2OverrideIntakes.first.dose, equals(10.0));
+      final p4OverrideIntakes = intakesFor('progesterone', [cyclofem], [logOverride]);
+      expect(p4OverrideIntakes.first.dose, equals(50.0));
     });
 
     test('Compound presets catalog and compound field in Therapy', () {
