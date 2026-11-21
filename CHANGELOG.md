@@ -4,6 +4,11 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.12] - 2026-11-21
+
+### Fixed
+- **Android Lint `FullBackupContent` Build Fix (`backup_rules.xml`, `data_extraction_rules.xml`):** Removed the redundant `<exclude domain="database" path="." />` rule from `<full-backup-content>` and `<cloud-backup>` (databases are already excluded by omission when only `<include domain="sharedpref" path="." />` is specified), resolving `:app:lintVitalRelease` errors during release APK builds.
+
 ## [2.1.11] - 2026-11-21
 
 ### Fixed
