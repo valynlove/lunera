@@ -4,6 +4,17 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.10] - 2026-11-21
+
+### Changed
+- **Privacy-First Notification & Widget Defaults (`lib/models.dart`):** Enabled discreet notification masking (`discreetNotify = 'wellness'`) and Home Screen Widget detail hiding (`widgetHide = true`) by default.
+- **Sign-Out Confirmation & Local Cache Cleanup (`lib/ui/auth.dart`, `lib/ui/settings_page.dart`, `lib/profile.dart`, `lib/l10n_id.dart`):** Added `confirmAndSignOut()` to warn users (including pending offline changes) before signing out, and updated `signOutAll()` to clear local `Lock` state, `ProfileController` preferences, and Firestore local persistence while keeping cloud data intact.
+
+### Added / Fixed
+- **Selective Android Auto Backup Rules (`android/app/src/main/AndroidManifest.xml`, `backup_rules.xml`, `data_extraction_rules.xml`):** Configured selective Android backup and device-transfer rules to keep user migration convenient while excluding `FlutterSecureStorage` and raw Firestore local databases from cloud/ADB backups.
+- **External Update URL Allowlist (`lib/update_checker.dart`, `android/app/src/main/kotlin/com/example/ritme/MainActivity.kt`):** Restricted `openUrl` to `https://` URLs on trusted GitHub domains (`github.com`, `githubusercontent.com`).
+- **Backup & CSV Export Hardening (`lib/repo.dart`, `lib/history_export.dart`):** Enforced document ID format and finite/non-negative numeric validation in `Repo.validate()`, and enabled CSV formula-injection escaping on `doseUnit` and `secondaryDoseUnit`.
+
 ## [2.1.9] - 2026-11-21
 
 ### Added

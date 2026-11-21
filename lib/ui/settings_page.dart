@@ -726,10 +726,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       user?.email ?? user?.displayName ?? tr('Guest'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    onTap: () {
+                    onTap: () async {
                       HapticFeedback.selectionClick();
-                      Navigator.pop(context);
-                      signOutAll();
+                      final signedOut = await confirmAndSignOut(context);
+                      if (signedOut && context.mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                 ],

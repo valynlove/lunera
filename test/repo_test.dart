@@ -65,6 +65,52 @@ void main() {
         }
       };
       expect(() => repo.validate(corruptedData), throwsFormatException);
+
+      // Rejects path-traversal/invalid document IDs and non-finite or negative numbers
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'supplies': [
+              {'id': 'bad/id', 'name': 'Vial', 'qty': 1}
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'supplies': [
+              {'id': '..', 'name': 'Vial', 'qty': 1}
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'supplies': [
+              {'id': 's1', 'name': 'Vial', 'qty': -1}
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'labs': [
+              {'id': 'lab1', 'hormoneId': 'estradiol', 'value': double.nan, 'at': '2026-11-01T08:00:00.000Z'}
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
     });
 
     test('SyncState copyWith clears errorMessage cleanly and trackWrite transitions idle -> syncing -> synced', () async {

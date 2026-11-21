@@ -56,3 +56,5 @@ app.*.map.json
 .gradle/
 *.hprof
 *.apk
+
+threat-model/

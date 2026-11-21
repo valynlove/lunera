@@ -46,7 +46,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '2.1.9';
+  static const currentVersion = '2.1.10';
 
   static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
 
@@ -59,14 +59,32 @@ class UpdateCheckerService {
   static String? _promptedVersion;
   static bool _isShowingDialog = false;
 
+  /// Memastikan URL eksternal menggunakan HTTPS dan berasal dari domain GitHub terpercaya.
+  static bool isTrustedExternalUrl(String rawUrl) {
+    final uri = Uri.tryParse(rawUrl.trim());
+    if (uri == null || uri.scheme.toLowerCase() != 'https' || !uri.hasAuthority) {
+      return false;
+    }
+    final host = uri.host.toLowerCase();
+    return host == 'github.com' ||
+        host.endsWith('.github.com') ||
+        host == 'githubusercontent.com' ||
+        host.endsWith('.githubusercontent.com');
+  }
+
   /// Membuka URL di browser atau installer eksternal.
   static Future<void> openUrl(String url) async {
     if (kIsWeb) return;
+    final clean = url.trim();
+    if (!isTrustedExternalUrl(clean)) {
+      debugPrint('Blocked untrusted external URL: $clean');
+      return;
+    }
     try {
       if (defaultTargetPlatform == TargetPlatform.android) {
-        await _channel.invokeMethod('openUrl', {'url': url});
+        await _channel.invokeMethod('openUrl', {'url': clean});
       } else if (defaultTargetPlatform == TargetPlatform.windows) {
-        await Process.run('cmd', ['/c', 'start', '', url]);
+        await Process.run('cmd', ['/c', 'start', '', clean]);
       }
     } catch (e) {
       debugPrint('Failed to open URL via native: $e');

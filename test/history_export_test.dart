@@ -128,6 +128,27 @@ void main() {
           '2026-11-18,07:00,${orphanLog.at.toIso8601String()},Therapy deleted,,,taken,2,,,,,',
         ),
       );
+
+      final formulaUnitTherapy = Therapy(
+        id: 't_formula',
+        hormoneId: 'estradiol',
+        name: 'Test',
+        dose: 2,
+        doseUnit: '=CMD()',
+        secondaryHormoneId: 'progesterone',
+        secondaryDose: 10,
+        secondaryDoseUnit: '+SUM(1)',
+        start: DateTime(2026, 10, 1),
+      );
+      final formulaUnitLog = DoseLog(
+        id: 'l_formula',
+        therapyId: 't_formula',
+        at: DateTime(2026, 11, 21, 10, 0),
+        dose: 2,
+        secondaryDose: 10,
+      );
+      final formulaCsv = exportDoseHistoryCsv([formulaUnitLog], [formulaUnitTherapy]);
+      expect(formulaCsv, contains(",'=CMD(),10,'+SUM(1),"));
     });
 
     test('exportDoseHistoryJson outputs valid standalone JSON rejected by full-backup validate()', () {

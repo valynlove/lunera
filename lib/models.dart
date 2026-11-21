@@ -501,9 +501,9 @@ class Prefs {
     this.dayStart = 240,
     this.accent = 'lunera',
     this.notify = false,
-    this.widgetHide = false,
+    this.widgetHide = true,
     this.locale = 'en',
-    this.discreetNotify = 'off',
+    this.discreetNotify = 'wellness',
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
@@ -571,9 +571,9 @@ class Prefs {
         dayStart: (m['dayStart'] as num?)?.toInt() ?? 240,
         accent: m['accent'] ?? 'lunera',
         notify: m['notify'] ?? false,
-        widgetHide: m['widgetHide'] ?? false,
+        widgetHide: m['widgetHide'] ?? true,
         locale: m['locale'] ?? 'en',
-        discreetNotify: m['discreetNotify'] ?? 'off',
+        discreetNotify: m['discreetNotify'] ?? 'wellness',
       );
 }
 

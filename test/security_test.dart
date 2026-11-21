@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
+import 'package:lunera/update_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -278,6 +279,33 @@ void main() {
       expect(reconstructed.discreetNotify, equals('minimal'));
       expect(reconstructed.toMap().containsKey('geminiApiKey'), isFalse);
       expect(reconstructed.toMap().containsKey('asteriaMode'), isFalse);
+    });
+
+    test('UpdateCheckerService.isTrustedExternalUrl allows only HTTPS GitHub hosts', () {
+      expect(
+        UpdateCheckerService.isTrustedExternalUrl('https://github.com/valynlove/lunera/releases/latest'),
+        isTrue,
+      );
+      expect(
+        UpdateCheckerService.isTrustedExternalUrl('https://objects.githubusercontent.com/github-production-release-asset/Lunera.apk'),
+        isTrue,
+      );
+      expect(
+        UpdateCheckerService.isTrustedExternalUrl('http://github.com/valynlove/lunera'),
+        isFalse,
+      );
+      expect(
+        UpdateCheckerService.isTrustedExternalUrl('javascript:alert(1)'),
+        isFalse,
+      );
+      expect(
+        UpdateCheckerService.isTrustedExternalUrl('file:///sdcard/Lunera.apk'),
+        isFalse,
+      );
+      expect(
+        UpdateCheckerService.isTrustedExternalUrl('https://evil.example.com/Lunera.apk'),
+        isFalse,
+      );
     });
   });
 }

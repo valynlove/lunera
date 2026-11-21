@@ -16,13 +16,24 @@ class MainActivity : FlutterFragmentActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "openUrl" -> {
-                    val url = call.argument<String>("url")
+                    val url = call.argument<String>("url")?.trim()
                     if (!url.isNullOrEmpty()) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        val uri = Uri.parse(url)
+                        val scheme = uri.scheme?.lowercase()
+                        val host = uri.host?.lowercase() ?: ""
+                        val trustedHost = host == "github.com" ||
+                            host.endsWith(".github.com") ||
+                            host == "githubusercontent.com" ||
+                            host.endsWith(".githubusercontent.com")
+                        if (scheme == "https" && trustedHost) {
+                            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                            result.success(true)
+                        } else {
+                            result.error("UNTRUSTED_URL", "Only HTTPS GitHub URLs are allowed", null)
                         }
-                        startActivity(intent)
-                        result.success(true)
                     } else {
                         result.error("INVALID_URL", "URL is null or empty", null)
                     }

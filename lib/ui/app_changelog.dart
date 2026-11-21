@@ -42,10 +42,33 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.9',
+      version: '2.1.10',
       dateEn: 'November 21, 2026',
       dateId: '21 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Privacy-First Defaults: Discreet notifications (Wellness & Routine) and Home Screen Widget privacy masking are now enabled by default for new setups.',
+          textId: 'Bawaan Ramah Privasi: Notifikasi tersamar (Hidrasi & Rutinitas) dan penyembunyian detail widget layar utama kini aktif secara bawaan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Sign-Out Local Cleanup & Warning: Signing out now warns if offline changes are pending, and clears local Firestore cache, profile preferences, and device lock state while preserving cloud data.',
+          textId: 'Peringatan & Pembersihan Keluar Akun: Keluar dari akun kini menampilkan konfirmasi (termasuk peringatan perubahan offline tertunda) serta membersihkan cache Firestore, profil lokal, dan kunci perangkat tanpa menghapus data cloud.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Selective Android Backup & Input Hardening: Added Android backup/data-extraction rules excluding sensitive databases and keystore storage, enforced HTTPS GitHub URL allowlisting in the update launcher, hardened backup JSON validation, and sanitized CSV dose units.',
+          textId: 'Cadangan Android Selektif & Penguatan Validasi: Menambahkan aturan cadangan Android untuk mengecualikan basis data dan keystore sensitif, menerapkan allowlist URL HTTPS GitHub pada pembaruan, memperketat validasi cadangan JSON, dan mengamankan unit dosis pada ekspor CSV.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.9',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

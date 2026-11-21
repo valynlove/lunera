@@ -88,9 +88,9 @@ String exportDoseHistoryCsv(List<DoseLog> logs, List<Therapy> therapies) {
       _csvCell(info.injType ?? ''),
       info.status,
       info.dose == null ? '' : fmt(info.dose!),
-      _csvCell(info.doseUnit ?? '', sanitizeFormula: false),
+      _csvCell(info.doseUnit ?? ''),
       info.secondaryDose == null ? '' : fmt(info.secondaryDose!),
-      _csvCell(info.secondaryDoseUnit ?? '', sanitizeFormula: false),
+      _csvCell(info.secondaryDoseUnit ?? ''),
       _csvCell(l.places.join('; ')),
       _csvCell(l.note ?? ''),
     ].join(','));

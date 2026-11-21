@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../lock.dart';
 import '../notifications.dart';
+import '../profile.dart';
+import '../repo.dart';
 import '../theme.dart';
 import '../widget_sync.dart';
 import '../l10n.dart';
@@ -37,12 +39,45 @@ String authError(Object e) {
   return tr('Something went wrong: {0}', [e]);
 }
 
-/// Keluar dan batalkan semua pengingat di perangkat ini.
+/// Keluar, batalkan semua pengingat, dan bersihkan cache/kunci lokal di perangkat ini.
 Future<void> signOutAll() async {
+  String? uid;
+  try {
+    uid = FirebaseAuth.instance.currentUser?.uid;
+  } catch (_) {}
   Lock.instance.sessionUnlocked = false;
   await AppNotifier.instance.cancelAll();
   await WidgetSync.clear();
+  await Lock.instance.clearLocal(uid);
+  await ProfileController.clearLocal(uid);
   await FirebaseAuth.instance.signOut();
+  try {
+    await FirebaseFirestore.instance.clearPersistence();
+  } catch (_) {}
+}
+
+/// Peringatkan pengguna (termasuk jika ada perubahan offline tertunda) sebelum keluar dan menghapus cache lokal.
+Future<bool> confirmAndSignOut(BuildContext context) async {
+  final sync = Repo.syncStateNotifier.value;
+  final hasPending = sync.status == SyncStatus.queuedOffline || sync.pendingCount > 0;
+  final message = hasPending
+      ? tr(
+          'You have {0} unsynced offline changes. Signing out will clear local data on this device and unsynced changes may be lost. Sign out anyway?',
+          [sync.pendingCount > 0 ? sync.pendingCount : 1],
+        )
+      : tr(
+          'Sign out of your account? Local cached data and device lock settings will be cleared from this device, while your cloud data remains safe.',
+        );
+  if (!await confirm(context, message, ok: tr('Sign out'))) {
+    return false;
+  }
+  Lock.instance.signingOut = true;
+  try {
+    await signOutAll();
+  } finally {
+    Lock.instance.signingOut = false;
+  }
+  return true;
 }
 
 Future<String?> _emailFor(String id) async {

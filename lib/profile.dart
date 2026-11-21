@@ -39,6 +39,16 @@ final sharedPreferencesProvider = Provider<SharedPreferences>(
 class ProfileController extends Notifier<ProfileState> {
   static const _timeout = Duration(seconds: 15);
 
+  /// Bersihkan data profil lokal (nama panggilan & foto) untuk [uid] saat keluar akun.
+  static Future<void> clearLocal([String? uid, SharedPreferences? prefs]) async {
+    final targetUid = uid;
+    if (targetUid == null || targetUid.isEmpty) return;
+    final p = prefs ?? await SharedPreferences.getInstance();
+    await p.remove('nickname_$targetUid');
+    await p.remove('photo_$targetUid');
+    await p.remove('profile_updated_$targetUid');
+  }
+
   String _nickKey(String uid) => 'nickname_$uid';
   String _photoKey(String uid) => 'photo_$uid';
   String _updatedKey(String uid) => 'profile_updated_$uid';

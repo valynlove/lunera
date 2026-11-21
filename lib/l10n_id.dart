@@ -863,4 +863,6 @@ const Map<String, String> idStrings = {
   'Enter 6-digit PIN or use Face Unlock': 'Masukkan PIN 6 angka atau gunakan Face Unlock',
   'Enter 6-digit PIN or scan fingerprint': 'Masukkan PIN 6 angka atau pindai sidik jari',
   'Unlock with biometric': 'Buka dengan biometrik',
+  'You have {0} unsynced offline changes. Signing out will clear local data on this device and unsynced changes may be lost. Sign out anyway?': 'Anda memiliki {0} perubahan offline yang belum tersinkron. Keluar akan menghapus data lokal di perangkat ini dan perubahan yang belum tersinkron dapat hilang. Tetap keluar?',
+  'Sign out of your account? Local cached data and device lock settings will be cleared from this device, while your cloud data remains safe.': 'Keluar dari akun Anda? Data cache lokal dan pengaturan kunci di perangkat ini akan dibersihkan, sementara data cloud Anda tetap aman.',
 };

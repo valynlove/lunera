@@ -672,6 +672,27 @@ class Repo {
     });
   }
 
+  static bool _isValidDocId(dynamic id) {
+    if (id is! String) return false;
+    final s = id.trim();
+    if (s.isEmpty || s.length > 128 || s == '.' || s == '..' || s.contains('/')) {
+      return false;
+    }
+    return true;
+  }
+
+  static double? _finiteNum(dynamic v) {
+    if (v is num) {
+      final d = v.toDouble();
+      return d.isFinite ? d : null;
+    }
+    if (v is String) {
+      final d = double.tryParse(v);
+      return (d != null && d.isFinite) ? d : null;
+    }
+    return null;
+  }
+
   static bool _isValidDate(dynamic d) {
     if (d == null) return false;
     if (d is Timestamp || d is DateTime) return true;
@@ -686,22 +707,25 @@ class Repo {
   static bool _isValidRow(String col, Map r) {
     switch (col) {
       case 'therapies':
-        return r['name'] is String && r['hormoneId'] is String;
+        final doseOk = r['dose'] == null ||
+            (_finiteNum(r['dose']) != null && _finiteNum(r['dose'])! >= 0);
+        return r['name'] is String && r['hormoneId'] is String && doseOk;
       case 'logs':
         return r['therapyId'] is String && _isValidDate(r['at']);
       case 'labs':
+        final val = _finiteNum(r['value']);
         return r['hormoneId'] is String &&
             _isValidDate(r['at']) &&
-            (r['value'] is num || num.tryParse('${r['value']}') != null);
+            val != null &&
+            val >= 0;
       case 'supplies':
-        return r['name'] is String &&
-            (r['qty'] is num || num.tryParse('${r['qty']}') != null);
+        final qty = _finiteNum(r['qty']);
+        return r['name'] is String && qty != null && qty >= 0;
       case 'journal':
       case 'measurements':
         return _isValidDate(r['at']);
       case 'targets':
-        return (r['low'] is num || num.tryParse('${r['low']}') != null) &&
-            (r['high'] is num || num.tryParse('${r['high']}') != null);
+        return _finiteNum(r['low']) != null && _finiteNum(r['high']) != null;
       default:
         return true;
     }
@@ -725,7 +749,7 @@ class Repo {
         throw FormatException(tr('The "{0}" section is invalid.', [k]));
       }
       for (final r in rows) {
-        if (r is! Map || r['id'] is! String || !_isValidRow(k, r)) {
+        if (r is! Map || !_isValidDocId(r['id']) || !_isValidRow(k, r)) {
           throw FormatException(tr('The "{0}" section is corrupted.', [k]));
         }
       }

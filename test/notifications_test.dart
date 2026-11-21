@@ -7,16 +7,16 @@ void main() {
   group('Lunera Notifications & Preferences Tests', () {
     test('Prefs widgetHide, locale, and discreetNotify configuration', () {
       const prefs = Prefs();
-      expect(prefs.widgetHide, isFalse);
+      expect(prefs.widgetHide, isTrue);
       expect(prefs.locale, equals('en'));
-      expect(prefs.discreetNotify, equals('off'));
-      final updated = prefs.copy(widgetHide: true, locale: 'id', discreetNotify: 'wellness');
-      expect(updated.widgetHide, isTrue);
+      expect(prefs.discreetNotify, equals('wellness'));
+      final updated = prefs.copy(widgetHide: false, locale: 'id', discreetNotify: 'off');
+      expect(updated.widgetHide, isFalse);
       expect(updated.locale, equals('id'));
-      expect(updated.discreetNotify, equals('wellness'));
-      expect(updated.toMap()['widgetHide'], isTrue);
+      expect(updated.discreetNotify, equals('off'));
+      expect(updated.toMap()['widgetHide'], isFalse);
       expect(updated.toMap()['locale'], equals('id'));
-      expect(updated.toMap()['discreetNotify'], equals('wellness'));
+      expect(updated.toMap()['discreetNotify'], equals('off'));
       expect(updated.toMap().containsKey('geminiApiKey'), isFalse);
       expect(updated.toMap().containsKey('asteriaMode'), isFalse);
     });
