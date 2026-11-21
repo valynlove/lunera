@@ -107,6 +107,7 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.9'
           channel: 'stable'
           cache: true
 
@@ -117,7 +118,7 @@ jobs:
       - name: Analyze & Run Tests
         if: steps.check_release.outputs.exists == 'false'
         run: |
-          flutter analyze
+          flutter analyze --no-fatal-infos
           flutter test
 
       - name: Configure Android Release Signing

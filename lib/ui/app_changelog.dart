@@ -42,10 +42,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.10',
+      version: '2.1.11',
       dateEn: 'November 21, 2026',
       dateId: '21 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Release CI Flutter SDK & Analyzer Stability: Pinned GitHub Actions Flutter SDK to 3.47.9 and configured flutter analyze --no-fatal-infos so info-level SDK deprecation notices do not fail release builds.',
+          textId: 'Stabilitas CI Rilis & Analyzer Flutter: Mengunci versi Flutter SDK di GitHub Actions ke 3.47.9 dan menambahkan --no-fatal-infos pada flutter analyze agar peringatan info SDK tidak menggagalkan build rilis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.10',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,
