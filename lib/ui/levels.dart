@@ -292,7 +292,7 @@ class _LevelCard extends ConsumerWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text.rich(TextSpan(
-                            text: fmt(last.base / f),
+                            text: '${last.prefix}${fmt(last.base / f)}',
                             style: display(36, color: Colors.white),
                             children: [
                               TextSpan(
@@ -404,10 +404,13 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
     final total = to.difference(from).inMinutes / 1440;
     final sim = simSpots(intakes, from, to,
         scale: scale / f, n: math.max(40, math.min(1200, (total * 8).round())));
-    final dots = [
+    final visibleLabs = [
       for (final l in labs)
-        if (!l.at.isBefore(from) && !l.at.isAfter(to))
-          FlSpot(l.at.difference(from).inMinutes / 1440, l.base / f),
+        if (!l.at.isBefore(from) && !l.at.isAfter(to)) l,
+    ];
+    final dots = [
+      for (final l in visibleLabs)
+        FlSpot(l.at.difference(from).inMinutes / 1440, l.base / f),
     ];
     final bandD = band == null ? null : [band[0] / f, band[1] / f];
     final ys = <double>[
@@ -428,6 +431,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
         FlSpot(e.at.difference(from).inMinutes / 1440, top * .05)
     ];
     final drawMood = showMood && moodSpots.isNotEmpty;
+    final dotBar = dots.isNotEmpty ? (sim.isNotEmpty ? 1 : 0) : -1;
     final moodBar =
         drawMood ? (sim.isNotEmpty ? 1 : 0) + (dots.isNotEmpty ? 1 : 0) : -1;
 
@@ -476,7 +480,9 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
               LineTooltipItem(
                 s.barIndex == moodBar
                     ? tr(moods[moodEntries[s.spotIndex].mood]?.$1 ?? '')
-                    : fmt(s.y),
+                    : (s.barIndex == dotBar && s.spotIndex < visibleLabs.length
+                        ? '${visibleLabs[s.spotIndex].prefix}${fmt(s.y)}'
+                        : fmt(s.y)),
                 const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.w700),
               ),
@@ -654,7 +660,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
                             alignment: Alignment.centerLeft,
                             child: Text.rich(
                               TextSpan(
-                                text: fmt(lastLab.base / f),
+                                text: '${lastLab.prefix}${fmt(lastLab.base / f)}',
                                 style: display(36, color: Colors.white),
                                 children: [
                                   TextSpan(
@@ -673,7 +679,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
                           const SizedBox(height: 2),
                           Text(
                             tr('Latest lab: {0} {1} ({2})',
-                                [fmt(lastLab.base / f), u, _date(lastLab.at)]),
+                                ['${lastLab.prefix}${fmt(lastLab.base / f)}', u, _date(lastLab.at)]),
                             style: TextStyle(
                               fontSize: 11.5,
                               color: Pastel.mist.withValues(alpha: 0.75),
@@ -817,7 +823,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
           const SizedBox(height: 2),
           Text(
             tr('Latest lab: {0} {1} ({2})',
-                [fmt(lastLab.base / f), u, _date(lastLab.at)]),
+                ['${lastLab.prefix}${fmt(lastLab.base / f)}', u, _date(lastLab.at)]),
             style: TextStyle(
                 fontSize: 11.5,
                 color: Pastel.mist.withValues(alpha: 0.85),
@@ -1096,7 +1102,7 @@ class HormonePage extends ConsumerWidget {
                       HapticFeedback.selectionClick();
                       showSheet(context, LabSheet(initial: l));
                     },
-                    title: Text('${fmt(l.value)} ${l.unit}',
+                    title: Text('${l.prefix}${fmt(l.value)} ${l.unit}',
                         style: const TextStyle(
                             fontWeight: FontWeight.w700, color: Colors.white)),
                     subtitle: Text(
@@ -1175,6 +1181,7 @@ class LabSheet extends ConsumerStatefulWidget {
 class _LabSheetState extends ConsumerState<LabSheet> {
   late var h = presetOf(widget.initial?.hormoneId ?? 'estradiol');
   late String? unit = widget.initial?.unit;
+  late String? cmp = widget.initial?.cmp;
   late final value = TextEditingController(
       text: widget.initial == null ? '' : fmt(widget.initial!.value));
   late final note = TextEditingController(text: widget.initial?.note ?? '');
@@ -1182,7 +1189,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
 
   void _save({bool again = false}) {
     final v = parseNum(value.text);
-    if (v == null) return;
+    if (v == null || !v.isFinite || v < 0) return;
     HapticFeedback.lightImpact();
     final lab = Lab(
         id: widget.initial?.id ?? '',
@@ -1190,7 +1197,8 @@ class _LabSheetState extends ConsumerState<LabSheet> {
         at: at,
         value: v,
         unit: unit ?? h.base,
-        note: note.text.trim());
+        note: note.text.trim(),
+        cmp: cmp);
     final repo = ref.read(repoProvider);
     if (widget.initial != null) {
       repo?.updateLab(lab);
@@ -1202,6 +1210,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
       setState(() {
         h = presets[(i + 1) % presets.length];
         unit = null;
+        cmp = null;
         value.clear();
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -1236,10 +1245,35 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           ),
       ]),
       gap(12),
-      TextField(
-          controller: value,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: tr('Value'))),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (final (code, label) in const [
+            (null, '='),
+            ('<', '<'),
+            ('>', '>'),
+          ]) ...[
+            ChoiceChip(
+              label: Text(label,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              selected: cmp == code,
+              onSelected: (_) {
+                HapticFeedback.selectionClick();
+                setState(() => cmp = code);
+              },
+            ),
+            const SizedBox(width: 6),
+          ],
+          const SizedBox(width: 4),
+          Expanded(
+            child: TextField(
+                controller: value,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: tr('Value'))),
+          ),
+        ],
+      ),
       gap(8),
       Wrap(spacing: 8, children: [
         for (final k in h.units.keys)

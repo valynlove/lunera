@@ -65,19 +65,50 @@ double mgOf(double d, String u) => switch (u.trim().toLowerCase()) {
       _ => d,
     };
 
-double _conc(Intake i, DateTime t) {
-  final dt = t.difference(i.at).inMinutes / 1440.0;
-  final m = i.pk;
-  if (dt <= 0 || dt >= (m.oral ? 10 : 150)) return 0;
-  if (m.oral) {
-    final g = m.p[0], ka = m.p[1], ke = m.p[2];
-    return i.dose * g * ka / (ka - ke) * (math.exp(-ke * dt) - math.exp(-ka * dt));
+final double _inactiveDecay = math.log(1e6);
+const double _equalRatesThreshold = 1e-8;
+
+double _activeDays(PkProfile m) {
+  final kMin = m.oral
+      ? math.min(m.p[1], m.p[2])
+      : math.min(m.p[2], math.min(m.p[3], m.p[4]));
+  return kMin <= 0 ? 0.0 : _inactiveDecay / kMin;
+}
+
+double _repeatedRateLimit(double r, double s, double dt) {
+  final gap = s - r;
+  return (math.exp(-s * dt) + math.exp(-r * dt) * (gap * dt - 1)) / (gap * gap);
+}
+
+double _batemanSum(double k1, double k2, double k3, double dt) {
+  bool equal(double a, double b) => (a - b).abs() * dt <= _equalRatesThreshold;
+  final k1k2 = equal(k1, k2), k1k3 = equal(k1, k3), k2k3 = equal(k2, k3);
+  if ((k1k2 && k1k3) || (k1k2 && k2k3) || (k1k3 && k2k3)) {
+    return dt * dt * math.exp(-k1 * dt) / 2;
   }
-  final f = m.p[0], auc = m.p[1], k1 = m.p[2], k2 = m.p[3], k3 = m.p[4];
+  if (k1k2) return _repeatedRateLimit(k1, k3, dt);
+  if (k1k3) return _repeatedRateLimit(k1, k2, dt);
+  if (k2k3) return _repeatedRateLimit(k2, k1, dt);
   final a = math.exp(-k1 * dt) / ((k1 - k2) * (k1 - k3));
   final b = math.exp(-k2 * dt) / ((k1 - k2) * (k2 - k3));
   final c = math.exp(-k3 * dt) / ((k1 - k3) * (k2 - k3));
-  return i.dose * f * auc * k1 * k2 * k3 * (a - b + c);
+  return a - b + c;
+}
+
+double _conc(Intake i, DateTime t) {
+  if (i.dose <= 0 || !i.dose.isFinite) return 0;
+  final dt = t.difference(i.at).inMinutes / 1440.0;
+  final m = i.pk;
+  if (dt <= 0 || dt >= _activeDays(m)) return 0;
+  if (m.oral) {
+    final g = m.p[0], ka = m.p[1], ke = m.p[2];
+    if ((ka - ke).abs() * dt <= _equalRatesThreshold) {
+      return i.dose * g * ka * dt * math.exp(-ke * dt);
+    }
+    return i.dose * g * ka / (ka - ke) * (math.exp(-ke * dt) - math.exp(-ka * dt));
+  }
+  final f = m.p[0], auc = m.p[1], k1 = m.p[2], k2 = m.p[3], k3 = m.p[4];
+  return i.dose * f * auc * k1 * k2 * k3 * _batemanSum(k1, k2, k3, dt);
 }
 
 /// Level (dalam satuan dasar hormon) pada waktu [t].
@@ -93,12 +124,14 @@ List<Intake> intakesFor(String hormoneId, List<Therapy> ths, List<DoseLog> logs)
     if (t == null) continue;
     final pkPrimary = pkOf(t.pk);
     if (pkPrimary != null && t.hormoneId == hormoneId) {
-      out.add(Intake(l.at, mgOf(l.dose ?? t.dose, t.doseUnit), pkPrimary));
+      final d1 = mgOf(l.dose ?? t.dose, t.doseUnit);
+      if (d1 > 0 && d1.isFinite) out.add(Intake(l.at, d1, pkPrimary));
     }
     final pkSecondary = pkOf(t.secondaryPk);
     final secDose = l.secondaryDose ?? t.secondaryDose;
     if (pkSecondary != null && t.secondaryHormoneId == hormoneId && secDose != null) {
-      out.add(Intake(l.at, mgOf(secDose, t.secondaryDoseUnit ?? 'mg'), pkSecondary));
+      final d2 = mgOf(secDose, t.secondaryDoseUnit ?? 'mg');
+      if (d2 > 0 && d2.isFinite) out.add(Intake(l.at, d2, pkSecondary));
     }
   }
   return out;
@@ -106,10 +139,18 @@ List<Intake> intakesFor(String hormoneId, List<Therapy> ths, List<DoseLog> logs)
 
 List<FlSpot> simSpots(List<Intake> xs, DateTime t0, DateTime t1, {double scale = 1, int n = 300}) {
   if (xs.isEmpty) return [];
+  final active = [
+    for (final i in xs)
+      if (i.dose > 0 &&
+          i.dose.isFinite &&
+          i.at.isBefore(t1) &&
+          t0.difference(i.at).inMinutes / 1440.0 < _activeDays(i.pk))
+        i,
+  ];
   final minutes = t1.difference(t0).inMinutes.toDouble();
   return [
     for (var k = 0; k <= n; k++)
-      FlSpot(minutes * k / n / 1440, levelAt(xs, t0.add(Duration(minutes: (minutes * k / n).round()))) * scale),
+      FlSpot(minutes * k / n / 1440, levelAt(active, t0.add(Duration(minutes: (minutes * k / n).round()))) * scale),
   ];
 }
 
@@ -117,6 +158,7 @@ List<FlSpot> simSpots(List<Intake> xs, DateTime t0, DateTime t1, {double scale =
 (double, int) calibration(List<Intake> xs, List<Lab> labs) {
   final r = <double>[];
   for (final l in labs) {
+    if (l.cmp != null) continue;
     final s = levelAt(xs, l.at);
     if (s > 1) r.add(l.base / s);
   }

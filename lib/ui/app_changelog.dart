@@ -42,10 +42,39 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.12',
+      version: '2.1.13',
       dateEn: 'November 21, 2026',
       dateId: '21 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'New Lab Units (ng/L & µg/L): Added ng/L for Estradiol and µg/L for Testosterone, Progesterone, and Prolactin.',
+          textId:
+              'Satuan Lab Baru (ng/L & µg/L): Menambahkan ng/L untuk Estradiol dan µg/L untuk Testosteron, Progesteron, serta Prolaktin.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Lab Comparators (< / >): Support recording and displaying below/above threshold lab results across cards, charts, and widgets while excluding them from curve calibration.',
+          textId:
+              'Komparator Hasil Lab (< / >): Mendukung pencatatan dan tampilan hasil lab di bawah/atas ambang batas di kartu, grafik, dan widget tanpa memengaruhi kalibrasi kurva.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Pharmacokinetic Simulator Accuracy & Performance: Extended long-acting ester windows (Estradiol Undecylate & Testosterone Undecanoate) past 150 days using a dynamic 1e-6 decay threshold, added equal-rate limit guards, and pre-filtered active intakes once per simulation.',
+          textId:
+              'Akurasi & Performa Simulator Farmakokinetik: Memperpanjang jendela ester kerja panjang (Estradiol Undecylate & Testosterone Undecanoate) melewati 150 hari dengan ambang peluruhan 1e-6 dinamis, guard limit laju setara, dan filter asupan satu kali sebelum simulasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.12',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

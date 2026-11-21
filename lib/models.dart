@@ -26,12 +26,12 @@ class HormonePreset {
 }
 
 const presets = <HormonePreset>[
-  HormonePreset('estradiol', 'Estradiol', {'pg/mL': 1, 'pmol/L': 1 / 3.671}),
-  HormonePreset('testosterone', 'Testosterone', {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84}),
-  HormonePreset('progesterone', 'Progesterone', {'ng/mL': 1, 'nmol/L': 1 / 3.18}),
+  HormonePreset('estradiol', 'Estradiol', {'pg/mL': 1, 'pmol/L': 1 / 3.671, 'ng/L': 1}),
+  HormonePreset('testosterone', 'Testosterone', {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84, 'µg/L': 100}),
+  HormonePreset('progesterone', 'Progesterone', {'ng/mL': 1, 'nmol/L': 1 / 3.18, 'µg/L': 1}),
   HormonePreset('lh', 'LH', {'IU/L': 1, 'mIU/mL': 1}),
   HormonePreset('fsh', 'FSH', {'IU/L': 1, 'mIU/mL': 1}),
-  HormonePreset('prolactin', 'Prolactin', {'ng/mL': 1, 'mIU/L': 1 / 21.2}),
+  HormonePreset('prolactin', 'Prolactin', {'ng/mL': 1, 'mIU/L': 1 / 21.2, 'µg/L': 1}),
 ];
 HormonePreset presetOf(String id) {
   if (id == 'blocker') return const HormonePreset('blocker', 'Anti-androgen (Blocker)', {'mg': 1});
@@ -390,17 +390,34 @@ class DoseLog {
 }
 
 class Lab {
-  const Lab({required this.id, required this.hormoneId, required this.at, required this.value, required this.unit, this.note});
+  const Lab({
+    required this.id,
+    required this.hormoneId,
+    required this.at,
+    required this.value,
+    required this.unit,
+    this.note,
+    this.cmp,
+  });
   final String id;
   final String hormoneId;
   final DateTime at;
   final double value;
   final String unit;
   final String? note;
+  final String? cmp; // '<' | '>' | null (exact)
 
   double get base => presetOf(hormoneId).toBase(value, unit);
+  String get prefix => (cmp == '<' || cmp == '>') ? '$cmp ' : '';
 
-  Map<String, dynamic> toMap() => {'hormoneId': hormoneId, 'at': _t(at), 'value': value, 'unit': unit, 'note': note};
+  Map<String, dynamic> toMap() => {
+        'hormoneId': hormoneId,
+        'at': _t(at),
+        'value': value,
+        'unit': unit,
+        'note': note,
+        if (cmp == '<' || cmp == '>') 'cmp': cmp,
+      };
 
   factory Lab.from(String id, Map<String, dynamic> m) => Lab(
         id: id,
@@ -409,6 +426,7 @@ class Lab {
         value: (m['value'] as num).toDouble(),
         unit: m['unit'],
         note: m['note'],
+        cmp: (m['cmp'] == '<' || m['cmp'] == '>') ? m['cmp'] as String : null,
       );
 }
 

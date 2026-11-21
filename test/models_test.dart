@@ -10,10 +10,45 @@ void main() {
     test('Hormone preset conversion works properly', () {
       final e2 = presetOf('estradiol');
       expect(e2.toBase(100, 'pg/mL'), equals(100));
+      expect(e2.toBase(100, 'ng/L'), equals(100));
       expect(e2.toBase(367.1, 'pmol/L'), closeTo(100, 0.1));
 
       final t = presetOf('testosterone');
       expect(t.toBase(5, 'ng/mL'), equals(500));
+      expect(t.toBase(5, 'µg/L'), equals(500));
+
+      final p4 = presetOf('progesterone');
+      expect(p4.toBase(12.5, 'µg/L'), equals(12.5));
+
+      final prl = presetOf('prolactin');
+      expect(prl.toBase(15, 'µg/L'), equals(15));
+    });
+
+    test('Lab comparator serialization and backward compatibility', () {
+      final below = Lab(
+        id: 'lab_lt',
+        hormoneId: 'testosterone',
+        at: DateTime(2026, 11, 20),
+        value: 15,
+        unit: 'ng/dL',
+        cmp: '<',
+      );
+      expect(below.prefix, equals('< '));
+      final belowMap = below.toMap();
+      expect(belowMap['cmp'], equals('<'));
+      final restoredBelow = Lab.from('lab_lt', belowMap);
+      expect(restoredBelow.cmp, equals('<'));
+      expect(restoredBelow.prefix, equals('< '));
+
+      final exactLegacy = Lab.from('lab_eq', {
+        'hormoneId': 'estradiol',
+        'at': '2026-11-20T08:00:00.000',
+        'value': 180,
+        'unit': 'pg/mL',
+      });
+      expect(exactLegacy.cmp, isNull);
+      expect(exactLegacy.prefix, isEmpty);
+      expect(exactLegacy.toMap().containsKey('cmp'), isFalse);
     });
 
     test('Number parsing handles both comma and dot formats', () {

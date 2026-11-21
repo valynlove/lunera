@@ -4,6 +4,18 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.13] - 2026-11-21
+
+### Added
+- **New Lab Concentration Units (`lib/models.dart`):** Added `ng/L` for Estradiol and `µg/L` for Testosterone, Progesterone, and Prolactin presets.
+- **Censored Lab Value Comparators (`<` / `>`) (`lib/models.dart`, `lib/repo.dart`, `lib/sim.dart`, `lib/ui/levels.dart`, `lib/widget_sync.dart`):** Added optional `<` and `>` comparators when recording, validating, backing up, and displaying lab results (cards, charts, tooltips, and home widget), while automatically excluding censored `<`/`>` measurements from pharmacokinetic curve calibration.
+
+### Changed
+- **Dynamic Decay Window & Simulation Performance (`lib/sim.dart`):**
+  - Replaced the fixed 150-day injection cutoff with a dynamic `1e-6` decay threshold (`ln(1e6) / k_min`), fixing premature curve truncation for long-acting esters such as **Estradiol Undecylate** and **Testosterone Undecanoate**.
+  - Added mathematical limit forms when rate constants are equal (`_batemanSum`, `_repeatedRateLimit`, and oral `ka ≈ ke` guard) and filtered out non-positive/non-finite doses.
+  - Pre-filtered active intakes once per simulation window in `simSpots()` to keep chart rendering fast as dose history grows.
+
 ## [2.1.12] - 2026-11-21
 
 ### Fixed

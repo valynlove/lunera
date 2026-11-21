@@ -714,10 +714,13 @@ class Repo {
         return r['therapyId'] is String && _isValidDate(r['at']);
       case 'labs':
         final val = _finiteNum(r['value']);
+        final cmp = r['cmp'];
+        final cmpOk = cmp == null || cmp == '<' || cmp == '>';
         return r['hormoneId'] is String &&
             _isValidDate(r['at']) &&
             val != null &&
-            val >= 0;
+            val >= 0 &&
+            cmpOk;
       case 'supplies':
         final qty = _finiteNum(r['qty']);
         return r['name'] is String && qty != null && qty >= 0;

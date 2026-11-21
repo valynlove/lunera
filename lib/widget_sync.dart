@@ -127,7 +127,7 @@ class WidgetSync {
       value = '${fmt((levelAt(intakes, now) / f).roundToDouble())} $unit';
       note = tr('Estimated from dose entries, dots = lab results');
     } else if (hl.isNotEmpty) {
-      value = '${fmt(hl.last.base / f)} $unit';
+      value = '${hl.last.prefix}${fmt(hl.last.base / f)} $unit';
       note = tr('Lab result {0}', [DateFormat('d MMM y', L10n.code).format(hl.last.at)]);
     }
     await HomeWidget.saveWidgetData<String>('lvl_title', p.name);

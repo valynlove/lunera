@@ -19,7 +19,9 @@ void main() {
             {'id': 'l1', 'therapyId': 't1', 'at': '2026-11-01T12:00:00.000Z'}
           ],
           'labs': [
-            {'id': 'lab1', 'hormoneId': 'estradiol', 'value': 200, 'at': '2026-11-01T08:00:00.000Z'}
+            {'id': 'lab1', 'hormoneId': 'estradiol', 'value': 200, 'at': '2026-11-01T08:00:00.000Z'},
+            {'id': 'lab2', 'hormoneId': 'testosterone', 'value': 15, 'cmp': '<', 'at': '2026-11-01T08:00:00.000Z'},
+            {'id': 'lab3', 'hormoneId': 'estradiol', 'value': 1000, 'cmp': '>', 'at': '2026-11-01T08:00:00.000Z'},
           ],
           'supplies': [
             {'id': 's1', 'name': 'EV Vial', 'qty': 10}
@@ -36,7 +38,7 @@ void main() {
         }
       };
 
-      expect(repo.validate(validLunera), equals(7));
+      expect(repo.validate(validLunera), equals(9));
 
       // Test legacy 'ritme' metadata compatibility
       final validLegacy = {
@@ -106,6 +108,28 @@ void main() {
           'data': {
             'labs': [
               {'id': 'lab1', 'hormoneId': 'estradiol', 'value': double.nan, 'at': '2026-11-01T08:00:00.000Z'}
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'labs': [
+              {'id': 'lab1', 'hormoneId': 'estradiol', 'value': 100, 'cmp': '~', 'at': '2026-11-01T08:00:00.000Z'}
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'labs': [
+              {'id': 'lab1', 'hormoneId': 'estradiol', 'value': 100, 'cmp': 123, 'at': '2026-11-01T08:00:00.000Z'}
             ]
           }
         }),
