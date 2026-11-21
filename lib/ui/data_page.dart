@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:file_selector/file_selector.dart';
@@ -91,23 +92,23 @@ class _DataPageState extends ConsumerState<DataPage> {
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
-            IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
+            IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.arrowLeft)),
             Expanded(child: Text(tr('Data'), style: display(32))),
           ]),
           gap(12),
           _Panel(
-            icon: Icons.wifi_off_rounded,
+            icon: LucideIcons.wifiOff,
             tag: tr('Offline'),
             title: tr('File on this device'),
             body: tr('Save all your data to a single JSON file, or restore from a file. No internet needed.'),
             actions: [
-              pillButton(tr('Export'), busy ? () {} : _exportFile, icon: Icons.file_upload_outlined),
-              OutlinedButton.icon(onPressed: busy ? null : _importFile, icon: const Icon(Icons.file_download_outlined), label: Text(tr('Import'))),
+              pillButton(tr('Export'), busy ? () {} : _exportFile, icon: LucideIcons.upload),
+              OutlinedButton.icon(onPressed: busy ? null : _importFile, icon: const Icon(LucideIcons.download), label: Text(tr('Import'))),
             ],
           ),
           gap(14),
           _Panel(
-            icon: Icons.cloud_done_rounded,
+            icon: LucideIcons.cloudCheck,
             tag: tr('Online'),
             title: tr('Cloud backup'),
             body: tr('Keep a copy of your data in your Firebase account. Useful for going back to an earlier state.'),
@@ -122,23 +123,51 @@ class _DataPageState extends ConsumerState<DataPage> {
                       child: CircularProgressIndicator(strokeWidth: 2, color: C.lagoon),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      tr('Syncing in background...'),
-                      style: TextStyle(fontSize: 12, color: C.lagoon, fontWeight: FontWeight.w600),
+                    Expanded(
+                      child: Text(
+                        tr('Syncing in background...'),
+                        style: TextStyle(fontSize: 12, color: C.lagoon, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ] else if (syncState.status == SyncStatus.queuedOffline) ...[
+                    const Icon(LucideIcons.cloudOff, size: 15, color: C.amber),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        tr('Queued offline ({0} pending)', [syncState.pendingCount]),
+                        style: const TextStyle(fontSize: 12, color: C.amber, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ] else if (syncState.status == SyncStatus.error) ...[
+                    const Icon(LucideIcons.circleAlert, size: 15, color: Pastel.rose),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        syncState.errorMessage?.isNotEmpty == true
+                            ? tr('Sync failed: {0}', [syncState.errorMessage!])
+                            : tr('Sync failed'),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12, color: Pastel.rose, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ] else if (syncState.status == SyncStatus.synced && syncState.lastSynced != null) ...[
-                    Icon(Icons.check_circle_outline_rounded, size: 15, color: C.lagoon),
+                    Icon(LucideIcons.circleCheck, size: 15, color: C.lagoon),
                     const SizedBox(width: 6),
-                    Text(
-                      tr('All changes synced ({0})', [DateFormat('HH:mm').format(syncState.lastSynced!)]),
-                      style: TextStyle(fontSize: 12, color: C.lagoon, fontWeight: FontWeight.w600),
+                    Expanded(
+                      child: Text(
+                        tr('All changes synced ({0})', [DateFormat('HH:mm').format(syncState.lastSynced!)]),
+                        style: TextStyle(fontSize: 12, color: C.lagoon, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ] else ...[
-                    Icon(Icons.cloud_queue_rounded, size: 15, color: fg.withValues(alpha: 0.5)),
+                    Icon(LucideIcons.cloud, size: 15, color: fg.withValues(alpha: 0.5)),
                     const SizedBox(width: 6),
-                    Text(
-                      tr('Auto-sync ready'),
-                      style: TextStyle(fontSize: 12, color: fg.withValues(alpha: 0.5)),
+                    Expanded(
+                      child: Text(
+                        tr('Auto-sync ready'),
+                        style: TextStyle(fontSize: 12, color: fg.withValues(alpha: 0.5)),
+                      ),
                     ),
                   ],
                 ],
@@ -148,7 +177,7 @@ class _DataPageState extends ConsumerState<DataPage> {
               pillButton(tr('Back up now'), busy ? () {} : () => _run(() async {
                     await ref.read(repoProvider)!.saveBackup();
                     _toast(tr('Backup saved.'));
-                  }), icon: Icons.cloud_upload_rounded, color: C.lagoon),
+                  }), icon: LucideIcons.cloudUpload, color: C.lagoon),
             ],
           ),
           gap(8),
@@ -161,12 +190,12 @@ class _DataPageState extends ConsumerState<DataPage> {
                 IconButton(
                   tooltip: tr('Restore'),
                   onPressed: busy ? null : () => _run(() async => _importRaw(await ref.read(repoProvider)!.backupJson(b.id))),
-                  icon: const Icon(Icons.settings_backup_restore_rounded),
+                  icon: const Icon(LucideIcons.refreshCw),
                 ),
                 IconButton(
                   tooltip: tr('Delete'),
                   onPressed: busy ? null : () => _run(() => ref.read(repoProvider)!.deleteBackup(b.id)),
-                  icon: const Icon(Icons.delete_outline_rounded),
+                  icon: const Icon(LucideIcons.trash2),
                 ),
               ]),
             ),

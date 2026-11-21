@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -68,25 +69,47 @@ class AppRoot extends ConsumerStatefulWidget {
 }
 
 class _AppRootState extends ConsumerState<AppRoot> {
-  bool _minSplashDone = false;
+  bool _splashFinished = false;
+  bool _fallbackTimedOut = false;
+  Timer? _fallbackTimer;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) setState(() => _minSplashDone = true);
+    _fallbackTimer = Timer(const Duration(milliseconds: 2400), () {
+      if (mounted && !_fallbackTimedOut) {
+        setState(() => _fallbackTimedOut = true);
+      }
     });
+  }
+
+  void _onSplashFinish() {
+    _fallbackTimer?.cancel();
+    if (mounted && !_splashFinished) {
+      setState(() => _splashFinished = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _fallbackTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(userProvider.select((u) => u.isLoading));
-    final showSplash = loading || !_minSplashDone;
+    final showSplash = !_fallbackTimedOut && (loading || !_splashFinished);
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 600),
-      switchInCurve: Curves.easeIn,
-      switchOutCurve: Curves.easeOut,
-      child: !showSplash ? const AuthGate(key: ValueKey('gate')) : const SplashPage(key: ValueKey('splash')),
+      duration: const Duration(milliseconds: 420),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: !showSplash
+          ? const AuthGate(key: ValueKey('gate'))
+          : SplashPage(
+              key: const ValueKey('splash'),
+              onFinish: _onSplashFinish,
+            ),
     );
   }
 }
@@ -95,7 +118,7 @@ class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) => ref.watch(userProvider).when(
-        data: (u) => u == null ? const WelcomePage() : const LockGate(child: Shell()),
+        data: (u) => u == null ? const WelcomePage() : LockGate(key: ValueKey(u.uid), uid: u.uid, child: const Shell()),
         loading: () => const SplashPage(),
         error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
       );

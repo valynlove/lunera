@@ -1,20 +1,47 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../lock.dart';
 import '../theme.dart';
 import 'auth.dart';
+import 'splash.dart';
 import '../l10n.dart';
 
-/// Membungkus aplikasi: terkunci saat dibuka, dan lagi setelah ditinggalkan cukup lama.
+/// Membungkus aplikasi: memverifikasi kunci lokal & cloud sebelum merender [child],
+/// dan mengunci ulang setelah ditinggalkan melewati batas waktu.
 class LockGate extends StatefulWidget {
-  const LockGate({super.key, required this.child});
+  const LockGate({
+    super.key,
+    required this.child,
+    this.uid,
+    this.syncCloud,
+  });
+
   final Widget child;
+  final String? uid;
+  final Future<void> Function(String uid)? syncCloud;
+
   @override
   State<LockGate> createState() => _LockGateState();
 }
 
 class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
+  String? get _effectiveUid {
+    if (widget.uid != null) return widget.uid;
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
   late bool locked = Lock.instance.state.value.enabled && !Lock.instance.sessionUnlocked;
+  bool _resolvingUser = false;
+  late bool checkingLock = !Lock.instance.sessionUnlocked &&
+      !locked &&
+      _effectiveUid != null &&
+      (widget.syncCloud != null || !Lock.instance.hasSyncedFor(_effectiveUid!));
   DateTime? leftAt;
 
   @override
@@ -22,6 +49,74 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Lock.instance.state.addListener(_onState);
+    _resolveUserAndSync(fromInit: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant LockGate oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.uid != widget.uid) {
+      _resolveUserAndSync(fromInit: false);
+    }
+  }
+
+  void _resolveUserAndSync({required bool fromInit}) {
+    final targetUid = _effectiveUid;
+    if (Lock.instance.isInitialized && targetUid != null && !Lock.instance.isLoadedFor(targetUid)) {
+      _resolvingUser = true;
+      locked = true;
+      Lock.instance.isLocked.value = true;
+      if (!fromInit && mounted) setState(() {});
+      Lock.instance.ensureLocalLoaded(targetUid).whenComplete(() {
+        if (!mounted) return;
+        setState(() {
+          _resolvingUser = false;
+          locked = Lock.instance.state.value.enabled && !Lock.instance.sessionUnlocked;
+          Lock.instance.isLocked.value = locked;
+          if (!locked && !Lock.instance.sessionUnlocked &&
+              (widget.syncCloud != null || !Lock.instance.hasSyncedFor(targetUid))) {
+            checkingLock = true;
+          }
+        });
+        _runInitialCloudSync();
+      });
+    } else {
+      _resolvingUser = false;
+      locked = Lock.instance.state.value.enabled && !Lock.instance.sessionUnlocked;
+      Lock.instance.isLocked.value = locked;
+      if (!fromInit && targetUid != null && !Lock.instance.sessionUnlocked && !locked &&
+          (widget.syncCloud != null || !Lock.instance.hasSyncedFor(targetUid))) {
+        checkingLock = true;
+      }
+      if (!fromInit && mounted) setState(() {});
+      _runInitialCloudSync();
+    }
+  }
+
+  Future<void> _runInitialCloudSync() async {
+    final uid = _effectiveUid;
+    if (uid == null) {
+      if (checkingLock && mounted) {
+        setState(() => checkingLock = false);
+      }
+      return;
+    }
+    try {
+      final fn = widget.syncCloud ?? Lock.instance.syncWithCloud;
+      await fn(uid);
+    } catch (e) {
+      debugPrint('LockGate cloud sync error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          checkingLock = false;
+          if (!Lock.instance.signingOut && !Lock.instance.isLockSuppressed) {
+            locked = Lock.instance.state.value.enabled && !Lock.instance.sessionUnlocked;
+            Lock.instance.isLocked.value = locked;
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -31,37 +126,87 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  void _engageLock() {
+    try {
+      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+    } catch (_) {}
+    Lock.instance.isLocked.value = true;
+    setState(() => locked = true);
+  }
+
   void _onState() {
-    if (!Lock.instance.state.value.enabled && locked) setState(() => locked = false);
+    if (!mounted || Lock.instance.signingOut || _resolvingUser) return;
+    final enabled = Lock.instance.state.value.enabled;
+    if (!enabled && locked) {
+      Lock.instance.consumeAutoLockOnEnable();
+      Lock.instance.isLocked.value = false;
+      setState(() => locked = false);
+    } else if (enabled &&
+        !Lock.instance.sessionUnlocked &&
+        !locked &&
+        !Lock.instance.isLockSuppressed &&
+        !Lock.instance.isAuthenticating) {
+      Lock.instance.consumeAutoLockOnEnable();
+      _engageLock();
+    } else if (enabled &&
+        !locked &&
+        !Lock.instance.isLockSuppressed &&
+        !Lock.instance.isAuthenticating &&
+        Lock.instance.consumeAutoLockOnEnable()) {
+      Lock.instance.sessionUnlocked = false;
+      _engageLock();
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState s) {
     final st = Lock.instance.state.value;
-    if (s == AppLifecycleState.paused) leftAt = DateTime.now();
-    if (s == AppLifecycleState.resumed && st.enabled && leftAt != null && !locked) {
-      if (Lock.instance.isLockSuppressed) {
-        leftAt = DateTime.now();
+    if (s == AppLifecycleState.paused) {
+      if (Lock.instance.isLockSuppressed || Lock.instance.isAuthenticating || Lock.instance.signingOut) {
+        leftAt = null;
         return;
       }
+      leftAt = DateTime.now();
+    }
+    if (s == AppLifecycleState.resumed) {
+      final previousLeftAt = leftAt;
+      leftAt = null;
+      if (locked) {
+        Lock.instance.refreshBiometricSupport();
+        return;
+      }
+      if (!st.enabled || _resolvingUser) return;
+      if (Lock.instance.isLockSuppressed || Lock.instance.isAuthenticating || Lock.instance.signingOut) {
+        return;
+      }
+      if (previousLeftAt == null) return;
       final requiredDelay = st.delayMin == 0 ? const Duration(seconds: 3) : Duration(minutes: st.delayMin);
-      if (DateTime.now().difference(leftAt!) >= requiredDelay) {
+      if (DateTime.now().difference(previousLeftAt) >= requiredDelay) {
         Lock.instance.sessionUnlocked = false;
-        setState(() => locked = true);
+        _engageLock();
       }
     }
   }
 
   @override
-  Widget build(BuildContext context) => Stack(children: [
-        widget.child,
-        if (locked) Positioned.fill(child: LockScreen(
-            onUnlock: () {
-              Lock.instance.sessionUnlocked = true;
-              setState(() => locked = false);
-            },
-          )),
-      ]);
+  Widget build(BuildContext context) {
+    if (_resolvingUser || checkingLock) {
+      return const SplashPage();
+    }
+    if (locked || Lock.instance.signingOut) {
+      return LockScreen(
+        onUnlock: () {
+          Lock.instance.sessionUnlocked = true;
+          Lock.instance.isLocked.value = false;
+          setState(() {
+            locked = false;
+            checkingLock = false;
+          });
+        },
+      );
+    }
+    return widget.child;
+  }
 }
 
 /// Papan angka dengan penanda 6 titik bertema celestial (terinspirasi dari konsep Wall o' Pay).
@@ -72,7 +217,7 @@ class PinPad extends StatelessWidget {
     required this.onChanged,
     this.length = 6,
     this.onBio,
-    this.biometricIcon = Icons.fingerprint_rounded,
+    this.biometricIcon = LucideIcons.fingerprintPattern,
     this.biometricTooltip,
   });
 
@@ -100,7 +245,7 @@ class PinPad extends StatelessWidget {
             side: BorderSide(
               color: tap == null
                   ? Colors.transparent
-                  : const Color(0xFFE8D3A5).withValues(alpha: 0.22),
+                  : C.lavender.withValues(alpha: 0.22),
               width: 1.0,
             ),
           ),
@@ -194,7 +339,7 @@ class PinPad extends StatelessWidget {
               _key(
                 tap: value.isEmpty ? null : () => onChanged(value.substring(0, value.length - 1)),
                 child: Icon(
-                  Icons.backspace_outlined,
+                  LucideIcons.delete,
                   color: value.isNotEmpty
                       ? Colors.white.withValues(alpha: 0.90)
                       : Colors.transparent,
@@ -218,29 +363,45 @@ class _LockScreenState extends State<LockScreen> {
   String pin = '';
   String? msg;
   bool _bioRunning = false;
+  bool _signingOut = false;
+
+  String _lockoutMessage() {
+    final sec = Lock.instance.remainingLockoutSeconds;
+    if (sec > 0) {
+      return tr('Please wait {0}s before trying again.', [sec]);
+    }
+    return tr('Wait a moment before trying again.');
+  }
 
   @override
   void initState() {
     super.initState();
     if (Lock.instance.isLockedOut) {
-      msg = tr('Wait a moment before trying again.');
+      msg = _lockoutMessage();
     }
-    if (Lock.instance.state.value.bio) WidgetsBinding.instance.addPostFrameCallback((_) => _bio());
+    if (Lock.instance.state.value.biometricEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _bio());
+    }
   }
 
   Future<void> _bio() async {
-    if (_bioRunning || !mounted) return;
+    if (_bioRunning || _signingOut || Lock.instance.signingOut || !mounted) return;
+    if (Lock.instance.isLockedOut) {
+      setState(() => msg = _lockoutMessage());
+      return;
+    }
     _bioRunning = true;
     try {
-      if (await Lock.instance.authBio() && mounted) widget.onUnlock();
+      if (await Lock.instance.authBio() && mounted && !_signingOut) widget.onUnlock();
     } finally {
       if (mounted) _bioRunning = false;
     }
   }
 
   void _changed(String v) {
+    if (_signingOut || Lock.instance.signingOut) return;
     if (Lock.instance.isLockedOut) {
-      setState(() => msg = tr('Wait a moment before trying again.'));
+      setState(() => msg = _lockoutMessage());
       return;
     }
     setState(() {
@@ -254,142 +415,187 @@ class _LockScreenState extends State<LockScreen> {
     }
     setState(() {
       pin = '';
-      msg = Lock.instance.isLockedOut
-          ? tr('Too many attempts. Try again in 30 seconds.')
-          : tr('Wrong PIN.');
+      msg = Lock.instance.isLockedOut ? _lockoutMessage() : tr('Wrong PIN.');
     });
   }
 
   Future<void> _forgot() async {
-    if (!await confirm(context, tr('Log out and turn off the lock? You\'ll need to log in again with your password.'), ok: tr('Log out'))) return;
-    await Lock.instance.disable();
-    await signOutAll();
+    if (_signingOut) return;
+    if (!await confirm(
+      context,
+      tr('Log out and remove the lock from this device? Cloud lock protection remains active on your account.'),
+      ok: tr('Log out'),
+    )) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _signingOut = true);
+    Lock.instance.signingOut = true;
+    try {
+      await Lock.instance.clearLocal();
+      await signOutAll();
+    } finally {
+      Lock.instance.signingOut = false;
+      if (mounted) setState(() => _signingOut = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (Lock.instance.state.value.decoyCalculator) {
-      return Theme(
-        data: buildTheme(Brightness.dark),
-        child: _DecoyCalculatorView(
-          onUnlock: widget.onUnlock,
-          onForgot: _forgot,
-          onBio: Lock.instance.state.value.bio ? _bio : null,
-        ),
-      );
-    }
+    return ValueListenableBuilder<AppLockState>(
+      valueListenable: Lock.instance.state,
+      builder: (context, st, _) {
+        final bioIcon = st.isFaceOnly ? LucideIcons.scanFace : LucideIcons.fingerprintPattern;
+        final bioTooltip = st.isFaceOnly
+            ? tr('Face Unlock')
+            : st.isFingerprintOnly
+                ? tr('Fingerprint Unlock')
+                : tr('Biometric Unlock');
 
-    return Theme(
-      data: buildTheme(Brightness.dark),
-      child: Scaffold(
-        body: AuthScene(
-          darken: true,
-          child: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.06),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Pastel.lilac.withValues(alpha: 0.25),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Pastel.lilac.withValues(alpha: 0.20),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: const MoonLogo(size: 64),
-                    ),
-                    gap(12),
-                    Text(appName, style: wordmark(32, color: Colors.white)),
-                    gap(8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-                      ),
-                      child: Row(
+        if (st.decoyCalculator) {
+          return PopScope(
+            canPop: false,
+            child: Theme(
+              data: buildTheme(Brightness.dark),
+              child: _DecoyCalculatorView(
+                onUnlock: widget.onUnlock,
+                onForgot: _forgot,
+                onBio: st.biometricEnabled ? _bio : null,
+                biometricIcon: bioIcon,
+                biometricTooltip: bioTooltip,
+              ),
+            ),
+          );
+        }
+
+        final promptText = !st.biometricEnabled
+            ? tr('Enter PIN')
+            : st.isFaceOnly
+                ? tr('Enter 6-digit PIN or use Face Unlock')
+                : st.isFingerprintOnly
+                    ? tr('Enter 6-digit PIN or scan fingerprint')
+                    : tr('Enter PIN');
+
+        return PopScope(
+          canPop: false,
+          child: Theme(
+            data: buildTheme(Brightness.dark),
+            child: Scaffold(
+              body: AuthScene(
+                darken: true,
+                child: SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.lock_rounded, size: 14, color: Pastel.lilac),
-                          const SizedBox(width: 6),
-                          Text(
-                            tr('Enter PIN'),
-                            style: TextStyle(
-                              color: Pastel.mist.withValues(alpha: 0.95),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Pastel.lilac.withValues(alpha: 0.25),
+                                width: 1.2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Pastel.lilac.withValues(alpha: 0.20),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: const MoonLogo(size: 64),
+                          ),
+                          gap(12),
+                          Text(appName, style: wordmark(32, color: Colors.white)),
+                          gap(8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.lock, size: 16, color: C.iconActive),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    promptText,
+                                    style: TextStyle(
+                                      color: Pastel.mist.withValues(alpha: 0.95),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          gap(28),
+                          PinPad(
+                            value: pin,
+                            onChanged: _changed,
+                            onBio: st.biometricEnabled ? _bio : null,
+                            biometricIcon: bioIcon,
+                            biometricTooltip: bioTooltip,
+                          ),
+                          gap(8),
+                          SizedBox(
+                            height: 38,
+                            child: msg == null
+                                ? null
+                                : Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0x33FF5722),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: const Color(0x66FF5722)),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(LucideIcons.circleAlert, size: 16, color: Color(0xFFFF8A80)),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            msg!,
+                                            style: const TextStyle(
+                                              color: Color(0xFFFFCDD2),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                          gap(10),
+                          TextButton.icon(
+                            onPressed: _forgot,
+                            icon: const Icon(LucideIcons.circleHelp, size: 16, color: C.iconDefault),
+                            label: Text(
+                              tr('Forgot PIN?'),
+                              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    gap(28),
-                    PinPad(
-                      value: pin,
-                      onChanged: _changed,
-                      onBio: Lock.instance.state.value.bio ? _bio : null,
-                    ),
-                    gap(8),
-                    SizedBox(
-                      height: 38,
-                      child: msg == null
-                          ? null
-                          : Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x33FF5722),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: const Color(0x66FF5722)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.error_outline_rounded, size: 15, color: Color(0xFFFF8A80)),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      msg!,
-                                      style: const TextStyle(
-                                        color: Color(0xFFFFCDD2),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                    ),
-                    gap(10),
-                    TextButton.icon(
-                      onPressed: _forgot,
-                      icon: const Icon(Icons.help_outline_rounded, size: 16, color: Colors.white60),
-                      label: Text(
-                        tr('Forgot PIN?'),
-                        style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -399,11 +605,15 @@ class _DecoyCalculatorView extends StatefulWidget {
     required this.onUnlock,
     required this.onForgot,
     this.onBio,
+    this.biometricIcon = LucideIcons.fingerprintPattern,
+    this.biometricTooltip,
   });
 
   final VoidCallback onUnlock;
   final VoidCallback onForgot;
   final VoidCallback? onBio;
+  final IconData biometricIcon;
+  final String? biometricTooltip;
 
   @override
   State<_DecoyCalculatorView> createState() => _DecoyCalculatorViewState();
@@ -613,9 +823,9 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
                   const Spacer(),
                   if (widget.onBio != null)
                     IconButton(
-                      icon: const Icon(Icons.fingerprint_rounded, color: Colors.white70),
+                      icon: Icon(widget.biometricIcon, color: Colors.white70),
                       onPressed: widget.onBio,
-                      tooltip: tr('Fingerprint or face'),
+                      tooltip: widget.biometricTooltip ?? tr('Fingerprint or face'),
                     ),
                 ],
               ),
@@ -736,7 +946,7 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
                       _calcButton(label: '.', onTap: _onDecimal),
                       _calcButton(
                         label: '⌫',
-                        icon: const Icon(Icons.backspace_outlined, color: Colors.white, size: 20),
+                        icon: const Icon(LucideIcons.delete, color: Colors.white, size: 20),
                         onTap: _onBackspace,
                       ),
                       _calcButton(
@@ -783,9 +993,17 @@ class _PinFlowState extends State<_PinFlow> {
   String pin = '';
   String? first, msg;
 
+  String _lockoutMessage() {
+    final sec = Lock.instance.remainingLockoutSeconds;
+    if (sec > 0) {
+      return tr('Please wait {0}s before trying again.', [sec]);
+    }
+    return tr('Wait a moment before trying again.');
+  }
+
   void _changed(String v) {
     if (!widget.create && Lock.instance.isLockedOut) {
-      setState(() => msg = tr('Wait a moment before trying again.'));
+      setState(() => msg = _lockoutMessage());
       return;
     }
     setState(() {
@@ -799,9 +1017,7 @@ class _PinFlowState extends State<_PinFlow> {
       } else {
         setState(() {
           pin = '';
-          msg = Lock.instance.isLockedOut
-              ? tr('Too many attempts. Try again in 30 seconds.')
-              : tr('Wrong PIN.');
+          msg = Lock.instance.isLockedOut ? _lockoutMessage() : tr('Wrong PIN.');
         });
       }
     } else if (first == null) {
@@ -833,7 +1049,7 @@ class _PinFlowState extends State<_PinFlow> {
                     alignment: Alignment.centerLeft,
                     child: IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded, color: Colors.white),
+                      icon: const Icon(LucideIcons.x, color: Colors.white),
                     ),
                   ),
                   Expanded(
@@ -853,7 +1069,7 @@ class _PinFlowState extends State<_PinFlow> {
                                   width: 1.2,
                                 ),
                               ),
-                              child: const Icon(Icons.dialpad_rounded, size: 36, color: Pastel.lilac),
+                              child: const Icon(LucideIcons.grid, size: 24, color: C.iconActive),
                             ),
                             gap(16),
                             Text(
@@ -881,7 +1097,7 @@ class _PinFlowState extends State<_PinFlow> {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Icon(Icons.error_outline_rounded, size: 15, color: Color(0xFFFF8A80)),
+                                            const Icon(LucideIcons.circleAlert, size: 16, color: Color(0xFFFF8A80)),
                                             const SizedBox(width: 6),
                                             Text(
                                               msg!,

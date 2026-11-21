@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -45,7 +46,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '2.1.0';
+  static const currentVersion = '2.1.9';
 
   static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
 
@@ -223,18 +224,18 @@ class UpdateCheckerService {
                 color: dark ? C.deepCard : Colors.white,
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: const Color(0xFFD6B277).withValues(alpha: dark ? 0.38 : 0.25),
+                  color: C.lavender.withValues(alpha: dark ? 0.28 : 0.20),
                   width: 1.2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: (dark ? const Color(0xFF060412) : Colors.black12).withValues(alpha: 0.45),
+                    color: (dark ? C.voidBg : Colors.black12).withValues(alpha: 0.50),
                     blurRadius: 32,
                     offset: const Offset(0, 10),
                   ),
                   if (dark)
                     BoxShadow(
-                      color: C.peony.withValues(alpha: 0.15),
+                      color: C.aurora.withValues(alpha: 0.16),
                       blurRadius: 30,
                       spreadRadius: -4,
                     ),
@@ -255,26 +256,26 @@ class UpdateCheckerService {
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              C.peony.withValues(alpha: 0.32),
-                              const Color(0xFFF1BA79).withValues(alpha: 0.18),
+                              C.aurora.withValues(alpha: 0.32),
+                              C.magenta.withValues(alpha: 0.18),
                               Colors.transparent,
                             ],
                           ),
                           border: Border.all(
-                            color: const Color(0xFFD6B277).withValues(alpha: 0.48),
+                            color: C.lavender.withValues(alpha: 0.42),
                             width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: C.peony.withValues(alpha: 0.25),
+                              color: C.aurora.withValues(alpha: 0.24),
                               blurRadius: 16,
                             ),
                           ],
                         ),
                         child: Center(
                           child: Icon(
-                            Icons.auto_awesome_rounded,
-                            color: dark ? const Color(0xFFF1BA79) : C.peony,
+                            LucideIcons.sparkles,
+                            color: dark ? C.coral : C.aurora,
                             size: 26,
                           ),
                         ),
@@ -286,17 +287,17 @@ class UpdateCheckerService {
                           children: [
                             Text(
                               tr('Update Available!'),
-                              style: display(21, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
+                              style: display(22, color: dark ? Colors.white : C.midnight),
                             ),
                             const SizedBox(height: 4),
                             // Version Pill
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                               decoration: BoxDecoration(
-                                color: dark ? const Color(0xFF19143F).withValues(alpha: 0.8) : Colors.grey.shade100,
+                                color: dark ? C.nebula.withValues(alpha: 0.8) : Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Pastel.lilac.withValues(alpha: 0.32),
+                                  color: C.lavender.withValues(alpha: 0.32),
                                   width: 1,
                                 ),
                               ),
@@ -313,9 +314,9 @@ class UpdateCheckerService {
                                   ),
                                   const SizedBox(width: 6),
                                   const Icon(
-                                    Icons.arrow_forward_rounded,
+                                    LucideIcons.arrowRight,
                                     size: 12,
-                                    color: Color(0xFFF1BA79),
+                                    color: C.coral,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
@@ -323,7 +324,7 @@ class UpdateCheckerService {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w800,
-                                      color: dark ? const Color(0xFFF1BA79) : C.peony,
+                                      color: dark ? C.coral : C.aurora,
                                     ),
                                   ),
                                 ],
@@ -340,7 +341,7 @@ class UpdateCheckerService {
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.45,
-                      color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.85),
+                      color: (dark ? C.mist : C.midnight).withValues(alpha: 0.88),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -349,10 +350,10 @@ class UpdateCheckerService {
                       constraints: const BoxConstraints(maxHeight: 180),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: dark ? const Color(0xFF100C29) : Colors.grey.shade50,
+                        color: dark ? C.midnight : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFFD6B277).withValues(alpha: dark ? 0.25 : 0.18),
+                          color: C.lavender.withValues(alpha: dark ? 0.22 : 0.16),
                         ),
                       ),
                       child: Scrollbar(
@@ -364,7 +365,7 @@ class UpdateCheckerService {
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.5,
-                              color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.88),
+                              color: (dark ? C.mist : C.midnight).withValues(alpha: 0.90),
                             ),
                           ),
                         ),
@@ -376,7 +377,7 @@ class UpdateCheckerService {
                     style: TextStyle(
                       fontSize: 11.5,
                       fontStyle: FontStyle.italic,
-                      color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.55),
+                      color: (dark ? C.mist : C.midnight).withValues(alpha: 0.58),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -389,31 +390,31 @@ class UpdateCheckerService {
                         style: OutlinedButton.styleFrom(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          backgroundColor: dark ? const Color(0xFF282057).withValues(alpha: 0.35) : Colors.grey.shade50,
+                          backgroundColor: dark ? C.nebula.withValues(alpha: 0.42) : Colors.grey.shade50,
                           side: BorderSide(
-                            color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.18),
+                            color: (dark ? C.lavender : C.midnight).withValues(alpha: 0.22),
                           ),
                         ),
                         child: Text(
                           tr('Later'),
                           style: TextStyle(
-                            color: dark ? Colors.white70 : C.midnight,
+                            color: dark ? C.mist : C.midnight,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       FilledButton.icon(
-                        icon: const Icon(Icons.download_rounded, size: 18),
+                        icon: const Icon(LucideIcons.download, size: 18),
                         label: Text(
                           tr('Update Now'),
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         style: FilledButton.styleFrom(
-                          backgroundColor: C.peony,
+                          backgroundColor: C.aurora,
                           foregroundColor: Colors.white,
                           elevation: 3,
-                          shadowColor: C.peony.withValues(alpha: 0.5),
+                          shadowColor: C.aurora.withValues(alpha: 0.5),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         ),

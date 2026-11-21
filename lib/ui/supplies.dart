@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
@@ -33,7 +34,7 @@ class SuppliesPage extends ConsumerWidget {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: () => showSheet(context, const SupplySheet()),
-                  icon: const Icon(Icons.add_rounded, size: 20),
+                  icon: const Icon(LucideIcons.plus, size: 20),
                   label: Text(tr('Add Supply'),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   style: FilledButton.styleFrom(
@@ -58,15 +59,14 @@ class SuppliesPage extends ConsumerWidget {
                     backgroundColor: Colors.transparent,
                     builder: (_) => const PickupAssistantSheet(),
                   ),
-                  icon: const Icon(Icons.local_shipping_outlined, size: 20),
+                  icon: const Icon(LucideIcons.truck, size: 20),
                   label: Text(tr('Pickup Assistant'),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Pastel.lilac,
-                    backgroundColor:
-                        const Color(0xFF17264D).withValues(alpha: 0.45),
+                    foregroundColor: C.lavender,
+                    backgroundColor: C.midnight.withValues(alpha: 0.55),
                     side: BorderSide(
-                      color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
+                      color: C.lavender.withValues(alpha: 0.28),
                       width: 1.1,
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 13),
@@ -101,8 +101,8 @@ class SuppliesPage extends ConsumerWidget {
                 children: [
                   Icon(
                     lowCount > 0
-                        ? Icons.inventory_2_outlined
-                        : Icons.local_shipping_outlined,
+                        ? LucideIcons.package
+                        : LucideIcons.truck,
                     color: lowCount > 0 ? C.amber : C.peony,
                     size: 24,
                   ),
@@ -193,14 +193,14 @@ class _MedCard extends ConsumerWidget {
                             ?.copyWith(fontWeight: FontWeight.w700))),
                 IconButton.filledTonal(
                     onPressed: () => repo?.adjustSupply(s.id, -1),
-                    icon: const Icon(Icons.remove_rounded)),
+                    icon: const Icon(LucideIcons.minus)),
                 Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Text('${fmt(s.qty)} ${s.unitLabel}',
                         style: display(20))),
                 IconButton.filledTonal(
                     onPressed: () => repo?.adjustSupply(s.id, 1),
-                    icon: const Icon(Icons.add_rounded)),
+                    icon: const Icon(LucideIcons.plus)),
               ]),
               gap(14),
               ClipRRect(
@@ -251,7 +251,7 @@ class _GenericCard extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 10, 10, 10),
             child: Row(children: [
-              Icon(genericTypes[s.gtype]?.$2 ?? Icons.inventory_2_rounded,
+              Icon(genericTypes[s.gtype]?.$2 ?? LucideIcons.package,
                   color: low ? C.amber : C.lagoon),
               const SizedBox(width: 14),
               Expanded(
@@ -259,14 +259,14 @@ class _GenericCard extends ConsumerWidget {
                       style: const TextStyle(fontWeight: FontWeight.w700))),
               IconButton.filledTonal(
                   onPressed: () => repo?.adjustSupply(s.id, -1),
-                  icon: const Icon(Icons.remove_rounded)),
+                  icon: const Icon(LucideIcons.minus)),
               Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(fmt(s.qty),
                       style: display(20, color: low ? C.amber : null))),
               IconButton.filledTonal(
                   onPressed: () => repo?.adjustSupply(s.id, 1),
-                  icon: const Icon(Icons.add_rounded)),
+                  icon: const Icon(LucideIcons.plus)),
             ]),
           ),
         ),
@@ -424,7 +424,7 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
                 lastDate: DateTime(2100));
             if (d != null) setState(() => expiry = d);
           },
-          icon: const Icon(Icons.event_rounded, size: 18),
+          icon: const Icon(LucideIcons.calendarDays, size: 18),
           label: Text(expiry == null
               ? tr('Expiry date (optional)')
               : DateFormat('d MMM y', L10n.code).format(expiry!)),
@@ -435,7 +435,7 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
         if (editing)
           TextButton.icon(
               onPressed: _delete,
-              icon: const Icon(Icons.delete_outline_rounded),
+              icon: const Icon(LucideIcons.trash2),
               label: Text(tr('Delete'))),
         Expanded(
             child: pillButton(

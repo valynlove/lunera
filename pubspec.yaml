@@ -1,7 +1,7 @@
 name: lunera
 description: Personal health & therapy tracking application
 publish_to: none
-version: 2.1.0+85
+version: 2.1.9+94
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
@@ -20,10 +20,12 @@ dependencies:
   timezone: ^0.11.0
   flutter_timezone: ^5.0.1
   local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.3.2
   crypto: ^3.0.5
   image_picker: ^1.2.4
   home_widget: ^0.10.0
+  lucide_icons_flutter: ^4.0.3
 dev_dependencies:
   flutter_test: {sdk: flutter}
   flutter_lints: ^4.0.0

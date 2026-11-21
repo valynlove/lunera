@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme.dart';
@@ -74,18 +76,31 @@ class AppLockState {
     this.delayMin = 1,
     this.decoyCalculator = false,
     this.privacyShield = false,
+    this.biometricAvailable = false,
+    this.biometricTypes = const [],
   });
-  final bool enabled, bio;
-  final int delayMin; // kunci lagi setelah ditinggalkan sekian menit (0 = segera)
+
+  final bool enabled;
+  final bool bio;
+  final int delayMin; // kunci lagi setelah ditinggalkan sekian menit (0 = segera / grace 3 detik)
   final bool decoyCalculator; // samarkan sebagai kalkulator fungsional
   final bool privacyShield; // true = FLAG_SECURE aktif (sembunyikan preview app switcher dan cegah screenshot)
+  final bool biometricAvailable; // true = perangkat memiliki biometrik terdaftar
+  final List<BiometricType> biometricTypes;
+
+  bool get biometricEnabled => enabled && bio && biometricAvailable;
+  bool get hasFace => biometricTypes.contains(BiometricType.face);
+  bool get hasFingerprint => biometricTypes.contains(BiometricType.fingerprint);
+  bool get isFaceOnly => hasFace && !hasFingerprint;
+  bool get isFingerprintOnly => hasFingerprint && !hasFace;
 }
 
 typedef LockState = AppLockState;
 
-/// Kunci aplikasi dengan PIN dan Biometrik.
-/// Disimpan per perangkat (offline-first) dan otomatis tersinkronkan dengan akun di Cloud Firestore
-/// agar PIN di HP tidak mengunci Chrome atau perangkat lain, tapi tetap dapat dipulihkan.
+/// Kunci aplikasi dengan PIN 6 digit (PBKDF2-HMAC-SHA256) dan Biometrik (Fingerprint / Face Unlock).
+/// Rahasia PIN & status lockout disimpan per-akun di [FlutterSecureStorage] (Android Keystore / iOS Keychain)
+/// dengan migrasi otomatis dari penyimpanan lama, isolasi per-UID, lockout eksponensial bertingkat,
+/// clock-rollback guard, dan sinkronisasi Cloud Firestore (offline-first).
 class Lock {
   Lock._();
   static final instance = Lock._();
@@ -93,6 +108,7 @@ class Lock {
   static const int maxAttempts = 5;
   static const Duration lockoutDuration = Duration(seconds: 30);
   static const _channel = MethodChannel('com.example.ritme/app_utils');
+  static const _secretFields = ['hash', 'salt', 'fails', 'lockoutUntil', 'lockoutTier'];
 
   /// Atur perlindungan layar (FLAG_SECURE) ke native Android.
   /// Pada debug mode, otomatis dilewati agar developer tetap bisa mengambil tangkapan layar untuk testing.
@@ -107,13 +123,70 @@ class Lock {
     } catch (_) {}
   }
 
+  /// Menentukan nilai timestamp `updatedAt` remote yang aman dari manipulasi timestamp masa depan.
+  static int clampRemoteUpdatedAtMs(int remoteAtMs, {int? nowMs}) {
+    final refNow = nowMs ?? DateTime.now().millisecondsSinceEpoch;
+    final maxAllowed = refNow + 300000; // toleransi clock skew 5 menit
+    if (remoteAtMs > maxAllowed) {
+      return refNow;
+    }
+    return remoteAtMs;
+  }
+
   final state = ValueNotifier<AppLockState>(const AppLockState());
+  final isLocked = ValueNotifier<bool>(false);
   bool sessionUnlocked = false; // sudah dibuka di proses ini (bertahan saat aplikasi dibangun ulang karena ganti bahasa)
+  bool signingOut = false; // mencegah Shell tampil sesaat antara clearLocal() dan signOutAll()
+
   final _auth = LocalAuthentication();
+  final _secureStorage = const FlutterSecureStorage();
+  final Map<String, String> _secretCache = {};
   SharedPreferences? _p;
 
+  String? _activeUid;
+  bool _hasLoaded = false;
+  bool _pendingAutoLockOnEnable = false;
+  StreamSubscription<User?>? _authSub;
+  Future<void> _loadUserQueue = Future<void>.value();
+  final Map<String, Future<void>> _inFlightLocalLoad = {};
+
+  bool _biometricAvailable = false;
+  List<BiometricType> _biometricTypes = const [];
+
+  Future<void>? _inFlightSync;
+  String? _inFlightSyncUid;
+  String? _lastSyncedUid;
+
   bool _isAuthenticating = false;
-  bool get isAuthenticating => _isAuthenticating;
+  DateTime? _lastBiometricAuthEndedAt;
+
+  /// Menandakan `Lock.instance.load()` telah selesai berjalan minimal sekali.
+  bool get isInitialized => _hasLoaded;
+
+  /// Memeriksa apakah kunci untuk [uid] (`null` = tamu) sudah dimuat ke memori.
+  bool isLoadedFor(String? uid) => _hasLoaded && _activeUid == uid;
+
+  /// Mengambil dan mengosongkan penanda bahwa perubahan status PIN ke aktif
+  /// berasal dari pemuatan akun/sinkronisasi (bukan setup PIN interaktif).
+  bool consumeAutoLockOnEnable() {
+    final v = _pendingAutoLockOnEnable;
+    _pendingAutoLockOnEnable = false;
+    return v;
+  }
+
+  /// Menandakan apakah dialog biometrik sistem sedang aktif (atau baru saja ditutup)
+  /// agar transisi lifecycle pause/resume dari dialog OS tidak memicu penguncian ulang.
+  bool get isAuthenticating {
+    if (_isAuthenticating) return true;
+    final ended = _lastBiometricAuthEndedAt;
+    if (ended != null &&
+        DateTime.now().difference(ended) < const Duration(milliseconds: 1200)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool get isAuthenticatingBiometric => isAuthenticating;
 
   int _externalActivityDepth = 0;
   DateTime? _suppressLockUntil;
@@ -155,6 +228,7 @@ class Lock {
   }
 
   String? get _uid {
+    if (_activeUid != null) return _activeUid;
     try {
       return FirebaseAuth.instance.currentUser?.uid;
     } catch (_) {
@@ -162,75 +236,326 @@ class Lock {
     }
   }
 
-  DateTime? get lockedUntil {
-    final untilMs = _p?.getInt('lock.until') ?? 0;
-    if (untilMs <= 0) return null;
-    final until = DateTime.fromMillisecondsSinceEpoch(untilMs);
-    return DateTime.now().isBefore(until) ? until : null;
+  String get _currentUid => _uid ?? 'guest';
+
+  String _k(String key, [String? uid]) {
+    final u = uid ?? _currentUid;
+    return 'lock.$key.$u';
   }
 
-  bool get isLockedOut => lockedUntil != null;
+  String? _getSecret(String key) => _secretCache[key] ?? _p?.getString(key);
 
-  int get failCount => _p?.getInt('lock.fails') ?? 0;
+  int? _getSecretInt(String key) {
+    final raw = _secretCache[key];
+    if (raw != null) {
+      final parsed = int.tryParse(raw);
+      if (parsed != null) return parsed;
+    }
+    final legacyObj = _p?.get(key);
+    if (legacyObj is int) return legacyObj;
+    if (legacyObj is String) return int.tryParse(legacyObj);
+    return null;
+  }
 
-  void _recordFailure() {
-    final p = _p;
-    if (p == null) return;
-    final next = (p.getInt('lock.fails') ?? 0) + 1;
-    if (next >= maxAttempts) {
-      p.setInt('lock.fails', 0);
-      p.setInt('lock.until', DateTime.now().add(lockoutDuration).millisecondsSinceEpoch);
-    } else {
-      p.setInt('lock.fails', next);
+  Future<void> _writeSecret(String key, String value) async {
+    _secretCache[key] = value;
+    if (!kIsWeb) {
+      try {
+        await _secureStorage.write(key: key, value: value);
+        await _p?.remove(key);
+        return;
+      } catch (_) {
+        // Fallback ke SharedPreferences pada lingkungan unit test tanpa plugin native
+      }
+    }
+    await _p?.setString(key, value);
+  }
+
+  Future<void> _deleteSecret(String key) async {
+    _secretCache.remove(key);
+    await _p?.remove(key);
+    if (!kIsWeb) {
+      try {
+        await _secureStorage.delete(key: key);
+      } catch (_) {}
     }
   }
 
-  void _clearFailures() {
-    _p?.remove('lock.fails');
-    _p?.remove('lock.until');
+  Future<void> _loadSecretsForUid(String? uid) async {
+    final targetUid = uid ?? 'guest';
+    for (final field in _secretFields) {
+      final key = _k(field, targetUid);
+      String? val;
+      var secureOk = false;
+      if (!kIsWeb) {
+        try {
+          val = await _secureStorage.read(key: key);
+          secureOk = true;
+        } catch (_) {}
+      }
+      final legacyObj = _p?.get(key);
+      final legacyVal = legacyObj?.toString();
+      if (val != null) {
+        _secretCache[key] = val;
+        if (legacyObj != null) {
+          await _p?.remove(key);
+        }
+      } else if (legacyVal != null) {
+        _secretCache[key] = legacyVal;
+        if (secureOk) {
+          try {
+            await _secureStorage.write(key: key, value: legacyVal);
+            await _p?.remove(key);
+          } catch (_) {}
+        }
+      } else {
+        _secretCache.remove(key);
+      }
+    }
+  }
+
+  Future<void> _migrateLegacyIfNeeded(String? uid) async {
+    final p = _p;
+    if (p == null) return;
+    final targetUid = uid ?? 'guest';
+    final scopedHash = _getSecret(_k('hash', targetUid));
+    final legacyHash = p.getString('lock.hash');
+    if (scopedHash == null && legacyHash != null) {
+      await _writeSecret(_k('hash', targetUid), legacyHash);
+      final legacySalt = p.getString('lock.salt');
+      if (legacySalt != null) await _writeSecret(_k('salt', targetUid), legacySalt);
+      final legacyFails = p.getInt('lock.fails');
+      if (legacyFails != null) await _writeSecret(_k('fails', targetUid), legacyFails.toString());
+      final legacyUntil = p.getInt('lock.until');
+      if (legacyUntil != null) await _writeSecret(_k('lockoutUntil', targetUid), legacyUntil.toString());
+      final legacyDelay = p.getInt('lock.delay');
+      if (legacyDelay != null) await p.setInt(_k('delay', targetUid), legacyDelay);
+      final legacyBio = p.getBool('lock.bio');
+      if (legacyBio != null) await p.setBool(_k('bio', targetUid), legacyBio);
+      final legacyDecoy = p.getBool('lock.decoy');
+      if (legacyDecoy != null) await p.setBool(_k('decoy', targetUid), legacyDecoy);
+      final legacyAt = p.getInt('lock.updatedAt');
+      if (legacyAt != null) await p.setInt(_k('updatedAt', targetUid), legacyAt);
+
+      for (final legacyKey in const [
+        'lock.hash',
+        'lock.salt',
+        'lock.fails',
+        'lock.until',
+        'lock.delay',
+        'lock.bio',
+        'lock.decoy',
+        'lock.updatedAt',
+      ]) {
+        await p.remove(legacyKey);
+      }
+    }
+  }
+
+  /// Waktu berakhirnya penalti lockout akibat salah mengetik PIN berulang kali (disimpan persisten).
+  /// Dilengkapi penjaga manipulasi jam sistem mundur (clock-rollback guard).
+  DateTime? get lockoutUntil {
+    final ms = _getSecretInt(_k('lockoutUntil'));
+    if (ms == null || ms <= 0) return null;
+    final now = DateTime.now();
+    final until = DateTime.fromMillisecondsSinceEpoch(ms);
+    final diffMs = until.difference(now).inMilliseconds;
+    if (diffMs <= 0) return null;
+    // Maksimum penalti adalah 300 detik. Jika selisih > 305 detik, berarti jam perangkat dimundurkan.
+    if (diffMs > 305000) {
+      final clamped = now.add(const Duration(seconds: 300));
+      unawaited(_writeSecret(_k('lockoutUntil'), clamped.millisecondsSinceEpoch.toString()));
+      return clamped;
+    }
+    return until;
+  }
+
+  /// Alias kompatibilitas mundur untuk [lockoutUntil].
+  DateTime? get lockedUntil => lockoutUntil;
+
+  /// Apakah saat ini sedang dalam masa penalti lockout brute-force PIN.
+  bool get isLockedOut => lockoutUntil != null;
+
+  /// Sisa detik penalti lockout saat ini (0 jika tidak terkunci).
+  int get remainingLockoutSeconds {
+    final until = lockoutUntil;
+    if (until == null) return 0;
+    return (until.difference(DateTime.now()).inMilliseconds / 1000)
+        .ceil()
+        .clamp(1, 300);
+  }
+
+  int get failCount => _getSecretInt(_k('fails')) ?? 0;
+
+  int get lockoutTier => _getSecretInt(_k('lockoutTier')) ?? 0;
+
+  Future<void> _clearLockoutState([String? uid]) async {
+    final targetUid = uid ?? _currentUid;
+    await _deleteSecret(_k('fails', targetUid));
+    await _deleteSecret(_k('lockoutUntil', targetUid));
+    await _deleteSecret(_k('lockoutTier', targetUid));
+  }
+
+  void _recordFailure() {
+    final uid = _currentUid;
+    final next = (_getSecretInt(_k('fails', uid)) ?? 0) + 1;
+    if (next >= maxAttempts) {
+      final tier = (_getSecretInt(_k('lockoutTier', uid)) ?? 0) + 1;
+      final penaltySec = switch (tier) {
+        1 => 30,
+        2 => 120,
+        _ => 300,
+      };
+      final untilMs = DateTime.now()
+          .add(Duration(seconds: penaltySec))
+          .millisecondsSinceEpoch;
+      unawaited(_writeSecret(_k('fails', uid), '0'));
+      unawaited(_writeSecret(_k('lockoutTier', uid), tier.toString()));
+      unawaited(_writeSecret(_k('lockoutUntil', uid), untilMs.toString()));
+    } else {
+      unawaited(_writeSecret(_k('fails', uid), next.toString()));
+    }
   }
 
   Future<void> load() async {
     _p = await SharedPreferences.getInstance();
-    _emit();
+    try {
+      _activeUid = FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      _activeUid = null;
+    }
+    await _loadSecretsForUid(_activeUid);
+    await _migrateLegacyIfNeeded(_activeUid);
+    _hasLoaded = true;
+    await refreshBiometricSupport();
     if (state.value.privacyShield) {
       await setSecureScreen(true);
     }
-    final uid = _uid;
-    if (uid != null) {
-      syncWithCloud(uid);
+    try {
+      final uid = _activeUid;
+      if (uid != null) {
+        unawaited(syncWithCloud(uid));
+      }
+      await _authSub?.cancel();
+      _authSub = FirebaseAuth.instance.authStateChanges().listen(
+        (u) {
+          final nextUid = u?.uid;
+          if (_hasLoaded && nextUid == _activeUid) return;
+          unawaited(loadForUser(nextUid));
+        },
+        onError: (Object e) {
+          debugPrint('Auth state listener error in Lock: $e');
+        },
+      );
+    } catch (e) {
+      debugPrint('Firebase not available for lock sync: $e');
     }
   }
 
-  void _emit() {
-    final p = _p;
-    if (p == null) return;
-    state.value = AppLockState(
-      enabled: p.getString('lock.hash') != null,
-      bio: p.getBool('lock.bio') ?? false,
-      delayMin: p.getInt('lock.delay') ?? 1,
-      decoyCalculator: p.getBool('lock.decoy') ?? false,
-      privacyShield: p.getBool('lock.privacyShield') ?? false,
-    );
+  /// Memuat hanya state PIN lokal untuk [uid] (cepat, tanpa menunggu jaringan Firestore)
+  /// agar [LockGate] tidak me-mount UI utama sebelum status kunci lokal diketahui.
+  Future<void> ensureLocalLoaded(String? uid) {
+    final key = uid ?? 'guest';
+    final existing = _inFlightLocalLoad[key];
+    if (existing != null) return existing;
+
+    final future = () async {
+      _p = await SharedPreferences.getInstance();
+      _activeUid = uid;
+      await _loadSecretsForUid(uid);
+      await _migrateLegacyIfNeeded(uid);
+      _hasLoaded = true;
+      _emit();
+    }().whenComplete(() {
+      _inFlightLocalLoad.remove(key);
+    });
+
+    _inFlightLocalLoad[key] = future;
+    return future;
   }
 
-  DocumentReference<Map<String, dynamic>> _doc(String uid) =>
-      FirebaseFirestore.instance.collection('users').doc(uid).collection('meta').doc('security');
+  Future<void> loadForUser(String? uid) {
+    _loadUserQueue = _loadUserQueue.catchError((_) {}).then((_) async {
+      await ensureLocalLoaded(uid);
+      if (uid != null) {
+        await syncWithCloud(uid);
+      }
+    });
+    return _loadUserQueue;
+  }
+
+  /// Periksa ketersediaan dan jenis sensor biometrik yang terdaftar di perangkat.
+  Future<void> refreshBiometricSupport() async {
+    if (kIsWeb) {
+      _biometricAvailable = false;
+      _biometricTypes = const [];
+      _emit();
+      return;
+    }
+    try {
+      final canCheck = await _auth.canCheckBiometrics;
+      final isSupported = await _auth.isDeviceSupported();
+      if (canCheck && isSupported) {
+        final enrolled = await _auth.getAvailableBiometrics();
+        _biometricTypes = enrolled;
+        _biometricAvailable = enrolled.isNotEmpty;
+      } else {
+        _biometricTypes = const [];
+        _biometricAvailable = false;
+      }
+    } catch (e) {
+      debugPrint('Failed to check biometric support: $e');
+      _biometricTypes = const [];
+      _biometricAvailable = false;
+    }
+    _emit();
+  }
+
+  void _emit({bool suppressAutoLock = false}) {
+    final p = _p;
+    if (p == null) return;
+    final wasEnabled = state.value.enabled;
+    final enabled = _getSecret(_k('hash')) != null;
+    final bioPref = p.getBool(_k('bio')) ?? false;
+    _pendingAutoLockOnEnable = !suppressAutoLock && !wasEnabled && enabled;
+    state.value = AppLockState(
+      enabled: enabled,
+      bio: enabled && bioPref,
+      delayMin: p.getInt(_k('delay')) ?? 1,
+      decoyCalculator: p.getBool(_k('decoy')) ?? false,
+      privacyShield: p.getBool('lock.privacyShield') ?? false,
+      biometricAvailable: _biometricAvailable,
+      biometricTypes: _biometricTypes,
+    );
+    _pendingAutoLockOnEnable = false;
+    if (!enabled) {
+      isLocked.value = false;
+    }
+  }
+
+  DocumentReference<Map<String, dynamic>>? _doc(String uid) {
+    try {
+      return FirebaseFirestore.instance.collection('users').doc(uid).collection('meta').doc('security');
+    } catch (_) {
+      return null;
+    }
+  }
 
   Future<void> setPin(String pin) async {
     final salt = base64Url.encode(List<int>.generate(16, (_) => Random.secure().nextInt(256)));
     final hash = hashPinPbkdf2(pin, salt);
     final now = DateTime.now().millisecondsSinceEpoch;
-    await _p!.setString('lock.salt', salt);
-    await _p!.setString('lock.hash', hash);
-    await _p!.setInt('lock.updatedAt', now);
-    _clearFailures();
-    _emit();
+    final uid = _currentUid;
+    await _writeSecret(_k('salt', uid), salt);
+    await _writeSecret(_k('hash', uid), hash);
+    await _p!.setInt(_k('updatedAt', uid), now);
+    await _clearLockoutState(uid);
+    _emit(suppressAutoLock: true);
 
-    final uid = _uid;
-    if (uid != null) {
+    final userUid = _uid;
+    if (userUid != null) {
       try {
-        await _doc(uid).set({
+        await _doc(userUid)?.set({
           'enabled': true,
           'salt': salt,
           'hash': hash,
@@ -243,16 +568,16 @@ class Lock {
     }
   }
 
-  Future<void> _upgradeLegacyHash(String upgradedHash) async {
+  Future<void> _upgradeLegacyHash(String upgradedHash, String uid) async {
     final p = _p;
     if (p == null) return;
     final now = DateTime.now().millisecondsSinceEpoch;
-    await p.setString('lock.hash', upgradedHash);
-    await p.setInt('lock.updatedAt', now);
-    final uid = _uid;
-    if (uid != null) {
+    await _writeSecret(_k('hash', uid), upgradedHash);
+    await p.setInt(_k('updatedAt', uid), now);
+    final userUid = _uid;
+    if (userUid != null && userUid == uid) {
       try {
-        await _doc(uid).set({
+        await _doc(userUid)?.set({
           'hash': upgradedHash,
           'updatedAt': now,
         }, SetOptions(merge: true));
@@ -264,12 +589,14 @@ class Lock {
 
   bool verify(String pin) {
     if (isLockedOut) return false;
-    final salt = _p?.getString('lock.salt'), h = _p?.getString('lock.hash');
+    final uid = _currentUid;
+    final salt = _getSecret(_k('salt', uid));
+    final h = _getSecret(_k('hash', uid));
     if (salt == null || h == null) return false;
     if (verifyPinHash(pin, salt, h)) {
-      _clearFailures();
+      unawaited(_clearLockoutState(uid));
       if (!h.startsWith('pbkdf2\$')) {
-        _upgradeLegacyHash(hashPinPbkdf2(pin, salt));
+        unawaited(_upgradeLegacyHash(hashPinPbkdf2(pin, salt), uid));
       }
       return true;
     }
@@ -277,27 +604,58 @@ class Lock {
     return false;
   }
 
-  Future<void> disable() async {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    for (final k in const [
+  /// Menghapus kredensial dan status kunci hanya pada perangkat ini tanpa mengubah konfigurasi cloud.
+  Future<void> clearLocal([String? uid]) async {
+    final targetUid = uid ?? _currentUid;
+    await _deleteSecret(_k('salt', targetUid));
+    await _deleteSecret(_k('hash', targetUid));
+    await _clearLockoutState(targetUid);
+    for (final k in [
+      _k('bio', targetUid),
+      _k('decoy', targetUid),
+      _k('delay', targetUid),
+      _k('updatedAt', targetUid),
+      // Bersihkan juga kunci legacy tidak terscope bila masih tersisa
       'lock.salt',
       'lock.hash',
       'lock.bio',
       'lock.decoy',
-      'lock.privacyShield',
+      'lock.delay',
       'lock.updatedAt',
       'lock.fails',
-      'lock.until'
+      'lock.until',
     ]) {
       await _p?.remove(k);
     }
+    if (targetUid == _currentUid) {
+      await _p?.remove('lock.privacyShield');
+      sessionUnlocked = false;
+      _lastSyncedUid = null;
+      isLocked.value = false;
+      await setSecureScreen(false);
+      _emit();
+    }
+  }
+
+  Future<void> disable() async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final uid = _currentUid;
+    await _deleteSecret(_k('salt', uid));
+    await _deleteSecret(_k('hash', uid));
+    await _clearLockoutState(uid);
+    await _p?.remove(_k('bio', uid));
+    await _p?.remove(_k('decoy', uid));
+    await _p?.remove('lock.privacyShield');
+    await _p?.setInt(_k('updatedAt', uid), now);
+    sessionUnlocked = false;
+    isLocked.value = false;
     await setSecureScreen(false);
     _emit();
 
-    final uid = _uid;
-    if (uid != null) {
+    final userUid = _uid;
+    if (userUid != null) {
       try {
-        await _doc(uid).set({
+        await _doc(userUid)?.set({
           'enabled': false,
           'updatedAt': now,
         }, SetOptions(merge: true));
@@ -314,18 +672,34 @@ class Lock {
   }
 
   Future<void> setBio(bool v) async {
-    await _p?.setBool('lock.bio', v);
+    await _p?.setBool(_k('bio'), v);
     _emit();
   }
 
+  /// Aktifkan atau nonaktifkan pembuka kunci biometrik untuk pengguna saat ini.
+  /// Saat diaktifkan, pengguna wajib memverifikasi biometrik terlebih dahulu.
+  Future<bool> setBiometric(bool enabled, {String? localizedReason}) async {
+    final p = _p;
+    if (p == null) return false;
+    if (enabled) {
+      await refreshBiometricSupport();
+      if (!_biometricAvailable) return false;
+      final ok = await authBio(localizedReason: localizedReason);
+      if (!ok) return false;
+    }
+    await p.setBool(_k('bio', _currentUid), enabled);
+    _emit();
+    return true;
+  }
+
   Future<void> setDecoyCalculator(bool v) async {
-    await _p?.setBool('lock.decoy', v);
+    await _p?.setBool(_k('decoy'), v);
     _emit();
 
-    final uid = _uid;
-    if (uid != null && state.value.enabled) {
+    final userUid = _uid;
+    if (userUid != null && state.value.enabled) {
       try {
-        await _doc(uid).set({
+        await _doc(userUid)?.set({
           'decoyCalculator': v,
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
         }, SetOptions(merge: true));
@@ -336,14 +710,16 @@ class Lock {
   }
 
   Future<void> setDelay(int minutes) async {
-    await _p?.setInt('lock.delay', minutes);
+    final clamped = minutes.clamp(0, 60);
+    await _p?.setInt(_k('delay'), clamped);
+    await _p?.setInt(_k('updatedAt'), DateTime.now().millisecondsSinceEpoch);
     _emit();
 
-    final uid = _uid;
-    if (uid != null && state.value.enabled) {
+    final userUid = _uid;
+    if (userUid != null && state.value.enabled) {
       try {
-        await _doc(uid).set({
-          'delayMin': minutes,
+        await _doc(userUid)?.set({
+          'delayMin': clamped,
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
         }, SetOptions(merge: true));
       } catch (e) {
@@ -353,73 +729,115 @@ class Lock {
   }
 
   Future<bool> bioAvailable() async {
-    if (kIsWeb) return false;
-    try {
-      return await _auth.canCheckBiometrics && await _auth.isDeviceSupported();
-    } catch (_) {
-      return false;
-    }
+    await refreshBiometricSupport();
+    return _biometricAvailable;
   }
 
   /// Gagal (termasuk belum disiapkan di Android) dianggap tidak lolos; PIN tetap bisa dipakai.
-  /// Dilindungi mutex _isAuthenticating dan stickyAuth: false agar tidak memicu prompt spam
-  /// atau tabrakan background lifecycle saat layar mati/hidup.
-  Future<bool> authBio() async {
-    if (kIsWeb || _isAuthenticating) return false;
+  /// Dilindungi mutex _isAuthenticating, cooldown 1200ms pasca-dialog, dan blokir saat lockout aktif.
+  Future<bool> authBio({String? localizedReason}) async {
+    if (kIsWeb || _isAuthenticating || isLockedOut) return false;
     _isAuthenticating = true;
     try {
       final ok = await _auth.authenticate(
-        localizedReason: tr('Open {0}', [appName]),
+        localizedReason: localizedReason ?? tr('Open {0}', [appName]),
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: false,
         ),
       );
-      if (ok) _clearFailures();
+      if (ok) {
+        await _clearLockoutState();
+      }
       return ok;
     } catch (_) {
       return false;
     } finally {
       _isAuthenticating = false;
+      _lastBiometricAuthEndedAt = DateTime.now();
     }
   }
 
-  /// Sinkronisasi kredensial PIN dari cloud saat login di perangkat baru.
-  Future<void> syncWithCloud(String uid) async {
+  bool hasSyncedFor(String uid) => _lastSyncedUid == uid;
+
+  /// Reset penanda sinkronisasi per sesi (mis. saat uji unit atau pergantian akun).
+  void resetSyncCache() {
+    _inFlightSync = null;
+    _inFlightSyncUid = null;
+    _lastSyncedUid = null;
+  }
+
+  /// Sinkronisasi kredensial PIN dari cloud saat startup atau login di perangkat baru.
+  Future<void> syncWithCloud(String uid, {Duration timeout = const Duration(seconds: 4)}) {
+    if (_p == null) return Future.value();
+    if (_inFlightSync != null && _inFlightSyncUid == uid) {
+      return _inFlightSync!;
+    }
+    _inFlightSyncUid = uid;
+    late final Future<void> run;
+    run = _performCloudSync(uid, timeout: timeout).whenComplete(() {
+      if (identical(_inFlightSync, run)) {
+        _inFlightSync = null;
+        _inFlightSyncUid = null;
+      }
+    });
+    _inFlightSync = run;
+    return run;
+  }
+
+  Future<void> _performCloudSync(String uid, {required Duration timeout}) async {
     if (_p == null) return;
     try {
-      final snap = await _doc(uid).get();
-      if (!snap.exists) return;
-      final data = snap.data();
-      if (data == null) return;
-
-      final cloudEnabled = data['enabled'] as bool? ?? false;
-      final cloudUpdated = data['updatedAt'] as int? ?? 0;
-      final localUpdated = _p!.getInt('lock.updatedAt') ?? 0;
-
-      if (cloudUpdated > localUpdated) {
-        if (cloudEnabled) {
-          final salt = data['salt'] as String?;
-          final hash = data['hash'] as String?;
-          final delay = data['delayMin'] as int? ?? 1;
-          if (salt != null && hash != null) {
-            await _p!.setString('lock.salt', salt);
-            await _p!.setString('lock.hash', hash);
-            await _p!.setInt('lock.delay', delay);
-            await _p!.setBool('lock.decoy', data['decoyCalculator'] as bool? ?? false);
-            await _p!.setInt('lock.updatedAt', cloudUpdated);
-            _emit();
-          }
-        } else {
-          for (final k in const ['lock.salt', 'lock.hash', 'lock.bio', 'lock.decoy', 'lock.fails', 'lock.until']) {
-            await _p!.remove(k);
-          }
-          await _p!.setInt('lock.updatedAt', cloudUpdated);
-          _emit();
-        }
+      final doc = _doc(uid);
+      if (doc == null) return;
+      DocumentSnapshot<Map<String, dynamic>> snap;
+      try {
+        snap = await doc.get().timeout(timeout);
+      } catch (_) {
+        // Offline-First: fallback ke cache lokal Firestore jika server tidak terjangkau / timeout.
+        snap = await doc.get(const GetOptions(source: Source.cache));
       }
+      _lastSyncedUid = uid;
+      if (!snap.exists) return;
+      await applyCloudLockData(snap.data(), uid: uid);
     } catch (e) {
       debugPrint('Cloud sync error for lock: $e');
+    }
+  }
+
+  /// Menerapkan snapshot konfigurasi kunci dari cloud ke penyimpanan lokal bila lebih baru.
+  Future<void> applyCloudLockData(Map<String, dynamic>? data, {String? uid}) async {
+    if (_p == null || data == null) return;
+    final targetUid = uid ?? _currentUid;
+
+    final cloudEnabled = data['enabled'] as bool? ?? false;
+    final rawCloudUpdated = (data['updatedAt'] as num?)?.toInt() ?? 0;
+    final cloudUpdated = clampRemoteUpdatedAtMs(rawCloudUpdated);
+    final localUpdated = _p!.getInt(_k('updatedAt', targetUid)) ?? 0;
+
+    if (cloudUpdated > localUpdated) {
+      if (cloudEnabled) {
+        final salt = data['salt'] as String?;
+        final hash = data['hash'] as String?;
+        final delay = ((data['delayMin'] as num?)?.toInt() ?? 1).clamp(0, 60);
+        if (salt != null && hash != null && salt.isNotEmpty && hash.isNotEmpty) {
+          await _writeSecret(_k('salt', targetUid), salt);
+          await _writeSecret(_k('hash', targetUid), hash);
+          await _p!.setInt(_k('delay', targetUid), delay);
+          await _p!.setBool(_k('decoy', targetUid), data['decoyCalculator'] as bool? ?? false);
+          await _p!.setInt(_k('updatedAt', targetUid), cloudUpdated);
+          if (targetUid == _currentUid) _emit();
+        }
+      } else {
+        await _deleteSecret(_k('salt', targetUid));
+        await _deleteSecret(_k('hash', targetUid));
+        await _clearLockoutState(targetUid);
+        for (final k in [_k('bio', targetUid), _k('decoy', targetUid), _k('delay', targetUid)]) {
+          await _p!.remove(k);
+        }
+        await _p!.setInt(_k('updatedAt', targetUid), cloudUpdated);
+        if (targetUid == _currentUid) _emit();
+      }
     }
   }
 }

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
+import '../history_export.dart';
 import 'sheets.dart';
 import '../l10n.dart';
 
@@ -43,7 +45,7 @@ class LogTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(22),
         child: ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-          leading: Icon(l.skipped ? Icons.skip_next_rounded : (t?.adm.icon ?? Icons.medication_rounded), color: l.skipped ? fg.withValues(alpha: .45) : C.lagoon),
+          leading: Icon(l.skipped ? LucideIcons.skipForward : (t?.adm.icon ?? LucideIcons.pill), color: l.skipped ? fg.withValues(alpha: .45) : C.lagoon),
           title: Text(
             t?.name ?? tr('Therapy deleted'),
             style: TextStyle(
@@ -120,20 +122,43 @@ class HistoryPage extends ConsumerWidget {
         HapticFeedback.lightImpact();
         _add(context, ths, supplies, prefs, logs);
       },
-      icon: Icons.add_rounded,
+      icon: LucideIcons.plus,
+    );
+    final importBtn = OutlinedButton.icon(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        importDoseHistoryFile(context, ref);
+      },
+      icon: const Icon(LucideIcons.download, size: 18),
+      label: Text(tr('Import')),
+    );
+    final exportBtn = OutlinedButton.icon(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        showHistoryExportSheet(context, logs, ths);
+      },
+      icon: const Icon(LucideIcons.upload, size: 18),
+      label: Text(tr('Export')),
+    );
+    final actions = Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [importBtn, exportBtn, add],
     );
     return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
       if (embedded)
-        Align(alignment: Alignment.centerRight, child: add)
+        Align(alignment: Alignment.centerRight, child: actions)
       else
-        Row(children: [Expanded(child: Text(tr('History'), style: display(40))), add]),
+        Row(children: [Expanded(child: Text(tr('History'), style: display(40))), actions]),
       gap(14),
       if (prefs.hrtCounter && starts.isNotEmpty)
         Container(
           padding: const EdgeInsets.all(20),
           decoration: cardBox(context),
           child: Row(children: [
-            Icon(Icons.timelapse_rounded, color: C.peony, size: 36),
+            Icon(LucideIcons.hourglass, color: C.peony, size: 36),
             const SizedBox(width: 16),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -149,7 +174,7 @@ class HistoryPage extends ConsumerWidget {
           padding: const EdgeInsets.only(top: 40),
           child: Column(
             children: [
-              iconBadge(Icons.history_rounded, Pastel.lilac, size: 56, iconSize: 28),
+              iconBadge(LucideIcons.history, Pastel.lilac, size: 56, iconSize: 28),
               const SizedBox(height: 16),
               Text(tr('No history entries yet'), style: display(24)),
               const SizedBox(height: 6),

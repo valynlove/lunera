@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n.dart';
 import '../theme.dart';
 
@@ -114,7 +115,7 @@ ${tr('Note')}: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCAT
                     color: C.peony.withValues(alpha: 0.16),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.local_shipping_rounded, color: C.peony, size: 22),
+                  child: Icon(LucideIcons.truck, color: C.peony, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -134,7 +135,7 @@ ${tr('Note')}: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCAT
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, size: 20),
+                  icon: const Icon(LucideIcons.x, size: 20),
                 ),
               ],
             ),
@@ -258,7 +259,7 @@ ${tr('Note')}: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCAT
             // Copy Action Button
             FilledButton.icon(
               onPressed: _copyToClipboard,
-              icon: const Icon(Icons.copy_rounded, size: 18),
+              icon: const Icon(LucideIcons.copy, size: 18),
               label: Text(
                 tr('Copy Template to Clipboard'),
                 style: const TextStyle(fontWeight: FontWeight.w700),
@@ -285,7 +286,7 @@ ${tr('Note')}: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCAT
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.shield_outlined, color: C.amber, size: 18),
+                      const Icon(LucideIcons.shield, color: C.amber, size: 18),
                       const SizedBox(width: 8),
                       Text(
                         tr('Safe Pickup Privacy Tips'),

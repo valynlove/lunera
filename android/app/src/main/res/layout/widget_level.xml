@@ -20,7 +20,7 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="#B8B0FF"
+            android:textColor="#C7B8FF"
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -50,6 +50,6 @@
         android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="#B9B6E0"
+        android:textColor="#C7B8FF"
         android:textSize="11sp" />
 </LinearLayout>

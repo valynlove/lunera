@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../lock.dart';
 import '../notifications.dart';
 import '../theme.dart';
@@ -138,7 +139,7 @@ class _AuthShell extends StatelessWidget {
                               alignment: Alignment.centerLeft,
                               child: IconButton(
                                   onPressed: () => Navigator.pop(context),
-                                  icon: const Icon(Icons.arrow_back_rounded)))
+                                  icon: const Icon(LucideIcons.arrowLeft)))
                         else
                           gap(40),
                         const MoonLogo(size: 56),
@@ -230,7 +231,7 @@ class _PassFieldState extends State<_PassField> {
           suffixIcon: IconButton(
             onPressed: () => setState(() => hide = !hide),
             icon: Icon(
-                hide ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+                hide ? LucideIcons.eye : LucideIcons.eyeOff),
           ),
         ),
       );

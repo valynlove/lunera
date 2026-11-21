@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
@@ -112,7 +113,7 @@ class HomePage extends ConsumerWidget {
                 HapticFeedback.lightImpact();
                 showSheet(context, TherapySheet(supplies: supplies));
               },
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(LucideIcons.plus),
             ),
             const SizedBox(width: 10),
             UserAvatar(
@@ -156,7 +157,7 @@ class HomePage extends ConsumerWidget {
                   HapticFeedback.lightImpact();
                   showSheet(context, TherapySheet(supplies: supplies));
                 },
-                icon: Icons.add_rounded,
+                icon: LucideIcons.plus,
               ),
             ]),
           )
@@ -191,7 +192,7 @@ class HomePage extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_month_rounded,
+                    const Icon(LucideIcons.calendarDays,
                         size: 16, color: Pastel.lilac),
                     const SizedBox(width: 8),
                     Text(
@@ -203,7 +204,7 @@ class HomePage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.chevron_right_rounded,
+                    const Icon(LucideIcons.chevronRight,
                         size: 16, color: Pastel.lilac),
                   ],
                 ),
@@ -268,7 +269,7 @@ class DoseCard extends ConsumerWidget {
           ? [Text(tr('Day off'), style: display(18, color: Colors.white))]
           : nextToday == null
               ? [
-                  const Icon(Icons.check_circle_rounded,
+                  const Icon(LucideIcons.circleCheckBig,
                       color: Pastel.mint, size: 26),
                   const SizedBox(height: 2),
                   Text(tr('{0}/{1}', [done, td.length]),
@@ -394,7 +395,7 @@ class DoseCard extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                           child: Padding(
                             padding: const EdgeInsets.all(4),
-                            child: Icon(Icons.edit_outlined,
+                            child: Icon(LucideIcons.pencil,
                                 size: 16,
                                 color: Pastel.mist.withValues(alpha: 0.8)),
                           ),
@@ -440,7 +441,7 @@ class DoseCard extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.event_repeat_rounded,
+                              Icon(LucideIcons.repeat,
                                   size: 12,
                                   color: Pastel.cream.withValues(alpha: 0.85)),
                               const SizedBox(width: 4),
@@ -460,7 +461,7 @@ class DoseCard extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.my_location_rounded,
+                          const Icon(LucideIcons.locateFixed,
                               size: 13, color: Pastel.mint),
                           const SizedBox(width: 4),
                           Flexible(
@@ -509,7 +510,7 @@ class DoseCard extends ConsumerWidget {
                     elevation: 2,
                     shadowColor: C.peony.withValues(alpha: 0.4),
                   ),
-                  icon: const Icon(Icons.check_rounded, size: 18),
+                  icon: const Icon(LucideIcons.check, size: 18),
                   label: Text(
                     t.route == 'inj' ? tr('Log injection') : tr('Log dose'),
                     maxLines: 1,
@@ -541,7 +542,7 @@ class DoseCard extends ConsumerWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.self_improvement_rounded,
+                  icon: const Icon(LucideIcons.heartPulse,
                       size: 20, color: Pastel.lilac),
                 ),
               ],
@@ -697,7 +698,7 @@ class SlotTile extends ConsumerWidget {
       child: ListTile(
         onTap: s.skipped ? undoSkip : open,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        leading: Icon(s.skipped ? Icons.skip_next_rounded : t.adm.icon,
+        leading: Icon(s.skipped ? LucideIcons.skipForward : t.adm.icon,
             color: s.taken
                 ? C.lagoon
                 : (s.skipped
@@ -715,7 +716,7 @@ class SlotTile extends ConsumerWidget {
               color: Pastel.mist.withValues(alpha: 0.85), fontSize: 12),
         ),
         trailing: s.taken
-            ? Icon(Icons.check_circle_rounded, color: C.lagoon)
+            ? Icon(LucideIcons.circleCheckBig, color: C.lagoon)
             : s.skipped
                 ? null
                 : Row(mainAxisSize: MainAxisSize.min, children: [
@@ -725,7 +726,7 @@ class SlotTile extends ConsumerWidget {
                         HapticFeedback.mediumImpact();
                         skipSlot(context, ref, s);
                       },
-                      icon: const Icon(Icons.skip_next_rounded),
+                      icon: const Icon(LucideIcons.skipForward),
                     ),
                     FilledButton.tonal(
                       onPressed: open,
@@ -752,12 +753,12 @@ class AlertsCard extends ConsumerWidget {
     for (final s in supplies) {
       if (s.expired) {
         alerts.add(
-            (Icons.error_outline_rounded, tr('{0} has expired', [s.name])));
+            (LucideIcons.circleAlert, tr('{0} has expired', [s.name])));
         continue;
       }
       if (s.low) {
         alerts.add((
-          Icons.inventory_2_outlined,
+          LucideIcons.package,
           s.generic
               ? tr('{0} has {1} left', [s.name, fmt(s.qty)])
               : tr('{0} has {1} {1?dose|doses} left', [s.name, s.doses])
@@ -766,7 +767,7 @@ class AlertsCard extends ConsumerWidget {
       final d = s.daysToExpiry;
       if (d != null && d <= 30) {
         alerts.add((
-          Icons.event_busy_outlined,
+          LucideIcons.calendarOff,
           tr('{0} expires in {1} {1?day|days}', [s.name, d])
         ));
       }
@@ -791,7 +792,7 @@ class AlertsCard extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                iconBadge(Icons.inventory_2_rounded, C.amber,
+                iconBadge(LucideIcons.package, C.amber,
                     size: 36, iconSize: 18),
                 const SizedBox(width: 12),
                 Expanded(
@@ -820,7 +821,7 @@ class AlertsCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.chevron_right_rounded,
+                Icon(LucideIcons.chevronRight,
                     size: 18, color: C.amber.withValues(alpha: 0.8)),
               ],
             ),
@@ -843,15 +844,15 @@ class _OverdueAlertBanner extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF2E193C).withValues(alpha: 0.85),
+        color: C.nebula.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: C.peony.withValues(alpha: 0.65),
+          color: C.coral.withValues(alpha: 0.60),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: C.peony.withValues(alpha: 0.16),
+            color: C.coral.withValues(alpha: 0.16),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -869,7 +870,7 @@ class _OverdueAlertBanner extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                iconBadge(Icons.warning_amber_rounded, C.peony,
+                iconBadge(LucideIcons.triangleAlert, C.coral,
                     size: 36, iconSize: 20),
                 const SizedBox(width: 12),
                 Expanded(
@@ -942,7 +943,7 @@ void _showOverdueSheet(
           color: C.deepCard,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(
-            color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
+            color: C.lavender.withValues(alpha: 0.24),
             width: 1.2,
           ),
         ),
@@ -963,7 +964,7 @@ void _showOverdueSheet(
             const SizedBox(height: 16),
             Row(
               children: [
-                iconBadge(Icons.warning_amber_rounded, C.peony,
+                iconBadge(LucideIcons.triangleAlert, C.coral,
                     size: 36, iconSize: 20),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1075,7 +1076,7 @@ class WeekCard extends ConsumerWidget {
             Expanded(
               child: Row(
                 children: [
-                  iconBadge(Icons.auto_graph_rounded, C.peony,
+                  iconBadge(LucideIcons.chartLine, C.peony,
                       size: 28, iconSize: 16),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1109,8 +1110,8 @@ class WeekCard extends ConsumerWidget {
                           color: Pastel.lilac),
                     ),
                     const SizedBox(width: 2),
-                    const Icon(Icons.arrow_forward_ios_rounded,
-                        size: 10, color: Pastel.lilac),
+                    const Icon(LucideIcons.chevronRight,
+                        size: 16, color: C.iconActive),
                   ],
                 ),
               ),

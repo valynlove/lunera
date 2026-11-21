@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ class LevelsPage extends ConsumerWidget {
                   HapticFeedback.lightImpact();
                   showSheet(context, const LabSheet());
                 },
-                icon: const Icon(Icons.add_rounded, size: 20),
+                icon: const Icon(LucideIcons.plus, size: 20),
                 label: Text(tr('Add Lab Result'),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
                 style: FilledButton.styleFrom(
@@ -76,15 +77,14 @@ class LevelsPage extends ConsumerWidget {
                   Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const InsightsPage()));
                 },
-                icon: const Icon(Icons.insights_rounded, size: 20),
+                icon: const Icon(LucideIcons.activity, size: 20),
                 label: Text(tr('Insights'),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Pastel.lilac,
-                  backgroundColor:
-                      const Color(0xFF17264D).withValues(alpha: 0.45),
+                  foregroundColor: C.lavender,
+                  backgroundColor: C.midnight.withValues(alpha: 0.55),
                   side: BorderSide(
-                    color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
+                    color: C.lavender.withValues(alpha: 0.28),
                     width: 1.1,
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 13),
@@ -105,7 +105,7 @@ class LevelsPage extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 60),
             child: Column(
               children: [
-                iconBadge(Icons.insights_rounded, Pastel.sky,
+                iconBadge(LucideIcons.activity, Pastel.sky,
                     size: 56, iconSize: 28),
                 const SizedBox(height: 16),
                 Text(tr('No level data yet'), style: display(26)),
@@ -123,7 +123,7 @@ class LevelsPage extends ConsumerWidget {
                     HapticFeedback.lightImpact();
                     showSheet(context, const LabSheet());
                   },
-                  icon: Icons.add_rounded,
+                  icon: LucideIcons.plus,
                 ),
               ],
             ),
@@ -722,7 +722,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
                       child: _spark(sparkPoints, hColor),
                     )
                   else
-                    const Icon(Icons.arrow_forward_ios_rounded,
+                    const Icon(LucideIcons.chevronRight,
                         size: 16, color: Pastel.lilac),
                 ],
               ),
@@ -795,8 +795,8 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => HormonePage(widget.hormoneId)));
               },
-              icon: const Icon(Icons.arrow_forward_ios_rounded,
-                  size: 14, color: Pastel.lilac),
+              icon: const Icon(LucideIcons.chevronRight,
+                  size: 18, color: C.iconActive),
             ),
         ],
       ),
@@ -833,7 +833,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
               HapticFeedback.selectionClick();
               setState(() => off++);
             },
-            icon: const Icon(Icons.chevron_left_rounded),
+            icon: const Icon(LucideIcons.chevronLeft),
           ),
           Expanded(
             child: Center(
@@ -854,7 +854,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
                     setState(() => off--);
                   }
                 : null,
-            icon: const Icon(Icons.chevron_right_rounded),
+            icon: const Icon(LucideIcons.chevronRight),
           ),
         ]),
       SizedBox(height: widget.compact ? 185 : 280, child: chart),
@@ -905,7 +905,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             ),
           if (moodEntries.isNotEmpty)
             FilterChip(
-              avatar: const Icon(Icons.mood_rounded, size: 16),
+              avatar: const Icon(LucideIcons.smile, size: 16),
               label: Text(tr('Mood')),
               selected: showMood,
               onSelected: (v) {
@@ -943,7 +943,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.circle_outlined, size: 12, color: hColor),
+                Icon(LucideIcons.circle, size: 12, color: hColor),
                 const SizedBox(width: 5),
                 Text(tr('lab result'),
                     style: TextStyle(
@@ -995,7 +995,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
                           fontWeight: FontWeight.w600,
                           color: Pastel.lilac)),
                   const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward_rounded,
+                  const Icon(LucideIcons.arrowRight,
                       size: 13, color: Pastel.lilac),
                 ],
               ),
@@ -1016,7 +1016,7 @@ class _LevelPanelState extends ConsumerState<LevelPanel> {
           Wrap(spacing: 12, runSpacing: 4, children: [
             for (final m in moods.entries)
               Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.circle, size: 10, color: moodColor(m.key)),
+                Icon(LucideIcons.circle, size: 10, color: moodColor(m.key)),
                 const SizedBox(width: 4),
                 Text(tr(m.value.$1),
                     style: TextStyle(
@@ -1053,7 +1053,7 @@ class HormonePage extends ConsumerWidget {
                 HapticFeedback.selectionClick();
                 Navigator.pop(context);
               },
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(LucideIcons.arrowLeft),
             ),
             Expanded(child: Text(p.name, style: display(32))),
             IconButton.filledTonal(
@@ -1062,7 +1062,7 @@ class HormonePage extends ConsumerWidget {
                 HapticFeedback.lightImpact();
                 _target(context, ref, p, u, band);
               },
-              icon: const Icon(Icons.flag_rounded),
+              icon: const Icon(LucideIcons.flag),
             ),
           ]),
           gap(8),
@@ -1108,7 +1108,7 @@ class HormonePage extends ConsumerWidget {
                           color: Pastel.mist.withValues(alpha: 0.85),
                           fontSize: 12),
                     ),
-                    trailing: const Icon(Icons.edit_outlined,
+                    trailing: const Icon(LucideIcons.pencil,
                         size: 18, color: Pastel.lilac),
                   );
                 },
@@ -1263,7 +1263,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
               lastDate: DateTime.now());
           if (d != null) setState(() => at = d);
         },
-        icon: const Icon(Icons.calendar_today_rounded, size: 18),
+        icon: const Icon(LucideIcons.calendar, size: 18),
         label: Text(tr('Test date: {0}', [_date(at)])),
       ),
       gap(10),
@@ -1283,7 +1283,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
               ref.read(repoProvider)?.deleteLab(widget.initial!.id);
               Navigator.pop(context);
             },
-            icon: const Icon(Icons.delete_outline_rounded),
+            icon: const Icon(LucideIcons.trash2),
             label: Text(tr('Delete')),
           ),
         Expanded(

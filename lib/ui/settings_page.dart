@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_selector/file_selector.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../history_export.dart';
 import '../l10n.dart';
 import '../lock.dart';
 import '../models.dart';
@@ -134,6 +136,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  Color _syncStatusColor(SyncStatus s) => switch (s) {
+        SyncStatus.queuedOffline => C.amber,
+        SyncStatus.error => Pastel.rose,
+        SyncStatus.idle || SyncStatus.syncing || SyncStatus.synced => Pastel.mint,
+      };
+
+  IconData _syncStatusIcon(SyncStatus s) => switch (s) {
+        SyncStatus.syncing => LucideIcons.refreshCw,
+        SyncStatus.queuedOffline => LucideIcons.cloudOff,
+        SyncStatus.error => LucideIcons.circleAlert,
+        SyncStatus.idle || SyncStatus.synced => LucideIcons.cloudCheck,
+      };
+
+  String _syncStatusBadge(SyncStatus s) => switch (s) {
+        SyncStatus.syncing => tr('Syncing in progress...'),
+        SyncStatus.queuedOffline => tr('Offline queued'),
+        SyncStatus.error => tr('Sync error'),
+        SyncStatus.idle || SyncStatus.synced => tr('Active'),
+      };
+
+  String _syncStatusSubtitle(SyncState s) => switch (s.status) {
+        SyncStatus.queuedOffline => tr('{0} pending changes will sync automatically when online.', [s.pendingCount]),
+        SyncStatus.error =>
+          s.errorMessage?.isNotEmpty == true ? s.errorMessage! : tr('Some changes could not be synced.'),
+        SyncStatus.idle ||
+        SyncStatus.syncing ||
+        SyncStatus.synced =>
+          tr('Automatic background sync keeps your data safe across devices.'),
+      };
+
   @override
   Widget build(BuildContext context) {
     final p = ref.watch(prefsProvider).value ?? const Prefs();
@@ -163,7 +195,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     HapticFeedback.selectionClick();
                     Navigator.pop(context);
                   },
-                  icon: const Icon(Icons.arrow_back_rounded),
+                  icon: const Icon(LucideIcons.arrowLeft),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -215,11 +247,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         color: Pastel.lilac.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.accessibility_new_rounded, size: 20, color: Pastel.lilac),
+                      child: const Icon(LucideIcons.accessibility, size: 20, color: Pastel.lilac),
                     ),
                     title: Text(tr('Injection Site Rotation & Health'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                     subtitle: Text(tr('Inspect zone health, rest countdowns, and rotation history.'), style: TextStyle(fontSize: 12, color: muted)),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       showSheet(context, const SiteRotationSheet());
@@ -259,7 +291,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: Column(
                 children: [
                   SwitchListTile(
-                    secondary: iconBadge(Icons.alarm_rounded, Pastel.butter),
+                    secondary: iconBadge(LucideIcons.alarmClock, Pastel.butter),
                     title: Text(
                       tr('Dose reminders'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -321,7 +353,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               HapticFeedback.lightImpact();
                               AppNotifier.instance.test(p);
                             },
-                            icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                            icon: const Icon(LucideIcons.bellRing, size: 18),
                             label: Text(tr('Send test notification')),
                           ),
                         ],
@@ -347,7 +379,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     leading: iconBadge(
-                      Icons.lock_outline_rounded,
+                      LucideIcons.lock,
                       lockState.enabled ? Pastel.mint : Pastel.lilac,
                     ),
                     title: Text(
@@ -362,7 +394,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           : tr('Protect your therapy logs with a 6-digit PIN and biometrics.'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       Navigator.push(
@@ -392,7 +424,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.cloud_off_outlined,
+                            LucideIcons.cloudOff,
                             color: Pastel.lilac,
                             size: 24,
                           ),
@@ -425,7 +457,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        icon: const Icon(Icons.login_rounded, size: 18),
+                        icon: const Icon(LucideIcons.logIn, size: 18),
                         label: Text(tr('Sign In / Create Account')),
                         onPressed: () => Navigator.push(
                           context,
@@ -439,14 +471,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Pastel.mint.withValues(alpha: 0.16),
+                            color: _syncStatusColor(syncState.status).withValues(alpha: 0.16),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            syncState.status == SyncStatus.syncing
-                                ? Icons.sync_rounded
-                                : Icons.cloud_done_rounded,
-                            color: Pastel.mint,
+                            _syncStatusIcon(syncState.status),
+                            color: _syncStatusColor(syncState.status),
                             size: 24,
                           ),
                         ),
@@ -457,25 +487,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                    tr('Real-Time Cloud Sync'),
-                                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                  Flexible(
+                                    child: Text(
+                                      tr('Real-Time Cloud Sync'),
+                                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: Pastel.mint.withValues(alpha: 0.2),
+                                      color: _syncStatusColor(syncState.status).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      syncState.status == SyncStatus.syncing
-                                          ? tr('Syncing in progress...')
-                                          : tr('Active'),
-                                      style: const TextStyle(
+                                      _syncStatusBadge(syncState.status),
+                                      style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: Pastel.mint,
+                                        color: _syncStatusColor(syncState.status),
                                       ),
                                     ),
                                   ),
@@ -483,7 +513,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                tr('Automatic background sync keeps your data safe across devices.'),
+                                _syncStatusSubtitle(syncState),
                                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
                               ),
                             ],
@@ -503,7 +533,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             ),
                             icon: _busyCloud
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Icon(Icons.cloud_upload_outlined, size: 16),
+                                : const Icon(LucideIcons.cloudUpload, size: 16),
                             label: Text(tr('Save Cloud Backup Now')),
                             onPressed: _busyCloud ? null : _saveCloudBackup,
                           ),
@@ -516,7 +546,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
-                            icon: const Icon(Icons.history_toggle_off_rounded, size: 16),
+                            icon: const Icon(LucideIcons.clock, size: 16),
                             label: Text(tr('Manage Cloud Backups')),
                             onPressed: () {
                               HapticFeedback.selectionClick();
@@ -542,7 +572,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.file_upload_outlined, Pastel.mint),
+                    leading: iconBadge(LucideIcons.upload, Pastel.mint),
                     title: Text(
                       tr('Export backup file (JSON)'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -551,7 +581,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       tr('Save or share a copy of all your therapy data.'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       _exportFile();
@@ -560,7 +590,47 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   const Divider(height: 1, indent: 68),
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.file_download_outlined, Pastel.sky),
+                    leading: iconBadge(LucideIcons.history, Pastel.butter),
+                    title: Text(
+                      tr('Export dose history (CSV / JSON)'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      tr('Export your injection and dose log history only.'),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showHistoryExportSheet(
+                        context,
+                        ref.read(logsProvider).value ?? const [],
+                        ref.read(therapiesProvider).value ?? const [],
+                      );
+                    },
+                  ),
+                  const Divider(height: 1, indent: 68),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(LucideIcons.download, Pastel.lilac),
+                    title: Text(
+                      tr('Import dose history (CSV / JSON)'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      tr('Merge injection and dose logs from a CSV or JSON history file.'),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      importDoseHistoryFile(context, ref);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 68),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(LucideIcons.download, Pastel.sky),
                     title: Text(
                       tr('Import backup file (JSON)'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -569,7 +639,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       tr('Merges or restores a backup file into this device.'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       _importFile();
@@ -578,7 +648,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   const Divider(height: 1, indent: 68),
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.history_toggle_off_rounded, Pastel.lilac),
+                    leading: iconBadge(LucideIcons.clock, Pastel.lilac),
                     title: Text(
                       tr('Manage cloud backups & history'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -587,7 +657,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       tr('View and restore past cloud snapshots'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       Navigator.push(
@@ -647,7 +717,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.logout_rounded, C.amber),
+                    leading: iconBadge(LucideIcons.logOut, C.amber),
                     title: Text(
                       tr('Sign out'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -712,7 +782,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.info_outline_rounded, Pastel.lilac),
+                    leading: iconBadge(LucideIcons.info, Pastel.lilac),
                     title: Text(
                       tr('About {0}', [appName]),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -721,7 +791,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       tr('Personal health & therapy tracking application'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       _showAboutDialog(context);
@@ -731,8 +801,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     leading: iconBadge(
-                      Icons.system_update_alt_rounded,
-                      updateInfo != null ? const Color(0xFFE65100) : Pastel.sky,
+                      LucideIcons.download,
+                      updateInfo != null ? C.coral : Pastel.sky,
                     ),
                     title: Row(
                       children: [
@@ -742,7 +812,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE65100),
+                              color: C.coral,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -763,11 +833,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           : 'Lunera v${UpdateCheckerService.currentVersion}${kDebugMode ? ' (Dev)' : ''} • ${kDebugMode ? 'Debug Build' : 'Latest Release'}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: updateInfo != null ? const Color(0xFFE65100) : muted,
+                        color: updateInfo != null ? C.coral : muted,
                         fontWeight: updateInfo != null ? FontWeight.w700 : null,
                       ),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       if (updateInfo != null) {
@@ -786,7 +856,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   const Divider(height: 1, indent: 68),
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.history_edu_rounded, Pastel.rose),
+                    leading: iconBadge(LucideIcons.bookOpen, Pastel.rose),
                     title: Text(
                       tr('Version Changelog'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -798,7 +868,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       showAppChangelogSheet(context);
@@ -807,7 +877,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   const Divider(height: 1, indent: 68),
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.code_rounded, Pastel.mint),
+                    leading: iconBadge(LucideIcons.code, Pastel.mint),
                     title: Text(
                       tr('GitHub Repository'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -816,7 +886,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       tr('View source code, release notes, and issue tracker.'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                    trailing: const Icon(LucideIcons.externalLink, size: 18),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       UpdateCheckerService.openUrl('https://github.com/valynlove/lunera');
@@ -825,7 +895,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   const Divider(height: 1, indent: 68),
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.health_and_safety_outlined, C.amber),
+                    leading: iconBadge(LucideIcons.shieldCheck, C.amber),
                     title: Text(
                       tr('Medical Disclaimer'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -834,7 +904,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       tr('Lunera is a personal tracking tool and not a substitute for professional medical advice.'),
                       style: TextStyle(fontSize: 12, color: muted),
                     ),
-                    trailing: const Icon(Icons.info_outline_rounded, size: 18),
+                    trailing: const Icon(LucideIcons.info, size: 18),
                     onTap: () {
                       HapticFeedback.selectionClick();
                       _showDisclaimerDialog(context);

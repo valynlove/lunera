@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
@@ -143,7 +144,10 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
     );
     final repo = ref.read(repoProvider);
     if (widget.edit == null) {
-      repo?.logDose(log);
+      repo?.logDose(
+        log,
+        existingSupplies: {for (final s in widget.supplies) s.id},
+      );
     } else {
       repo?.updateLog(log);
     }
@@ -193,7 +197,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
           if (!editing)
             IconButton(
               tooltip: tr('Edit therapy settings'),
-              icon: const Icon(Icons.tune_rounded, color: C.lavender, size: 22),
+              icon: const Icon(LucideIcons.slidersHorizontal, color: C.lavender, size: 22),
               onPressed: () {
                 Navigator.pop(context);
                 showSheet(context, TherapySheet(supplies: widget.supplies, initial: widget.t));
@@ -209,7 +213,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
           labelText: isCombination
               ? tr('{0} dose ({1})', [presetOf(t.hormoneId).name, t.doseUnit])
               : tr('Dose ({0})', [t.doseUnit]),
-          prefixIcon: const Icon(Icons.medication_rounded, size: 20, color: C.lavender),
+          prefixIcon: const Icon(LucideIcons.pill, size: 20, color: C.lavender),
           helperText: t.compound != null ? compoundPresets.where((p) => p.id == t.compound).firstOrNull?.name : null,
         ),
       ),
@@ -227,7 +231,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.biotech_outlined, size: 18, color: C.lavender),
+                  const Icon(LucideIcons.microscope, size: 18, color: C.lavender),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -257,7 +261,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
                   dropdownColor: C.deepCard,
                   borderRadius: BorderRadius.circular(16),
                   isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+                  icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
                   decoration: InputDecoration(
                     labelText: tr('Second active category'),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -290,7 +294,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
                       dropdownColor: C.deepCard,
                       borderRadius: BorderRadius.circular(16),
                       isExpanded: true,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+                      icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
                       decoration: InputDecoration(
                         labelText: tr('Second active compound:'),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -388,7 +392,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.add_circle_outline_rounded, size: 16, color: C.lavender),
+                const Icon(LucideIcons.circlePlus, size: 16, color: C.lavender),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -406,7 +410,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       gap(10),
       OutlinedButton.icon(
         onPressed: _pick,
-        icon: const Icon(Icons.schedule_rounded, size: 18),
+        icon: const Icon(LucideIcons.clock, size: 18),
         label: Text(tr('Time: {0}', [DateFormat('d MMM, HH:mm', L10n.code).format(at)])),
       ),
       if (t.adm.places && widget.prefs.places.isNotEmpty) ...[
@@ -456,7 +460,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.self_improvement_rounded, color: C.peony, size: 20),
+                  Icon(LucideIcons.heartPulse, color: C.peony, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -467,7 +471,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
                       ],
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: C.peony.withValues(alpha: 0.7)),
+                  Icon(LucideIcons.chevronRight, size: 14, color: C.peony.withValues(alpha: 0.7)),
                 ],
               ),
             ),
@@ -488,7 +492,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final s in gens)
             FilterChip(
-              avatar: Icon(genericTypes[s.gtype]?.$2 ?? Icons.inventory_2_rounded, size: 16),
+              avatar: Icon(genericTypes[s.gtype]?.$2 ?? LucideIcons.package, size: 16),
               label: Text(s.name),
               selected: generics.contains(s.id),
               onSelected: (v) => setState(() => v ? generics.add(s.id) : generics.remove(s.id)),
@@ -502,7 +506,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
           maxLines: 2,
           decoration: InputDecoration(
             labelText: tr('Note (optional)'),
-            prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: C.lavender),
+            prefixIcon: const Icon(LucideIcons.notebookPen, size: 20, color: C.lavender),
           ),
         ),
       ] else ...[
@@ -528,7 +532,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
         if (editing)
           TextButton.icon(
             onPressed: _delete,
-            icon: const Icon(Icons.delete_outline_rounded, size: 20),
+            icon: const Icon(LucideIcons.trash2, size: 20),
             label: Text(tr('Delete')),
             style: TextButton.styleFrom(foregroundColor: Pastel.rose),
           ),
@@ -695,10 +699,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
         dropdownColor: C.deepCard,
         borderRadius: BorderRadius.circular(16),
         isExpanded: true,
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+        icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
         decoration: InputDecoration(
           labelText: tr('Therapy category'),
-          prefixIcon: const Icon(Icons.category_outlined, size: 20, color: C.lavender),
+          prefixIcon: const Icon(LucideIcons.tag, size: 20, color: C.lavender),
         ),
         items: [
           for (final m in _mols)
@@ -738,11 +742,11 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
             dropdownColor: C.deepCard,
             borderRadius: BorderRadius.circular(16),
             isExpanded: true,
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+            icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
             hint: Text(tr('Select active compound'), style: const TextStyle(fontSize: 14)),
             decoration: InputDecoration(
               labelText: tr('Active compound'),
-              prefixIcon: const Icon(Icons.science_outlined, size: 20, color: C.lavender),
+              prefixIcon: const Icon(LucideIcons.testTube2, size: 20, color: C.lavender),
             ),
             items: [
               for (final c in available)
@@ -789,7 +793,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
         dropdownColor: C.deepCard,
         borderRadius: BorderRadius.circular(16),
         isExpanded: true,
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+        icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
         decoration: InputDecoration(
           labelText: tr('How it\'s taken'),
           prefixIcon: Icon(routeOf(route).icon, size: 20, color: C.lavender),
@@ -823,10 +827,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
             dropdownColor: C.deepCard,
             borderRadius: BorderRadius.circular(16),
             isExpanded: true,
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+            icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
             decoration: InputDecoration(
               labelText: route == 'inj' ? tr('Ester / simulation profile ({0}):', [presetOf(hormone).name]) : tr('Simulation profile ({0}):', [presetOf(hormone).name]),
-              prefixIcon: const Icon(Icons.auto_graph_rounded, size: 20, color: C.lavender),
+              prefixIcon: const Icon(LucideIcons.chartLine, size: 20, color: C.lavender),
             ),
             items: [
               for (final p in matchingPk)
@@ -845,10 +849,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
           dropdownColor: C.deepCard,
           borderRadius: BorderRadius.circular(16),
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+          icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
           decoration: InputDecoration(
             labelText: tr('Injection method'),
-            prefixIcon: const Icon(Icons.vaccines_rounded, size: 20, color: C.lavender),
+            prefixIcon: const Icon(LucideIcons.syringe, size: 20, color: C.lavender),
           ),
           items: [
             DropdownMenuItem(value: 'im', child: Text(tr('Intramuscular (IM)'), style: const TextStyle(fontSize: 14))),
@@ -873,10 +877,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
           dropdownColor: C.deepCard,
           borderRadius: BorderRadius.circular(16),
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+          icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
           decoration: InputDecoration(
             labelText: tr('Dose unit type'),
-            prefixIcon: const Icon(Icons.layers_rounded, size: 20, color: C.lavender),
+            prefixIcon: const Icon(LucideIcons.layers, size: 20, color: C.lavender),
           ),
           items: [
             DropdownMenuItem(value: 'mg', child: Text(tr('Mass dose (mg)'), style: const TextStyle(fontSize: 14))),
@@ -908,10 +912,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
           dropdownColor: C.deepCard,
           borderRadius: BorderRadius.circular(16),
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+          icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
           decoration: InputDecoration(
             labelText: tr('Second active category'),
-            prefixIcon: const Icon(Icons.biotech_outlined, size: 20, color: C.lavender),
+            prefixIcon: const Icon(LucideIcons.microscope, size: 20, color: C.lavender),
           ),
           items: [
             for (final m in _mols.where((m) => m.$1 != hormone && m.$1 != 'other'))
@@ -946,11 +950,11 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
               dropdownColor: C.deepCard,
               borderRadius: BorderRadius.circular(16),
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+              icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
               hint: Text(tr('Select active compound'), style: const TextStyle(fontSize: 14)),
               decoration: InputDecoration(
                 labelText: tr('Second active compound'),
-                prefixIcon: const Icon(Icons.biotech_outlined, size: 20, color: C.lavender),
+                prefixIcon: const Icon(LucideIcons.microscope, size: 20, color: C.lavender),
               ),
               items: [
                 for (final c in secAvailable)
@@ -1006,10 +1010,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
               dropdownColor: C.deepCard,
               borderRadius: BorderRadius.circular(16),
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+              icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
               decoration: InputDecoration(
                 labelText: route == 'inj' ? tr('Ester / simulation profile ({0}):', [presetOf(secondaryHormone).name]) : tr('Simulation profile ({0}):', [presetOf(secondaryHormone).name]),
-                prefixIcon: const Icon(Icons.auto_graph_rounded, size: 20, color: C.lavender),
+                prefixIcon: const Icon(LucideIcons.chartLine, size: 20, color: C.lavender),
               ),
               items: [
                 for (final p in matchingSecPk)
@@ -1028,10 +1032,10 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
         dropdownColor: C.deepCard,
         borderRadius: BorderRadius.circular(16),
         isExpanded: true,
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: C.lavender),
+        icon: const Icon(LucideIcons.chevronDown, color: C.lavender),
         decoration: InputDecoration(
           labelText: tr('Schedule repeat'),
-          prefixIcon: const Icon(Icons.event_repeat_rounded, size: 20, color: C.lavender),
+          prefixIcon: const Icon(LucideIcons.repeat, size: 20, color: C.lavender),
         ),
         items: [
           for (final k in _kinds)
@@ -1086,7 +1090,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
         Text(tr('Times')),
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final s in times) InputChip(label: Text(s), onDeleted: times.length > 1 ? () => setState(() => times.remove(s)) : null),
-          ActionChip(avatar: const Icon(Icons.add_rounded, size: 16), label: Text(tr('Add time')), onPressed: _addTime),
+          ActionChip(avatar: const Icon(LucideIcons.plus, size: 16), label: Text(tr('Add time')), onPressed: _addTime),
         ]),
         gap(10),
         OutlinedButton.icon(
@@ -1094,7 +1098,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
             final d = await showDatePicker(context: context, initialDate: day, firstDate: DateTime(2000), lastDate: DateTime(2100));
             if (d != null) setState(() => day = d);
           },
-          icon: const Icon(Icons.calendar_today_rounded, size: 18),
+          icon: const Icon(LucideIcons.calendar, size: 18),
           label: Text(tr('Start: {0}', [DateFormat('d MMM y', L10n.code).format(day)])),
         ),
       ],
@@ -1108,7 +1112,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
       ],
       gap(20),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: Text(tr('Delete'))),
+        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(LucideIcons.trash2), label: Text(tr('Delete'))),
         Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save therapy'), _save)),
       ]),
     ]);

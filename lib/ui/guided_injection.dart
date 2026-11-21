@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -123,7 +124,10 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
       used: usage,
     );
 
-    ref.read(repoProvider)?.logDose(log);
+    ref.read(repoProvider)?.logDose(
+          log,
+          existingSupplies: {for (final s in widget.supplies) s.id},
+        );
     Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -182,7 +186,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
                       color: C.peony.withValues(alpha: 0.16),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.self_improvement_rounded, color: C.peony, size: 20),
+                    child: Icon(LucideIcons.heartPulse, color: C.peony, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -204,7 +208,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded, size: 20),
+                    icon: const Icon(LucideIcons.x, size: 20),
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
@@ -324,7 +328,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
                 ),
               ),
               child: Center(
-                child: Icon(Icons.spa_rounded, color: C.peony, size: 44),
+                child: Icon(LucideIcons.flower2, color: C.peony, size: 44),
               ),
             ),
           ),
@@ -354,7 +358,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
           ),
           child: Row(
             children: [
-              Icon(Icons.place_rounded, color: C.peony, size: 20),
+              Icon(LucideIcons.mapPin, color: C.peony, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -396,7 +400,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
           ),
           child: Center(
             child: _secondsLeft == 0
-                ? Icon(Icons.check_circle_rounded, color: C.lagoon, size: 52)
+                ? Icon(LucideIcons.circleCheckBig, color: C.lagoon, size: 52)
                 : Text(
                     '$_secondsLeft',
                     style: const TextStyle(
@@ -427,7 +431,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
         if (!_timerRunning && _secondsLeft > 0)
           OutlinedButton.icon(
             onPressed: _startDryingTimer,
-            icon: const Icon(Icons.timer_outlined, size: 18),
+            icon: const Icon(LucideIcons.timer, size: 18),
             label: Text(tr('Start 30s Timer')),
           )
         else if (_timerRunning)
@@ -472,7 +476,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
             children: [
               Row(
                 children: [
-                  const Icon(Icons.tips_and_updates_rounded, color: C.amber, size: 22),
+                  const Icon(LucideIcons.lightbulb, color: C.amber, size: 22),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -513,7 +517,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
             shape: BoxShape.circle,
             color: C.peony.withValues(alpha: 0.16),
           ),
-          child: Icon(Icons.favorite_rounded, color: C.peony, size: 46),
+          child: Icon(LucideIcons.heart, color: C.peony, size: 46),
         ),
         gap(16),
         Text(

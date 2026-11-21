@@ -8,11 +8,11 @@
 
 **A Gentle, Elegant & Privacy-Focused Personal Health & Therapy Tracker**
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.22+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.3+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
-[![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
-[![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.0-6C5CE7.svg)](CHANGELOG.md)
+[![Flutter](https://img.shields.io/badge/Flutter-3.22+-8065E8?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.3+-A58BFF?logo=dart&logoColor=white)](https://dart.dev)
+[![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-D76ABF?logo=firebase&logoColor=white)](https://firebase.google.com/)
+[![License](https://img.shields.io/badge/License-MIT-7DE2C7?labelColor=11102B)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-2.1.9-F2A17C?labelColor=11102B)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Direct Download APK](https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk) • [📋 Changelog](CHANGELOG.md)
 
@@ -22,14 +22,35 @@
 
 ## 🌟 Overview
 
-**Lunera** is a modern, privacy-first mobile and desktop application designed to accompany individuals on their personal wellness and hormone therapy journeys. Built with Flutter, Riverpod, and Firebase, Lunera empowers users to understand their physiological rhythms, track dosage schedules, monitor physical transitions, and ensure complete biometric security—all wrapped in a soothing Midnight UI.
+**Lunera** is a modern, privacy-first mobile and desktop application designed to accompany individuals on their personal wellness and hormone therapy journeys. Built with Flutter, Riverpod, and Firebase, Lunera empowers users to understand their physiological rhythms, track dosage schedules, monitor physical transitions, and ensure complete biometric security—all wrapped in the soothing **Eternal Dusk** twilight sanctuary design system.
+
+---
+
+## 🎨 Eternal Dusk Theme Palette
+
+Lunera combines **Midnight Aurora** depth with **Vice City Sunset** warmth across both the mobile app (`lib/theme.dart`) and the web landing page (`docs/`):
+
+| Token | Hex | Role |
+| :--- | :--- | :--- |
+| **Void** | `#090817` | Deepest obsidian void canvas & cold-launch backdrop |
+| **Midnight** | `#11102B` | Primary nocturnal canvas |
+| **Deep Card** | `#171436` | Layered dark card surface |
+| **Nebula** | `#292052` | Elevated cosmic plum surface |
+| **Aurora** | `#8065E8` | Primary electric aurora violet |
+| **Violet** | `#A58BFF` | Luminous violet highlight |
+| **Lavender** | `#C7B8FF` | Soft lavender rim & active icon accent |
+| **Magenta** | `#D76ABF` | Dusk sunset magenta gradient accent |
+| **Rose** | `#F09ABF` | Warm twilight rose (Estradiol E2 series) |
+| **Coral** | `#F2A17C` | Horizon sunset coral (Progesterone P4 & stock alerts) |
+| **Mint** | `#7DE2C7` | Completed doses, adherence & in-range clinical states |
 
 ---
 
 ## ✨ Key Features
 
-- 🔒 **PIN Security & Multi-Device Sync:** Protect your private medical data with a 6-digit salted SHA-256 PIN lock, automatically synchronized across all your devices via Firebase Cloud Firestore.
-- 🌌 **Atmospheric Lake Splash & Celestial Theme:** Serene night lake entrance animation (`SplashPage`) with reflective water horizons, celestial orbit ring icons, and smooth transitions.
+- 🔒 **PIN Security & Multi-Device Sync:** Protect your private medical data with a 6-digit salted SHA-256 PIN lock (`flutter_secure_storage` + Keystore/Keychain), Decoy Calculator camouflage, and encrypted multi-device sync via Firebase Cloud Firestore.
+- 🌌 **Eternal Dusk Splash & Twilight Sanctuary:** Dual-controller staged entrance animation (`SplashPage`) with layered atmospheric backdrop (`eternal_dusk_splash_bg.jpg` + `eternal_dusk_overlay.png`), pulsing Aurora/Magenta/Coral emblem halo, `Instrument Serif` display typography, and `Plus Jakarta Sans` UI clarity.
+- 🎯 **Unified Lucide Icon System:** Clean, consistent `lucide_icons_flutter` outline iconography across the app paired with the Eternal Dusk orbital crescent emblem.
 - 📊 **Pharmacokinetic Level Simulations:** Interactive multi-compartment pharmacokinetic curves for Estradiol and Testosterone with customizable target zones and lab result calibration.
 - 💉 **Visual Injection Site Map & Heatmap:** Interactive 2D anatomical silhouette with dual-perspective views (Front and Back), intelligent tissue rest tracking (days since last injection), and automatic site rotation suggestions.
 - 📈 **Body Measurements & Progression Curves:** Dual-unit body measurement logging (bust, underbust, waist, hips, thigh, calf, inseam, feet, weight, height) with automatic bra size calculation, clothing fit, and interactive trend charts (`fl_chart`) for WHR and chest progression.
@@ -37,9 +58,8 @@
 - 🔔 **Scheduled Dose Reminders:** Offline-capable native local notifications (`flutter_local_notifications`) with exact alarm receivers and high-importance sound/vibration channels.
 - 📖 **Mood & Body Observation Journal:** Daily emotional state logging, physical transition observation notes, and category filters.
 - 📦 **Supply & Equipment Tracking:** Manage inventory for vials, syringes, alcohol wipes, and needles with automatic stock deduction upon dose intake.
-- 💾 **Dual Local & Cloud Safety:** Completely offline JSON export/import and secure cloud synchronization via Firebase Cloud Firestore.
+- 💾 **Dual Local & Cloud Safety:** Completely offline JSON export/import, standalone CSV/JSON dose history export, and secure cloud synchronization via Firebase Cloud Firestore.
 - 🌐 **Bilingual Localization:** Full native support for English (default) and Bahasa Indonesia with dynamic runtime switching.
-- 🎨 **Midnight Design System:** Aesthetic dark theme with customizable accent palettes (`Lunera`, `Moonlight`, `Ocean`, `Rose Quartz`) and smooth animations.
 
 ---
 
@@ -49,11 +69,12 @@
 | :---------------------- | :--------------------------------------------------------------- |
 | **Framework**           | Flutter (Stable Channel)                                         |
 | **Language**            | Dart 3                                                           |
+| **UI & Typography**     | Eternal Dusk Design System (`google_fonts`, `lucide_icons_flutter`) |
 | **State Management**    | Riverpod (`flutter_riverpod`)                                    |
 | **Backend & Cloud**     | Firebase Core, Firebase Auth, Cloud Firestore                    |
 | **Data Visualization**  | `fl_chart`                                                       |
 | **Local Notifications** | `flutter_local_notifications`, `timezone`, `flutter_timezone`    |
-| **Hardware & Security** | `local_auth` (Biometrics), `shared_preferences`                  |
+| **Hardware & Security** | `local_auth`, `flutter_secure_storage`, `shared_preferences`     |
 | **CI / CD Automation**  | GitHub Actions (Auto APK Compilation & GitHub Release)           |
 | **Landing Page**        | HTML5, Modern CSS3, Vanilla JavaScript (GitHub Pages in `/docs`) |
 

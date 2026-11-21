@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../l10n.dart';
 import '../models.dart';
@@ -70,8 +71,8 @@ class MorePage extends ConsumerWidget {
               height: 1.25),
         ),
         trailing: trailing ??
-            const Icon(Icons.chevron_right_rounded,
-                size: 20, color: Pastel.lilac),
+            const Icon(LucideIcons.chevronRight,
+                size: 18, color: C.iconDefault),
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
@@ -118,7 +119,7 @@ class MorePage extends ConsumerWidget {
                 for (final inj in injections)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: iconBadge(Icons.medication_rounded, Pastel.sky),
+                    leading: iconBadge(LucideIcons.pill, Pastel.sky),
                     title: Text(inj.name,
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text('${fmt(inj.dose)} ${inj.doseUnit}'),
@@ -164,31 +165,31 @@ class MorePage extends ConsumerWidget {
         Text(tr('More'), style: display(40)),
         gap(16),
 
-        // 1. Header Profil Pengguna (Arcane Astral Hero Card)
+        // 1. User Profile Hero Card (Eternal Dusk)
         Container(
           margin: const EdgeInsets.only(top: 4, bottom: 20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF26334F),
-                Color(0xFF17264D),
+                C.nebula.withValues(alpha: 0.92),
+                C.midnight.withValues(alpha: 0.96),
               ],
             ),
             border: Border.all(
-              color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
+              color: C.lavender.withValues(alpha: 0.26),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF091122).withValues(alpha: 0.55),
+                color: C.voidBg.withValues(alpha: 0.55),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: C.peony.withValues(alpha: 0.15),
+                color: C.aurora.withValues(alpha: 0.16),
                 blurRadius: 18,
                 offset: const Offset(0, -1),
               ),
@@ -200,8 +201,8 @@ class MorePage extends ConsumerWidget {
                 top: 8,
                 right: 8,
                 child: IconButton(
-                  icon: const Icon(Icons.settings_outlined, size: 22),
-                  color: Pastel.cream.withValues(alpha: 0.85),
+                  icon: const Icon(LucideIcons.settings, size: 22),
+                  color: C.iconDefault,
                   tooltip: tr('Settings'),
                   onPressed: () {
                     HapticFeedback.selectionClick();
@@ -289,7 +290,7 @@ class MorePage extends ConsumerWidget {
           child: Column(
             children: [
               tile(
-                icon: Icons.insights_rounded,
+                icon: LucideIcons.activity,
                 color: Pastel.lilac,
                 title: tr('Insights & Patterns'),
                 subtitle: tr('Adherence trends and mood patterns'),
@@ -297,7 +298,7 @@ class MorePage extends ConsumerWidget {
               ),
               const Divider(height: 1, indent: 68),
               tile(
-                icon: Icons.accessibility_new_rounded,
+                icon: LucideIcons.accessibility,
                 color: Pastel.rose,
                 title: tr('Body & Changes'),
                 subtitle:
@@ -306,7 +307,7 @@ class MorePage extends ConsumerWidget {
               ),
               const Divider(height: 1, indent: 68),
               tile(
-                icon: Icons.healing_rounded,
+                icon: LucideIcons.bandage,
                 color: Pastel.mint,
                 title: tr('Site Rotation & Health'),
                 subtitle: tr(
@@ -324,7 +325,7 @@ class MorePage extends ConsumerWidget {
           child: Column(
             children: [
               tile(
-                icon: Icons.self_improvement_rounded,
+                icon: LucideIcons.heartPulse,
                 color: Pastel.sky,
                 title: tr('Guided Calm Injection'),
                 subtitle:
@@ -333,7 +334,7 @@ class MorePage extends ConsumerWidget {
               ),
               const Divider(height: 1, indent: 68),
               tile(
-                icon: Icons.local_shipping_outlined,
+                icon: LucideIcons.truck,
                 color: Pastel.butter,
                 title: tr('Discreet Pickup Assistant'),
                 subtitle: tr(
@@ -351,7 +352,7 @@ class MorePage extends ConsumerWidget {
           child: Column(
             children: [
               tile(
-                icon: Icons.tune_rounded,
+                icon: LucideIcons.slidersHorizontal,
                 color: C.peony,
                 title: tr('Settings'),
                 subtitle: tr('Appearance, units, reminders, security & backup'),
@@ -359,7 +360,7 @@ class MorePage extends ConsumerWidget {
               ),
               const Divider(height: 1, indent: 68),
               tile(
-                icon: Icons.info_outline_rounded,
+                icon: LucideIcons.info,
                 color: Pastel.lilac,
                 title: tr('About {0}', [appName]),
                 subtitle: tr('Version, mission, and medical disclaimer'),

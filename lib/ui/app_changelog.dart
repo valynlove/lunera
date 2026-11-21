@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../update_checker.dart';
@@ -41,10 +42,124 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.1.9',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Standalone Dose History Import (CSV & JSON): Import and merge injection and dose administration logs from CSV or JSON history files directly from the History tab or Settings → Manual Backup & Export, preserving existing history and current supply stock.',
+          textId: 'Impor Riwayat Dosis Mandiri (CSV & JSON): Impor dan gabungkan catatan suntikan serta dosis dari berkas CSV atau JSON langsung dari tab Riwayat atau Pengaturan → Cadangan Manual & Ekspor tanpa menghapus riwayat lama atau memotong stok saat ini.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.7',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Eternal Dusk Splash Screen Redesign: Adopted the staged Wall o\' Pay splash architecture with coordinated background fade-in, centered 3D Lunera emblem scale/glow pulse, LUNERA display wordmark, "Your Journey, In Every Phase." tagline, minimal 48×3 progress bar, reduced-motion support, and matching Android/iOS native launch screens.',
+          textId: 'Desain Ulang Layar Splash Eternal Dusk: Mengadopsi arsitektur splash bertahap ala Wall o\' Pay dengan animasi latar belakang, lambang 3D Lunera berpendar halus, wordmark LUNERA, tagline "Perjalananmu, Di Setiap Fase.", indikator progres minimalis, dukungan reduced motion, serta layar peluncur native Android/iOS yang serasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.6',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Transparent Home Screen Launcher Icon: Updated Android launcher icons (mipmap-mdpi through mipmap-xxxhdpi), web favicon/icons, and showcase logos to render the Eternal Dusk orbital crescent emblem on a clean transparent background.',
+          textId: 'Ikon Peluncur Layar Utama Transparan: Memperbarui ikon peluncur Android, favicon/ikon web, dan logo showcase agar menampilkan lambang bulan sabit Eternal Dusk di atas latar transparan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.5',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Eternal Dusk Profile Avatar Border: Updated the circular profile avatar frame overlay to the new Eternal Dusk orbital crescent moon and violet-coral neon ring across Home, More, and Profile.',
+          textId: 'Bingkai Avatar Profil Eternal Dusk: Memperbarui bingkai avatar melingkar dengan cincin orbit bulan sabit dan sorotan ungu-koral Eternal Dusk di Beranda, Lainnya, dan Profil.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.4',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified Lucide Icon System: Standardized all functional UI icons across screens, navigation dock, forms, dialogs, and sheets onto Lucide outline icons (2px stroke) with consistent #A29BBE default, #C7B8FF active, and selective Aurora Violet highlights.',
+          textId: 'Sistem Ikon Lucide Terpadu: Menstandarkan seluruh ikon antarmuka fungsional di setiap layar, bilah navigasi, formulir, dialog, dan lembar ke ikon garis Lucide dengan warna baku #A29BBE, aktif #C7B8FF, dan sorotan Aurora Violet.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.3',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Eternal Dusk Visual Rebranding & Asset Integration: Transformed global theme tokens, Instrument Serif + Plus Jakarta Sans typography, splash screen, launcher icons, home widgets, and UI surfaces with the new Midnight Aurora & sunset palette and supplied Eternal Dusk brand assets.',
+          textId: 'Rebranding Visual & Integrasi Aset Eternal Dusk: Memperbarui token tema global, tipografi Instrument Serif + Plus Jakarta Sans, layar splash, ikon peluncur, widget beranda, serta komponen antarmuka dengan palet Midnight Aurora dan aset brand Eternal Dusk terbaru.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.2',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Standalone Dose History Export (CSV & JSON): Export your injection and dose administration logs directly from the History tab or Settings → Manual Backup & Export, with spreadsheet formula-injection protection and an isolated JSON schema separate from full device backups.',
+          textId: 'Ekspor Riwayat Dosis Mandiri (CSV & JSON): Ekspor catatan suntikan dan riwayat dosis langsung dari tab Riwayat atau Pengaturan → Cadangan Manual & Ekspor, lengkap dengan perlindungan formula spreadsheet dan skema JSON terpisah dari cadangan penuh.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.1',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Encrypted Keystore/Keychain PIN Storage: Migrated PIN hashes, salts, and brute-force lockout counters from SharedPreferences to flutter_secure_storage with automatic legacy migration.',
+          textId: 'Penyimpanan PIN Terenkripsi Keystore/Keychain: Memigrasikan hash PIN, salt, dan status lockout dari SharedPreferences ke flutter_secure_storage secara otomatis.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Per-Account Lock Isolation & Tiered Lockout: Scoped local lock credentials per user UID, added exponential brute-force penalties (30s → 120s → 300s) with clock-rollback guard, and clamped remote cloud sync timestamps.',
+          textId: 'Isolasi Kunci Per-Akun & Lockout Bertingkat: Memisahkan kredensial kunci lokal per UID akun, penalti brute-force eksponensial (30 dtk → 120 dtk → 300 dtk) dengan penjaga manipulasi jam, serta pembatasan timestamp sinkronisasi cloud.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Enhanced Biometric & LockGate Security: Live Face/Fingerprint hardware detection on SecurityPage resume, 1200ms post-biometric lifecycle cooldown, automatic modal route dismissal on re-lock, and dynamic lockout countdowns.',
+          textId: 'Peningkatan Biometrik & LockGate: Deteksi sensor Wajah/Sidik Jari langsung saat kembali ke halaman Keamanan, cooldown 1200ms pasca-dialog biometrik, penutupan otomatis modal saat terkunci ulang, dan hitung mundur lockout dinamis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.1.0',
       dateEn: 'November 10, 2026',
       dateId: '10 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,
@@ -1244,7 +1359,7 @@ class AppChangelogSheet extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.history_edu_rounded,
+                        LucideIcons.bookOpen,
                         color: C.peony,
                         size: 24,
                       ),
@@ -1273,7 +1388,7 @@ class AppChangelogSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(LucideIcons.x),
                       tooltip: context.tr('Close'),
                       onPressed: () => Navigator.pop(context),
                     ),

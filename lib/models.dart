@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart' show IconData, Icons;
+import 'package:flutter/material.dart' show IconData;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'l10n.dart';
 
 DateTime _d(dynamic t) {
@@ -105,16 +106,16 @@ class AdminRoute {
 }
 
 const adminRoutes = <AdminRoute>[
-  AdminRoute('inj', 'Injection', Icons.colorize_rounded, places: true),
-  AdminRoute('oral', 'Oral', Icons.medication_rounded),
-  AdminRoute('sublingual', 'Sublingual', Icons.face_rounded),
-  AdminRoute('patch', 'Patch', Icons.layers_rounded, places: true),
-  AdminRoute('gel', 'Gel', Icons.water_drop_rounded),
-  AdminRoute('implant', 'Implant', Icons.straighten_rounded),
-  AdminRoute('supp', 'Suppository', Icons.medication_liquid_rounded),
-  AdminRoute('spray', 'Spray', Icons.air_rounded),
-  AdminRoute('drops', 'Drops', Icons.opacity_rounded),
-  AdminRoute('other', 'Other', Icons.more_horiz_rounded),
+  AdminRoute('inj', 'Injection', LucideIcons.syringe, places: true),
+  AdminRoute('oral', 'Oral', LucideIcons.pill),
+  AdminRoute('sublingual', 'Sublingual', LucideIcons.scanFace),
+  AdminRoute('patch', 'Patch', LucideIcons.layers, places: true),
+  AdminRoute('gel', 'Gel', LucideIcons.droplet),
+  AdminRoute('implant', 'Implant', LucideIcons.ruler),
+  AdminRoute('supp', 'Suppository', LucideIcons.flaskConical),
+  AdminRoute('spray', 'Spray', LucideIcons.wind),
+  AdminRoute('drops', 'Drops', LucideIcons.droplets),
+  AdminRoute('other', 'Other', LucideIcons.ellipsis),
 ];
 AdminRoute routeOf(String id) => adminRoutes.firstWhere((r) => r.id == id, orElse: () => adminRoutes.last);
 
@@ -122,11 +123,11 @@ const routes = adminRoutes;
 
 /// Jenis barang non-obat yang umum untuk HRT (kunci -> label English, ikon).
 const genericSupplyTypes = <String, (String, IconData)>{
-  'syringe': ('Syringe', Icons.vaccines_rounded),
-  'wipe': ('Alcohol wipe', Icons.cleaning_services_rounded),
-  'needle': ('Needle', Icons.colorize_rounded),
-  'gloves': ('Gloves', Icons.back_hand_rounded),
-  'bandage': ('Bandage', Icons.healing_rounded),
+  'syringe': ('Syringe', LucideIcons.syringe),
+  'wipe': ('Alcohol wipe', LucideIcons.sparkles),
+  'needle': ('Needle', LucideIcons.syringe),
+  'gloves': ('Gloves', LucideIcons.hand),
+  'bandage': ('Bandage', LucideIcons.bandage),
 };
 const genericTypes = genericSupplyTypes;
 
@@ -593,11 +594,11 @@ class CloudBackup {
 
 /// Suasana hati untuk jurnal: kunci -> (label, ikon).
 const moodTypes = <String, (String, IconData)>{
-  'happy': ('Happy', Icons.sentiment_very_satisfied_rounded),
-  'calm': ('Calm', Icons.sentiment_satisfied_rounded),
-  'neutral': ('Neutral', Icons.sentiment_neutral_rounded),
-  'low': ('Low', Icons.sentiment_dissatisfied_rounded),
-  'anxious': ('Anxious', Icons.sentiment_very_dissatisfied_rounded),
+  'happy': ('Happy', LucideIcons.laugh),
+  'calm': ('Calm', LucideIcons.smile),
+  'neutral': ('Neutral', LucideIcons.meh),
+  'low': ('Low', LucideIcons.frown),
+  'anxious': ('Anxious', LucideIcons.angry),
 };
 const moods = moodTypes;
 

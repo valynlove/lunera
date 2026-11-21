@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
@@ -10,11 +11,11 @@ import 'body.dart';
 import '../l10n.dart';
 
 Color moodColor(String? k) => switch (k) {
-      'happy' => C.amber, // Celestial Honey Gold
-      'calm' => Pastel.mint, // Sage Astral Mint
-      'low' => const Color(0xFF8F88B6), // Muted slate violet
-      'anxious' => const Color(0xFFF87171), // Soft coral red
-      _ => Pastel.lilac, // Arcane Lilac
+      'happy' => C.coral, // Eternal Dusk Coral
+      'calm' => Pastel.mint, // Mint Harmony
+      'low' => const Color(0xFF9B8EC4), // Muted Twilight Violet
+      'anxious' => C.rose, // Twilight Rose
+      _ => C.lavender, // Eternal Dusk Lavender
     };
 
 /// Daftar jurnal dengan penyaring, dipakai di tab Kalender.
@@ -46,17 +47,17 @@ class _JournalViewState extends ConsumerState<JournalView> {
     }
 
     return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
-      Align(alignment: Alignment.centerRight, child: pillButton(tr('Write'), () => showSheet(context, const JournalSheet()), icon: Icons.edit_outlined)),
+      Align(alignment: Alignment.centerRight, child: pillButton(tr('Write'), () => showSheet(context, const JournalSheet()), icon: LucideIcons.pencil)),
       gap(12),
       Container(
         decoration: cardBox(context, radius: 22),
         child: ListTile(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BodyPage())),
-          leading: Icon(Icons.accessibility_new_rounded, color: C.peony),
+          leading: Icon(LucideIcons.accessibility, color: C.peony),
           title: Text(tr('Body & changes'), style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(tr('Timeline by body area')),
-          trailing: const Icon(Icons.chevron_right_rounded),
+          trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
         ),
       ),
       gap(12),
@@ -96,7 +97,7 @@ class JournalTile extends StatelessWidget {
         onTap: () => showSheet(context, JournalSheet(initial: e)),
         leading: CircleAvatar(
           backgroundColor: C.peony.withValues(alpha: .14),
-          child: Icon(m?.$2 ?? (e.hasBody ? Icons.accessibility_new_rounded : Icons.edit_note_rounded), color: C.peony),
+          child: Icon(m?.$2 ?? (e.hasBody ? LucideIcons.accessibility : LucideIcons.notebookPen), color: C.peony),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: Text(lines.join('\n'), maxLines: 6, overflow: TextOverflow.ellipsis),
@@ -177,7 +178,7 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
       gap(10),
       OutlinedButton.icon(
         onPressed: _pick,
-        icon: const Icon(Icons.schedule_rounded, size: 18),
+        icon: const Icon(LucideIcons.clock, size: 18),
         label: Text(DateFormat('d MMM y, HH:mm', L10n.code).format(at)),
       ),
       gap(14),
@@ -205,7 +206,7 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
       TextField(controller: text, maxLines: 4, minLines: 2, decoration: InputDecoration(labelText: tr('Notes'))),
       gap(18),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(Icons.delete_outline_rounded), label: Text(tr('Delete'))),
+        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(LucideIcons.trash2), label: Text(tr('Delete'))),
         Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save'), _save)),
       ]),
     ]);
@@ -240,7 +241,7 @@ class MoodQuickCard extends ConsumerWidget {
           Icon(m.$2, color: C.peony, size: 30),
           const SizedBox(width: 14),
           Expanded(child: Text(tr('Today you feel {0}', [tr(m.$1).toLowerCase()]), style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white))),
-          Icon(Icons.edit_outlined, size: 18, color: Pastel.mist.withValues(alpha: .85)),
+          Icon(LucideIcons.pencil, size: 18, color: Pastel.mist.withValues(alpha: .85)),
         ]),
       ));
     }

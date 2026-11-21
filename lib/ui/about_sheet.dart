@@ -4,29 +4,21 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../l10n.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import 'app_changelog.dart';
 
-/// Menampilkan modal bottom sheet berisi informasi aplikasi, filosofi brand, dan pilar lore Lunera.
+/// Displays the About Lunera modal sheet with Eternal Dusk branding, lore pillars,
+/// core architecture principles, medical disclaimer, and source links.
 void showAboutLuneraSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (ctx) => const AboutLuneraSheet(),
-  );
-}
-
-/// Helper untuk menampilkan ikon celestial otentik dari sprite sheet Lunera.
-Widget celestialIcon(String name, {double size = 26}) {
-  return Image.asset(
-    'assets/icons/celestial/$name.png',
-    width: size,
-    height: size,
-    fit: BoxFit.contain,
   );
 }
 
@@ -37,8 +29,8 @@ class AboutLuneraSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    final mutedColor = Pastel.mist.withValues(alpha: 0.78);
-    final borderColor = const Color(0xFFE8D3A5).withValues(alpha: dark ? 0.30 : 0.22);
+    final mutedColor = C.mist.withValues(alpha: 0.78);
+    final borderColor = C.lavender.withValues(alpha: dark ? 0.22 : 0.18);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
@@ -47,10 +39,10 @@ class AboutLuneraSheet extends StatelessWidget {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: dark ? const Color(0xFF161238) : theme.scaffoldBackgroundColor,
+            color: dark ? C.deepCard : theme.scaffoldBackgroundColor,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             border: Border.all(
-              color: const Color(0xFFE8D3A5).withValues(alpha: dark ? 0.35 : 0.22),
+              color: C.lavender.withValues(alpha: dark ? 0.28 : 0.20),
               width: 1.2,
             ),
             boxShadow: [
@@ -61,7 +53,7 @@ class AboutLuneraSheet extends StatelessWidget {
               ),
               if (dark)
                 BoxShadow(
-                  color: C.peony.withValues(alpha: 0.16),
+                  color: C.aurora.withValues(alpha: 0.16),
                   blurRadius: 28,
                   spreadRadius: -4,
                 ),
@@ -86,7 +78,7 @@ class AboutLuneraSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    celestialIcon('star_celestial', size: 24),
+                    const Icon(LucideIcons.sparkles, size: 24, color: C.iconActive),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -95,7 +87,7 @@ class AboutLuneraSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(LucideIcons.x, size: 24),
                       onPressed: () => Navigator.of(context).pop(),
                       tooltip: tr('Close'),
                     ),
@@ -121,19 +113,19 @@ class AboutLuneraSheet extends StatelessWidget {
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  C.peony.withValues(alpha: 0.38),
-                                  C.amber.withValues(alpha: 0.18),
+                                  C.aurora.withValues(alpha: 0.36),
+                                  C.magenta.withValues(alpha: 0.20),
                                   Colors.transparent,
                                 ],
                               ),
                               border: Border.all(
-                                color: const Color(0xFFE8D3A5).withValues(alpha: 0.55),
+                                color: C.lavender.withValues(alpha: 0.48),
                                 width: 1.4,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: C.peony.withValues(alpha: 0.35),
-                                  blurRadius: 26,
+                                  color: C.aurora.withValues(alpha: 0.32),
+                                  blurRadius: 24,
                                 ),
                               ],
                             ),
@@ -144,24 +136,24 @@ class AboutLuneraSheet extends StatelessWidget {
                           const SizedBox(height: 14),
                           Text(
                             appName,
-                            style: wordmark(28, color: const Color(0xFFE8D3A5)),
+                            style: wordmark(28, color: C.lavender),
                           ),
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                             decoration: BoxDecoration(
-                              color: dark ? const Color(0xFF1E1748).withValues(alpha: 0.85) : Colors.grey.shade100,
+                              color: dark ? C.nebula.withValues(alpha: 0.85) : Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFFE8D3A5).withValues(alpha: 0.45),
+                                color: C.lavender.withValues(alpha: 0.38),
                               ),
                             ),
                             child: const Text(
-                              'v${UpdateCheckerService.currentVersion} • Arcane Astral Edition',
+                              'v${UpdateCheckerService.currentVersion} • Eternal Dusk Edition',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFFE8D3A5),
+                                color: C.lavender,
                                 letterSpacing: 0.4,
                               ),
                             ),
@@ -186,16 +178,16 @@ class AboutLuneraSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: dark ? const Color(0xFF1E1748).withValues(alpha: 0.6) : Colors.grey.shade50,
+                        color: dark ? C.nebula.withValues(alpha: 0.58) : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: const Color(0xFFE8D3A5).withValues(alpha: 0.32),
+                          color: C.lavender.withValues(alpha: 0.28),
                         ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.format_quote_rounded, size: 30, color: Color(0xFFF1BA79)),
+                          const Icon(LucideIcons.quote, size: 24, color: C.coral),
                           const SizedBox(width: 14),
                           Expanded(
                             child: Text(
@@ -205,7 +197,7 @@ class AboutLuneraSheet extends StatelessWidget {
                                 height: 1.48,
                                 fontStyle: FontStyle.italic,
                                 fontWeight: FontWeight.w500,
-                                color: dark ? Colors.white.withValues(alpha: 0.92) : Colors.black87,
+                                color: dark ? C.mist.withValues(alpha: 0.94) : Colors.black87,
                               ),
                             ),
                           ),
@@ -217,7 +209,7 @@ class AboutLuneraSheet extends StatelessWidget {
                     // Section: Pillars of Care
                     Row(
                       children: [
-                        const Icon(Icons.auto_awesome_rounded, size: 18, color: Pastel.lilac),
+                        const Icon(LucideIcons.sparkles, size: 18, color: C.iconActive),
                         const SizedBox(width: 8),
                         Text(
                           tr('Brand Lore & Philosophy'),
@@ -231,9 +223,9 @@ class AboutLuneraSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // 4 Lore Pillars with default icons
+                    // 4 Lore Pillars
                     _LoreCard(
-                      icon: Icons.dark_mode_rounded,
+                      icon: LucideIcons.moon,
                       iconColor: Pastel.lilac,
                       title: tr('The Moon Phase Rhythms'),
                       description: tr(
@@ -242,7 +234,7 @@ class AboutLuneraSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.shield_rounded,
+                      icon: LucideIcons.shield,
                       iconColor: C.amber,
                       title: tr('The Celestial Sanctuary'),
                       description: tr(
@@ -251,7 +243,7 @@ class AboutLuneraSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.auto_awesome_rounded,
+                      icon: LucideIcons.sparkles,
                       iconColor: Pastel.mint,
                       title: tr('The Guiding Star'),
                       description: tr(
@@ -260,11 +252,11 @@ class AboutLuneraSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.brush_rounded,
-                      iconColor: Pastel.sky,
-                      title: tr('The Arcane Astral Canvas'),
+                      icon: LucideIcons.paintbrush,
+                      iconColor: C.magenta,
+                      title: tr('The Eternal Dusk Canvas'),
                       description: tr(
-                          'A nocturnal midnight aesthetic designed to reduce anxiety, replacing stark sterile hospital charts with celestial tranquility.'),
+                          'An atmospheric midnight aurora and twilight sunset aesthetic designed to calm anxiety, replacing stark clinical charts with serene warmth.'),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 24),
@@ -272,7 +264,7 @@ class AboutLuneraSheet extends StatelessWidget {
                     // Section: Core Sovereignty & Architecture
                     Row(
                       children: [
-                        const Icon(Icons.verified_user_rounded, size: 18, color: Pastel.lilac),
+                        const Icon(LucideIcons.shieldCheck, size: 18, color: C.iconActive),
                         const SizedBox(width: 8),
                         Text(
                           tr('Core Principles'),
@@ -286,25 +278,25 @@ class AboutLuneraSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     _PrincipleRow(
-                      icon: Icons.offline_bolt_rounded,
+                      icon: LucideIcons.zap,
                       title: tr('Offline-First Architecture'),
                       subtitle: tr('Fast local storage with zero network dependency and complete data ownership.'),
                     ),
                     const SizedBox(height: 12),
                     _PrincipleRow(
-                      icon: Icons.fingerprint_rounded,
+                      icon: LucideIcons.fingerprintPattern,
                       title: tr('Biometric & Privacy Guard'),
                       subtitle: tr('Instant privacy shield, decoy calculator mode, and discreet masked push alerts.'),
                     ),
                     const SizedBox(height: 12),
                     _PrincipleRow(
-                      icon: Icons.timer_outlined,
+                      icon: LucideIcons.timer,
                       title: tr('Guided Calm Injection'),
                       subtitle: tr('Step-by-step calming assistant with injection angle guidance and breathing pacing.'),
                     ),
                     const SizedBox(height: 12),
                     _PrincipleRow(
-                      icon: Icons.notifications_active_outlined,
+                      icon: LucideIcons.bellRing,
                       title: tr('Precision Reminders'),
                       subtitle: tr('Alarm-manager powered scheduled doses and automatic supply pickup alerts.'),
                     ),
@@ -314,16 +306,16 @@ class AboutLuneraSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: dark ? const Color(0xFF1E1748).withValues(alpha: 0.8) : Colors.amber.shade50,
+                        color: dark ? C.nebula.withValues(alpha: 0.72) : Colors.amber.shade50,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: const Color(0xFFE8D3A5).withValues(alpha: 0.38),
+                          color: C.coral.withValues(alpha: 0.36),
                         ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.medical_services_outlined, size: 26, color: Color(0xFFF1BA79)),
+                          const Icon(LucideIcons.stethoscope, size: 24, color: C.coral),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -334,7 +326,7 @@ class AboutLuneraSheet extends StatelessWidget {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13.5,
-                                    color: Color(0xFFF1BA79),
+                                    color: C.coral,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -343,7 +335,7 @@ class AboutLuneraSheet extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     height: 1.45,
-                                    color: dark ? Colors.white.withValues(alpha: 0.85) : Colors.black87,
+                                    color: dark ? C.mist.withValues(alpha: 0.88) : Colors.black87,
                                   ),
                                 ),
                               ],
@@ -357,7 +349,7 @@ class AboutLuneraSheet extends StatelessWidget {
                     // Section: App Information & Transparency
                     Row(
                       children: [
-                        const Icon(Icons.info_outline_rounded, size: 18, color: Pastel.lilac),
+                        const Icon(LucideIcons.info, size: 18, color: C.iconActive),
                         const SizedBox(width: 8),
                         Text(
                           tr('App Information'),
@@ -373,7 +365,7 @@ class AboutLuneraSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: dark ? const Color(0xFF1A1540).withValues(alpha: 0.5) : Colors.grey.shade50,
+                        color: dark ? C.midnight.withValues(alpha: 0.65) : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: borderColor),
                       ),
@@ -408,14 +400,14 @@ class AboutLuneraSheet extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Pastel.lilac,
-                              side: BorderSide(color: Pastel.lilac.withValues(alpha: 0.4)),
+                              foregroundColor: C.iconActive,
+                              side: BorderSide(color: C.iconActive.withValues(alpha: 0.4)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            icon: celestialIcon('journal_book', size: 20),
+                            icon: const Icon(LucideIcons.bookOpen, size: 18),
                             label: Text(
                               tr('Version Changelog'),
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
@@ -439,7 +431,7 @@ class AboutLuneraSheet extends StatelessWidget {
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            icon: celestialIcon('message_feedback', size: 20),
+                            icon: const Icon(LucideIcons.messageSquare, size: 18),
                             label: Text(
                               tr('Send Feedback'),
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
@@ -626,8 +618,8 @@ class _MetaRow extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   const Icon(
-                    Icons.open_in_new_rounded,
-                    size: 14,
+                    LucideIcons.externalLink,
+                    size: 16,
                     color: Pastel.sky,
                   ),
                 ],

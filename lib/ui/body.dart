@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
@@ -76,7 +77,7 @@ class _BodyPageState extends ConsumerState<BodyPage> {
           title: Text(tr(name), style: const TextStyle(fontWeight: FontWeight.w700)),
           subtitle: Text(l == null ? tr('No entries yet') : '${l.$1}\n${fmtDate.format(l.$2)}'),
           isThreeLine: l != null,
-          trailing: Icon(Icons.chevron_right_rounded, color: fg.withValues(alpha: .5)),
+          trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
         ),
       );
     }
@@ -143,7 +144,7 @@ class _BodyPageState extends ConsumerState<BodyPage> {
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.all(20), children: [
           Row(children: [
-            IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
+            IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.arrowLeft)),
             Expanded(child: Text(tr('Body & changes'), style: display(28))),
           ]),
           gap(12),
@@ -165,9 +166,9 @@ class _BodyPageState extends ConsumerState<BodyPage> {
             sizeTab,
           gap(16),
           if (tab == 2)
-            pillButton(tr('Log Measurement'), () => showSheet(context, const MeasurementSheet()), icon: Icons.straighten_rounded)
+            pillButton(tr('Log Measurement'), () => showSheet(context, const MeasurementSheet()), icon: LucideIcons.ruler)
           else
-            pillButton(tr('Log a change'), () => showSheet(context, const JournalSheet()), icon: Icons.add_rounded),
+            pillButton(tr('Log a change'), () => showSheet(context, const JournalSheet()), icon: LucideIcons.plus),
         ]),
       ),
     );
@@ -186,7 +187,7 @@ class _SizeTab extends ConsumerWidget {
         decoration: cardBox(context),
         child: Column(
           children: [
-            Icon(Icons.straighten_rounded, size: 54, color: C.peony.withValues(alpha: 0.8)),
+            Icon(LucideIcons.ruler, size: 54, color: C.peony.withValues(alpha: 0.8)),
             gap(14),
             Text(tr('Body Sizing & Measurements'), style: display(20), textAlign: TextAlign.center),
             gap(8),
@@ -198,7 +199,7 @@ class _SizeTab extends ConsumerWidget {
             gap(16),
             OutlinedButton.icon(
               onPressed: () => showSheet(context, const MeasurementSheet()),
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(LucideIcons.plus),
               label: Text(tr('Log First Measurement')),
             ),
           ],
@@ -236,7 +237,7 @@ class _SizeTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(children: [
-                  const Icon(Icons.female_rounded, color: Pastel.lilac, size: 22),
+                  const Icon(LucideIcons.heartHandshake, color: Pastel.lilac, size: 22),
                   const SizedBox(width: 8),
                   Text(tr('Bra & Chest Size'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ]),
@@ -318,7 +319,7 @@ class _SizeTab extends ConsumerWidget {
         decoration: cardBox(context),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            const Icon(Icons.checkroom_rounded, color: Pastel.mint, size: 20),
+            const Icon(LucideIcons.shirt, color: Pastel.mint, size: 20),
             const SizedBox(width: 8),
             Text(tr('Estimated Clothing Fit'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
           ]),
@@ -441,7 +442,7 @@ class _SizeTab extends ConsumerWidget {
               ),
             ),
             trailing: IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, size: 20),
+              icon: const Icon(LucideIcons.trash2, size: 20),
               onPressed: () async {
                 if (!await confirm(context, tr('Delete this measurement entry?'))) return;
                 ref.read(repoProvider)?.deleteMeasurement(m.id);
@@ -536,7 +537,7 @@ class _MeasurementTrendsCardState extends State<_MeasurementTrendsCard> {
                 color: Pastel.lilac.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.trending_up_rounded, color: Pastel.lilac, size: 24),
+              child: const Icon(LucideIcons.trendingUp, color: Pastel.lilac, size: 24),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -855,7 +856,7 @@ class _MeasurementTrendsCardState extends State<_MeasurementTrendsCard> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.trending_up_rounded, color: Pastel.lilac, size: 22),
+                  const Icon(LucideIcons.trendingUp, color: Pastel.lilac, size: 22),
                   const SizedBox(width: 8),
                   Text(tr('Progression Trends'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ],
@@ -1117,9 +1118,9 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
       gap(12),
       ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: const Icon(Icons.event_rounded),
+        leading: const Icon(LucideIcons.calendarDays),
         title: Text(fmtDate.format(at)),
-        trailing: const Icon(Icons.edit_calendar_rounded, size: 20),
+        trailing: const Icon(LucideIcons.calendarFold, size: 20),
         onTap: _pickDate,
       ),
       gap(8),
@@ -1136,7 +1137,7 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.checkroom_rounded, color: Pastel.lilac),
+              const Icon(LucideIcons.shirt, color: Pastel.lilac),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1166,7 +1167,7 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.snowshoeing_rounded, color: Pastel.mint),
+              const Icon(LucideIcons.footprints, color: Pastel.mint),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

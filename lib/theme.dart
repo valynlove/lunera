@@ -7,89 +7,110 @@ import 'l10n.dart';
 const appName = 'Lunera';
 const tagline = 'Every Phase, Your Own.';
 
+/// Eternal Dusk color tokens combining Midnight Aurora with Vice City Sunset warmth.
 class C {
-  static const ink = Color(0xFF17264D); // Deep Indigo
-  static const mist = Color(0xFFDDF6FF); // Ice Blue
-  static const amber = Color(0xFFE8D3A5); // Champagne
-  static const gold = Color(0xFFE8D3A5); // Champagne alias
-  static const deep = Color(0xFF17264D); // Deep Indigo Canvas (#17264D)
-  static const deepCard = Color(0xFF26334F); // Midnight Surface (#26334F)
-  static const surface = deepCard; // Design token alias for theme standards
-  static const midnight = Color(0xFF17264D); // Atmospheric Deep Indigo Canvas
-  static const lavender = Color(0xFFB9A9E8); // Soft Lavender (#B9A9E8)
-  static const indigo = Color(0xFF26334F); // Midnight Slate (#26334F)
-  static const moonlight = Color(0xFFE8D3A5); // Champagne Moonlight (#E8D3A5)
+  static const voidBg = Color(0xFF090817); // Deepest obsidian void
+  static const midnight = Color(0xFF11102B); // Primary nocturnal midnight canvas
+  static const nebula = Color(0xFF292052); // Elevated cosmic plum surface
+  static const aurora = Color(0xFF8065E8); // Primary electric aurora violet
+  static const violet = Color(0xFFA58BFF); // Luminous violet highlight
+  static const lavender = Color(0xFFC7B8FF); // Soft lavender rim & accent
+  static const magenta = Color(0xFFD76ABF); // Dusk sunset magenta
+  static const rose = Color(0xFFF09ABF); // Warm twilight rose
+  static const coral = Color(0xFFF2A17C); // Horizon sunset coral
 
-  static Color lagoon = const Color(0xFF5BC8E8); // aksen kedua (Sky Cyan)
-  static Color peony = const Color(0xFFB9A9E8); // aksen utama (Lavender)
+  // Semantic & legacy design token aliases mapped cleanly to Eternal Dusk
+  static const deepCard = Color(0xFF171436); // Layered dark card surface
+  static const surface = deepCard;
+  static const ink = voidBg;
+  static const deep = midnight;
+  static const indigo = nebula;
+  static const mist = Color(0xFFECE8FF); // High-contrast lavender-tinted white
+  static const amber = coral;
+  static const gold = coral;
+  static const moonlight = lavender;
+
+  // Functional UI icon tokens (Lucide outline system)
+  static const iconDefault = Color(0xFFA29BBE);
+  static const iconActive = lavender; // #C7B8FF
+  static const iconHighlight = aurora; // #8065E8
+
+  static Color lagoon = magenta; // Secondary dusk accent
+  static Color peony = aurora; // Primary aurora accent
 }
 
-/// Palet sentuhan pastel dan pendaran surgawi (Arcane Astral × Trans Pride) khas Lunera.
+/// Supporting tonal palette for clinical states, badges, and readable dark UI text.
 class Pastel {
-  static const lilac = Color(0xFFB9A9E8); // Lavender: countdown, highlights, rilis aktif
-  static const rose = Color(0xFFF1A4B8); // Blush Pink: suasana hati hangat, transisi tubuh
-  static const mint = Color(0xFF8EE3C3); // Sage Astral Mint: dosis selesai, kepatuhan, within range
-  static const sky = Color(0xFF5BC8E8); // Sky Cyan: ketenangan, kurva PK, titik lab
-  static const butter = Color(0xFFE8D3A5); // Champagne: pengingat stok, bintang, perhatian lembut
-  static const cream = Color(0xFFE8D3A5); // Champagne: pendaran rembulan & ornamen
-  static const mist = Color(0xFFDDF6FF); // Ice Blue: teks kontras lembut di atas permukaan gelap
-  static const glow = Color(0x33B9A9E8); // Efek pendaran lavender lembut
+  static const lilac = C.lavender; // Highlights, active labels, countdowns
+  static const rose = C.rose; // Estradiol & warm mood accents
+  static const mint = Color(0xFF7DE2C7); // Completed doses, adherence, in-range
+  static const sky = C.violet; // Testosterone, telemetry, secondary highlights
+  static const butter = C.coral; // Alerts, stock reminders, progesterone
+  static const cream = C.lavender; // Subtle editorial trim & luminous captions
+  static const mist = C.mist; // High-contrast foreground text
+  static const glow = Color(0x338065E8); // Soft aurora ambient glow
 }
 
-/// (nama, aksen kedua / pastel, aksen utama)
+/// Accent preset metadata (retained for preferences compatibility).
 const accents = <String, (String, Color, Color)>{
-  'lunera': ('Celestial Bloom & Sky Cyan', Color(0xFF5BC8E8), Color(0xFFB9A9E8)),
-  'rose': ('Blush Pink & Lavender', Color(0xFFF1A4B8), Color(0xFFB9A9E8)),
-  'lagoon': ('Sky Cyan & Ice Blue', Color(0xFFDDF6FF), Color(0xFF5BC8E8)),
-  'solstice': ('Champagne & Cotton Candy', Color(0xFFFFDCE9), Color(0xFFE8D3A5)),
+  'lunera': ('Eternal Dusk (Aurora & Sunset)', C.magenta, C.aurora),
+  'rose': ('Twilight Rose & Violet', C.rose, C.aurora),
+  'lagoon': ('Violet & Lavender', C.lavender, C.violet),
+  'solstice': ('Sunset Coral & Magenta', C.coral, C.magenta),
 };
 
 void applyAccent([String? id]) {
-  // Selalu terkunci pada tema tunggal Arcane Astral × Trans Pride
-  C.lagoon = const Color(0xFF5BC8E8);
-  C.peony = const Color(0xFFB9A9E8);
+  // Locked to the unified Eternal Dusk palette.
+  C.lagoon = C.magenta;
+  C.peony = C.aurora;
 }
 
-/// Warna representasi hormon sesuai palet Arcane Astral × Trans Pride.
+/// Hormone series colors aligned with Eternal Dusk data visualization harmony.
 Color hormoneColor(String hormoneId) {
   switch (hormoneId.toLowerCase()) {
     case 'progesterone':
     case 'p4':
-      return C.amber; // Champagne (#E8D3A5)
+      return C.coral;
     case 'testosterone':
     case 't':
-      return Pastel.sky; // Sky Cyan (#5BC8E8)
+      return C.violet;
     case 'estradiol':
     case 'e2':
     default:
-      return Pastel.rose; // Blush Pink (#F1A4B8)
+      return C.rose;
   }
 }
 
-TextStyle display(double size, {Color? color, FontWeight? weight}) => GoogleFonts.cormorantGaramond(
+TextStyle display(double size, {Color? color, FontWeight? weight}) =>
+    GoogleFonts.instrumentSerif(
       fontSize: size,
-      fontWeight: weight ?? (size >= 36 ? FontWeight.w700 : FontWeight.w600),
+      fontWeight: weight ?? FontWeight.w400,
       height: 1.12,
       letterSpacing: -size * 0.01,
       color: color,
     );
 
-TextStyle wordmark(double size, {Color? color, FontWeight? weight}) => GoogleFonts.cinzel(
+TextStyle wordmark(double size, {Color? color, FontWeight? weight}) =>
+    GoogleFonts.instrumentSerif(
       fontSize: size,
-      fontWeight: weight ?? FontWeight.w700,
-      letterSpacing: size * .10,
+      fontWeight: weight ?? FontWeight.w400,
+      letterSpacing: size * 0.08,
       height: 1.05,
       color: color,
     );
 
 ThemeData buildTheme([Brightness b = Brightness.dark]) {
-  const fg = Pastel.mist;
-  final scheme = ColorScheme.fromSeed(seedColor: C.peony, brightness: Brightness.dark).copyWith(
-    primary: C.peony,
-    secondary: C.lagoon,
+  const fg = C.mist;
+  final scheme =
+      ColorScheme.fromSeed(seedColor: C.aurora, brightness: Brightness.dark)
+          .copyWith(
+    primary: C.aurora,
+    secondary: C.magenta,
+    tertiary: C.coral,
     surface: C.deepCard,
+    surfaceContainerHighest: C.nebula,
     onSurface: fg,
-    outlineVariant: const Color(0xFF384970).withValues(alpha: .38),
+    outlineVariant: C.lavender.withValues(alpha: 0.22),
   );
   final base = ThemeData(
     useMaterial3: true,
@@ -116,77 +137,124 @@ ThemeData buildTheme([Brightness b = Brightness.dark]) {
     ),
   );
   return base.copyWith(
-    textTheme: GoogleFonts.manropeTextTheme(base.textTheme).apply(bodyColor: fg, displayColor: fg),
+    textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme)
+        .apply(bodyColor: fg, displayColor: fg),
+    iconTheme: const IconThemeData(color: C.iconDefault, size: 24),
+    primaryIconTheme: const IconThemeData(color: C.iconActive, size: 24),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF1E2A44).withValues(alpha: .50),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+      fillColor: C.midnight.withValues(alpha: 0.78),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: C.lavender.withValues(alpha: 0.16)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: C.lavender.withValues(alpha: 0.16)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: C.violet, width: 1.3),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: C.deepCard,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+        side: BorderSide(color: C.lavender.withValues(alpha: 0.22)),
+      ),
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: scheme.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: C.nebula,
+      contentTextStyle: TextStyle(
+        color: fg,
+        fontWeight: FontWeight.w500,
+      ),
     ),
   );
 }
 
-/// Latar seluruh aplikasi (Arcane Astral Wallpaper & Atmospheric Scrim).
+/// Global Eternal Dusk atmospheric wallpaper, scrim, and subtle overlay.
 Widget appBackdrop(BuildContext context, Widget? child) {
   return Stack(
     fit: StackFit.expand,
     children: [
-      // 1. Wallpaper bawaan bertema Arcane Astral
       Image.asset(
-        'assets/images/arcane_astral_bg.jpg',
+        'assets/images/eternal_dusk_bg.jpg',
         fit: BoxFit.cover,
-        alignment: Alignment.topCenter,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        alignment: Alignment.center,
+        errorBuilder: (_, __, ___) => const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [C.voidBg, C.midnight, C.nebula],
+            ),
+          ),
+        ),
       ),
-      // 2. Lapisan scrim peredup atmosferik agar kontras teks & kartu tetap tajam dan nyaman dibaca
       DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF17264D).withValues(alpha: 0.55),
-              const Color(0xFF131D38).withValues(alpha: 0.70),
-              const Color(0xFF0F172A).withValues(alpha: 0.86),
+              C.voidBg.withValues(alpha: 0.38),
+              C.midnight.withValues(alpha: 0.58),
+              C.voidBg.withValues(alpha: 0.82),
             ],
-            stops: const [0.0, 0.45, 1.0],
+            stops: const [0.0, 0.48, 1.0],
           ),
         ),
       ),
-      // 3. Pohon antarmuka aplikasi utama
+      IgnorePointer(
+        child: Opacity(
+          opacity: 0.18,
+          child: Image.asset(
+            'assets/images/eternal_dusk_overlay.png',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
+      ),
       if (child != null) child,
     ],
   );
 }
 
-/// Kartu: permukaan beludru malam dengan bingkai bias emas rembulan tipis dan bayangan halus.
+/// Layered dark card decoration with subtle lavender hairline border and ambient shadow.
 BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = false}) {
   final t = Theme.of(c);
   return BoxDecoration(
-    color: t.colorScheme.surface,
+    color: t.colorScheme.surface.withValues(alpha: 0.90),
     borderRadius: BorderRadius.circular(radius),
     border: Border.all(
       color: highlight
-          ? const Color(0xFFE8D3A5).withValues(alpha: 0.58)
-          : const Color(0xFFE8D3A5).withValues(alpha: 0.22),
+          ? C.violet.withValues(alpha: 0.55)
+          : C.lavender.withValues(alpha: 0.16),
       width: highlight ? 1.2 : 1.0,
     ),
     boxShadow: [
       BoxShadow(
-        color: (highlight ? C.amber : const Color(0xFF091122)).withValues(alpha: highlight ? .18 : .32),
-        blurRadius: highlight ? 24 : 16,
+        color: (highlight ? C.aurora : C.voidBg)
+            .withValues(alpha: highlight ? 0.20 : 0.42),
+        blurRadius: highlight ? 22 : 16,
         offset: const Offset(0, 4),
       ),
     ],
   );
 }
 
-Widget pillButton(String label, VoidCallback onTap, {IconData? icon, Color? color}) {
+Widget pillButton(String label, VoidCallback onTap,
+    {IconData? icon, Color? color}) {
   final style = FilledButton.styleFrom(
-    backgroundColor: color ?? C.peony,
+    backgroundColor: color ?? C.aurora,
     foregroundColor: Colors.white,
     shape: const StadiumBorder(),
     padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
@@ -194,12 +262,21 @@ Widget pillButton(String label, VoidCallback onTap, {IconData? icon, Color? colo
   );
   return icon == null
       ? FilledButton(onPressed: onTap, style: style, child: Text(label))
-      : FilledButton.icon(onPressed: onTap, style: style, icon: Icon(icon, size: 20), label: Text(label));
+      : FilledButton.icon(
+          onPressed: onTap,
+          style: style,
+          icon: Icon(icon, size: 20),
+          label: Text(label),
+        );
 }
 
-/// Tab berbentuk pil: yang aktif berisi gradien violet.
+/// Pill-shaped tab selector with Eternal Dusk Aurora → Magenta gradient highlight.
 class PillTabs<T> extends StatelessWidget {
-  const PillTabs({super.key, required this.items, required this.value, required this.onChanged});
+  const PillTabs(
+      {super.key,
+      required this.items,
+      required this.value,
+      required this.onChanged});
   final List<(T, String)> items;
   final T value;
   final ValueChanged<T> onChanged;
@@ -208,7 +285,10 @@ class PillTabs<T> extends StatelessWidget {
     final fg = Theme.of(context).colorScheme.onSurface;
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: fg.withValues(alpha: .07), borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: fg.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Row(children: [
         for (final it in items)
           Expanded(
@@ -220,12 +300,22 @@ class PillTabs<T> extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: it.$1 == value ? LinearGradient(colors: [C.peony, Color.lerp(C.peony, Colors.white, .22)!]) : null,
+                  gradient: it.$1 == value
+                      ? const LinearGradient(
+                          colors: [C.aurora, C.magenta],
+                        )
+                      : null,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   it.$2,
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: it.$1 == value ? Colors.white : fg.withValues(alpha: .7)),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: it.$1 == value
+                        ? Colors.white
+                        : fg.withValues(alpha: 0.72),
+                  ),
                 ),
               ),
             ),
@@ -235,7 +325,7 @@ class PillTabs<T> extends StatelessWidget {
   }
 }
 
-/// Logo: bulan sabit dengan bintang dan cincin orbit astrologi (Celestial Moon Emblem).
+/// Eternal Dusk orbital crescent moon emblem.
 class MoonLogo extends StatelessWidget {
   const MoonLogo({super.key, this.size = 72});
   final double size;
@@ -243,12 +333,10 @@ class MoonLogo extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
         width: size,
         height: size,
-        child: ClipOval(
-          child: Image.asset(
-            'assets/images/lunera_celestial_logo.png',
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => CustomPaint(painter: _MoonPainter()),
-          ),
+        child: Image.asset(
+          'assets/images/eternal_dusk_emblem.png',
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => CustomPaint(painter: _MoonPainter()),
         ),
       );
 }
@@ -261,9 +349,32 @@ class MoonLogoSmall extends StatelessWidget {
         decoration: BoxDecoration(
           color: C.deepCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE8D3A5).withValues(alpha: .35)),
+          border: Border.all(color: C.lavender.withValues(alpha: 0.28)),
         ),
         child: const MoonLogo(size: 28),
+      );
+}
+
+/// Primary horizontal Eternal Dusk wordmark + crescent emblem lockup.
+class BrandLogo extends StatelessWidget {
+  const BrandLogo({super.key, this.height = 44});
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: height,
+        child: Image.asset(
+          'assets/images/eternal_dusk_logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MoonLogo(size: height * 0.9),
+              const SizedBox(width: 10),
+              Text(appName, style: wordmark(height * 0.65, color: C.mist)),
+            ],
+          ),
+        ),
       );
 }
 
@@ -272,14 +383,13 @@ class _MoonPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / 48);
-    final paint = Paint()..color = Pastel.cream;
+    final paint = Paint()..color = C.lavender;
     final ring = Paint()
-      ..color = Pastel.lilac.withValues(alpha: .85)
+      ..color = C.coral.withValues(alpha: 0.85)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.3
       ..strokeCap = StrokeCap.round;
     final orbit = Rect.fromCenter(center: Offset.zero, width: 44, height: 12);
-    // cincin orbit: setengah belakang digambar sebelum bulan, setengah depan sesudahnya
     canvas.save();
     canvas.translate(24, 27);
     canvas.rotate(-0.3);
@@ -289,7 +399,8 @@ class _MoonPainter extends CustomPainter {
     final moon = Path.combine(
       PathOperation.difference,
       Path()..addOval(Rect.fromCircle(center: const Offset(24, 24), radius: 16)),
-      Path()..addOval(Rect.fromCircle(center: const Offset(32, 19), radius: 13)),
+      Path()
+        ..addOval(Rect.fromCircle(center: const Offset(32, 19), radius: 13)),
     );
     canvas.drawPath(moon, paint);
     final star = Path()
@@ -316,7 +427,7 @@ class _MoonPainter extends CustomPainter {
   bool shouldRepaint(_MoonPainter o) => false;
 }
 
-/// Bintang kompas astrologi 8-arah khas estetika Arcane Astral.
+/// 8-point compass star fallback icon.
 class CompassStarPainter extends CustomPainter {
   const CompassStarPainter({required this.color, this.glow = false});
   final Color color;
@@ -372,7 +483,7 @@ class CompassStarPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.glow != glow;
 }
 
-/// Latar belakang atmosferik celestial kosmik untuk layar autentikasi dan kunci PIN (Arcane Astral & Scrim).
+/// Atmospheric Eternal Dusk scene for authentication and PIN lock screens.
 class AuthScene extends StatelessWidget {
   const AuthScene({super.key, required this.child, this.darken = false});
 
@@ -384,9 +495,8 @@ class AuthScene extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Gambar latar celestial kosmik
         Image.asset(
-          'assets/images/arcane_astral_bg.jpg',
+          'assets/images/eternal_dusk_bg.jpg',
           fit: BoxFit.cover,
           alignment: Alignment.center,
           errorBuilder: (_, __, ___) => const DecoratedBox(
@@ -394,34 +504,42 @@ class AuthScene extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0F0E33), Color(0xFF14123A), Color(0xFF0B091E)],
+                colors: [C.voidBg, C.midnight, C.nebula],
               ),
             ),
           ),
         ),
-        // 2. Lapisan scrim atmosferik peredup agar teks & tombol tetap kontras dan nyaman dibaca
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFF17264D).withValues(alpha: darken ? 0.68 : 0.38),
-                const Color(0xFF131D38).withValues(alpha: darken ? 0.76 : 0.50),
-                const Color(0xFF0F172A).withValues(alpha: darken ? 0.92 : 0.76),
+                C.voidBg.withValues(alpha: darken ? 0.66 : 0.35),
+                C.midnight.withValues(alpha: darken ? 0.76 : 0.48),
+                C.voidBg.withValues(alpha: darken ? 0.90 : 0.72),
               ],
               stops: const [0.0, 0.48, 1.0],
             ),
           ),
         ),
-        // 3. Pohon antarmuka utama
+        IgnorePointer(
+          child: Opacity(
+            opacity: darken ? 0.14 : 0.22,
+            child: Image.asset(
+              'assets/images/eternal_dusk_overlay.png',
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+        ),
         child,
       ],
     );
   }
 }
 
-/// Langit malam dengan bintang dan pegunungan, untuk layar masuk dan kunci.
+/// Eternal Dusk gradient & mountain ridge backdrop helper.
 class NightScene extends StatelessWidget {
   const NightScene({super.key, required this.child});
   final Widget child;
@@ -432,8 +550,8 @@ class NightScene extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF12112F), Color(0xFF25225A), Color(0xFF5C4A8F), Color(0xFFC98AA8)],
-              stops: [0, .52, .84, 1],
+              colors: [C.voidBg, C.midnight, C.nebula, C.magenta],
+              stops: [0, 0.48, 0.82, 1],
             ),
           ),
         ),
@@ -447,24 +565,53 @@ class _NightPainter extends CustomPainter {
   void paint(Canvas canvas, Size s) {
     final rnd = math.Random(7);
     for (var i = 0; i < 40; i++) {
-      final p = Paint()..color = Colors.white.withValues(alpha: .35 + rnd.nextDouble() * .6);
-      canvas.drawCircle(Offset(rnd.nextDouble() * s.width, rnd.nextDouble() * s.height * .6), .6 + rnd.nextDouble() * 1.2, p);
+      final p = Paint()
+        ..color = Colors.white.withValues(alpha: 0.35 + rnd.nextDouble() * 0.6);
+      canvas.drawCircle(
+        Offset(rnd.nextDouble() * s.width, rnd.nextDouble() * s.height * 0.6),
+        0.6 + rnd.nextDouble() * 1.2,
+        p,
+      );
     }
-    final hh = (s.height * .16).clamp(100.0, 170.0);
+    final hh = (s.height * 0.16).clamp(100.0, 170.0);
     Path ridge(List<List<double>> pts) {
       final path = Path()..moveTo(0, s.height);
       for (final q in pts) {
         path.lineTo(q[0] / 1440 * s.width, s.height - hh + q[1] / 140 * hh);
       }
-      return path..lineTo(s.width, s.height)..close();
+      return path
+        ..lineTo(s.width, s.height)
+        ..close();
     }
 
     canvas.drawPath(
-        ridge([[0, 82], [140, 36], [260, 74], [430, 16], [620, 82], [790, 38], [990, 90], [1140, 50], [1320, 88], [1440, 62]]),
-        Paint()..color = const Color(0xFF201A4B));
+      ridge([
+        [0, 82],
+        [140, 36],
+        [260, 74],
+        [430, 16],
+        [620, 82],
+        [790, 38],
+        [990, 90],
+        [1140, 50],
+        [1320, 88],
+        [1440, 62]
+      ]),
+      Paint()..color = C.nebula,
+    );
     canvas.drawPath(
-        ridge([[0, 108], [180, 78], [330, 104], [550, 66], [750, 100], [990, 70], [1240, 102], [1440, 92]]),
-        Paint()..color = const Color(0xFF120E2E));
+      ridge([
+        [0, 108],
+        [180, 78],
+        [330, 104],
+        [550, 66],
+        [750, 100],
+        [990, 70],
+        [1240, 102],
+        [1440, 92]
+      ]),
+      Paint()..color = C.voidBg,
+    );
   }
 
   @override
@@ -476,12 +623,13 @@ Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
       isScrollControlled: true,
       showDragHandle: true,
       builder: (b) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(b).viewInsets.bottom + 24),
+        padding:
+            EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(b).viewInsets.bottom + 24),
         child: SingleChildScrollView(child: w),
       ),
     );
 
-/// Kartu kontainer bergaya beludru malam dengan sudut membulat dan garis tepi halus sesuai tema Lunera.
+/// Layered dark container card with hairline border and soft ambient shadow.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -502,20 +650,21 @@ class AppCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       side: BorderSide(
         color: highlight
-            ? const Color(0xFFE8D3A5).withValues(alpha: 0.58)
-            : const Color(0xFFE8D3A5).withValues(alpha: 0.22),
+            ? C.violet.withValues(alpha: 0.55)
+            : C.lavender.withValues(alpha: 0.16),
         width: highlight ? 1.2 : 1.0,
       ),
     );
 
     return Container(
       decoration: ShapeDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.90),
         shape: shape,
         shadows: [
           BoxShadow(
-            color: (highlight ? C.peony : const Color(0xFF091122)).withValues(alpha: highlight ? .18 : .32),
-            blurRadius: highlight ? 24 : 16,
+            color: (highlight ? C.aurora : C.voidBg)
+                .withValues(alpha: highlight ? 0.20 : 0.42),
+            blurRadius: highlight ? 22 : 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -533,7 +682,7 @@ class AppCard extends StatelessWidget {
   }
 }
 
-/// Judul section yang seragam di halaman pengaturan dan fitur (ala Wall o' Pay).
+/// Consistent section header across settings and feature pages.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -557,7 +706,10 @@ class SectionHeader extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.78),
                   letterSpacing: 0.2,
                 ),
           ),
@@ -569,10 +721,10 @@ class SectionHeader extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Text(
                   actionLabel!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: C.peony,
+                    color: C.violet,
                   ),
                 ),
               ),
@@ -583,12 +735,12 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Badge ikon persegi membulat dengan aksen warna tematik (ala Wall o' Pay).
+/// Rounded square thematic icon badge.
 Widget iconBadge(
   IconData icon,
   Color color, {
-  double size = 40,
-  double iconSize = 20,
+  double size = 42,
+  double iconSize = 22,
 }) {
   return Container(
     width: size,
@@ -596,7 +748,7 @@ Widget iconBadge(
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.16),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: color.withValues(alpha: 0.25), width: 1.0),
+      border: Border.all(color: color.withValues(alpha: 0.28), width: 1.0),
     ),
     child: Icon(icon, color: color, size: iconSize),
   );
@@ -610,15 +762,17 @@ Future<bool> confirm(BuildContext c, String text, {String ok = 'Delete'}) async 
       builder: (d) => AlertDialog(
         content: Text(text),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(c.tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(c.tr(ok))),
+          TextButton(
+              onPressed: () => Navigator.pop(d, false),
+              child: Text(c.tr('Cancel'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true), child: Text(c.tr(ok))),
         ],
       ),
     )) ??
     false;
 
-/// Pemandangan danau di malam hari (layar pembuka): langit, bulan sabit, pegunungan,
-/// dan danau yang memantulkan cahaya cakrawala. [moon] false jika bulan digambar di tempat lain.
+/// Eternal Dusk horizon lake scene fallback painter.
 class LakeScene extends StatelessWidget {
   const LakeScene({super.key, required this.child, this.moon = true});
   final Widget child;
@@ -631,15 +785,15 @@ class LakeScene extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF0F0E33),
-                Color(0xFF25225A),
-                Color(0xFF4B3C86),
-                Color(0xFF8E6AA8),
-                Color(0xFFD79AB8),
-                Color(0xFF3A2E72),
-                Color(0xFF14123A),
+                C.voidBg,
+                C.midnight,
+                C.nebula,
+                C.magenta,
+                C.coral,
+                C.nebula,
+                C.voidBg,
               ],
-              stops: [0, .35, .55, .68, .72, .8, 1],
+              stops: [0, 0.35, 0.55, 0.68, 0.72, 0.8, 1],
             ),
           ),
         ),
@@ -653,40 +807,65 @@ class _LakePainter extends CustomPainter {
   final bool moon;
 
   static const List<List<List<double>>> _far = [
-    [[0, .60], [.12, .63], [.22, .665], [.34, .70], [.46, .72]],
-    [[.56, .72], [.68, .68], [.80, .64], [.90, .62], [1, .60]],
+    [
+      [0, .60],
+      [.12, .63],
+      [.22, .665],
+      [.34, .70],
+      [.46, .72]
+    ],
+    [
+      [.56, .72],
+      [.68, .68],
+      [.80, .64],
+      [.90, .62],
+      [1, .60]
+    ],
   ];
   static const List<List<List<double>>> _near = [
-    [[0, .665], [.10, .69], [.20, .71], [.30, .72]],
-    [[.66, .72], [.78, .70], [.90, .68], [1, .66]],
+    [
+      [0, .665],
+      [.10, .69],
+      [.20, .71],
+      [.30, .72]
+    ],
+    [
+      [.66, .72],
+      [.78, .70],
+      [.90, .68],
+      [1, .66]
+    ],
   ];
 
   @override
   void paint(Canvas canvas, Size s) {
-    final w = s.width, h = s.height, horizon = h * .72;
+    final w = s.width, h = s.height, horizon = h * 0.72;
     final rnd = math.Random(11);
     for (var i = 0; i < 45; i++) {
       canvas.drawCircle(
-        Offset(rnd.nextDouble() * w, rnd.nextDouble() * h * .5),
-        .5 + rnd.nextDouble() * 1.1,
-        Paint()..color = Colors.white.withValues(alpha: .3 + rnd.nextDouble() * .6),
+        Offset(rnd.nextDouble() * w, rnd.nextDouble() * h * 0.5),
+        0.5 + rnd.nextDouble() * 1.1,
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.3 + rnd.nextDouble() * 0.6),
       );
     }
 
     if (moon) {
-      final c = Offset(w * .46, h * .17), r = w * .075;
+      final c = Offset(w * 0.46, h * 0.17), r = w * 0.075;
       final crescent = Path.combine(
         PathOperation.difference,
         Path()..addOval(Rect.fromCircle(center: c, radius: r)),
-        Path()..addOval(Rect.fromCircle(center: c.translate(r * .55, -r * .2), radius: r * .88)),
+        Path()
+          ..addOval(Rect.fromCircle(
+              center: c.translate(r * 0.55, -r * 0.2), radius: r * 0.88)),
       );
       canvas.drawPath(
         crescent,
         Paint()
-          ..color = const Color(0xFFF3E9E4).withValues(alpha: .55)
+          ..color = C.lavender.withValues(alpha: 0.55)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
       );
-      canvas.drawPath(crescent, Paint()..color = const Color(0xFFF3E9E4));
+      canvas.drawPath(crescent, Paint()..color = C.mist);
     }
 
     Path ridge(List<List<double>> pts) {
@@ -694,7 +873,9 @@ class _LakePainter extends CustomPainter {
       for (final q in pts) {
         p.lineTo(q[0] * w, q[1] * h);
       }
-      return p..lineTo(pts.last[0] * w, horizon)..close();
+      return p
+        ..lineTo(pts.last[0] * w, horizon)
+        ..close();
     }
 
     void draw(List<List<List<double>>> layers, Color color) {
@@ -703,37 +884,47 @@ class _LakePainter extends CustomPainter {
       }
     }
 
-    draw(_far, const Color(0xFF3B2F73));
-    draw(_near, const Color(0xFF1A1844));
+    draw(_far, C.nebula);
+    draw(_near, C.midnight);
 
-    // pantulan cahaya cakrawala di danau
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(w * .5, horizon + h * .05), width: w * .5, height: h * .1),
+      Rect.fromCenter(
+        center: Offset(w * 0.5, horizon + h * 0.05),
+        width: w * 0.5,
+        height: h * 0.1,
+      ),
       Paint()
-        ..shader = const RadialGradient(
-          colors: [Color(0x66E7A9C4), Color(0x00E7A9C4)],
+        ..shader = RadialGradient(
+          colors: [
+            C.rose.withValues(alpha: 0.40),
+            C.rose.withValues(alpha: 0.0),
+          ],
         ).createShader(
-          Rect.fromCenter(center: Offset(w * .5, horizon + h * .05), width: w * .5, height: h * .1),
+          Rect.fromCenter(
+            center: Offset(w * 0.5, horizon + h * 0.05),
+            width: w * 0.5,
+            height: h * 0.1,
+          ),
         ),
     );
-    // pantulan pegunungan (dicerminkan terhadap cakrawala)
     canvas.save();
     canvas.translate(0, horizon * 2);
     canvas.scale(1, -1);
     for (final l in _far) {
-      canvas.drawPath(ridge(l), Paint()..color = const Color(0xFF3B2F73).withValues(alpha: .35));
+      canvas.drawPath(ridge(l), Paint()..color = C.nebula.withValues(alpha: 0.35));
     }
     for (final l in _near) {
-      canvas.drawPath(ridge(l), Paint()..color = const Color(0xFF1A1844).withValues(alpha: .5));
+      canvas.drawPath(
+          ridge(l), Paint()..color = C.midnight.withValues(alpha: 0.5));
     }
     canvas.restore();
-    // riak air
     final ripple = Paint()
-      ..color = Colors.white.withValues(alpha: .07)
+      ..color = Colors.white.withValues(alpha: 0.07)
       ..strokeWidth = 1;
     for (var i = 0; i < 26; i++) {
       final y = horizon + 6 + rnd.nextDouble() * (h - horizon - 12);
-      final x = rnd.nextDouble() * w * .8, len = w * (.08 + rnd.nextDouble() * .22);
+      final x = rnd.nextDouble() * w * 0.8,
+          len = w * (0.08 + rnd.nextDouble() * 0.22);
       canvas.drawLine(Offset(x, y), Offset(x + len, y), ripple);
     }
   }

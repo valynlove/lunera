@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -145,7 +146,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     if (hasPhoto)
                       IconButton(
                         icon: const Icon(
-                          Icons.delete_outline_rounded,
+                          LucideIcons.trash2,
                           color: Colors.redAccent,
                         ),
                         tooltip: tr('Remove photo'),
@@ -163,7 +164,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _PhotoActionItem(
-                      icon: Icons.photo_camera_rounded,
+                      icon: LucideIcons.camera,
                       label: tr('Camera'),
                       onTap: () {
                         Navigator.of(sheetCtx).pop();
@@ -171,7 +172,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       },
                     ),
                     _PhotoActionItem(
-                      icon: Icons.photo_library_rounded,
+                      icon: LucideIcons.image,
                       label: tr('Gallery'),
                       onTap: () {
                         Navigator.of(sheetCtx).pop();
@@ -180,7 +181,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                     if (hasPhoto)
                       _PhotoActionItem(
-                        icon: Icons.visibility_rounded,
+                        icon: LucideIcons.eye,
                         label: tr('View Photo'),
                         onTap: () {
                           Navigator.of(sheetCtx).pop();
@@ -258,7 +259,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: const Padding(
                         padding: EdgeInsets.all(9),
                         child: Icon(
-                          Icons.photo_camera_outlined,
+                          LucideIcons.camera,
                           size: 20,
                           color: Colors.white,
                         ),
@@ -275,14 +276,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               TextButton.icon(
                 onPressed: () => _showPhotoBottomSheet(context),
-                icon: const Icon(Icons.image_outlined, size: 18),
+                icon: const Icon(LucideIcons.image, size: 18),
                 label: Text(tr('Change photo')),
               ),
               if (hasPhoto) ...[
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: _viewPhoto,
-                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  icon: const Icon(LucideIcons.eye, size: 18),
                   label: Text(tr('View Photo')),
                 ),
               ],
@@ -303,21 +304,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     labelText: tr('Nickname'),
                     hintText: tr('e.g. Lunaria'),
                     helperText: tr('Shown in greetings on the Home screen and profile card.'),
-                    prefixIcon: const Icon(Icons.badge_outlined),
+                    prefixIcon: const Icon(LucideIcons.badge),
                   ),
                 ),
                 gap(16),
                 if (username != null && username.isNotEmpty)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.alternate_email_rounded, color: C.peony),
+                    leading: Icon(LucideIcons.atSign, color: C.peony),
                     title: Text('@$username', style: const TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text(tr('Account username')),
                   ),
                 if (user?.email != null)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.mail_outline_rounded, color: C.peony),
+                    leading: Icon(LucideIcons.mail, color: C.peony),
                     title: Text(user!.email!, style: const TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: Text(tr('Registered email')),
                   ),
@@ -333,7 +334,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           pillButton(
             _saving ? '...' : tr('Save Profile'),
             _saving ? () {} : _save,
-            icon: Icons.check_circle_outline_rounded,
+            icon: LucideIcons.circleCheck,
           ),
         ],
       ),
@@ -523,12 +524,12 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+            icon: const Icon(LucideIcons.refreshCw, color: Colors.white),
             tooltip: tr('Reset'),
             onPressed: _reset,
           ),
           IconButton(
-            icon: const Icon(Icons.rotate_90_degrees_cw_outlined, color: Colors.white),
+            icon: const Icon(LucideIcons.rotateCw, color: Colors.white),
             tooltip: tr('Rotate'),
             onPressed: _rotate,
           ),
@@ -622,7 +623,7 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.rotate_90_degrees_cw_outlined, color: Colors.white),
+                              icon: const Icon(LucideIcons.rotateCw, color: Colors.white),
                               tooltip: tr('Rotate'),
                               onPressed: _rotate,
                             ),
@@ -641,7 +642,7 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                                         height: 16,
                                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                       )
-                                    : const Icon(Icons.check, size: 18),
+                                    : const Icon(LucideIcons.check, size: 18),
                                 label: Text(
                                   tr('Done'),
                                   maxLines: 1,
@@ -867,7 +868,7 @@ class ProfilePhotoViewPage extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _PhotoActionItem(
-                      icon: Icons.photo_camera_rounded,
+                      icon: LucideIcons.camera,
                       label: tr('Camera'),
                       onTap: () {
                         Navigator.of(sheetCtx).pop();
@@ -875,7 +876,7 @@ class ProfilePhotoViewPage extends ConsumerWidget {
                       },
                     ),
                     _PhotoActionItem(
-                      icon: Icons.photo_library_rounded,
+                      icon: LucideIcons.image,
                       label: tr('Gallery'),
                       onTap: () {
                         Navigator.of(sheetCtx).pop();
@@ -924,12 +925,12 @@ class ProfilePhotoViewPage extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Colors.white),
+            icon: const Icon(LucideIcons.pencil, color: Colors.white),
             tooltip: tr('Change photo'),
             onPressed: () => _showPicker(context, ref),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+            icon: const Icon(LucideIcons.trash2, color: Colors.white),
             tooltip: tr('Remove photo'),
             onPressed: () => _confirmRemove(context, ref),
           ),

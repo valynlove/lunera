@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
@@ -127,7 +128,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   HapticFeedback.selectionClick();
                   setState(() => sel = DateTime(sel.year, sel.month, sel.day - 7));
                 },
-                icon: const Icon(Icons.chevron_left_rounded, color: Pastel.lilac),
+                icon: const Icon(LucideIcons.chevronLeft, color: Pastel.lilac),
                 tooltip: tr('Previous week'),
               ),
               Expanded(
@@ -150,7 +151,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     HapticFeedback.selectionClick();
                     setState(() => sel = today);
                   },
-                  icon: const Icon(Icons.today_rounded, size: 14, color: Pastel.mint),
+                  icon: const Icon(LucideIcons.calendarCheck, size: 14, color: Pastel.mint),
                   label: Text(
                     tr('Today'),
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Pastel.mint),
@@ -169,7 +170,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   HapticFeedback.selectionClick();
                   setState(() => sel = DateTime(sel.year, sel.month, sel.day + 7));
                 },
-                icon: const Icon(Icons.chevron_right_rounded, color: Pastel.lilac),
+                icon: const Icon(LucideIcons.chevronRight, color: Pastel.lilac),
                 tooltip: tr('Next week'),
               ),
             ]),
@@ -224,7 +225,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           decoration: cardBox(context, radius: 20),
           child: Column(
             children: [
-              iconBadge(Icons.nightlight_round, Pastel.lilac, size: 48, iconSize: 24),
+              iconBadge(LucideIcons.moon, Pastel.lilac, size: 48, iconSize: 24),
               const SizedBox(height: 12),
               Text(
                 tr('No doses scheduled'),
@@ -246,7 +247,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           HapticFeedback.lightImpact();
           showSheet(context, TherapySheet(supplies: supplies));
         },
-        icon: Icons.add_rounded,
+        icon: LucideIcons.plus,
       ),
     ]);
 

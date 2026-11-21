@@ -192,7 +192,7 @@ class _ChartPainter extends CustomPainter {
   final String fromLabel, toLabel;
   final Color line, dot;
 
-  static const _text = Color(0xFFB9B6E0);
+  static const _text = Color(0xFFC7B8FF);
 
   void _label(Canvas c, String s, Offset at, {bool right = false}) {
     final tp = TextPainter(text: TextSpan(text: s, style: const TextStyle(fontSize: 10, color: _text)), textDirection: TextDirection.ltr)..layout();

@@ -4,6 +4,70 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.9] - 2026-11-21
+
+### Added
+- **Standalone Dose History Import (CSV & JSON) (`lib/history_export.dart`, `lib/repo.dart`, `lib/ui/history.dart`, `lib/ui/settings_page.dart`):** Added dedicated dose and injection history import supporting both `dose_history` JSON exports and RFC 4180 CSV files in safe Merge mode—accessible from the History tab and Settings → Manual Backup & Export—with duplicate detection, deleted-therapy preservation, full-backup rejection guards, and zero impact on existing supply stock.
+
+## [2.1.8] - 2026-11-21
+
+### Changed
+- **Eternal Dusk Landing Page & Documentation Theme Overhaul (`docs/index.html`, `docs/style.css`, `docs/script.js`, `README.md`):**
+  - Migrated the GitHub Pages showcase (`docs/`) from Arcane Astral & Astral Gold to the unified **Eternal Dusk** palette (`#090817` Void, `#11102B` Midnight, `#171436` Deep Card, `#292052` Nebula, `#8065E8` Aurora, `#A58BFF` Violet, `#C7B8FF` Lavender, `#D76ABF` Magenta, `#F09ABF` Rose, `#F2A17C` Coral, `#7DE2C7` Mint), pairing `eternal_dusk_bg.jpg` and `eternal_dusk_overlay.png` with `Instrument Serif` + `Plus Jakarta Sans` typography.
+  - Replaced legacy Arcane Astral gold PNG icons across the highlights strip, feature list, value cards, and dual phone mockup docks with inline Lucide outline stroke SVGs and updated brand marks to `images/logo.png`.
+  - Updated `README.md` badges, Eternal Dusk palette swatch table, overview, key features, and tech stack (`google_fonts`, `lucide_icons_flutter`) while synchronizing version references to `2.1.8`.
+
+## [2.1.7] - 2026-11-21
+
+### Changed
+- **Eternal Dusk Flutter & Native Splash Screen Redesign (`lib/ui/splash.dart`, `lib/main.dart`, `android/app/src/main/res/`, `ios/Runner/`):**
+  - Redesigned `SplashPage` following Wall o' Pay's dual-controller staged architecture (`_introController` + `_ambientController`), featuring coordinated background fade-in (`eternal_dusk_splash_bg.jpg` + `eternal_dusk_overlay.png`), centered 3D emblem scale/fade with pulsing Aurora/Magenta/Coral halo, `LUNERA` wordmark, `"Your Journey, In Every Phase."` tagline, and a minimal 48×3 gradient loading bar.
+  - Added full `MediaQuery.maybeDisableAnimationsOf(context)` reduced-motion support, responsive `LayoutBuilder` sizing across phone and tablet densities, and non-blocking `AppRoot` `onFinish` + 2400ms safety fallback coordination in `lib/main.dart`.
+  - Updated Android `launch_background.xml`, `LaunchTheme` system bar colors (`styles.xml`, `values-night`, `values-v31`, `values-night-v31`), and iOS `LaunchScreen.storyboard` + `LaunchImage.imageset` to `#090817` Void with centered emblem to prevent startup flashes.
+
+## [2.1.6] - 2026-11-21
+
+### Changed
+- **Transparent Home Screen Launcher Icon (`android/app/src/main/res/mipmap-*/ic_launcher.png`, `web/`, `docs/images/`):**
+  - Replaced the solid gradient launcher background with a clean transparent RGBA canvas featuring the Eternal Dusk crescent emblem, matching transparent launcher icon styling across Android mipmaps, web icons/favicon, and showcase brand images.
+
+## [2.1.5] - 2026-11-21
+
+### Changed
+- **Eternal Dusk Profile Avatar Frame (`assets/images/eternal_dusk_avatar_frame.png`, `lib/profile.dart`):**
+  - Replaced the profile avatar border with the new Eternal Dusk orbital crescent moon frame (`frameSize = size * 1.44`), centered around the circular avatar across Home, More, and Profile pages.
+
+## [2.1.4] - 2026-11-21
+
+### Changed
+- **Unified Lucide Icon System Standard (`pubspec.yaml`, `lib/theme.dart`, `lib/`):**
+  - Adopted `lucide_icons_flutter` (`LucideIcons.*`, outline stroke width 2px) as the single consistent UI icon library across all screens, forms, cards, dialogs, and navigation items.
+  - Replaced custom PNG navigation/UI icons in the bottom navigation dock (`_NavBar`) and About sheet (`AboutLuneraSheet`) with Lucide outline icons while keeping the Eternal Dusk brand wordmark, crescent emblem, and launcher icon separate.
+  - Added semantic icon design tokens in `lib/theme.dart` (`C.iconDefault #A29BBE`, `C.iconActive #C7B8FF`, `C.iconHighlight #8065E8`) and harmonized sizing across standard (24 px), navigation (22–24 px), and inline indicator (16–18 px) icons.
+
+## [2.1.3] - 2026-11-21
+
+### Changed
+- **Eternal Dusk Visual Rebranding & Asset Integration (`lib/theme.dart`, `lib/ui/splash.dart`, `assets/images/`, `android/app/src/main/res/`, `web/`):**
+  - Integrated the supplied Eternal Dusk brand assets: primary brand wordmark lockup (`eternal_dusk_logo.png`), crescent emblem & launcher icons (`eternal_dusk_emblem.png`, Android `mipmap-*` launcher icons, Web & docs icons), main backdrop (`eternal_dusk_bg.jpg`), splash backdrop (`eternal_dusk_splash_bg.jpg`), and decorative overlay (`eternal_dusk_overlay.png`).
+  - Replaced Celestial Midnight & Arcane Astral tokens with the Eternal Dusk palette (Void `#090817`, Midnight `#11102B`, Nebula `#292052`, Aurora `#8065E8`, Violet `#A58BFF`, Lavender `#C7B8FF`, Magenta `#D76ABF`, Rose `#F09ABF`, Coral `#F2A17C`), `Plus Jakarta Sans` UI typography, and `Instrument Serif` editorial display headings.
+  - Updated navigation dock, cards, buttons, forms, dialogs, bottom sheets, hormone visualization colors, splash screen, Android home widgets, and PWA manifest without altering any features, schemas, or HRT calculations.
+
+## [2.1.2] - 2026-11-21
+
+### Added
+- **Standalone Dose History Export (`lib/history_export.dart`, `lib/ui/history.dart`, `lib/ui/settings_page.dart`):** Added a dedicated export flow for injection and dose administration history in both CSV (RFC 4180 with spreadsheet formula-injection sanitization) and structured JSON formats, accessible directly from the History tab and Settings → Manual Backup & Export without altering the full backup JSON schema.
+
+## [2.1.1] - 2026-11-21
+
+### Added
+- **Encrypted PIN & Lockout Storage (`lib/lock.dart`, `pubspec.yaml`):** Adopted `flutter_secure_storage` (Android Keystore / iOS Keychain) for storing PIN hashes, salts, failed attempt counters, and lockout timestamps, with transparent migration from legacy `SharedPreferences` keys.
+- **Per-UID Local Lock Isolation (`lib/lock.dart`, `lib/ui/lock_screen.dart`):** Scoped local lock credentials and settings per account UID (`lock.<key>.<uid>`) with auth-state tracking and `ensureLocalLoaded(uid)` so switching accounts never overwrites another user's PIN state.
+- **Tiered Exponential Brute-Force Lockout & Clock Guards (`lib/lock.dart`):** Upgraded failed-PIN penalties to progressive tiers (30s → 120s → 300s), added a clock-rollback guard clamping manipulated lockout durations, and added `clampRemoteUpdatedAtMs` to reject tampered future timestamps during cloud lock sync.
+
+### Changed
+- **Biometric Hardware Detection & Lifecycle Hardening (`lib/lock.dart`, `lib/ui/security_page.dart`, `lib/ui/lock_screen.dart`):** Added live `Face Unlock` / `Fingerprint Unlock` hardware capability detection on `SecurityPage` resume, a 1200ms post-biometric lifecycle cooldown, biometric lockout enforcement, dynamic remaining-seconds lockout messages, and automatic root-navigator modal dismissal when `LockGate` re-engages.
+
 ## [2.1.0] - 2026-11-10
 
 ### Added

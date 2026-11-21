@@ -1,10 +1,10 @@
 /**
  * Lunera — Landing Page Interactive Logic
- * Signature Celestial Midnight & Astral Gold Theme
+ * Signature Eternal Dusk Theme
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "2.1.0";
+const APP_VERSION = "2.1.9";
 
 // Fetch latest release tag and APK asset link from GitHub API
 function fetchLatestReleaseVersion() {

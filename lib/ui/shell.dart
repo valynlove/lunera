@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n.dart';
 import '../lock.dart';
 import '../notifications.dart';
@@ -26,10 +27,6 @@ class _ShellState extends ConsumerState<Shell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final uid = ref.read(userProvider).value?.uid;
-      if (uid != null) {
-        Lock.instance.syncWithCloud(uid);
-      }
       if (AppNotifier.instance.supported) {
         final prefs = ref.read(prefsProvider).value;
         if (prefs == null || prefs.notify) {
@@ -37,7 +34,7 @@ class _ShellState extends ConsumerState<Shell> {
         }
       }
       Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
+        if (mounted && (!Lock.instance.state.value.enabled || Lock.instance.sessionUnlocked)) {
           UpdateCheckerService.checkAndNotify(ref, context: context);
         }
       });
@@ -120,21 +117,21 @@ class _ExitDialog extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.fromLTRB(26, 28, 26, 24),
           decoration: BoxDecoration(
-            color: dark ? C.deepCard : Colors.white,
+            color: C.deepCard,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: const Color(0xFFE8D3A5).withValues(alpha: dark ? 0.38 : 0.25),
+              color: C.lavender.withValues(alpha: dark ? 0.28 : 0.20),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: (dark ? const Color(0xFF091122) : Colors.black12).withValues(alpha: 0.45),
+                color: (dark ? C.voidBg : Colors.black12).withValues(alpha: 0.50),
                 blurRadius: 32,
                 offset: const Offset(0, 10),
               ),
               if (dark)
                 BoxShadow(
-                  color: C.peony.withValues(alpha: 0.14),
+                  color: C.aurora.withValues(alpha: 0.16),
                   blurRadius: 28,
                   spreadRadius: -4,
                 ),
@@ -143,7 +140,7 @@ class _ExitDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Glowing Celestial Emblem
+              // Soft Ambient Emblem
               Container(
                 width: 64,
                 height: 64,
@@ -151,18 +148,18 @@ class _ExitDialog extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      C.peony.withValues(alpha: 0.28),
-                      const Color(0xFF5BC8E8).withValues(alpha: 0.16),
+                      C.aurora.withValues(alpha: 0.28),
+                      C.magenta.withValues(alpha: 0.16),
                       Colors.transparent,
                     ],
                   ),
                   border: Border.all(
-                    color: const Color(0xFFE8D3A5).withValues(alpha: 0.45),
+                    color: C.lavender.withValues(alpha: 0.42),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: C.peony.withValues(alpha: 0.22),
+                      color: C.aurora.withValues(alpha: 0.22),
                       blurRadius: 18,
                       spreadRadius: 2,
                     ),
@@ -170,9 +167,9 @@ class _ExitDialog extends StatelessWidget {
                 ),
                 child: Center(
                   child: Icon(
-                    Icons.power_settings_new_rounded,
-                    color: dark ? const Color(0xFFF1BA79) : C.peony,
-                    size: 30,
+                    LucideIcons.power,
+                    color: dark ? C.coral : C.aurora,
+                    size: 24,
                   ),
                 ),
               ),
@@ -181,7 +178,7 @@ class _ExitDialog extends StatelessWidget {
               Text(
                 tr('Exit {0}?', [appName]),
                 textAlign: TextAlign.center,
-                style: display(22, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
+                style: display(24, color: dark ? Colors.white : C.midnight),
               ),
               const SizedBox(height: 10),
               // Subtitle
@@ -191,7 +188,7 @@ class _ExitDialog extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.45,
-                  color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.75),
+                  color: (dark ? C.mist : C.midnight).withValues(alpha: 0.80),
                 ),
               ),
               const SizedBox(height: 24),
@@ -204,15 +201,15 @@ class _ExitDialog extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: dark ? const Color(0xFF282057).withValues(alpha: 0.35) : Colors.grey.shade50,
+                        backgroundColor: dark ? C.nebula.withValues(alpha: 0.42) : Colors.grey.shade50,
                         side: BorderSide(
-                          color: (dark ? Colors.white : C.midnight).withValues(alpha: 0.18),
+                          color: (dark ? C.lavender : C.midnight).withValues(alpha: 0.22),
                         ),
                       ),
                       child: Text(
                         tr('Cancel'),
                         style: TextStyle(
-                          color: dark ? Colors.white70 : C.midnight,
+                          color: dark ? C.mist : C.midnight,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -223,16 +220,16 @@ class _ExitDialog extends StatelessWidget {
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () => Navigator.of(context).pop(true),
-                      icon: const Icon(Icons.exit_to_app_rounded, size: 18),
+                      icon: const Icon(LucideIcons.logOut, size: 18),
                       label: Text(
                         tr('Exit'),
                         style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                       ),
                       style: FilledButton.styleFrom(
-                        backgroundColor: C.peony,
+                        backgroundColor: C.aurora,
                         foregroundColor: Colors.white,
                         elevation: 3,
-                        shadowColor: C.peony.withValues(alpha: 0.5),
+                        shadowColor: C.aurora.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
@@ -255,16 +252,15 @@ class _NavBar extends StatelessWidget {
   final ValueChanged<int> onTap;
 
   static const _items = [
-    ('assets/icons/nav_levels.png', Icons.insights_rounded, 'Levels'),
-    ('assets/icons/nav_calendar.png', Icons.calendar_month_rounded, 'Calendar'),
-    ('assets/icons/nav_home.png', Icons.auto_awesome_rounded, 'Home'),
-    ('assets/icons/nav_supplies.png', Icons.inventory_2_rounded, 'Supplies'),
-    ('assets/icons/nav_more.png', Icons.grid_view_rounded, 'More'),
+    (LucideIcons.activity, 'Levels'),
+    (LucideIcons.calendar, 'Calendar'),
+    (LucideIcons.house, 'Home'),
+    (LucideIcons.package, 'Supplies'),
+    (LucideIcons.layoutGrid, 'More'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final fg = Theme.of(context).colorScheme.onSurface;
     final i = currentIndex;
 
     return SafeArea(
@@ -273,20 +269,20 @@ class _NavBar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF17264D).withValues(alpha: 0.94),
+            color: C.midnight.withValues(alpha: 0.94),
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
-              color: const Color(0xFFE8D3A5).withValues(alpha: 0.35),
+              color: C.lavender.withValues(alpha: 0.24),
               width: 1.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF091122).withValues(alpha: 0.55),
+                color: C.voidBg.withValues(alpha: 0.60),
                 blurRadius: 24,
                 offset: const Offset(0, 6),
               ),
               BoxShadow(
-                color: C.amber.withValues(alpha: 0.12),
+                color: C.aurora.withValues(alpha: 0.14),
                 blurRadius: 14,
                 offset: const Offset(0, -1),
               ),
@@ -307,53 +303,54 @@ class _NavBar extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             AnimatedScale(
-                              scale: i == k ? 1.08 : 0.94,
-                              duration: const Duration(milliseconds: 250),
+                              scale: i == k ? 1.06 : 0.96,
+                              duration: const Duration(milliseconds: 220),
                               curve: Curves.easeOutCubic,
                               child: Container(
-                                width: 48,
-                                height: 48,
-                                decoration: i == k
-                                    ? BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: i == k
+                                      ? const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [C.aurora, C.nebula],
+                                        )
+                                      : null,
+                                  color: i == k ? null : C.deepCard,
+                                  border: Border.all(
+                                    color: i == k
+                                        ? C.iconActive.withValues(alpha: 0.65)
+                                        : C.iconDefault.withValues(alpha: 0.28),
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: i == k
+                                      ? [
                                           BoxShadow(
-                                            color: C.amber.withValues(alpha: 0.40),
+                                            color: C.aurora.withValues(alpha: 0.42),
                                             blurRadius: 16,
-                                            spreadRadius: 2,
+                                            spreadRadius: 1,
                                           ),
-                                          BoxShadow(
-                                            color: C.peony.withValues(alpha: 0.28),
-                                            blurRadius: 20,
-                                            spreadRadius: 3,
-                                          ),
-                                        ],
-                                      )
-                                    : null,
+                                        ]
+                                      : null,
+                                ),
                                 child: Center(
-                                  child: Image.asset(
+                                  child: Icon(
                                     _items[k].$1,
-                                    width: 48,
-                                    height: 48,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => CustomPaint(
-                                      size: const Size(24, 24),
-                                      painter: CompassStarPainter(
-                                        color: i == k ? Pastel.cream : C.amber,
-                                        glow: i == k,
-                                      ),
-                                    ),
+                                    size: 24,
+                                    color: i == k ? C.iconActive : C.iconDefault,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 1),
+                            const SizedBox(height: 2),
                             Text(
-                              tr(_items[k].$3),
+                              tr(_items[k].$2),
                               style: TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: i == k ? FontWeight.w800 : FontWeight.w600,
-                                color: i == k ? Pastel.cream : fg.withValues(alpha: .75),
+                                color: i == k ? C.iconActive : C.iconDefault,
                               ),
                             ),
                           ],
@@ -373,18 +370,18 @@ class _NavBar extends StatelessWidget {
                           children: [
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              width: 42,
-                              height: 28,
+                              width: 44,
+                              height: 30,
                               decoration: BoxDecoration(
-                                color: i == k ? C.peony.withValues(alpha: .22) : Colors.transparent,
+                                color: i == k ? C.aurora.withValues(alpha: 0.24) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(14),
                                 border: i == k
-                                    ? Border.all(color: const Color(0xFFE8D3A5).withValues(alpha: .50), width: 1.0)
+                                    ? Border.all(color: C.violet.withValues(alpha: 0.50), width: 1.0)
                                     : null,
                                 boxShadow: i == k
                                     ? [
                                         BoxShadow(
-                                          color: C.peony.withValues(alpha: .25),
+                                          color: C.aurora.withValues(alpha: 0.22),
                                           blurRadius: 8,
                                           spreadRadius: 1,
                                         ),
@@ -392,29 +389,20 @@ class _NavBar extends StatelessWidget {
                                     : null,
                               ),
                               child: Center(
-                                child: Opacity(
-                                  opacity: i == k ? 1.0 : 0.65,
-                                  child: Image.asset(
-                                    _items[k].$1,
-                                    width: 22,
-                                    height: 22,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => Icon(
-                                      _items[k].$2,
-                                      size: 20,
-                                      color: i == k ? C.peony : fg.withValues(alpha: .6),
-                                    ),
-                                  ),
+                                child: Icon(
+                                  _items[k].$1,
+                                  size: 22,
+                                  color: i == k ? C.iconActive : C.iconDefault,
                                 ),
                               ),
                             ),
                             const SizedBox(height: 1),
                             Text(
-                              tr(_items[k].$3),
+                              tr(_items[k].$2),
                               style: TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: i == k ? FontWeight.w700 : FontWeight.w500,
-                                color: i == k ? Pastel.cream : fg.withValues(alpha: .6),
+                                color: i == k ? C.iconActive : C.iconDefault,
                               ),
                             ),
                           ],

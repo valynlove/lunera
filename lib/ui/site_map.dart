@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
@@ -174,7 +175,7 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded, color: Pastel.lilac, size: 18),
+              const Icon(LucideIcons.sparkles, color: Pastel.lilac, size: 18),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -373,10 +374,10 @@ class _SiteCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isSelected) ...[
-                    const Icon(Icons.check_circle_rounded, color: Pastel.lilac, size: 14),
+                    const Icon(LucideIcons.circleCheckBig, color: Pastel.lilac, size: 14),
                     const SizedBox(width: 4),
                   ] else if (stat.isSuggested) ...[
-                    const Icon(Icons.star_rounded, color: Pastel.butter, size: 14),
+                    const Icon(LucideIcons.star, color: Pastel.butter, size: 14),
                     const SizedBox(width: 4),
                   ],
                   Flexible(
@@ -556,7 +557,7 @@ class SiteRotationSheet extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
+              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.x)),
             ],
           ),
           gap(14),

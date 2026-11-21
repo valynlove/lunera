@@ -13,7 +13,8 @@ import 'theme.dart';
 class ProfileState {
   const ProfileState({this.nickname, this.photo, this.photoImage});
 
-  factory ProfileState.withImage({String? nickname, Uint8List? photo}) => ProfileState(
+  factory ProfileState.withImage({String? nickname, Uint8List? photo}) =>
+      ProfileState(
         nickname: nickname,
         photo: photo,
         photoImage: photo == null ? null : MemoryImage(photo),
@@ -23,12 +24,14 @@ class ProfileState {
   final Uint8List? photo;
   final MemoryImage? photoImage;
 
-  MemoryImage? get effectiveImage => photoImage ?? (photo == null ? null : MemoryImage(photo!));
+  MemoryImage? get effectiveImage =>
+      photoImage ?? (photo == null ? null : MemoryImage(photo!));
 }
 
 /// Di-override di ProviderScope pada main.dart dengan instance SharedPreferences.
 final sharedPreferencesProvider = Provider<SharedPreferences>(
-  (ref) => throw UnimplementedError('sharedPreferencesProvider must be overridden in ProviderScope'),
+  (ref) => throw UnimplementedError(
+      'sharedPreferencesProvider must be overridden in ProviderScope'),
 );
 
 /// Pengontrol profil (nickname & foto profil) yang disimpan secara lokal
@@ -71,7 +74,8 @@ class ProfileController extends Notifier<ProfileState> {
       await p.setString(_nickKey(uid), nick);
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
-    state = ProfileState.withImage(nickname: nick.isEmpty ? null : nick, photo: state.photo);
+    state = ProfileState.withImage(
+        nickname: nick.isEmpty ? null : nick, photo: state.photo);
     await uploadToCloud(uid);
   }
 
@@ -91,19 +95,26 @@ class ProfileController extends Notifier<ProfileState> {
   }
 
   DocumentReference<Map<String, dynamic>> _doc(String uid) =>
-      FirebaseFirestore.instance.collection('users').doc(uid).collection('meta').doc('profile');
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('meta')
+          .doc('profile');
 
   /// Unggah profil ke cloud Firestore
   Future<void> uploadToCloud(String uid) async {
-    Repo.scheduleDebounceSync();
-    try {
-      final p = ref.read(sharedPreferencesProvider);
-      await _doc(uid).set({
-        'nickname': p.getString(_nickKey(uid)),
-        'photo': p.getString(_photoKey(uid)),
-        'updatedAt': p.getInt(_updatedKey(uid)) ?? 0,
-      }).timeout(_timeout);
-    } catch (_) {}
+    final doc = _doc(uid);
+    final p = ref.read(sharedPreferencesProvider);
+    final payload = {
+      'nickname': p.getString(_nickKey(uid)),
+      'photo': p.getString(_photoKey(uid)),
+      'updatedAt': p.getInt(_updatedKey(uid)) ?? 0,
+    };
+    await Repo.trackWrite(
+      () => doc.set(payload),
+      verifyQueued: () => Repo.hasPendingWritesForDocs([doc]),
+      timeout: _timeout,
+    );
   }
 
   /// Pulihkan profil dari cloud jika ada versi yang lebih baru
@@ -138,7 +149,8 @@ class ProfileController extends Notifier<ProfileState> {
   }
 }
 
-final profileProvider = NotifierProvider<ProfileController, ProfileState>(ProfileController.new);
+final profileProvider =
+    NotifierProvider<ProfileController, ProfileState>(ProfileController.new);
 
 /// Nama tampilan utama: Nickname jika ada, lalu Username, lalu awalan email.
 final displayNameProvider = Provider<String?>((ref) {
@@ -153,7 +165,7 @@ final displayNameProvider = Provider<String?>((ref) {
   return local[0].toUpperCase() + local.substring(1);
 });
 
-/// Widget avatar pengguna dengan bingkai celestial Arcane Astral dan dukungan foto / inisial teks.
+/// User avatar widget with Eternal Dusk orbital frame overlay and photo or initial fallback.
 class UserAvatar extends ConsumerWidget {
   const UserAvatar({
     super.key,
@@ -170,9 +182,13 @@ class UserAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final photoImage = ref.watch(profileProvider.select((s) => s.effectiveImage));
+    final photoImage =
+        ref.watch(profileProvider.select((s) => s.effectiveImage));
     final name = ref.watch(displayNameProvider) ?? appName;
-    final initial = (name.isEmpty ? appName.substring(0, 1) : String.fromCharCode(name.runes.first)).toUpperCase();
+    final initial = (name.isEmpty
+            ? appName.substring(0, 1)
+            : String.fromCharCode(name.runes.first))
+        .toUpperCase();
 
     Widget avatar = CircleAvatar(
       radius: size / 2,
@@ -181,13 +197,14 @@ class UserAvatar extends ConsumerWidget {
       child: photoImage == null
           ? Text(
               initial,
-              style: display(size * 0.42, color: Colors.white, weight: FontWeight.w800),
+              style: display(size * 0.42,
+                  color: Colors.white, weight: FontWeight.w800),
             )
           : null,
     );
 
     if (showFrame) {
-      final frameSize = size * 1.35;
+      final frameSize = size * 1.44;
       avatar = SizedBox(
         width: size,
         height: size,
@@ -201,7 +218,7 @@ class UserAvatar extends ConsumerWidget {
               height: frameSize,
               child: IgnorePointer(
                 child: Image.asset(
-                  'assets/images/avatar_frame_celestial.png',
+                  'assets/images/eternal_dusk_avatar_frame.png',
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.medium,
                   errorBuilder: (_, __, ___) => const SizedBox.shrink(),
@@ -233,4 +250,3 @@ class UserAvatar extends ConsumerWidget {
     );
   }
 }
-

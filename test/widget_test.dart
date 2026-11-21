@@ -1,16 +1,24 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:lunera/l10n.dart';
+import 'package:lunera/lock.dart';
 import 'package:lunera/models.dart';
 import 'package:lunera/profile.dart';
 import 'package:lunera/repo.dart';
 import 'package:lunera/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lunera/ui/about_sheet.dart';
 import 'package:lunera/ui/app_changelog.dart';
 import 'package:lunera/ui/auth.dart';
 import 'package:lunera/ui/calendar.dart';
+import 'package:lunera/ui/data_page.dart';
 import 'package:lunera/ui/history.dart';
 import 'package:lunera/ui/guided_injection.dart';
 import 'package:lunera/ui/home.dart';
@@ -26,23 +34,38 @@ import 'package:lunera/ui/splash.dart';
 import 'package:lunera/ui/supplies.dart';
 import 'package:lunera/update_checker.dart';
 
+class _FakeUser implements User {
+  @override
+  String get uid => 'test-user';
+
+  @override
+  String? get email => 'test@lunera.app';
+
+  @override
+  String? get displayName => 'Test User';
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   setUpAll(() async {
     await initializeDateFormatting();
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.1.0'));
+      expect(UpdateCheckerService.currentVersion, equals('2.1.9'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.1.0'));
+      expect(AppChangelog.releases.first.version, equals('2.1.9'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
 
-    testWidgets('InjectionSiteMap renders without layout exception', (tester) async {
+    testWidgets('InjectionSiteMap renders without layout exception',
+        (tester) async {
       final therapy = Therapy(
         id: 't1',
         hormoneId: 'estradiol',
@@ -71,7 +94,8 @@ void main() {
       expect(find.byType(InjectionSiteMap), findsOneWidget);
     });
 
-    testWidgets('DoseSheet renders compact site chips without bulky body map', (tester) async {
+    testWidgets('DoseSheet renders compact site chips without bulky body map',
+        (tester) async {
       final therapy = Therapy(
         id: 't1',
         hormoneId: 'estradiol',
@@ -114,7 +138,9 @@ void main() {
       expect(find.byType(FilterChip), findsWidgets);
     });
 
-    testWidgets('SiteRotationSheet renders cleanly without overflow on narrow screens and Indonesian locale', (tester) async {
+    testWidgets(
+        'SiteRotationSheet renders cleanly without overflow on narrow screens and Indonesian locale',
+        (tester) async {
       L10n.notifier.value = 'id';
       addTearDown(() => L10n.notifier.value = 'en');
       tester.view.physicalSize = const Size(320, 800);
@@ -142,7 +168,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('CalmInjectionSheet renders guide and step timer cleanly', (tester) async {
+    testWidgets('CalmInjectionSheet renders guide and step timer cleanly',
+        (tester) async {
       final therapy = Therapy(
         id: 't1',
         hormoneId: 'estradiol',
@@ -175,7 +202,8 @@ void main() {
       expect(find.text('Guided Calm Injection'), findsOneWidget);
     });
 
-    testWidgets('MorePage renders all feature hub sections cleanly', (tester) async {
+    testWidgets('MorePage renders all feature hub sections cleanly',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -210,7 +238,9 @@ void main() {
       expect(find.byType(ProfilePage), findsOneWidget);
     });
 
-    testWidgets('SettingsPage renders settings sections and preferences cleanly', (tester) async {
+    testWidgets(
+        'SettingsPage renders settings sections and preferences cleanly',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -236,7 +266,9 @@ void main() {
       expect(find.text(tr('Appearance')), findsNothing);
     });
 
-    testWidgets('WelcomePage renders AuthScene celestial background and brand actions', (tester) async {
+    testWidgets(
+        'WelcomePage renders AuthScene celestial background and brand actions',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -254,7 +286,9 @@ void main() {
       expect(find.text(tr('Log in')), findsOneWidget);
     });
 
-    testWidgets('SignInPage renders AuthScene with darkened scrim and input fields', (tester) async {
+    testWidgets(
+        'SignInPage renders AuthScene with darkened scrim and input fields',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -272,7 +306,8 @@ void main() {
       expect(find.text(tr('Password')), findsOneWidget);
     });
 
-    testWidgets('LockScreen renders celestial AuthScene and glowing PinPad', (tester) async {
+    testWidgets('LockScreen renders celestial AuthScene and glowing PinPad',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -291,7 +326,9 @@ void main() {
       expect(find.text(tr('Enter PIN')), findsOneWidget);
     });
 
-    testWidgets('Update dialog renders celestial Arcane Astral card with version chip and release notes', (tester) async {
+    testWidgets(
+        'Update dialog renders celestial Arcane Astral card with version chip and release notes',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -302,7 +339,8 @@ void main() {
         currentVersion: '1.11.37',
         latestVersion: '1.11.38',
         releaseName: 'Lunera 1.11.38 Release',
-        releaseNotes: '- Revamped exit card and update card\n- Celestial starlight styling',
+        releaseNotes:
+            '- Revamped exit card and update card\n- Celestial starlight styling',
         downloadUrl: 'https://example.com/lunera.apk',
         releasePageUrl: 'https://example.com/releases/1.11.38',
         hasUpdate: true,
@@ -314,7 +352,8 @@ void main() {
             builder: (context) => Scaffold(
               body: Center(
                 child: ElevatedButton(
-                  onPressed: () => UpdateCheckerService.showUpdateDialog(context, updateInfo),
+                  onPressed: () => UpdateCheckerService.showUpdateDialog(
+                      context, updateInfo),
                   child: const Text('Open Update Dialog'),
                 ),
               ),
@@ -340,7 +379,9 @@ void main() {
       expect(find.byType(Dialog), findsNothing);
     });
 
-    testWidgets('Exit dialog renders celestial halo card and handles cancellation', (tester) async {
+    testWidgets(
+        'Exit dialog renders celestial halo card and handles cancellation',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -365,21 +406,25 @@ void main() {
                   child: ElevatedButton(
                     onPressed: () async {
                       // Trigger same exit dialog structure as in shell.dart
-                      final dark = Theme.of(context).brightness == Brightness.dark;
+                      final dark =
+                          Theme.of(context).brightness == Brightness.dark;
                       exitResult = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => Dialog(
                           backgroundColor: Colors.transparent,
-                          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                          insetPadding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 24),
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 380),
                             child: Container(
-                              padding: const EdgeInsets.fromLTRB(26, 28, 26, 24),
+                              padding:
+                                  const EdgeInsets.fromLTRB(26, 28, 26, 24),
                               decoration: BoxDecoration(
                                 color: dark ? C.deepCard : Colors.white,
                                 borderRadius: BorderRadius.circular(28),
                                 border: Border.all(
-                                  color: const Color(0xFFD6B277).withValues(alpha: dark ? 0.38 : 0.25),
+                                  color: const Color(0xFFD6B277)
+                                      .withValues(alpha: dark ? 0.38 : 0.25),
                                   width: 1.2,
                                 ),
                               ),
@@ -389,26 +434,33 @@ void main() {
                                   Container(
                                     width: 64,
                                     height: 64,
-                                    decoration: const BoxDecoration(shape: BoxShape.circle),
-                                    child: const Icon(Icons.power_settings_new_rounded),
+                                    decoration: const BoxDecoration(
+                                        shape: BoxShape.circle),
+                                    child: const Icon(LucideIcons.power),
                                   ),
                                   Text(
                                     tr('Exit {0}?', [appName]),
-                                    style: display(22, color: dark ? Colors.white : C.midnight, weight: FontWeight.w700),
+                                    style: display(22,
+                                        color: dark ? Colors.white : C.midnight,
+                                        weight: FontWeight.w700),
                                   ),
-                                  Text(tr('Are you sure you want to exit the application?')),
+                                  Text(tr(
+                                      'Are you sure you want to exit the application?')),
                                   Row(
                                     children: [
                                       Expanded(
                                         child: OutlinedButton(
-                                          onPressed: () => Navigator.of(ctx).pop(false),
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(false),
                                           child: Text(tr('Cancel')),
                                         ),
                                       ),
                                       Expanded(
                                         child: FilledButton.icon(
-                                          onPressed: () => Navigator.of(ctx).pop(true),
-                                          icon: const Icon(Icons.exit_to_app_rounded, size: 18),
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(true),
+                                          icon: const Icon(LucideIcons.logOut,
+                                              size: 18),
                                           label: Text(tr('Exit')),
                                         ),
                                       ),
@@ -435,7 +487,8 @@ void main() {
 
       expect(find.byType(Dialog), findsOneWidget);
       expect(find.text(tr('Exit {0}?', [appName])), findsOneWidget);
-      expect(find.text(tr('Are you sure you want to exit the application?')), findsOneWidget);
+      expect(find.text(tr('Are you sure you want to exit the application?')),
+          findsOneWidget);
       expect(find.text(tr('Cancel')), findsOneWidget);
       expect(find.text(tr('Exit')), findsOneWidget);
 
@@ -446,28 +499,64 @@ void main() {
       expect(exitResult, isFalse);
     });
 
-    testWidgets('SplashPage renders celestial Arcane Astral sequence, moon emblem, and wordmark', (tester) async {
+    testWidgets(
+        'SplashPage renders Eternal Dusk staged splash, logo, wordmark, tagline, and invokes onFinish',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
+      var finished = false;
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SplashPage(),
+        MaterialApp(
+          home: SplashPage(onFinish: () => finished = true),
         ),
       );
+      await tester.pump();
 
-      // Verify immediate render of celestial splash elements
       expect(find.byType(SplashPage), findsOneWidget);
+      expect(find.byType(MoonLogo), findsOneWidget);
       expect(find.text(appName.toUpperCase()), findsOneWidget);
-      expect(find.text(tr('YOUR JOURNEY, YOUR PACE.')), findsOneWidget);
-      expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+      expect(find.text(tr('Your Journey, In Every Phase.')), findsOneWidget);
+      expect(find.byIcon(LucideIcons.sparkles), findsOneWidget);
       expect(find.byType(Image), findsWidgets);
+      expect(finished, isTrue);
     });
 
-    testWidgets('AboutLuneraSheet renders lore pillars, core principles, and metadata cleanly', (tester) async {
+    testWidgets(
+        'SplashPage adapts cleanly on compact mobile and tablet with reduced motion',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      for (final size in const [Size(360, 640), Size(1024, 1366)]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        var finished = false;
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(size: size, disableAnimations: true),
+            child: MaterialApp(
+              home: SplashPage(
+                key: ValueKey(size),
+                onFinish: () => finished = true,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.text(appName.toUpperCase()), findsOneWidget);
+        expect(find.text(tr('Your Journey, In Every Phase.')), findsOneWidget);
+        expect(finished, isTrue);
+      }
+    });
+
+    testWidgets(
+        'AboutLuneraSheet renders lore pillars, core principles, and metadata cleanly',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -499,19 +588,21 @@ void main() {
       expect(find.text(tr('The Moon Phase Rhythms')), findsOneWidget);
       expect(find.text(tr('The Celestial Sanctuary')), findsOneWidget);
       expect(find.text(tr('The Guiding Star')), findsOneWidget);
-      expect(find.text(tr('The Arcane Astral Canvas')), findsOneWidget);
+      expect(find.text(tr('The Eternal Dusk Canvas')), findsOneWidget);
       expect(find.text(tr('Core Principles')), findsOneWidget);
       expect(find.text(tr('Medical Disclaimer')), findsOneWidget);
       expect(find.text(tr('Version Changelog')), findsOneWidget);
       expect(find.text(tr('Send Feedback')), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.tap(find.byIcon(LucideIcons.x));
       await tester.pumpAndSettle();
 
       expect(find.byType(AboutLuneraSheet), findsNothing);
     });
 
-    testWidgets('SuppliesPage renders title and dual action row for Add Supply and Pickup Assistant', (tester) async {
+    testWidgets(
+        'SuppliesPage renders title and dual action row for Add Supply and Pickup Assistant',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -555,12 +646,14 @@ void main() {
       expect(find.byType(PickupAssistantSheet), findsOneWidget);
 
       // Close Pickup Assistant sheet
-      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.tap(find.byIcon(LucideIcons.x));
       await tester.pumpAndSettle();
       expect(find.byType(PickupAssistantSheet), findsNothing);
     });
 
-    testWidgets('HomePage renders streamlined dashboard, dose card, and calendar bridge', (tester) async {
+    testWidgets(
+        'HomePage renders streamlined dashboard, dose card, and calendar bridge',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -583,11 +676,13 @@ void main() {
         ProviderScope(
           overrides: [
             userProvider.overrideWith((ref) => Stream.value(null)),
-            therapiesProvider.overrideWith((ref) => Stream.value(<Therapy>[therapy])),
+            therapiesProvider
+                .overrideWith((ref) => Stream.value(<Therapy>[therapy])),
             suppliesProvider.overrideWith((ref) => Stream.value(<Supply>[])),
             logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[])),
             prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
-            journalProvider.overrideWith((ref) => Stream.value(<JournalEntry>[])),
+            journalProvider
+                .overrideWith((ref) => Stream.value(<JournalEntry>[])),
           ],
           child: const MaterialApp(
             home: Scaffold(
@@ -605,7 +700,9 @@ void main() {
       expect(find.text(tr('View full schedule in Calendar')), findsOneWidget);
     });
 
-    testWidgets('LevelsPage renders streamlined header, action bar, and level panels cleanly', (tester) async {
+    testWidgets(
+        'LevelsPage renders streamlined header, action bar, and level panels cleanly',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -635,12 +732,18 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            therapiesProvider.overrideWith((ref) => Stream.value(<Therapy>[therapy])),
-            labsProvider.overrideWith((ref) => Stream.value(<Lab>[prolactinLab])),
-            targetsProvider.overrideWith((ref) => Stream.value(<String, List<double>>{'estradiol': [100.0, 200.0]})),
+            therapiesProvider
+                .overrideWith((ref) => Stream.value(<Therapy>[therapy])),
+            labsProvider
+                .overrideWith((ref) => Stream.value(<Lab>[prolactinLab])),
+            targetsProvider
+                .overrideWith((ref) => Stream.value(<String, List<double>>{
+                      'estradiol': [100.0, 200.0]
+                    })),
             logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[])),
             prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
-            journalProvider.overrideWith((ref) => Stream.value(<JournalEntry>[])),
+            journalProvider
+                .overrideWith((ref) => Stream.value(<JournalEntry>[])),
           ],
           child: const MaterialApp(
             home: Scaffold(
@@ -660,7 +763,8 @@ void main() {
       expect(find.text('Prolactin'), findsOneWidget);
     });
 
-    testWidgets('LevelsPage renders clean empty state when no data exists', (tester) async {
+    testWidgets('LevelsPage renders clean empty state when no data exists',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -672,10 +776,12 @@ void main() {
           overrides: [
             therapiesProvider.overrideWith((ref) => Stream.value(<Therapy>[])),
             labsProvider.overrideWith((ref) => Stream.value(<Lab>[])),
-            targetsProvider.overrideWith((ref) => Stream.value(<String, List<double>>{})),
+            targetsProvider
+                .overrideWith((ref) => Stream.value(<String, List<double>>{})),
             logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[])),
             prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
-            journalProvider.overrideWith((ref) => Stream.value(<JournalEntry>[])),
+            journalProvider
+                .overrideWith((ref) => Stream.value(<JournalEntry>[])),
           ],
           child: const MaterialApp(
             home: Scaffold(
@@ -688,10 +794,15 @@ void main() {
 
       expect(find.byType(LevelsPage), findsOneWidget);
       expect(find.text(tr('No level data yet')), findsOneWidget);
-      expect(find.text(tr('Log a dose or add your first blood test result to view hormone curves.')), findsOneWidget);
+      expect(
+          find.text(tr(
+              'Log a dose or add your first blood test result to view hormone curves.')),
+          findsOneWidget);
     });
 
-    testWidgets('CalendarPage renders weekly navigator card, tabs, and serene empty state', (tester) async {
+    testWidgets(
+        'CalendarPage renders weekly navigator card, tabs, and serene empty state',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -705,7 +816,8 @@ void main() {
             suppliesProvider.overrideWith((ref) => Stream.value(<Supply>[])),
             prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
             logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[])),
-            journalProvider.overrideWith((ref) => Stream.value(<JournalEntry>[])),
+            journalProvider
+                .overrideWith((ref) => Stream.value(<JournalEntry>[])),
           ],
           child: const MaterialApp(
             home: Scaffold(
@@ -731,7 +843,8 @@ void main() {
       expect(find.text(tr('No history entries yet')), findsOneWidget);
     });
 
-    testWidgets('UserAvatar renders CircleAvatar with celestial frame overlay', (tester) async {
+    testWidgets('UserAvatar renders CircleAvatar with celestial frame overlay',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -750,7 +863,9 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
     });
 
-    testWidgets('DoseSheet and LogTile support combination medication inputs and display', (tester) async {
+    testWidgets(
+        'DoseSheet and LogTile support combination medication inputs and display',
+        (tester) async {
       L10n.notifier.value = 'en';
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -827,23 +942,280 @@ void main() {
       expect(find.text('25'), findsOneWidget);
     });
 
-    testWidgets('Theme configures transparent page transitions to eliminate purple transition flash', (tester) async {
+    testWidgets(
+        'Theme configures transparent page transitions to eliminate purple transition flash',
+        (tester) async {
       final theme = buildTheme(Brightness.dark);
       expect(theme.pageTransitionsTheme, isNotNull);
 
       // Verify builders have transparent backgrounds/fallbacks
-      final androidBuilder = theme.pageTransitionsTheme.builders[TargetPlatform.android];
+      final androidBuilder =
+          theme.pageTransitionsTheme.builders[TargetPlatform.android];
       expect(androidBuilder, isA<PredictiveBackPageTransitionsBuilder>());
-      expect((androidBuilder as PredictiveBackPageTransitionsBuilder).fallbackColor, Colors.transparent);
+      expect(
+          (androidBuilder as PredictiveBackPageTransitionsBuilder)
+              .fallbackColor,
+          Colors.transparent);
 
-      final windowsBuilder = theme.pageTransitionsTheme.builders[TargetPlatform.windows];
+      final windowsBuilder =
+          theme.pageTransitionsTheme.builders[TargetPlatform.windows];
       expect(windowsBuilder, isA<ZoomPageTransitionsBuilder>());
-      expect((windowsBuilder as ZoomPageTransitionsBuilder).backgroundColor, Colors.transparent);
+      expect((windowsBuilder as ZoomPageTransitionsBuilder).backgroundColor,
+          Colors.transparent);
 
-      final linuxBuilder = theme.pageTransitionsTheme.builders[TargetPlatform.linux];
+      final linuxBuilder =
+          theme.pageTransitionsTheme.builders[TargetPlatform.linux];
       expect(linuxBuilder, isA<ZoomPageTransitionsBuilder>());
-      expect((linuxBuilder as ZoomPageTransitionsBuilder).backgroundColor, Colors.transparent);
+      expect((linuxBuilder as ZoomPageTransitionsBuilder).backgroundColor,
+          Colors.transparent);
+    });
+
+    testWidgets(
+        'LockGate blocks child until checkingLock finishes and unmounts child when locked',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      const appUtilsChannel = MethodChannel('com.example.ritme/app_utils');
+      const localAuthChannel = MethodChannel('plugins.flutter.io/local_auth');
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(appUtilsChannel, (_) async => null);
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(localAuthChannel, (call) async {
+        if (call.method == 'getAvailableBiometrics') return <String>[];
+        return false;
+      });
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(appUtilsChannel, null);
+        tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(localAuthChannel, null);
+      });
+
+      const salt = 'gate-salt';
+      final hash = hashPinPbkdf2('135790', salt, iterations: 1000);
+      FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({});
+      await Lock.instance.load();
+      await Lock.instance.clearLocal();
+      Lock.instance.resetSyncCache();
+
+      final completer = Completer<void>();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: LockGate(
+              uid: 'test-uid',
+              syncCloud: (_) => completer.future,
+              child: const Scaffold(body: Text('PROTECTED_SHELL')),
+            ),
+          ),
+        ),
+      );
+
+      // During checkingLock: SplashPage shown, Shell NOT mounted
+      expect(find.byType(SplashPage), findsOneWidget);
+      expect(find.text('PROTECTED_SHELL'), findsNothing);
+      expect(find.byType(LockScreen), findsNothing);
+
+      // Cloud returns enabled lock: LockGate transitions directly to LockScreen without ever mounting Shell
+      await Lock.instance.applyCloudLockData({
+        'enabled': true,
+        'salt': salt,
+        'hash': hash,
+        'delayMin': 0,
+        'decoyCalculator': false,
+        'updatedAt': 5000,
+      });
+      completer.complete();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(LockScreen), findsOneWidget);
+      expect(find.text('PROTECTED_SHELL'), findsNothing);
+
+      // Back button while locked must NOT pop LockScreen or expose child
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(find.byType(LockScreen), findsOneWidget);
+      expect(find.text('PROTECTED_SHELL'), findsNothing);
+
+      await Lock.instance.clearLocal();
+      Lock.instance.resetSyncCache();
+    }, timeout: const Timeout(Duration(seconds: 5)));
+
+    testWidgets(
+        'LockGate preserves tabProvider across lock/unlock and honors suppressLockDuring grace period',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      const appUtilsChannel = MethodChannel('com.example.ritme/app_utils');
+      const localAuthChannel = MethodChannel('plugins.flutter.io/local_auth');
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(appUtilsChannel, (_) async => null);
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(localAuthChannel, (call) async {
+        if (call.method == 'getAvailableBiometrics') return <String>[];
+        return false;
+      });
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(appUtilsChannel, null);
+        tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(localAuthChannel, null);
+      });
+
+      const salt = 'gate-salt-2';
+      final hash = hashPinPbkdf2('246810', salt, iterations: 1000);
+      FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+        'lock.salt': salt,
+        'lock.hash': hash,
+        'lock.delay': 0,
+        'lock.updatedAt': 1000,
+      });
+      await Lock.instance.load();
+      Lock.instance.sessionUnlocked = true;
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(tabProvider.notifier).state = 4;
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: LockGate(
+              uid: 'test-uid-2',
+              syncCloud: (_) async {},
+              child: Consumer(
+                builder: (_, ref, __) => Scaffold(
+                  body: Text('SHELL_TAB_${ref.watch(tabProvider)}'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('SHELL_TAB_4'), findsOneWidget);
+
+      // Lifecycle pause -> resume during suppressLockDuring must NOT trigger lock loop
+      await Lock.instance.suppressLockDuring(() async {
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump();
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+      }, gracePeriod: const Duration(milliseconds: 30));
+
+      expect(find.text('SHELL_TAB_4'), findsOneWidget);
+      expect(find.byType(LockScreen), findsNothing);
+
+      // Wait out real wall-clock grace period before re-locking via cloud lock update
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 50)));
+      Lock.instance.sessionUnlocked = false;
+      await Lock.instance.applyCloudLockData({
+        'enabled': true,
+        'salt': salt,
+        'hash': hash,
+        'delayMin': 0,
+        'decoyCalculator': false,
+        'updatedAt': 2000,
+      });
+      await tester.pump();
+
+      expect(find.byType(LockScreen), findsOneWidget);
+      expect(find.text('SHELL_TAB_4'), findsNothing);
+
+      // Enter PIN to unlock -> Shell mounts again with tabProvider preserved at 4
+      for (final d in ['2', '4', '6', '8', '1', '0']) {
+        await tester.tap(find.text(d));
+        await tester.pump();
+      }
+      await tester.pump();
+      expect(find.text('SHELL_TAB_4'), findsOneWidget);
+      expect(container.read(tabProvider), equals(4));
+
+      await Lock.instance.clearLocal();
+      Lock.instance.resetSyncCache();
+    }, timeout: const Timeout(Duration(seconds: 5)));
+
+    testWidgets(
+        'DataPage and SettingsPage distinguish queuedOffline and error sync states',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      Repo.resetSyncStateForTest();
+      addTearDown(Repo.resetSyncStateForTest);
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      // 1. DataPage with queuedOffline and error states
+      Repo.syncStateNotifier.value = const SyncState(
+        status: SyncStatus.queuedOffline,
+        pendingCount: 2,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          key: const ValueKey('data-sync-test'),
+          overrides: [
+            userProvider.overrideWith((ref) => Stream.value(null)),
+            backupsProvider.overrideWith((ref) => Stream.value(const [])),
+          ],
+          child: const MaterialApp(home: DataPage()),
+        ),
+      );
+      await tester.pump();
+      expect(
+          find.text(tr('Queued offline ({0} pending)', [2])), findsOneWidget);
+
+      Repo.syncStateNotifier.value = const SyncState(
+        status: SyncStatus.error,
+        errorMessage: 'Permission denied',
+      );
+      await tester.pump();
+      expect(find.text(tr('Sync failed: {0}', ['Permission denied'])),
+          findsOneWidget);
+
+      // 2. SettingsPage with queuedOffline and error states (signed-in user)
+      Repo.syncStateNotifier.value = const SyncState(
+        status: SyncStatus.queuedOffline,
+        pendingCount: 3,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          key: const ValueKey('settings-sync-test'),
+          overrides: [
+            userProvider.overrideWith((ref) => Stream.value(_FakeUser())),
+            prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
+          ],
+          child: const MaterialApp(home: SettingsPage()),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.scrollUntilVisible(
+          find.text(tr('Real-Time Cloud Sync')), 200);
+      expect(find.text(tr('Offline queued')), findsOneWidget);
+      expect(
+          find.text(tr(
+              '{0} pending changes will sync automatically when online.', [3])),
+          findsOneWidget);
+
+      Repo.syncStateNotifier.value = const SyncState(
+        status: SyncStatus.error,
+        errorMessage: 'Write rejected',
+      );
+      await tester.pump();
+      expect(find.text(tr('Sync error')), findsOneWidget);
+      expect(find.text('Write rejected'), findsOneWidget);
     });
   });
 }
-
