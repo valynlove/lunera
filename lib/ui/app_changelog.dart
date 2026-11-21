@@ -42,10 +42,53 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.13',
+      version: '2.1.14',
       dateEn: 'November 21, 2026',
       dateId: '21 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Upcoming Dose Projection & Peak/Trough: Preview scheduled doses ahead on hormone charts along with window peak and trough estimates, plus a rough PK profile for Estradiol gel.',
+          textId:
+              'Proyeksi Jadwal & Puncak/Terendah: Pratinjau dosis terjadwal ke depan di grafik hormon beserta estimasi puncak dan titik terendah, serta profil PK perkiraan untuk gel Estradiol.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Doctor Visit Summary: Share a clean 3- or 6-month text summary of therapies, adherence, and lab results without exposing private journal or free-text notes.',
+          textId:
+              'Ringkasan Konsultasi Dokter: Bagikan ringkasan teks 3 atau 6 bulan berisi terapi, kepatuhan, dan hasil lab tanpa menyertakan catatan pribadi atau jurnal.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Optional Encrypted Backups: Protect exported JSON backups with PBKDF2 + AES-256-GCM passphrase encryption while retaining plain JSON restore compatibility.',
+          textId:
+              'Backup Terenkripsi Opsional: Lindungi berkas ekspor JSON dengan enkripsi kata sandi PBKDF2 + AES-256-GCM sambil tetap mendukung restore backup JSON biasa.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Dose Notification Snooze: Added 15- and 30-minute snooze actions on dose reminders that preserve discreet notification masking and clear automatically when logged.',
+          textId:
+              'Tunda Notifikasi Dosis: Menambahkan aksi cepat tunda 15 dan 30 menit pada pengingat dosis dengan tetap menjaga mode privasi notifikasi.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Modular Levels UI: Split levels.dart into focused part files and added controller disposal in LabSheet.',
+          textId:
+              'Modularisasi UI Kadar Hormon: Memecah levels.dart menjadi sub-file terstruktur dan menambahkan pembersihan controller di LabSheet.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.13',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

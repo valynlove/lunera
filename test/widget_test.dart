@@ -54,12 +54,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.1.13'));
+      expect(UpdateCheckerService.currentVersion, equals('2.1.14'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.1.13'));
+      expect(AppChangelog.releases.first.version, equals('2.1.14'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -798,6 +798,125 @@ void main() {
           find.text(tr(
               'Log a dose or add your first blood test result to view hormone curves.')),
           findsOneWidget);
+    });
+
+    testWidgets('LabSheet toggles comparator choice chips cleanly',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: LabSheet(
+                  initial: Lab(
+                    id: 'l1',
+                    hormoneId: 'estradiol',
+                    at: DateTime(2026, 11, 1),
+                    value: 1000,
+                    unit: 'pg/mL',
+                    cmp: '>',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>')).selected,
+        isTrue,
+      );
+      expect(
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '=')).selected,
+        isFalse,
+      );
+
+      await tester.tap(find.widgetWithText(ChoiceChip, '='));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '=')).selected,
+        isTrue,
+      );
+      expect(
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>')).selected,
+        isFalse,
+      );
+    });
+
+    testWidgets(
+        'LevelPanel non-compact shows peak/trough and upcoming doses projection chip',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final now = DateTime.now();
+      final therapy = Therapy(
+        id: 'th-ev',
+        hormoneId: 'estradiol',
+        name: 'Estradiol Valerate',
+        dose: 4.0,
+        doseUnit: 'mg',
+        start: now.subtract(const Duration(days: 14)),
+        route: 'inj',
+        everyDays: 7,
+        times: const ['08:00'],
+        pk: 'e2_valerate',
+      );
+      final log = DoseLog(
+        id: 'log-1',
+        therapyId: 'th-ev',
+        at: now.subtract(const Duration(days: 3)),
+        dose: 4.0,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            therapiesProvider
+                .overrideWith((ref) => Stream.value(<Therapy>[therapy])),
+            labsProvider.overrideWith((ref) => Stream.value(<Lab>[])),
+            targetsProvider
+                .overrideWith((ref) => Stream.value(<String, List<double>>{})),
+            logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[log])),
+            prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
+            journalProvider
+                .overrideWith((ref) => Stream.value(<JournalEntry>[])),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: LevelPanel('estradiol'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(tr('Include upcoming doses')), findsOneWidget);
+      expect(find.textContaining('peak'), findsOneWidget);
+      expect(
+        find.text(tr('Projection assumes upcoming doses are taken as scheduled.')),
+        findsNothing,
+      );
+
+      await tester.tap(find.text(tr('Include upcoming doses')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(tr('Projection assumes upcoming doses are taken as scheduled.')),
+        findsOneWidget,
+      );
     });
 
     testWidgets(

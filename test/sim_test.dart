@@ -1,5 +1,7 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunera/models.dart';
+import 'package:lunera/schedule.dart';
 import 'package:lunera/sim.dart';
 
 void main() {
@@ -99,6 +101,65 @@ void main() {
       final parsed = intakesFor('estradiol', [therapy], logs);
       expect(parsed.length, equals(1));
       expect(parsed.first.dose, equals(4.0));
+    });
+
+    test('projectedIntakes returns future pending scheduled doses and excludes taken or skipped slots', () {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day - 14);
+      final therapy = Therapy(
+        id: 't_ev',
+        hormoneId: 'estradiol',
+        name: 'EV',
+        dose: 4.0,
+        doseUnit: 'mg',
+        start: start,
+        route: 'inj',
+        everyDays: 7,
+        times: const ['08:00'],
+        pk: 'e2_valerate',
+      );
+      const prefs = Prefs();
+      final allFuture = projectedIntakes('estradiol', [therapy], const [], prefs, aheadDays: 21, now: now);
+      expect(allFuture, isNotEmpty);
+      expect(allFuture.every((i) => i.at.isAfter(now) && i.dose == 4.0), isTrue);
+
+      final nextAt = allFuture.first.at;
+      final skippedLog = DoseLog(
+        id: 'skip1',
+        therapyId: 't_ev',
+        at: nextAt,
+        slot: slotKey(nextAt),
+        skipped: true,
+      );
+      final afterSkip = projectedIntakes('estradiol', [therapy], [skippedLog], prefs, aheadDays: 21, now: now);
+      expect(afterSkip.length, equals(allFuture.length - 1));
+      expect(afterSkip.any((i) => i.at == nextAt), isFalse);
+    });
+
+    test('peakTrough skips leading zeros, computes min/max, and handles all-zero spots', () {
+      expect(peakTrough(const [FlSpot(0, 0), FlSpot(1, 0)]), isNull);
+      expect(peakTrough(const []), isNull);
+
+      final res = peakTrough(const [
+        FlSpot(0, 0),
+        FlSpot(1, 0),
+        FlSpot(2, 120),
+        FlSpot(3, 350),
+        FlSpot(4, 90),
+      ]);
+      expect(res, isNotNull);
+      expect(res!.peak, equals(350));
+      expect(res.trough, equals(90));
+    });
+
+    test('e2_gel rough PK profile simulates absorption and decays to 0 after 31 days', () {
+      final gel = pkOf('e2_gel');
+      expect(gel, isNotNull);
+      expect(gel!.oral, isTrue);
+      final t0 = DateTime(2026, 11, 1, 8, 0);
+      final intakes = [Intake(t0, 1.0, gel)];
+      expect(levelAt(intakes, t0.add(const Duration(hours: 12))), greaterThan(10.0));
+      expect(levelAt(intakes, t0.add(const Duration(days: 31))), equals(0.0));
     });
   });
 }

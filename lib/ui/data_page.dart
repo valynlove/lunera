@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import '../backup_crypto.dart';
 import '../repo.dart';
 import '../theme.dart';
 import '../l10n.dart';
 import '../lock.dart';
+import 'backup_dialogs.dart';
 
 class DataPage extends ConsumerStatefulWidget {
   const DataPage({super.key});
@@ -64,8 +66,16 @@ class _DataPageState extends ConsumerState<DataPage> {
 
   Future<void> _exportFile() => _run(() async {
         final text = await ref.read(repoProvider)!.exportJson();
-        final name = 'lunera_${DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now())}.json';
-        final f = XFile.fromData(Uint8List.fromList(utf8.encode(text)), mimeType: 'application/json', name: name);
+        if (!mounted) return;
+        final mode = await askExportMode(context);
+        if (mode == null) return;
+        final out = mode.encrypt
+            ? await encryptBackup(text, mode.passphrase)
+            : text;
+        final stamp = DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
+        final name = 'lunera_$stamp${mode.encrypt ? '.enc' : ''}.json';
+        final f = XFile.fromData(Uint8List.fromList(utf8.encode(out)),
+            mimeType: 'application/json', name: name);
         if (kIsWeb) {
           await f.saveTo(name);
           _toast(tr('File downloaded.'));
@@ -76,10 +86,20 @@ class _DataPageState extends ConsumerState<DataPage> {
 
   Future<void> _importFile() => _run(() async {
         const group = XTypeGroup(label: 'JSON', extensions: ['json']);
-        final onAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-        final f = await Lock.instance.suppressLockDuring(() => openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
+        final onAndroid =
+            !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+        final f = await Lock.instance.suppressLockDuring(() =>
+            openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
         if (f == null) return;
-        await _importRaw(jsonDecode(utf8.decode(await f.readAsBytes())));
+        var raw = jsonDecode(utf8.decode(await f.readAsBytes()));
+        if (isEncryptedBackup(raw)) {
+          if (!mounted) return;
+          final p = await askImportPassphrase(context);
+          if (p == null) return;
+          raw = jsonDecode(await decryptBackup(raw as Map, p));
+        }
+        if (!mounted) return;
+        await _importRaw(raw);
       });
 
   @override

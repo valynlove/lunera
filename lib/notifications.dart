@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,6 +59,92 @@ String _verb(Therapy t) => switch (t.route) {
   );
 }
 
+const _snoozeTag = 'snz';
+const _snooze15Action = 'snooze_15';
+const _snooze30Action = 'snooze_30';
+const _doseCategory = 'dose_actions';
+
+String snoozePayload({
+  required String therapyId,
+  required String slot,
+  required String title,
+  required String body,
+}) =>
+    jsonEncode({
+      'k': _snoozeTag,
+      'tid': therapyId,
+      'slot': slot,
+      'title': title,
+      'body': body,
+    });
+
+Map<String, dynamic>? parseSnoozePayload(String? payload) {
+  if (payload == null || payload.isEmpty) return null;
+  try {
+    final m = jsonDecode(payload);
+    if (m is! Map<String, dynamic> || m['k'] != _snoozeTag) return null;
+    if (m['tid'] is! String ||
+        m['slot'] is! String ||
+        m['title'] is! String ||
+        m['body'] is! String) {
+      return null;
+    }
+    return m;
+  } catch (_) {
+    return null;
+  }
+}
+
+int? snoozeMinutes(String? actionId) => switch (actionId) {
+      _snooze15Action => 15,
+      _snooze30Action => 30,
+      _ => null,
+    };
+
+bool keepSnooze(String? payload, Set<String> pendingKeys) {
+  final p = parseSnoozePayload(payload);
+  return p != null && pendingKeys.contains('${p['tid']}|${p['slot']}');
+}
+
+NotificationDetails _buildDoseDetails({bool withActions = true}) =>
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'doses',
+        tr('Dose reminders'),
+        channelDescription: tr('Medication and injection schedule reminders'),
+        importance: Importance.max,
+        priority: Priority.max,
+        actions: withActions
+            ? [
+                AndroidNotificationAction(
+                  _snooze15Action,
+                  tr('Snooze 15 min'),
+                  showsUserInterface: false,
+                  cancelNotification: true,
+                ),
+                AndroidNotificationAction(
+                  _snooze30Action,
+                  tr('Snooze 30 min'),
+                  showsUserInterface: false,
+                  cancelNotification: true,
+                ),
+              ]
+            : null,
+      ),
+      iOS: DarwinNotificationDetails(
+        categoryIdentifier: withActions ? _doseCategory : null,
+        interruptionLevel: InterruptionLevel.timeSensitive,
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    );
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  AppNotifier.snoozeFromResponse(response);
+}
+
 /// Pengingat dosis lewat notifikasi lokal (Android dan iOS). Dijadwalkan ulang
 /// setiap terapi, catatan, atau pengaturan berubah, jadi tetap muncul saat offline.
 class AppNotifier {
@@ -75,30 +162,73 @@ class AppNotifier {
   IOSFlutterLocalNotificationsPlugin? get _ios =>
       _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
 
+  static Future<void> snoozeFromResponse(NotificationResponse r) async {
+    final m = snoozeMinutes(r.actionId);
+    final p = parseSnoozePayload(r.payload);
+    if (m == null || p == null) return;
+    try {
+      tzdata.initializeTimeZones();
+      final plugin = FlutterLocalNotificationsPlugin();
+      final exact = (await plugin
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>()
+              ?.canScheduleExactNotifications()) ??
+          false;
+      final mode = exact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle;
+      final id = ('${p['tid']}|${p['slot']}|$_snoozeTag').hashCode & 0x7fffffff;
+      await plugin.zonedSchedule(
+        id: id,
+        title: p['title'] as String,
+        body: p['body'] as String,
+        scheduledDate: tz.TZDateTime.now(tz.UTC).add(Duration(minutes: m)),
+        notificationDetails: _buildDoseDetails(withActions: true),
+        androidScheduleMode: mode,
+        payload: r.payload,
+      );
+    } catch (e) {
+      debugPrint('Snooze failed: $e');
+    }
+  }
+
   Future<void> init() async {
     if (_ready || !supported) return;
     tzdata.initializeTimeZones();
     final info = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(info.identifier));
     await _plugin.initialize(
-      settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        iOS: DarwinInitializationSettings(requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false),
+      settings: InitializationSettings(
+        android: const AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+          notificationCategories: [
+            DarwinNotificationCategory(
+              _doseCategory,
+              actions: [
+                DarwinNotificationAction.plain(
+                  _snooze15Action,
+                  tr('Snooze 15 min'),
+                ),
+                DarwinNotificationAction.plain(
+                  _snooze30Action,
+                  tr('Snooze 30 min'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
+      onDidReceiveNotificationResponse: snoozeFromResponse,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     _ready = true;
   }
 
-  NotificationDetails get _details => NotificationDetails(
-        android: AndroidNotificationDetails(
-          'doses',
-          tr('Dose reminders'),
-          channelDescription: tr('Medication and injection schedule reminders'),
-          importance: Importance.max,
-          priority: Priority.max,
-        ),
-        iOS: const DarwinNotificationDetails(interruptionLevel: InterruptionLevel.timeSensitive, presentAlert: true, presentBadge: true, presentSound: true),
-      );
+  NotificationDetails get _details => _buildDoseDetails(withActions: false);
+  NotificationDetails get _doseDetails => _buildDoseDetails(withActions: true);
 
   Future<bool> requestPermission() async {
     if (!supported) return false;
@@ -148,8 +278,25 @@ class AppNotifier {
   Future<void> _sync(List<Therapy> ths, List<DoseLog> logs, List<Supply> supplies, Prefs prefs) async {
     if (!supported) return;
     await init();
-    await _plugin.cancelAll();
-    if (!prefs.notify) return;
+    if (!prefs.notify) {
+      await _plugin.cancelAll();
+      return;
+    }
+    final pendingKeys = {
+      for (final s in buildSlots(ths, logs, prefs, back: 2, ahead: 1))
+        if (s.pending) '${s.t.id}|${slotKey(s.at)}',
+    };
+    try {
+      for (final n in await _plugin.getActiveNotifications()) {
+        final id = n.id;
+        if (id != null) await _plugin.cancel(id: id, tag: n.tag);
+      }
+    } catch (_) {}
+    for (final req in await _plugin.pendingNotificationRequests()) {
+      if (!keepSnooze(req.payload, pendingKeys)) {
+        await _plugin.cancel(id: req.id);
+      }
+    }
     final now = DateTime.now();
     final mode = await _canExact() ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle;
     final desc = [...logs]..sort((a, b) => b.at.compareTo(a.at));
@@ -161,14 +308,16 @@ class AppNotifier {
       final t = s.t;
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
       final (title, body) = doseNotificationText(t, prefs, place: place);
+      final slot = slotKey(s.at);
 
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
         title: title,
         body: body,
         scheduledDate: tz.TZDateTime(tz.local, s.at.year, s.at.month, s.at.day, s.at.hour, s.at.minute),
-        notificationDetails: _details,
+        notificationDetails: _doseDetails,
         androidScheduleMode: mode,
+        payload: snoozePayload(therapyId: t.id, slot: slot, title: title, body: body),
       );
     }
 

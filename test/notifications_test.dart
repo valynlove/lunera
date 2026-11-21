@@ -84,6 +84,51 @@ void main() {
       expect(lowSupplyNotificationText(medSupply, minimalPrefs), equals(('Lunera ✦', 'Gentle reminder.')));
       expect(expiryNotificationText(medSupply, 0, minimalPrefs), equals(('Lunera ✦', 'Gentle reminder.')));
     });
+
+    test('Snooze payload round-trip, action duration mapping, discreet preservation, and pending check', () {
+      final therapy = Therapy(
+        id: 't1',
+        hormoneId: 'estradiol',
+        name: 'Estradiol Valerate',
+        dose: 4,
+        doseUnit: 'mg',
+        start: DateTime(2026, 11, 1),
+        route: 'inj',
+      );
+      L10n.notifier.value = 'en';
+      final (title, body) = doseNotificationText(
+        therapy,
+        const Prefs(discreetNotify: 'wellness'),
+        place: 'Left thigh',
+      );
+
+      final payload = snoozePayload(
+        therapyId: 't1',
+        slot: '2026-11-21 08:00',
+        title: title,
+        body: body,
+      );
+      final parsed = parseSnoozePayload(payload);
+      expect(parsed, isNotNull);
+      expect(parsed!['tid'], equals('t1'));
+      expect(parsed['slot'], equals('2026-11-21 08:00'));
+      expect(parsed['title'], equals(title));
+      expect(parsed['body'], equals(body));
+      expect('$title $body', isNot(contains('Estradiol')));
+
+      expect(parseSnoozePayload(null), isNull);
+      expect(parseSnoozePayload('not json'), isNull);
+      expect(parseSnoozePayload('{"k":"other","tid":"t1"}'), isNull);
+
+      expect(snoozeMinutes('snooze_15'), equals(15));
+      expect(snoozeMinutes('snooze_30'), equals(30));
+      expect(snoozeMinutes('other'), isNull);
+      expect(snoozeMinutes(null), isNull);
+
+      expect(keepSnooze(payload, {'t1|2026-11-21 08:00'}), isTrue);
+      expect(keepSnooze(payload, {'t1|2026-11-21 20:00'}), isFalse);
+      expect(keepSnooze('invalid', {'t1|2026-11-21 08:00'}), isFalse);
+    });
   });
 }
 

@@ -69,7 +69,7 @@ const compoundPresets = <CompoundPreset>[
   CompoundPreset(id: 'eb_inj', hormoneId: 'estradiol', en: 'Estradiol benzoate', defaultRoute: 'inj', defaultDose: 2, pk: 'e2_benzoate'),
   CompoundPreset(id: 'e2_hemi', hormoneId: 'estradiol', en: 'Estradiol hemihydrate', defaultRoute: 'oral', defaultDose: 2, pk: 'e2_oral'),
   CompoundPreset(id: 'e2_val_oral', hormoneId: 'estradiol', en: 'Estradiol valerate (oral)', defaultRoute: 'oral', defaultDose: 2, pk: 'e2_oral'),
-  CompoundPreset(id: 'e2_gel', hormoneId: 'estradiol', en: 'Estradiol gel (transdermal)', defaultRoute: 'gel', defaultDose: 1),
+  CompoundPreset(id: 'e2_gel', hormoneId: 'estradiol', en: 'Estradiol gel (transdermal)', defaultRoute: 'gel', defaultDose: 1, pk: 'e2_gel'),
 
   // Testosterone (T)
   CompoundPreset(id: 'te_inj', hormoneId: 'testosterone', en: 'Testosterone enanthate', defaultRoute: 'inj', defaultDose: 100, pk: 't_enanthate'),

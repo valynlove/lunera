@@ -83,6 +83,12 @@ void main() {
       final p4InjProfiles = pkProfilesFor('progesterone', 'inj');
       expect(p4InjProfiles.map((p) => p.id), contains('mpa_susp'));
 
+      final e2GelProfiles = pkProfilesFor('estradiol', 'gel');
+      expect(e2GelProfiles.map((p) => p.id), contains('e2_gel'));
+      final e2OralProfiles = pkProfilesFor('estradiol', 'oral');
+      expect(e2OralProfiles.map((p) => p.id), isNot(contains('e2_gel')));
+      expect(compoundOf('e2_gel')?.pk, equals('e2_gel'));
+
       // Test mgOf
       expect(mgOf(500, 'mcg'), equals(0.5));
       expect(mgOf(1, 'g'), equals(1000));

@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../backup_crypto.dart';
+import '../doctor_report.dart';
 import '../history_export.dart';
 import '../l10n.dart';
 import '../lock.dart';
@@ -20,6 +22,7 @@ import '../update_checker.dart';
 import 'app_changelog.dart';
 import 'about_sheet.dart';
 import 'auth.dart';
+import 'backup_dialogs.dart';
 import 'data_page.dart';
 import 'security_page.dart';
 import 'site_map.dart';
@@ -44,13 +47,66 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (repo == null) return;
     try {
       final text = await repo.exportJson();
-      final name = 'lunera_${DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now())}.json';
-      final f = XFile.fromData(Uint8List.fromList(utf8.encode(text)), mimeType: 'application/json', name: name);
+      if (!mounted) return;
+      final mode = await askExportMode(context);
+      if (mode == null) return;
+      final out = mode.encrypt
+          ? await encryptBackup(text, mode.passphrase)
+          : text;
+      final stamp = DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
+      final name = 'lunera_$stamp${mode.encrypt ? '.enc' : ''}.json';
+      final f = XFile.fromData(Uint8List.fromList(utf8.encode(out)),
+          mimeType: 'application/json', name: name);
       if (kIsWeb) {
         await f.saveTo(name);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('File downloaded.'))));
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(tr('File downloaded.'))));
+        }
       } else {
         await Share.shareXFiles([f], fileNameOverrides: [name]);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
+      }
+    }
+  }
+
+  Future<void> _shareDoctorReport() async {
+    final months = await showDialog<int>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(tr('Doctor visit summary')),
+        content: Text(tr('This summary contains personal health information. Only share it with people you trust.')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+          TextButton(onPressed: () => Navigator.pop(d, 3), child: Text(tr('3 months'))),
+          FilledButton(onPressed: () => Navigator.pop(d, 6), child: Text(tr('6 months'))),
+        ],
+      ),
+    );
+    if (months == null || !mounted) return;
+    final text = buildDoctorReport(
+      therapies: ref.read(therapiesProvider).value ?? const [],
+      logs: ref.read(logsProvider).value ?? const [],
+      labs: ref.read(labsProvider).value ?? const [],
+      targets: ref.read(targetsProvider).value ?? const {},
+      prefs: ref.read(prefsProvider).value ?? const Prefs(),
+      now: DateTime.now(),
+      months: months,
+    );
+    try {
+      if (kIsWeb) {
+        await Clipboard.setData(ClipboardData(text: text));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Summary copied to clipboard.'))));
+        }
+      } else {
+        await Lock.instance.suppressLockDuring(
+          () => Share.share(text, subject: tr('Lunera doctor visit summary')),
+        );
       }
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
@@ -63,7 +119,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final f = await Lock.instance.suppressLockDuring(() => openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
     if (f == null) return;
     try {
-      final raw = jsonDecode(utf8.decode(await f.readAsBytes()));
+      var raw = jsonDecode(utf8.decode(await f.readAsBytes()));
+      if (isEncryptedBackup(raw)) {
+        if (!mounted) return;
+        final p = await askImportPassphrase(context);
+        if (p == null) return;
+        raw = jsonDecode(await decryptBackup(raw as Map, p));
+      }
       final repo = ref.read(repoProvider);
       if (repo == null) return;
       final n = repo.validate(raw);
@@ -89,7 +151,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Restored {0} {0?record|records}.', [n]))));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
+      final msg = e is FormatException ? e.message : tr('Failed: {0}', [e]);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     }
   }
 
@@ -585,6 +648,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       _exportFile();
+                    },
+                  ),
+                  const Divider(height: 1, indent: 68),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(LucideIcons.stethoscope, Pastel.lilac),
+                    title: Text(
+                      tr('Doctor visit summary'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      tr('Share a text summary of therapies, adherence and lab results'),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      _shareDoctorReport();
                     },
                   ),
                   const Divider(height: 1, indent: 68),

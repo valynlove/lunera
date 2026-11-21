@@ -4,6 +4,18 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.14] - 2026-11-21
+
+### Added
+- **Scheduled Dose Projection & Peak/Trough Summary (`lib/sim.dart`, `lib/ui/levels/level_panel.dart`):** Added `projectedIntakes()`, `peakTrough()`, and an optional *"Include upcoming doses"* filter chip in non-compact hormone charts to preview upcoming scheduled steady-state curves alongside window peak/trough estimates.
+- **Rough Transdermal Estradiol Gel PK Profile (`lib/sim.dart`, `lib/models.dart`):** Added a 1-compartment population rough estimate (`e2_gel`) linked to `CompoundPreset` `e2_gel`.
+- **Doctor Visit Summary (`lib/doctor_report.dart`, `lib/ui/settings_page.dart`):** Added a shareable 3- or 6-month Markdown clinical summary covering active therapies, adherence, lab results (with `<`/`>` comparators and target status), and current model estimates while excluding private free-text notes, journal entries, measurements, and supplies.
+- **Optional Encrypted JSON Backups (`lib/backup_crypto.dart`, `lib/ui/backup_dialogs.dart`, `lib/ui/data_page.dart`, `lib/ui/settings_page.dart`):** Added passphrase-protected AES-256-GCM + PBKDF2-HMAC-SHA256 (150,000 iterations) backup export/import (`lunera-enc` envelope, `.enc.json`) while keeping full backward compatibility with plain JSON backups.
+- **Dose Notification Snooze Actions (`lib/notifications.dart`, `android/app/src/main/AndroidManifest.xml`):** Added 15- and 30-minute snooze quick actions for dose reminders (preserving discreet mode text) with selective sync cancellation so logged doses clear pending snoozes.
+
+### Changed
+- **Modularized Hormone Levels UI (`lib/ui/levels.dart`, `lib/ui/levels/`):** Split `levels.dart` into `levels_page.dart`, `level_panel.dart`, `hormone_page.dart`, and `lab_sheet.dart` part files, and added `dispose()` cleanup for controllers in `_LabSheetState`.
+
 ## [2.1.13] - 2026-11-21
 
 ### Added
