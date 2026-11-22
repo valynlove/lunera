@@ -1,3 +1,4 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lunera/l10n.dart';
 import 'package:lunera/models.dart';
@@ -128,6 +129,34 @@ void main() {
       expect(keepSnooze(payload, {'t1|2026-11-21 08:00'}), isTrue);
       expect(keepSnooze(payload, {'t1|2026-11-21 20:00'}), isFalse);
       expect(keepSnooze('invalid', {'t1|2026-11-21 08:00'}), isFalse);
+    });
+
+    test('Mark taken action and body tap populate pendingQuickDose safely',
+        () async {
+      AppNotifier.pendingQuickDose.value = null;
+      expect(isQuickLogResponse(markTakenActionId), isTrue);
+      expect(isQuickLogResponse(null), isTrue);
+      expect(isQuickLogResponse('snooze_15'), isFalse);
+
+      final payload = snoozePayload(
+        therapyId: 't_e2',
+        slot: '2026-11-22 08:00',
+        title: 'Routine Reminder',
+        body: 'Body',
+      );
+      await AppNotifier.handleNotificationResponse(
+        NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotificationAction,
+          actionId: markTakenActionId,
+          payload: payload,
+        ),
+      );
+      expect(
+        AppNotifier.pendingQuickDose.value,
+        equals(('t_e2', '2026-11-22 08:00')),
+      );
+      AppNotifier.pendingQuickDose.value = null;
     });
   });
 }

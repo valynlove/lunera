@@ -169,4 +169,77 @@ const List<GuideArticle> _guidesCare = [
       'UCSF Transgender Care Guidelines — Follow-up Schedule',
     ],
   ),
+  GuideArticle(
+    id: 'voice_training',
+    category: GuideCategory.care,
+    readMinutes: 4,
+    icon: LucideIcons.mic,
+    titleEn: 'Voice Training Basics: Comfort, Resonance & Pacing',
+    titleId: 'Dasar Latihan Suara: Kenyamanan, Resonansi & Ritme',
+    subtitleEn:
+        'Understanding pitch, resonance, and vocal weight while staying gentle with voice dysphoria.',
+    subtitleId:
+        'Memahami pitch, resonansi, dan vocal weight sambil tetap lembut menghadapi disforia suara.',
+    takeawaysEn: [
+      'Voice perception comes from pitch, resonance (throat/mouth space), and vocal weight—not a single Hz number.',
+      'Gentle hydration and light warm-ups protect your vocal folds; stop right away if your throat feels tight or scratchy.',
+      'Voice dysphoria is real—take breaks whenever listening or practicing feels overwhelming.',
+    ],
+    takeawaysId: [
+      'Kesan suara terbentuk dari pitch, resonansi (ruang gema tenggorokan/mulut), dan vocal weight—bukan hanya satu angka Hz.',
+      'Hidrasi cukup dan pemanasan ringan melindungi pita suara; berhenti segera jika tenggorokan terasa tegang atau serak.',
+      'Disforia suara itu nyata—beri dirimu izin untuk istirahat kapan pun latihan terasa berat.',
+    ],
+    sections: [
+      GuideSection(
+        headingEn: 'Beyond Hz: pitch, resonance & vocal weight',
+        headingId: 'Lebih dari sekadar Hz: pitch, resonansi & vocal weight',
+        paragraphsEn: [
+          'Estradiol does not raise vocal fold pitch once voice deepening has occurred, while testosterone thickens vocal folds over months—yet in both journeys, comfortable habits shape how a voice feels and sounds.',
+          'Pitch (measured in Hz) is only one piece. Resonance (how bright or dark the vocal tract shapes sound) and vocal weight (how lightly or heavily the folds vibrate together) carry just as much impact without forcing uncomfortable extremes.',
+        ],
+        paragraphsId: [
+          'Estradiol tidak menaikkan nada pita suara setelah suara sempat menebal, sedangkan testosteron menebalkan pita suara secara bertahap—namun pada keduanya, kebiasaan vokal yang nyaman sangat membentuk karakter suara.',
+          'Pitch (dalam satuan Hz) hanyalah satu bagian. Resonansi (kesan cerah atau dalam dari ruang mulut/tenggorokan) dan vocal weight (ringan atau beratnya getaran pita suara) sering kali jauh lebih menentukan tanpa harus memaksakan nada ekstrem.',
+        ],
+      ),
+      GuideSection(
+        headingEn: 'Protecting your throat & pacing gently',
+        headingId: 'Menjaga pita suara & berlatih secara bertahap',
+        bulletsEn: [
+          'Sip water regularly and start with 2–3 minutes of gentle humming or relaxed sighs before speaking exercises.',
+          'Keep shoulders, jaw, and neck loose—effort belongs in breath support, never squeezing the throat.',
+          'Stop immediately for the day if you notice pain, hoarseness, or vocal fatigue.',
+        ],
+        bulletsId: [
+          'Minum air secara teratur dan awali dengan 2–3 menit gumaman lembut (humming) atau hembusan napas rileks sebelum latihan bicara.',
+          'Jaga bahu, rahang, dan leher tetap santai—tenaga datang dari dukungan napas, bukan menekan tenggorokan.',
+          'Hentikan latihan untuk hari itu jika tenggorokan mulai terasa nyeri, perih, atau serak.',
+        ],
+      ),
+      GuideSection(
+        headingEn: 'Navigating voice dysphoria with kindness',
+        headingId: 'Menghadapi disforia suara dengan lembut',
+        paragraphsEn: [
+          'Hearing your own voice or seeing pitch numbers can bring up strong emotions. It is completely okay to practice silently, skip audio feedback, or pause for days whenever you need.',
+        ],
+        paragraphsId: [
+          'Mendengar suara sendiri atau melihat angka pitch terkadang memicu rasa tidak nyaman. Sangat wajar jika kamu memilih berlatih tanpa mikrofon, melewatkan umpan balik angka, atau beristirahat beberapa hari.',
+        ],
+        callout: GuideCallout(
+          type: GuideCalloutType.tip,
+          titleEn: 'Optional practice studio',
+          titleId: 'Studio latihan opsional',
+          bodyEn:
+              'When you feel ready, tap the Voice Resonance card below 5 times to unlock the optional Voice Pitch Studio in Twilight Sanctuary (on-device only, no audio recorded).',
+          bodyId:
+              'Saat kamu sudah merasa siap, ketuk kartu Voice Resonance di bawah 5 kali untuk membuka Voice Pitch Studio opsional di Suaka Senja (diproses di perangkat, tanpa merekam suara).',
+        ),
+      ),
+    ],
+    references: [
+      'WPATH Standards of Care Version 8 (SOC 8) — Voice and Communication Therapy',
+      'UCSF Transgender Care Guidelines — Transgender Voice and Communication',
+    ],
+  ),
 ];

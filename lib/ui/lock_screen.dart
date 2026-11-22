@@ -455,6 +455,9 @@ class _LockScreenState extends State<LockScreen> {
         if (st.decoyCalculator) {
           return PopScope(
             canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) SystemNavigator.pop();
+            },
             child: Theme(
               data: buildTheme(Brightness.dark),
               child: _DecoyCalculatorView(
@@ -478,6 +481,9 @@ class _LockScreenState extends State<LockScreen> {
 
         return PopScope(
           canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) SystemNavigator.pop();
+          },
           child: Theme(
             data: buildTheme(Brightness.dark),
             child: Scaffold(
@@ -765,17 +771,19 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
     Color? color,
     Color? textColor,
     Widget? icon,
+    bool compact = false,
   }) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.all(5),
-        child: AspectRatio(
-          aspectRatio: 1.0,
+        padding: EdgeInsets.all(compact ? 3 : 5),
+        child: SizedBox.expand(
           child: Material(
             color: color ?? Colors.white.withValues(alpha: 0.08),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(compact ? 16 : 24),
+            ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(compact ? 16 : 24),
               onTap: () {
                 HapticFeedback.lightImpact();
                 onTap();
@@ -786,7 +794,7 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
                     Text(
                       label,
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: compact ? 18 : 22,
                         fontWeight: FontWeight.w600,
                         color: textColor ?? Colors.white,
                       ),
@@ -804,177 +812,280 @@ class _DecoyCalculatorViewState extends State<_DecoyCalculatorView> {
     return Scaffold(
       backgroundColor: const Color(0xFF14121F),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top stealth header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Text(
-                    tr('Calculator'),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.6),
-                      letterSpacing: 0.5,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 580;
+                return Column(
+                  children: [
+                    // Top stealth header
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: compact ? 2 : 8,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            tr('Calculator'),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.6),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (widget.onBio != null)
+                            IconButton(
+                              icon: Icon(widget.biometricIcon,
+                                  color: Colors.white70),
+                              onPressed: widget.onBio,
+                              tooltip: widget.biometricTooltip ??
+                                  tr('Fingerprint or face'),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  if (widget.onBio != null)
-                    IconButton(
-                      icon: Icon(widget.biometricIcon, color: Colors.white70),
-                      onPressed: widget.onBio,
-                      tooltip: widget.biometricTooltip ?? tr('Fingerprint or face'),
+                    // Calculator Display Area
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: compact ? 2 : 8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: compact ? 18 : 24,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                _expression,
+                                style: TextStyle(
+                                  fontSize: compact ? 13 : 16,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: compact ? 2 : 4),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _display,
+                                style: TextStyle(
+                                  fontSize: compact ? 38 : 54,
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.white,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            // Calculator Display Area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    height: 24,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        _expression,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.5),
+                    SizedBox(height: compact ? 4 : 12),
+                    // Responsive Keypad Grid fitting all viewport heights cleanly
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: compact ? constraints.maxHeight : 440,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _calcButton(
+                                        label: 'C',
+                                        onTap: _onClear,
+                                        onLongPress: widget.onForgot,
+                                        color: Colors.white
+                                            .withValues(alpha: 0.18),
+                                        compact: compact,
+                                      ),
+                                      _calcButton(
+                                        label: '±',
+                                        onTap: _onSign,
+                                        color: Colors.white
+                                            .withValues(alpha: 0.18),
+                                        compact: compact,
+                                      ),
+                                      _calcButton(
+                                        label: '%',
+                                        onTap: _onPercent,
+                                        color: Colors.white
+                                            .withValues(alpha: 0.18),
+                                        compact: compact,
+                                      ),
+                                      _calcButton(
+                                        label: '÷',
+                                        onTap: () => _onOp('÷'),
+                                        color: C.peony.withValues(alpha: 0.75),
+                                        textColor: Colors.white,
+                                        compact: compact,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _calcButton(
+                                          label: '7',
+                                          onTap: () => _onDigit('7'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '8',
+                                          onTap: () => _onDigit('8'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '9',
+                                          onTap: () => _onDigit('9'),
+                                          compact: compact),
+                                      _calcButton(
+                                        label: '×',
+                                        onTap: () => _onOp('×'),
+                                        color: C.peony.withValues(alpha: 0.75),
+                                        textColor: Colors.white,
+                                        compact: compact,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _calcButton(
+                                          label: '4',
+                                          onTap: () => _onDigit('4'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '5',
+                                          onTap: () => _onDigit('5'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '6',
+                                          onTap: () => _onDigit('6'),
+                                          compact: compact),
+                                      _calcButton(
+                                        label: '−',
+                                        onTap: () => _onOp('−'),
+                                        color: C.peony.withValues(alpha: 0.75),
+                                        textColor: Colors.white,
+                                        compact: compact,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _calcButton(
+                                          label: '1',
+                                          onTap: () => _onDigit('1'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '2',
+                                          onTap: () => _onDigit('2'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '3',
+                                          onTap: () => _onDigit('3'),
+                                          compact: compact),
+                                      _calcButton(
+                                        label: '+',
+                                        onTap: () => _onOp('+'),
+                                        color: C.peony.withValues(alpha: 0.75),
+                                        textColor: Colors.white,
+                                        compact: compact,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _calcButton(
+                                          label: '0',
+                                          onTap: () => _onDigit('0'),
+                                          compact: compact),
+                                      _calcButton(
+                                          label: '.',
+                                          onTap: _onDecimal,
+                                          compact: compact),
+                                      _calcButton(
+                                        label: '⌫',
+                                        icon: const Icon(LucideIcons.delete,
+                                            color: Colors.white, size: 20),
+                                        onTap: _onBackspace,
+                                        compact: compact,
+                                      ),
+                                      _calcButton(
+                                        label: '=',
+                                        onTap: _onEquals,
+                                        color: C.peony,
+                                        textColor: Colors.white,
+                                        compact: compact,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        _display,
-                        style: const TextStyle(
-                          fontSize: 54,
-                          fontWeight: FontWeight.w300,
-                          color: Colors.white,
-                          letterSpacing: 1.0,
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: compact ? 2 : 6),
+                      child: Center(
+                        child: TextButton(
+                          onPressed: widget.onForgot,
+                          style: compact
+                              ? TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                )
+                              : null,
+                          child: Text(
+                            tr('Forgot PIN?'),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.35),
+                              fontSize: 11,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 12),
-            // Keypad Grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      _calcButton(
-                        label: 'C',
-                        onTap: _onClear,
-                        onLongPress: widget.onForgot,
-                        color: Colors.white.withValues(alpha: 0.18),
-                      ),
-                      _calcButton(
-                        label: '±',
-                        onTap: _onSign,
-                        color: Colors.white.withValues(alpha: 0.18),
-                      ),
-                      _calcButton(
-                        label: '%',
-                        onTap: _onPercent,
-                        color: Colors.white.withValues(alpha: 0.18),
-                      ),
-                      _calcButton(
-                        label: '÷',
-                        onTap: () => _onOp('÷'),
-                        color: C.peony.withValues(alpha: 0.75),
-                        textColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      _calcButton(label: '7', onTap: () => _onDigit('7')),
-                      _calcButton(label: '8', onTap: () => _onDigit('8')),
-                      _calcButton(label: '9', onTap: () => _onDigit('9')),
-                      _calcButton(
-                        label: '×',
-                        onTap: () => _onOp('×'),
-                        color: C.peony.withValues(alpha: 0.75),
-                        textColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      _calcButton(label: '4', onTap: () => _onDigit('4')),
-                      _calcButton(label: '5', onTap: () => _onDigit('5')),
-                      _calcButton(label: '6', onTap: () => _onDigit('6')),
-                      _calcButton(
-                        label: '−',
-                        onTap: () => _onOp('−'),
-                        color: C.peony.withValues(alpha: 0.75),
-                        textColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      _calcButton(label: '1', onTap: () => _onDigit('1')),
-                      _calcButton(label: '2', onTap: () => _onDigit('2')),
-                      _calcButton(label: '3', onTap: () => _onDigit('3')),
-                      _calcButton(
-                        label: '+',
-                        onTap: () => _onOp('+'),
-                        color: C.peony.withValues(alpha: 0.75),
-                        textColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      _calcButton(label: '0', onTap: () => _onDigit('0')),
-                      _calcButton(label: '.', onTap: _onDecimal),
-                      _calcButton(
-                        label: '⌫',
-                        icon: const Icon(LucideIcons.delete, color: Colors.white, size: 20),
-                        onTap: _onBackspace,
-                      ),
-                      _calcButton(
-                        label: '=',
-                        onTap: _onEquals,
-                        color: C.peony,
-                        textColor: Colors.white,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: TextButton(
-                onPressed: widget.onForgot,
-                child: Text(
-                  tr('Forgot PIN?'),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.35),
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
+          ),
         ),
       ),
     );

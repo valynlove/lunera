@@ -42,10 +42,83 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.16',
+      version: '2.1.19',
       dateEn: 'November 22, 2026',
       dateId: '22 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Next Dose Day & Date on Home Cards: Dose cards now display the exact weekday, date, and time of the upcoming scheduled dose alongside the countdown dial.',
+          textId:
+              'Hari & Tanggal Dosis Berikutnya di Kartu Beranda: Kartu dosis kini menampilkan hari, tanggal, dan jam jadwal berikutnya secara jelas bersama dial hitung mundur.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Decoy Calculator Tablet Layout & Back Navigation: Made the Decoy Calculator keypad responsive across landscape tablets without button cutoff, and enabled system Back exit from the lock screen while keeping the session locked.',
+          textId:
+              'Tata Letak Tablet & Tombol Kembali Kalkulator Penyamaran: Membuat grid tombol Kalkulator Penyamaran responsif pada layar tablet lanskap tanpa terpotong, serta mengizinkan keluar aplikasi lewat tombol Back sistem sambil tetap menjaga sesi terkunci.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.18',
+      dateEn: 'November 22, 2026',
+      dateId: '22 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Gentle 3-Step Onboarding: Empty Home dashboard now guides new users calmly through adding a first therapy, reviewing PIN/Decoy privacy settings, and opening the Start Here safety guide.',
+          textId:
+              'Onboarding 3 Langkah Tenang: Layar Home kosong kini memandu pengguna baru menambah terapi pertama, mengatur kunci PIN/Decoy, dan membaca panduan Mulai di Sini.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Notification "Mark Taken" Action: Dose reminders now include a foreground "Mark taken" action (alongside 15/30-min snooze) that opens the pre-filled confirmation sheet safely behind LockGate.',
+          textId:
+              'Aksi Notifikasi "Tandai Diminum": Pengingat dosis kini memiliki tombol cepat "Tandai diminum" (bersama tunda 15/30 mnt) yang membuka konfirmasi dosis secara aman setelah LockGate.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Supply Run-Out Forecast & Trough Bloodwork Timing: Supplies display estimated weeks/days remaining based on therapy cadence, and Levels highlights the next trough blood-draw window alongside 3-month lab reminders.',
+          textId:
+              'Perkiraan Stok Habis & Waktu Cek Lab Trough: Halaman Supplies menampilkan perkiraan minggu/hari tersisa, dan tab Levels menampilkan waktu terbaik ambil darah trough serta pengingat cek rutin 3 bulan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Doctor Visit Summary PDF Export: Share or download a clean A4 print-ready PDF alongside Markdown from Settings -> Doctor Visit Summary.',
+          textId:
+              'Ekspor PDF Ringkasan Konsultasi Dokter: Bagikan atau unduh PDF A4 siap cetak selain format teks Markdown dari Pengaturan -> Ringkasan Konsultasi Dokter.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.17',
+      dateEn: 'November 22, 2026',
+      dateId: '22 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Voice Training Guide & Easter-Egg Voice Pitch Studio: Added a 14th Care Guide covering comfort, resonance, and voice dysphoria, plus a 5-tap Developer Mode unlock revealing the optional Voice Pitch Studio in Twilight Sanctuary (quiet warm-up, random reading prompts, live on-device Hz categories, and numeric-only history without storing audio).',
+          textId:
+              'Panduan Latihan Suara & Easter-Egg Voice Pitch Studio: Menambahkan panduan ke-14 tentang kenyamanan, resonansi, dan disforia suara, serta pemicu ketuk 5x ala Developer Mode untuk membuka Voice Pitch Studio opsional di Suaka Senja (pemanasan tenang, kalimat latihan acak, kategori Hz langsung di perangkat, dan riwayat angka tanpa menyimpan rekaman audio).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.16',
+      dateEn: 'November 22, 2026',
+      dateId: '22 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../guides_data.dart';
 import '../models.dart';
 import '../repo.dart';
+import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import 'article_page.dart';

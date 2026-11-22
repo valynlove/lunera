@@ -4,6 +4,30 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.19] - 2026-11-22
+
+### Changed
+- **Explicit Next Dose Date on Home `DoseCard` (`lib/ui/home.dart`, `lib/l10n_id.dart`):** Added the formatted weekday, date, and time (`Next: <weekday, d MMM • HH:mm>`) directly on scheduled dose cards so users do not need to calculate dates manually from the day countdown.
+
+### Fixed
+- **Decoy Calculator Tablet Landscape Layout & System Back Exit (`lib/ui/lock_screen.dart`):** Replaced fixed-aspect-ratio keypad rows with a height-adaptive, centered keypad (`maxWidth: 460`, `Expanded` rows) so all 5 calculator rows and *"Forgot PIN?"* fit cleanly on landscape tablets without clipping, and wired `PopScope.onPopInvokedWithResult` on lock screens to exit cleanly via `SystemNavigator.pop()` without bypassing lock protection.
+
+## [2.1.18] - 2026-11-22
+
+### Added
+- **Gentle 3-Step Onboarding (`lib/ui/home.dart`):** Added a calm, optional 3-step onboarding card on empty `HomePage` linking directly to adding a first therapy, reviewing PIN/Decoy privacy settings, and reading the *Start Here* guide.
+- **Notification "Mark Taken" Quick Action (`lib/notifications.dart`, `lib/ui/shell.dart`):** Added a foreground *"Mark taken"* notification action (plus body-tap handling) that safely opens the pre-filled `DoseSheet` with the suggested site after passing `LockGate`.
+- **Supply Run-Out Forecast & Trough Bloodwork Timing (`lib/schedule.dart`, `lib/ui/supplies.dart`, `lib/ui/levels/levels_page.dart`):** Added `estimateSupplyForecast()` to show estimated weeks/days remaining on medication and syringe supplies, and `computeTroughLabReminder()` to surface the next trough blood-draw window and 90-day routine lab check-in status on `LevelsPage`.
+- **Doctor Visit Summary PDF Export (`lib/doctor_report.dart`, `lib/ui/settings_page.dart`):** Added `buildDoctorReportPdf()` using a dependency-free A4 PDF 1.4 generator to export a print-ready PDF summary (excluding private notes, journal entries, supplies, and measurements) alongside Markdown export.
+
+## [2.1.17] - 2026-11-22
+
+### Added
+- **Voice Training Basics Guide (`lib/guides/guides_care.dart`):** Added the 14th bilingual Care & HRT Guide covering pitch, resonance, vocal weight, throat safety, and navigating voice dysphoria gently.
+- **Unlockable Voice Pitch Studio Easter Egg (`lib/voice_pitch.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`, `lib/ui/article_page.dart`, `lib/ui/sanctuary/sanctuary_page.dart`):**
+  - Added a 5-tap Developer Mode unlock card inside the *Voice Training Basics* guide that unlocks **Voice Pitch Studio** in *Twilight Sanctuary* (with a one-tap option to hide it again anytime).
+  - Includes a gentle dysphoria warning, a no-mic **Quiet Warm-up** timer, **Live Voice Test** with randomized/custom reading prompts, on-device YIN pitch estimation categorized into soft overlapping ranges (*Low/Masculine*, *Neutral/Overlap*, *Bright/Feminine*), and numeric-only local result storage with zero audio recordings saved.
+
 ## [2.1.16] - 2026-11-22
 
 ### Added

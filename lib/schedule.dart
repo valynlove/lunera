@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'models.dart';
 import 'l10n.dart';
@@ -144,4 +146,119 @@ String hrtDuration(DateTime from, DateTime to) {
   }
   final parts = [if (y > 0) tr('{0} {0?year|years}', [y]), if (m > 0) tr('{0} {0?month|months}', [m]), if (d > 0 || (y == 0 && m == 0)) tr('{0} {0?day|days}', [d])];
   return parts.join(' ');
+}
+
+/// Estimated remaining supply horizon based on linked active therapy cadence.
+class SupplyForecast {
+  const SupplyForecast({required this.daysLeft, required this.runOutDate});
+  final int daysLeft;
+  final DateTime runOutDate;
+}
+
+SupplyForecast? estimateSupplyForecast(
+  Supply s,
+  List<Therapy> therapies, {
+  DateTime? now,
+}) {
+  if (s.qty <= 0 || s.perDose <= 0) return null;
+
+  double cadencePerDay(Therapy t) =>
+      t.daily ? math.max(1, t.times.length).toDouble() : 1.0 / math.max(1, cycleOf(t));
+
+  final active = therapies.where((t) => !t.asNeeded).toList();
+  double dosesPerDay = 0;
+
+  if (!s.generic) {
+    var matched = active.where((t) => t.supplyId == s.id).toList();
+    if (matched.isEmpty) {
+      final needle = s.name.trim().toLowerCase();
+      if (needle.isNotEmpty) {
+        matched = active
+            .where((t) =>
+                t.name.trim().toLowerCase().contains(needle) ||
+                needle.contains(t.name.trim().toLowerCase()))
+            .toList();
+      }
+    }
+    if (matched.isEmpty && active.length == 1) {
+      matched = active;
+    }
+    for (final t in matched) {
+      dosesPerDay += cadencePerDay(t);
+    }
+  } else {
+    for (final t in active.where((t) => t.route == 'inj')) {
+      dosesPerDay += cadencePerDay(t);
+    }
+  }
+
+  if (dosesPerDay <= 0) return null;
+  final remainingDoses = s.qty / s.perDose;
+  final daysLeft = (remainingDoses / dosesPerDay).floor();
+  if (daysLeft <= 0) return null;
+
+  final base = now ?? DateTime.now();
+  return SupplyForecast(
+    daysLeft: daysLeft,
+    runOutDate: DateTime(base.year, base.month, base.day + daysLeft),
+  );
+}
+
+/// Guidance for optimal trough blood-draw timing and 90-day routine bloodwork.
+class TroughLabReminder {
+  const TroughLabReminder({
+    this.nextTroughSlot,
+    this.daysSinceLastLab,
+    this.nextRoutineLabDate,
+    required this.isDue,
+  });
+
+  final Slot? nextTroughSlot;
+  final int? daysSinceLastLab;
+  final DateTime? nextRoutineLabDate;
+  final bool isDue;
+}
+
+TroughLabReminder? computeTroughLabReminder(
+  List<Therapy> therapies,
+  List<DoseLog> logs,
+  List<Lab> labs,
+  Prefs prefs, {
+  DateTime? now,
+}) {
+  if (therapies.isEmpty) return null;
+  final refNow = now ?? DateTime.now();
+
+  final scheduled = therapies.where((t) => !t.asNeeded).toList();
+  final upcoming = scheduled.isEmpty
+      ? <Slot>[]
+      : [
+          for (final s in buildSlots(scheduled, logs, prefs, back: 0, ahead: 35))
+            if (s.pending && s.at.isAfter(refNow)) s,
+        ]
+    ..sort((a, b) => a.at.compareTo(b.at));
+
+  final sortedLabs = [...labs]..sort((a, b) => b.at.compareTo(a.at));
+  final latestLab = sortedLabs.firstOrNull;
+  if (latestLab == null) {
+    return TroughLabReminder(
+      nextTroughSlot: upcoming.firstOrNull,
+      daysSinceLastLab: null,
+      nextRoutineLabDate: null,
+      isDue: true,
+    );
+  }
+
+  final daysSince = math.max(0, daysBetween(latestLab.at, refNow));
+  final nextRoutine = DateTime(
+    latestLab.at.year,
+    latestLab.at.month,
+    latestLab.at.day + 90,
+  );
+  return TroughLabReminder(
+    nextTroughSlot: upcoming.firstOrNull,
+    daysSinceLastLab: daysSince,
+    nextRoutineLabDate: nextRoutine,
+    isDue: daysSince >= 90,
+  );
 }

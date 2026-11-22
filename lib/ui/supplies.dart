@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
+import '../schedule.dart';
 import '../theme.dart';
 import '../l10n.dart';
 import 'pickup_assistant_sheet.dart';
@@ -172,6 +173,19 @@ class _MedCard extends ConsumerWidget {
     final low = s.low;
     final color = expired ? C.peony : (low ? C.amber : C.lagoon);
     final repo = ref.read(repoProvider);
+    final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
+    final forecast = estimateSupplyForecast(s, ths);
+    final forecastText = forecast == null
+        ? null
+        : (forecast.daysLeft >= 14
+            ? tr('Est. ~{0} {0?week|weeks} left (until {1})', [
+                (forecast.daysLeft / 7).round(),
+                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
+              ])
+            : tr('Est. ~{0} {0?day|days} left (until {1})', [
+                forecast.daysLeft,
+                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
+              ]));
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       child: Material(
@@ -217,6 +231,16 @@ class _MedCard extends ConsumerWidget {
               Text(low
                   ? tr('{0} {0?dose|doses} left, restock soon', [s.doses])
                   : tr('{0} {0?dose|doses} left', [s.doses])),
+              if (forecastText != null) ...[
+                gap(2),
+                Text(
+                  forecastText,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Pastel.lilac.withValues(alpha: 0.9)),
+                ),
+              ],
               if (s.expiry != null)
                 Text(
                     tr(expired ? 'Expired since {0}' : 'Expires {0}',
@@ -240,6 +264,19 @@ class _GenericCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final low = s.low;
     final repo = ref.read(repoProvider);
+    final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
+    final forecast = estimateSupplyForecast(s, ths);
+    final forecastText = forecast == null
+        ? null
+        : (forecast.daysLeft >= 14
+            ? tr('Est. ~{0} {0?week|weeks} left (until {1})', [
+                (forecast.daysLeft / 7).round(),
+                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
+              ])
+            : tr('Est. ~{0} {0?day|days} left (until {1})', [
+                forecast.daysLeft,
+                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
+              ]));
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -255,8 +292,21 @@ class _GenericCard extends ConsumerWidget {
                   color: low ? C.amber : C.lagoon),
               const SizedBox(width: 14),
               Expanded(
-                  child: Text(s.name,
-                      style: const TextStyle(fontWeight: FontWeight.w700))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(s.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    if (forecastText != null)
+                      Text(
+                        forecastText,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Pastel.lilac.withValues(alpha: 0.85),
+                            fontSize: 11),
+                      ),
+                  ],
+                ),
+              ),
               IconButton.filledTonal(
                   onPressed: () => repo?.adjustSupply(s.id, -1),
                   icon: const Icon(LucideIcons.minus)),

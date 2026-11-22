@@ -54,12 +54,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.1.16'));
+      expect(UpdateCheckerService.currentVersion, equals('2.1.19'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.1.16'));
+      expect(AppChangelog.releases.first.version, equals('2.1.19'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -696,8 +696,117 @@ void main() {
       expect(find.byType(HomePage), findsOneWidget);
       expect(find.byType(DoseCard), findsOneWidget);
       expect(find.text('Estradiol Enanthate'), findsOneWidget);
+      expect(find.textContaining('Next: '), findsOneWidget);
       expect(find.text(tr('Log injection')), findsOneWidget);
       expect(find.text(tr('View full schedule in Calendar')), findsOneWidget);
+    });
+
+    testWidgets(
+        'Decoy calculator LockScreen fits cleanly on landscape tablet and unlocks',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      const appUtilsChannel = MethodChannel('com.example.ritme/app_utils');
+      const localAuthChannel = MethodChannel('plugins.flutter.io/local_auth');
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(appUtilsChannel, (_) async => null);
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(localAuthChannel, (call) async {
+        if (call.method == 'getAvailableBiometrics') return <String>[];
+        return false;
+      });
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(appUtilsChannel, null);
+        tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(localAuthChannel, null);
+      });
+
+      const salt = 'decoy-tablet-salt';
+      final hash = hashPinPbkdf2('135790', salt, iterations: 1000);
+      FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+        'lock.salt': salt,
+        'lock.hash': hash,
+        'lock.decoy': true,
+        'lock.updatedAt': 1000,
+      });
+      await Lock.instance.load();
+      Lock.instance.sessionUnlocked = false;
+      addTearDown(() async {
+        await Lock.instance.clearLocal();
+        Lock.instance.resetSyncCache();
+      });
+
+      tester.view.physicalSize = const Size(1280, 720);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      var unlocked = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LockScreen(onUnlock: () => unlocked = true),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      for (final label in ['C', '7', '4', '1', '0', '=']) {
+        final finder = find.descendant(
+            of: find.byType(InkWell), matching: find.text(label));
+        expect(finder, findsOneWidget);
+        final rect = tester.getRect(finder);
+        expect(rect.bottom, lessThanOrEqualTo(720.0), reason: label);
+      }
+      expect(find.text(tr('Forgot PIN?')), findsOneWidget);
+
+      for (final d in ['1', '3', '5', '7', '9', '0']) {
+        await tester.tap(
+          find.descendant(of: find.byType(InkWell), matching: find.text(d)),
+        );
+        await tester.pump();
+      }
+      await tester.tap(
+        find.descendant(of: find.byType(InkWell), matching: find.text('=')),
+      );
+      await tester.pumpAndSettle();
+      expect(unlocked, isTrue);
+    }, timeout: const Timeout(Duration(seconds: 10)));
+
+    testWidgets(
+        'HomePage shows gentle 3-step onboarding card when no therapies exist',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProvider.overrideWith((ref) => Stream.value(null)),
+            therapiesProvider.overrideWith((ref) => Stream.value(<Therapy>[])),
+            suppliesProvider.overrideWith((ref) => Stream.value(<Supply>[])),
+            logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[])),
+            prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
+            journalProvider
+                .overrideWith((ref) => Stream.value(<JournalEntry>[])),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: HomePage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(tr('No therapies yet')), findsOneWidget);
+      expect(find.text(tr('Get started in 3 calm steps')), findsOneWidget);
+      expect(find.text('1. ${tr('Add your first therapy')}'), findsOneWidget);
+      expect(find.text('2. ${tr('Protect your privacy')}'), findsOneWidget);
+      expect(
+          find.text('3. ${tr('Read the Start Here guide')}'), findsOneWidget);
     });
 
     testWidgets(
@@ -829,11 +938,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>')).selected,
+        tester
+            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>'))
+            .selected,
         isTrue,
       );
       expect(
-        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '=')).selected,
+        tester
+            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '='))
+            .selected,
         isFalse,
       );
 
@@ -841,11 +954,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '=')).selected,
+        tester
+            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '='))
+            .selected,
         isTrue,
       );
       expect(
-        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>')).selected,
+        tester
+            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>'))
+            .selected,
         isFalse,
       );
     });
@@ -906,7 +1023,8 @@ void main() {
       expect(find.text(tr('Include upcoming doses')), findsOneWidget);
       expect(find.textContaining('peak'), findsOneWidget);
       expect(
-        find.text(tr('Projection assumes upcoming doses are taken as scheduled.')),
+        find.text(
+            tr('Projection assumes upcoming doses are taken as scheduled.')),
         findsNothing,
       );
 
@@ -914,7 +1032,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text(tr('Projection assumes upcoming doses are taken as scheduled.')),
+        find.text(
+            tr('Projection assumes upcoming doses are taken as scheduled.')),
         findsOneWidget,
       );
     });

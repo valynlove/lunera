@@ -5,12 +5,15 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../l10n.dart';
 import '../../sanctuary_data.dart';
 import '../../theme.dart';
+import '../../voice_pitch.dart';
 import 'moonlight_lantern_page.dart';
 import 'safety_quiz_page.dart';
 import 'starlight_breath_page.dart';
+import 'voice_pitch_page.dart';
 
-/// Calm hub for Lunera's three gentle mini-experiences:
-/// Starlight Ripples & Breath, Safety & Dosing Sense, and Moonlight Lantern.
+/// Calm hub for Lunera's gentle mini-experiences:
+/// Starlight Ripples & Breath, Safety & Dosing Sense, Moonlight Lantern,
+/// and the unlockable Voice Pitch Studio easter egg.
 class SanctuaryPage extends StatefulWidget {
   const SanctuaryPage({super.key});
 
@@ -20,6 +23,7 @@ class SanctuaryPage extends StatefulWidget {
 
 class _SanctuaryPageState extends State<SanctuaryPage> {
   LanternState _state = const LanternState();
+  bool _voiceUnlocked = false;
 
   @override
   void initState() {
@@ -30,8 +34,12 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
   Future<void> _loadState() async {
     try {
       final loaded = await SanctuaryStore.load();
+      final voiceUnlocked = await VoiceStore.isUnlocked();
       if (!mounted) return;
-      setState(() => _state = loaded);
+      setState(() {
+        _state = loaded;
+        _voiceUnlocked = voiceUnlocked;
+      });
     } catch (_) {
       // Non-critical visual summary; keep default state on storage errors.
     }
@@ -117,6 +125,18 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
               showMintDot: canLight,
               onTap: () => _open(const MoonlightLanternPage()),
             ),
+            if (_voiceUnlocked) ...[
+              gap(14),
+              _SanctuaryCard(
+                icon: LucideIcons.mic,
+                accent: C.violet,
+                title: tr('Voice Pitch Studio'),
+                subtitle: tr(
+                    'Gentle voice warm-up, reading prompts & live pitch category check'),
+                badgeText: tr('Optional • On-device'),
+                onTap: () => _open(const VoicePitchPage()),
+              ),
+            ],
             gap(22),
             AppCard(
               padding: const EdgeInsets.all(16),

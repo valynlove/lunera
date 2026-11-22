@@ -60,6 +60,7 @@ String _verb(Therapy t) => switch (t.route) {
 }
 
 const _snoozeTag = 'snz';
+const markTakenActionId = 'mark_taken';
 const _snooze15Action = 'snooze_15';
 const _snooze30Action = 'snooze_30';
 const _doseCategory = 'dose_actions';
@@ -101,6 +102,9 @@ int? snoozeMinutes(String? actionId) => switch (actionId) {
       _ => null,
     };
 
+bool isQuickLogResponse(String? actionId) =>
+    actionId == markTakenActionId || actionId == null || actionId.isEmpty;
+
 bool keepSnooze(String? payload, Set<String> pendingKeys) {
   final p = parseSnoozePayload(payload);
   return p != null && pendingKeys.contains('${p['tid']}|${p['slot']}');
@@ -116,6 +120,12 @@ NotificationDetails _buildDoseDetails({bool withActions = true}) =>
         priority: Priority.max,
         actions: withActions
             ? [
+                AndroidNotificationAction(
+                  markTakenActionId,
+                  tr('Mark taken'),
+                  showsUserInterface: true,
+                  cancelNotification: true,
+                ),
                 AndroidNotificationAction(
                   _snooze15Action,
                   tr('Snooze 15 min'),
@@ -151,6 +161,11 @@ class AppNotifier {
   AppNotifier._();
   static final instance = AppNotifier._();
 
+  /// Holds a pending `(therapyId, slotKey)` triggered by tapping a dose
+  /// notification or its "Mark taken" action so the foreground shell opens
+  /// the confirmation sheet safely behind LockGate.
+  static final pendingQuickDose = ValueNotifier<(String, String)?>(null);
+
   final _plugin = FlutterLocalNotificationsPlugin();
   bool _ready = false;
   Future<void> _chain = Future.value();
@@ -161,6 +176,20 @@ class AppNotifier {
       _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
   IOSFlutterLocalNotificationsPlugin? get _ios =>
       _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+
+  /// Handles foreground notification responses (both snooze and Mark taken).
+  static Future<void> handleNotificationResponse(NotificationResponse r) async {
+    if (snoozeMinutes(r.actionId) != null) {
+      await snoozeFromResponse(r);
+      return;
+    }
+    if (isQuickLogResponse(r.actionId)) {
+      final p = parseSnoozePayload(r.payload);
+      if (p != null) {
+        pendingQuickDose.value = (p['tid'] as String, p['slot'] as String);
+      }
+    }
+  }
 
   static Future<void> snoozeFromResponse(NotificationResponse r) async {
     final m = snoozeMinutes(r.actionId);
@@ -209,6 +238,11 @@ class AppNotifier {
               _doseCategory,
               actions: [
                 DarwinNotificationAction.plain(
+                  markTakenActionId,
+                  tr('Mark taken'),
+                  options: {DarwinNotificationActionOption.foreground},
+                ),
+                DarwinNotificationAction.plain(
                   _snooze15Action,
                   tr('Snooze 15 min'),
                 ),
@@ -221,7 +255,7 @@ class AppNotifier {
           ],
         ),
       ),
-      onDidReceiveNotificationResponse: snoozeFromResponse,
+      onDidReceiveNotificationResponse: handleNotificationResponse,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     _ready = true;

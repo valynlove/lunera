@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n.dart';
 import '../lock.dart';
+import '../models.dart';
 import '../notifications.dart';
 import '../repo.dart';
+import '../schedule.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import '../widget_sync.dart';
@@ -13,6 +15,7 @@ import 'calendar.dart';
 import 'home.dart';
 import 'levels.dart';
 import 'more.dart';
+import 'sheets.dart';
 import 'supplies.dart';
 
 class Shell extends ConsumerStatefulWidget {
@@ -23,9 +26,12 @@ class Shell extends ConsumerStatefulWidget {
 }
 
 class _ShellState extends ConsumerState<Shell> {
+  bool _openingQuickDose = false;
+
   @override
   void initState() {
     super.initState();
+    AppNotifier.pendingQuickDose.addListener(_onQuickDosePending);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (AppNotifier.instance.supported) {
         final prefs = ref.read(prefsProvider).value;
@@ -33,6 +39,7 @@ class _ShellState extends ConsumerState<Shell> {
           AppNotifier.instance.requestPermission();
         }
       }
+      _tryOpenQuickDose();
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted && (!Lock.instance.state.value.enabled || Lock.instance.sessionUnlocked)) {
           UpdateCheckerService.checkAndNotify(ref, context: context);
@@ -42,9 +49,65 @@ class _ShellState extends ConsumerState<Shell> {
   }
 
   @override
+  void dispose() {
+    AppNotifier.pendingQuickDose.removeListener(_onQuickDosePending);
+    super.dispose();
+  }
+
+  void _onQuickDosePending() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryOpenQuickDose());
+  }
+
+  Future<void> _tryOpenQuickDose() async {
+    if (!mounted || _openingQuickDose) return;
+    final pending = AppNotifier.pendingQuickDose.value;
+    if (pending == null) return;
+
+    final ths = ref.read(therapiesProvider).value;
+    final logs = ref.read(logsProvider).value;
+    final supplies = ref.read(suppliesProvider).value;
+    final prefs = ref.read(prefsProvider).value;
+    if (ths == null || logs == null || supplies == null || prefs == null) {
+      return;
+    }
+
+    AppNotifier.pendingQuickDose.value = null;
+    final therapy = ths.where((t) => t.id == pending.$1).firstOrNull;
+    if (therapy == null) return;
+
+    final slots = buildSlots([therapy], logs, prefs, back: 3, ahead: 2);
+    final matchingSlot = slots
+        .where((s) => slotKey(s.at) == pending.$2 && s.pending)
+        .firstOrNull;
+    final descLogs = [...logs]..sort((a, b) => b.at.compareTo(a.at));
+    final suggested =
+        therapy.adm.places ? suggestPlace(prefs, descLogs, therapy.id) : '';
+
+    _openingQuickDose = true;
+    try {
+      await showSheet(
+        context,
+        DoseSheet(
+          t: therapy,
+          slot: matchingSlot,
+          supplies: supplies,
+          prefs: prefs,
+          suggested: suggested,
+        ),
+      );
+    } finally {
+      _openingQuickDose = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     ref.watch(notifySyncProvider); // jadwalkan ulang pengingat saat data berubah
     ref.watch(widgetSyncProvider); // perbarui widget layar utama
+    ref.listen<AsyncValue<List<Therapy>>>(
+      therapiesProvider,
+      (_, __) => _tryOpenQuickDose(),
+    );
     final i = ref.watch(tabProvider);
 
     return PopScope(

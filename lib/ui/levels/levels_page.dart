@@ -132,6 +132,16 @@ class LevelsPage extends ConsumerWidget {
             ),
           )
         else ...[
+          if (computeTroughLabReminder(
+            ths,
+            ref.watch(logsProvider).value ?? const <DoseLog>[],
+            labs,
+            ref.watch(prefsProvider).value ?? const Prefs(),
+          )
+              case final reminder?) ...[
+            _TroughReminderCard(reminder: reminder),
+            const SizedBox(height: 14),
+          ],
           // Kurva simulasi untuk hormon aktif (dengan ringkasan lab terintegrasi)
           for (final h in simIds)
             Padding(
@@ -301,6 +311,91 @@ class _LevelCard extends ConsumerWidget {
             ]),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _TroughReminderCard extends StatelessWidget {
+  const _TroughReminderCard({required this.reminder});
+
+  final TroughLabReminder reminder;
+
+  @override
+  Widget build(BuildContext context) {
+    final slot = reminder.nextTroughSlot;
+    final String routineText;
+    if (reminder.daysSinceLastLab == null) {
+      routineText = tr(
+          'No bloodwork logged yet — aim to test at trough after 4–8 weeks on a steady routine.');
+    } else if (reminder.isDue) {
+      routineText = tr(
+          'Last bloodwork was {0} {0?day|days} ago — consider a routine 3-month check-in.',
+          [reminder.daysSinceLastLab!]);
+    } else {
+      routineText = tr(
+          'Last bloodwork: {0} {0?day|days} ago • Next 3-month check: {1}',
+          [
+            reminder.daysSinceLastLab!,
+            DateFormat('d MMM y', L10n.code)
+                .format(reminder.nextRoutineLabDate!),
+          ]);
+    }
+
+    return AppCard(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          iconBadge(
+            LucideIcons.flaskConical,
+            reminder.isDue ? C.coral : Pastel.mint,
+            size: 40,
+            iconSize: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('Trough & Bloodwork Timing'),
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                if (slot != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    tr('Best trough blood-draw window: right before {0} on {1}',
+                        [
+                          slot.t.name,
+                          DateFormat('EEE, d MMM • HH:mm', L10n.code)
+                              .format(slot.at),
+                        ]),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: C.lavender,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  routineText,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Pastel.mist.withValues(alpha: 0.82),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

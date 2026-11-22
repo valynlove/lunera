@@ -6,8 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../guides_data.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import '../voice_pitch.dart';
 import 'insights.dart';
 import 'levels.dart';
+import 'sanctuary/voice_pitch_page.dart';
 import 'security_page.dart';
 import 'site_map.dart';
 
@@ -24,10 +26,54 @@ class ArticlePage extends StatefulWidget {
 }
 
 class _ArticlePageState extends State<ArticlePage> {
+  int _voiceTapCount = 0;
+  bool _voiceUnlocked = false;
+
   @override
   void initState() {
     super.initState();
     _markRead();
+    if (widget.article.id == 'voice_training') {
+      _loadVoiceUnlock();
+    }
+  }
+
+  Future<void> _loadVoiceUnlock() async {
+    try {
+      final unlocked = await VoiceStore.isUnlocked();
+      if (!mounted) return;
+      setState(() => _voiceUnlocked = unlocked);
+    } catch (_) {
+      // Ignore storage read errors gracefully.
+    }
+  }
+
+  Future<void> _handleVoiceEasterEggTap() async {
+    if (_voiceUnlocked) {
+      HapticFeedback.selectionClick();
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const VoicePitchPage()),
+      );
+      return;
+    }
+    HapticFeedback.selectionClick();
+    final next = _voiceTapCount + 1;
+    if (next >= 5) {
+      await VoiceStore.setUnlocked(true);
+      if (!mounted) return;
+      HapticFeedback.mediumImpact();
+      setState(() {
+        _voiceTapCount = 5;
+        _voiceUnlocked = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('Voice Pitch Studio unlocked in Twilight Sanctuary.')),
+        ),
+      );
+    } else {
+      setState(() => _voiceTapCount = next);
+    }
   }
 
   Future<void> _markRead() async {
@@ -232,6 +278,14 @@ class _ArticlePageState extends State<ArticlePage> {
               gap(20),
             ],
 
+            if (article.id == 'voice_training') ...[
+              _VoiceEasterEggCard(
+                unlocked: _voiceUnlocked,
+                onTap: _handleVoiceEasterEggTap,
+              ),
+              gap(20),
+            ],
+
             // Medical Disclaimer & References
             AppCard(
               padding: const EdgeInsets.all(16),
@@ -381,6 +435,70 @@ class _CalloutBox extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VoiceEasterEggCard extends StatelessWidget {
+  const _VoiceEasterEggCard({
+    required this.unlocked,
+    required this.onTap,
+  });
+
+  final bool unlocked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      highlight: unlocked,
+      padding: const EdgeInsets.all(16),
+      onTap: onTap,
+      child: Row(
+        children: [
+          iconBadge(
+            LucideIcons.mic,
+            unlocked ? Pastel.mint : C.violet,
+            size: 40,
+            iconSize: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  unlocked
+                      ? tr('Open Voice Pitch Studio')
+                      : tr('Voice Resonance & Pacing Studio'),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                gap(4),
+                Text(
+                  unlocked
+                      ? tr('Voice Pitch Studio unlocked in Twilight Sanctuary.')
+                      : tr('Tap 5 times to unlock the optional Voice Pitch Studio in Twilight Sanctuary.'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Pastel.mist.withValues(alpha: 0.80),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            unlocked ? LucideIcons.chevronRight : LucideIcons.sparkles,
+            size: 18,
+            color: unlocked ? Pastel.mint : C.iconDefault,
           ),
         ],
       ),

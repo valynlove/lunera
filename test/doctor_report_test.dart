@@ -108,5 +108,44 @@ void main() {
       expect(report, isNot(contains('SECRET_DOSE_NOTE_DO_NOT_LEAK')));
       expect(report, isNot(contains('SECRET_LAB_NOTE_DO_NOT_LEAK')));
     });
+
+    test('buildDoctorReportPdf generates valid A4 PDF document bytes',
+        () async {
+      L10n.notifier.value = 'en';
+      final now = DateTime(2026, 11, 22, 12, 0);
+      final therapy = Therapy(
+        id: 't_ev',
+        hormoneId: 'estradiol',
+        name: 'Estradiol Valerate',
+        dose: 4.0,
+        doseUnit: 'mg',
+        start: DateTime(2026, 10, 1),
+        kind: 'interval',
+        everyDays: 5,
+        times: const ['08:00'],
+        route: 'inj',
+        pk: 'e2_valerate',
+      );
+      final pdfBytes = await buildDoctorReportPdf(
+        therapies: [therapy],
+        logs: const [],
+        labs: [
+          Lab(
+            id: 'l1',
+            hormoneId: 'estradiol',
+            at: DateTime(2026, 11, 15),
+            value: 165,
+            unit: 'pg/mL',
+          ),
+        ],
+        targets: const {
+          'estradiol': [100.0, 200.0]
+        },
+        prefs: const Prefs(),
+        now: now,
+      );
+      expect(pdfBytes.length, greaterThan(500));
+      expect(String.fromCharCodes(pdfBytes.take(5)), equals('%PDF-'));
+    });
   });
 }

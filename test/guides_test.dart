@@ -18,9 +18,10 @@ void main() {
   });
 
   group('Care & HRT Guides data integrity', () {
-    test('contains 13 articles with unique IDs and single start_safely entry',
+    test('contains 14 articles with unique IDs and single start_safely entry',
         () {
-      expect(guideArticles.length, equals(13));
+      expect(guideArticles.length, equals(14));
+      expect(guideById('voice_training'), isNotNull);
       final ids = guideArticles.map((a) => a.id).toSet();
       expect(ids.length, equals(guideArticles.length));
 

@@ -88,20 +88,75 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
     );
     if (months == null || !mounted) return;
-    final text = buildDoctorReport(
-      therapies: ref.read(therapiesProvider).value ?? const [],
-      logs: ref.read(logsProvider).value ?? const [],
-      labs: ref.read(labsProvider).value ?? const [],
-      targets: ref.read(targetsProvider).value ?? const {},
-      prefs: ref.read(prefsProvider).value ?? const Prefs(),
-      now: DateTime.now(),
-      months: months,
+    final format = await showDialog<String>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(tr('Export format')),
+        content: Text(tr('Choose how you want to share your doctor visit summary.')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d, 'md'),
+              child: Text(tr('Text / Markdown'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, 'pdf'),
+              child: Text(tr('PDF Document'))),
+        ],
+      ),
     );
+    if (format == null || !mounted) return;
+
+    final ths = ref.read(therapiesProvider).value ?? const [];
+    final logs = ref.read(logsProvider).value ?? const [];
+    final labs = ref.read(labsProvider).value ?? const [];
+    final targets = ref.read(targetsProvider).value ?? const {};
+    final prefs = ref.read(prefsProvider).value ?? const Prefs();
+    final now = DateTime.now();
+
     try {
+      if (format == 'pdf') {
+        final bytes = await buildDoctorReportPdf(
+          therapies: ths,
+          logs: logs,
+          labs: labs,
+          targets: targets,
+          prefs: prefs,
+          now: now,
+          months: months,
+        );
+        final stamp = DateFormat('yyyy-MM-dd_HH-mm').format(now);
+        final name = 'lunera_doctor_summary_$stamp.pdf';
+        final f = XFile.fromData(bytes, mimeType: 'application/pdf', name: name);
+        if (kIsWeb) {
+          await f.saveTo(name);
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(tr('File downloaded.'))));
+          }
+        } else {
+          await Lock.instance.suppressLockDuring(
+            () => Share.shareXFiles([f],
+                fileNameOverrides: [name],
+                subject: tr('Lunera doctor visit summary')),
+          );
+        }
+        return;
+      }
+
+      final text = buildDoctorReport(
+        therapies: ths,
+        logs: logs,
+        labs: labs,
+        targets: targets,
+        prefs: prefs,
+        now: now,
+        months: months,
+      );
       if (kIsWeb) {
         await Clipboard.setData(ClipboardData(text: text));
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Summary copied to clipboard.'))));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(tr('Summary copied to clipboard.'))));
         }
       } else {
         await Lock.instance.suppressLockDuring(
@@ -109,7 +164,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
+      }
     }
   }
 

@@ -6,15 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../guides_data.dart';
 import '../models.dart';
 import '../profile.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
+import 'article_page.dart';
 import 'journal.dart';
 import 'guided_injection.dart';
 import 'profile_page.dart';
+import 'security_page.dart';
 import 'sheets.dart';
 import '../l10n.dart';
 
@@ -142,24 +145,93 @@ class HomePage extends ConsumerWidget {
         // 3. Main content
         if (ths.isEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 80),
-            child: Column(children: [
-              Text(tr('No therapies yet'), style: display(32)),
-              gap(10),
-              Text(
-                tr('Add your first medication to start tracking your schedule.'),
-                style: TextStyle(color: Pastel.mist.withValues(alpha: 0.85)),
-              ),
-              gap(20),
-              pillButton(
-                tr('Add therapy'),
-                () {
-                  HapticFeedback.lightImpact();
-                  showSheet(context, TherapySheet(supplies: supplies));
-                },
-                icon: LucideIcons.plus,
-              ),
-            ]),
+            padding: const EdgeInsets.only(top: 28),
+            child: Column(
+              children: [
+                Text(tr('No therapies yet'), style: display(32)),
+                gap(8),
+                Text(
+                  tr('Add your first medication to start tracking your schedule.'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Pastel.mist.withValues(alpha: 0.85)),
+                ),
+                gap(18),
+                pillButton(
+                  tr('Add therapy'),
+                  () {
+                    HapticFeedback.lightImpact();
+                    showSheet(context, TherapySheet(supplies: supplies));
+                  },
+                  icon: LucideIcons.plus,
+                ),
+                gap(24),
+                AppCard(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tr('Get started in 3 calm steps'),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      gap(14),
+                      _OnboardingStepTile(
+                        stepNumber: '1',
+                        icon: LucideIcons.plus,
+                        color: C.aurora,
+                        title: tr('Add your first therapy'),
+                        subtitle:
+                            tr('Set up your medication, route, and schedule'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          showSheet(context, TherapySheet(supplies: supplies));
+                        },
+                      ),
+                      const Divider(height: 20),
+                      _OnboardingStepTile(
+                        stepNumber: '2',
+                        icon: LucideIcons.shieldCheck,
+                        color: C.lavender,
+                        title: tr('Protect your privacy'),
+                        subtitle: tr(
+                            'Optional PIN lock, Decoy Calculator & discreet reminders'),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                                builder: (_) => const SecurityPage()),
+                          );
+                        },
+                      ),
+                      if (guideById('start_safely') case final startGuide?) ...[
+                        const Divider(height: 20),
+                        _OnboardingStepTile(
+                          stepNumber: '3',
+                          icon: LucideIcons.compass,
+                          color: C.coral,
+                          title: tr('Read the Start Here guide'),
+                          subtitle: tr(
+                              'Calm safety, dosing & harm-reduction essentials'),
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    ArticlePage(article: startGuide),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           )
         else ...[
           // Hero Dose Cards
@@ -457,6 +529,30 @@ class DoseCard extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    if (!t.asNeeded && next != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(LucideIcons.calendarClock,
+                              size: 13, color: Pastel.lilac),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              tr('Next: {0}', [
+                                DateFormat('EEEE, d MMM • HH:mm', L10n.code)
+                                    .format(next.at),
+                              ]),
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: Pastel.lilac,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     if (t.adm.places && place.isNotEmpty) ...[
                       const SizedBox(height: 6),
                       Row(
@@ -1183,6 +1279,68 @@ class WeekCard extends ConsumerWidget {
               fontWeight: FontWeight.w500),
         ),
       ]),
+    );
+  }
+}
+
+class _OnboardingStepTile extends StatelessWidget {
+  const _OnboardingStepTile({
+    required this.stepNumber,
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String stepNumber;
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            iconBadge(icon, color, size: 38, iconSize: 19),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$stepNumber. $title',
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Pastel.mist.withValues(alpha: 0.78),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(LucideIcons.chevronRight,
+                size: 16, color: C.iconDefault),
+          ],
+        ),
+      ),
     );
   }
 }
