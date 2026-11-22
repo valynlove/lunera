@@ -7,6 +7,7 @@ import '../guides_data.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import 'article_page.dart';
+import 'companion_avatar.dart';
 
 const _kGuidesReadKey = 'guides.read_ids';
 
@@ -82,15 +83,28 @@ class _GuidesPageState extends State<GuidesPage> {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 12, right: 4, top: 4),
-              child: Text(
-                tr('Calm, evidence-informed guides for every path — whether doctor-guided or independent.'),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Pastel.mist.withValues(alpha: 0.84),
-                  height: 1.4,
-                ),
+            gap(8),
+            AppCard(
+              padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
+              child: Row(
+                children: [
+                  const CompanionAvatar(
+                    mood: CompanionMood.explain,
+                    size: 58,
+                    glowColor: C.lavender,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      tr('Calm, evidence-informed guides for every path — whether doctor-guided or independent.'),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Pastel.mist.withValues(alpha: 0.84),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             gap(16),

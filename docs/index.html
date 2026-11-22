@@ -36,7 +36,7 @@
       <a class="logo" href="#home" aria-label="Lunera home">
         <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="logo-img">
         Lunera
-        <span class="app-version-tag">v2.1.19</span>
+        <span class="app-version-tag">v2.2.0</span>
       </a>
       <nav aria-label="Main Navigation">
         <ul>
@@ -50,9 +50,10 @@
     </div>
   </header>
 
-  <div class="wrap">
-    <!-- Hero Section -->
-    <section class="hero" id="home">
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-backdrop" aria-hidden="true"></div>
+    <div class="hero-inner">
       <!-- Eternal Dusk Orbital Watermark -->
       <svg class="bg-watermark wm-hero" viewBox="0 0 400 400" fill="none" stroke="rgba(199,184,255,0.12)" stroke-width="1" aria-hidden="true">
         <circle cx="200" cy="200" r="180" stroke-dasharray="3 4"/>
@@ -64,15 +65,24 @@
         <ellipse cx="200" cy="200" rx="180" ry="70" transform="rotate(-30 200 200)" stroke="rgba(242,161,124,0.12)"/>
         <polygon points="200,10 204,40 234,44 204,48 200,78 196,48 166,44 196,40" fill="rgba(199,184,255,0.16)"/>
       </svg>
-      <div class="hero-kicker">✦ Eternal Dusk Companion ✦</div>
-      <h1>Your Journey,<br><em>Our Care.</em></h1>
-      <p>A personal health companion for your HRT journey, because every phase is a part of your story.</p>
-      <div class="row">
-        <a class="btn gold apk-download-btn" id="hero-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">⬇ Download APK</a>
-        <a class="btn" href="#features">Learn More ⌄</a>
+      <div class="hero-copy">
+        <div class="hero-kicker">✦ Eternal Dusk Companion ✦</div>
+        <h1>Your Journey,<br><em>Our Care.</em></h1>
+        <p>A personal health companion for your HRT journey, because every phase is a part of your story.</p>
+        <div class="row">
+          <a class="btn gold apk-download-btn" id="hero-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">⬇ Download APK</a>
+          <a class="btn" href="#features">Learn More ⌄</a>
+        </div>
       </div>
-    </section>
+      <div class="hero-card-wrap">
+        <figure class="hero-showcase-card">
+          <img src="images/hero_card_dusk.jpg" alt="Lunera Eternal Dusk companion showcase card" loading="eager">
+        </figure>
+      </div>
+    </div>
+  </section>
 
+  <div class="wrap">
     <!-- Highlights Strip -->
     <section class="strip" aria-label="Highlights">
       <div>
@@ -537,32 +547,45 @@
 
     <!-- FAQ Section -->
     <section class="faq" id="faq">
-      <h2>Questions, <em>answered</em></h2>
-      <details>
-        <summary>Is my health data private?</summary>
-        <p>Yes. Your entries stay strictly on your device or in your personal private encrypted backup. Zero third-party trackers, zero advertising, zero data brokering.</p>
-      </details>
-      <details>
-        <summary>What can I track in Lunera?</summary>
-        <p>Hormone levels and pharmacokinetic simulations, injection sites with tissue rest rotation, schedules &amp; dosage alarms, physical body measurements, supply inventory, and mood journal entries.</p>
-      </details>
-      <details>
-        <summary>Is Lunera free to download?</summary>
-        <p>Yes. Lunera is 100% free and open-source under the MIT License. You can download the standalone APK directly from GitHub Releases and begin right away.</p>
-      </details>
-      <details>
-        <summary>Does it work offline without an internet connection?</summary>
-        <p>Absolutely. Lunera is built offline-first. All alarms, schedules, pharmacokinetic level simulations, body measurements, and local JSON backups function without an internet connection.</p>
-      </details>
+      <div class="faq-companion">
+        <span class="eyebrow">✦ Gentle Answers ✦</span>
+        <h2>Questions,<br><em>answered</em></h2>
+        <div class="chibi-stage chibi-stage-faq">
+          <img class="chibi-img" src="images/companion/explain.png" alt="Lunera companion explaining answers" loading="lazy">
+        </div>
+      </div>
+      <div class="faq-list">
+        <details>
+          <summary>Is my health data private?</summary>
+          <p>Yes. Your entries stay strictly on your device or in your personal private encrypted backup. Zero third-party trackers, zero advertising, zero data brokering.</p>
+        </details>
+        <details>
+          <summary>What can I track in Lunera?</summary>
+          <p>Hormone levels and pharmacokinetic simulations, injection sites with tissue rest rotation, schedules &amp; dosage alarms, physical body measurements, supply inventory, and mood journal entries.</p>
+        </details>
+        <details>
+          <summary>Is Lunera free to download?</summary>
+          <p>Yes. Lunera is 100% free and open-source under the MIT License. You can download the standalone APK directly from GitHub Releases and begin right away.</p>
+        </details>
+        <details>
+          <summary>Does it work offline without an internet connection?</summary>
+          <p>Absolutely. Lunera is built offline-first. All alarms, schedules, pharmacokinetic level simulations, body measurements, and local JSON backups function without an internet connection.</p>
+        </details>
+      </div>
     </section>
 
     <!-- Call to Action Banner -->
     <section class="cta" id="download">
-      <div>
+      <div class="cta-copy">
         <h3>Ready to begin your journey with Lunera?</h3>
         <p>Download the official Android APK and take the first step towards a peaceful, mindful rhythm.</p>
+        <div class="cta-actions">
+          <a class="btn gold apk-download-btn" id="cta-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">⬇ Download APK</a>
+        </div>
       </div>
-      <a class="btn gold apk-download-btn" id="cta-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">⬇ Download APK</a>
+      <div class="chibi-stage chibi-stage-cta">
+        <img class="chibi-img" src="images/companion/cheer.png" alt="Lunera companion cheering you on" loading="lazy">
+      </div>
     </section>
   </div> <!-- /.wrap -->
 
@@ -573,7 +596,7 @@
         <div class="footer-logo">
           <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="footer-logo-img">
           <span class="footer-brand-name">Lunera</span>
-          <span class="app-version-tag">v2.1.19</span>
+          <span class="app-version-tag">v2.2.0</span>
         </div>
         <p class="footer-tagline">A personal wellness companion for hormone therapy, health rhythms, and transition tracking.</p>
       </div>

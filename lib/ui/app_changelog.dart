@@ -42,10 +42,39 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.2.0',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Chibi Companion Sprite Suite: Integrated 12-expression transparent chibi companion avatar across Home onboarding, Care Guides, Guided Calm Injection, and Twilight Sanctuary.',
+          textId:
+              'Koleksi Karakter Pendamping Chibi: Menghadirkan karakter pendamping chibi 12 ekspresi transparan di onboarding Beranda, Panduan Perawatan, Panduan Injeksi Tenang, dan Twilight Sanctuary.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Glassmorphic Eternal Dusk Profile Card: Overhauled MorePage with a horizontal glassmorphic membership banner, glowing avatar frame, adherence statistics, and quick edit pill.',
+          textId:
+              'Kartu Profil Glassmorphic Eternal Dusk: Merombak halaman More dengan kartu profil bergaya keanggotaan kaca transparan berlatar senja, bingkai avatar bercahaya, dan statistik kepatuhan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Eternal Dusk Showcase & Web Landing Page: Added soft-blurred panoramic dusk backdrop, framed 2-column hero showcase card, and companion character highlights.',
+          textId:
+              'Showcase & Halaman Web Eternal Dusk: Menambahkan latar panorama senja berpendar lembut, kartu showcase hero 2-kolom berbingkai, dan sorotan karakter pendamping.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.1.19',
       dateEn: 'November 22, 2026',
       dateId: '22 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

@@ -6,6 +6,7 @@ import '../../l10n.dart';
 import '../../sanctuary_data.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
+import '../companion_avatar.dart';
 import 'moonlight_lantern_page.dart';
 import 'safety_quiz_page.dart';
 import 'starlight_breath_page.dart';
@@ -83,15 +84,28 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 12, right: 4, top: 4),
-              child: Text(
-                tr('Gentle breathing, safety practice, and a quiet light — always at your own pace.'),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Pastel.mist.withValues(alpha: 0.84),
-                  height: 1.4,
-                ),
+            gap(8),
+            AppCard(
+              padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
+              child: Row(
+                children: [
+                  const CompanionAvatar(
+                    mood: CompanionMood.care,
+                    size: 58,
+                    glowColor: C.magenta,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      tr('Gentle breathing, safety practice, and a quiet light — always at your own pace.'),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Pastel.mist.withValues(alpha: 0.84),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             gap(20),

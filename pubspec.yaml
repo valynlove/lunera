@@ -1,7 +1,7 @@
 name: lunera
 description: Personal health & therapy tracking application
 publish_to: none
-version: 2.1.19+104
+version: 2.2.0+105
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
@@ -35,5 +35,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/companion/
     - assets/icons/
     - assets/icons/celestial/

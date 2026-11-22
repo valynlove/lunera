@@ -4,6 +4,15 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-11-23
+
+### Added
+- **Multi-Expression Eternal Dusk Chibi Companion (`assets/images/companion/`, `lib/ui/companion_avatar.dart`, `docs/images/companion/`):** Split the 12-expression transparent companion sprite sheet into trimmed RGBA assets (`idle`, `happy`, `cheer`, `think`, `explain`, `ponder`, `care`, `calm`, `wave`, `remind`, `sleepy`, `wink`) and introduced `CompanionAvatar`, integrated into Home 3-step onboarding (`wave`), Care & HRT Guides (`explain`), Guided Calm Injection (`calm` & `happy`), Twilight Sanctuary (`care`), and zigzagged across the landing page FAQ (`explain`, left) and CTA (`cheer`, right) sections.
+
+### Changed
+- **Glassmorphic Eternal Dusk Profile Hero Card (`lib/ui/more.dart`, `lib/l10n_id.dart`):** Redesigned the `MorePage` profile card into a horizontal glassmorphic membership layout backed by `assets/images/profile_banner_dusk.jpg` with a dark glass scrim, glowing avatar frame, frosted `Edit Profile` pill, account sync badge (`Cloud Synced` / `Local Account`), ornamental divider, 4-column routine and adherence mini stats strip (`Journey`, `Therapies`, `Doses`, `Adherence`), and tagline.
+- **Blurred Eternal Dusk Hero Backdrop & Showcase Card on Landing Page (`docs/index.html`, `docs/style.css`, `docs/images/profile_banner_dusk.jpg`, `docs/images/hero_card_dusk.jpg`):** Added the soft-blurred Eternal Dusk panorama banner behind the web landing page hero section with directional dark scrims and a bottom fade mask, paired with a framed Eternal Dusk showcase card in a responsive 2-column hero layout.
+
 ## [2.1.19] - 2026-11-22
 
 ### Changed

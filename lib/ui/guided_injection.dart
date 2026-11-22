@@ -9,6 +9,7 @@ import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
+import 'companion_avatar.dart';
 
 /// Modal interaktif "Guided Calm Injection" yang memandu proses penyuntikan mandiri
 /// langkah demi langkah dengan teknik pernapasan, timer desinfeksi, dan afirmasi yang menenangkan.
@@ -316,8 +317,8 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
           child: ScaleTransition(
             scale: _breatheAnimation,
             child: Container(
-              width: 110,
-              height: 110,
+              width: 118,
+              height: 118,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -327,8 +328,13 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
                   ],
                 ),
               ),
-              child: Center(
-                child: Icon(LucideIcons.flower2, color: C.peony, size: 44),
+              child: const Center(
+                child: CompanionAvatar(
+                  mood: CompanionMood.calm,
+                  size: 92,
+                  glowColor: C.aurora,
+                  showGlow: false,
+                ),
               ),
             ),
           ),
@@ -511,13 +517,20 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
       key: const ValueKey(3),
       children: [
         Container(
-          width: 90,
-          height: 90,
+          width: 108,
+          height: 108,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: C.peony.withValues(alpha: 0.16),
           ),
-          child: Icon(LucideIcons.heart, color: C.peony, size: 46),
+          child: const Center(
+            child: CompanionAvatar(
+              mood: CompanionMood.happy,
+              size: 88,
+              glowColor: C.rose,
+              showGlow: false,
+            ),
+          ),
         ),
         gap(16),
         Text(

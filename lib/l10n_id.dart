@@ -1031,4 +1031,10 @@ const Map<String, String> idStrings = {
   'Text / Markdown': 'Teks / Markdown',
   'PDF Document': 'Dokumen PDF',
   'Next: {0}': 'Jadwal: {0}',
+  'Edit Profile': 'Ubah Profil',
+  'Cloud Synced': 'Tersinkron Cloud',
+  'Local Account': 'Akun Lokal',
+  'Therapies': 'Terapi',
+  'Doses': 'Dosis',
+  'Journey': 'Perjalanan',
 };

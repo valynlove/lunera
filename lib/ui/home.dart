@@ -14,6 +14,7 @@ import '../schedule.dart';
 import '../sim.dart';
 import '../theme.dart';
 import 'article_page.dart';
+import 'companion_avatar.dart';
 import 'journal.dart';
 import 'guided_injection.dart';
 import 'profile_page.dart';
@@ -170,13 +171,25 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        tr('Get started in 3 calm steps'),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
+                      Row(
+                        children: [
+                          const CompanionAvatar(
+                            mood: CompanionMood.wave,
+                            size: 54,
+                            glowColor: C.aurora,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              tr('Get started in 3 calm steps'),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       gap(14),
                       _OnboardingStepTile(

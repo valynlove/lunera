@@ -54,12 +54,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.1.19'));
+      expect(UpdateCheckerService.currentVersion, equals('2.2.0'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.1.19'));
+      expect(AppChangelog.releases.first.version, equals('2.2.0'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -227,6 +227,13 @@ void main() {
         ),
       );
       expect(find.byType(MorePage), findsOneWidget);
+      expect(find.text(tr('Edit Profile')), findsOneWidget);
+      expect(find.text(tr('Local Account')), findsOneWidget);
+      expect(find.text(tr('Journey')), findsOneWidget);
+      expect(find.text(tr('Therapies')), findsOneWidget);
+      expect(find.text(tr('Doses')), findsOneWidget);
+      expect(find.text(tr('Adherence')), findsOneWidget);
+      expect(find.text(tr(tagline)), findsOneWidget);
       expect(find.text(tr('Health & Journey')), findsOneWidget);
       expect(find.text(tr('Care & Assistant Tools')), findsOneWidget);
       expect(find.text(tr('System')), findsOneWidget);
@@ -236,6 +243,38 @@ void main() {
       await tester.tap(find.byType(UserAvatar));
       await tester.pump();
       expect(find.byType(ProfilePage), findsOneWidget);
+    });
+
+    testWidgets('MorePage profile card fits narrow phone width without overflow',
+        (tester) async {
+      L10n.notifier.value = 'en';
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProvider.overrideWith((ref) => Stream.value(null)),
+            therapiesProvider.overrideWith((ref) => Stream.value(<Therapy>[])),
+            suppliesProvider.overrideWith((ref) => Stream.value(<Supply>[])),
+            prefsProvider.overrideWith((ref) => Stream.value(const Prefs())),
+            logsProvider.overrideWith((ref) => Stream.value(<DoseLog>[])),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: MorePage(),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text(tr('Edit Profile')), findsOneWidget);
+      expect(find.text(tr('Local Account')), findsOneWidget);
+      expect(find.text(tr('Journey')), findsOneWidget);
+      expect(find.text(tr('Adherence')), findsOneWidget);
     });
 
     testWidgets(

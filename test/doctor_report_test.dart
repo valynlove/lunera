@@ -86,7 +86,7 @@ void main() {
         logs: logs,
         labs: labs,
         targets: targets,
-        prefs: const Prefs(),
+        prefs: const Prefs(dayStart: 0),
         now: now,
         months: 3,
       );
@@ -141,7 +141,7 @@ void main() {
         targets: const {
           'estradiol': [100.0, 200.0]
         },
-        prefs: const Prefs(),
+        prefs: const Prefs(dayStart: 0),
         now: now,
       );
       expect(pdfBytes.length, greaterThan(500));
