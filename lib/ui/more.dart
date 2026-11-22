@@ -12,10 +12,12 @@ import '../schedule.dart';
 import '../theme.dart';
 import 'body.dart';
 import 'guided_injection.dart';
+import 'guides_page.dart';
 import 'insights.dart';
 import 'pickup_assistant_sheet.dart';
 import 'profile_page.dart';
 import 'about_sheet.dart';
+import 'sanctuary/sanctuary_page.dart';
 import 'settings_page.dart';
 import 'site_map.dart';
 
@@ -324,6 +326,24 @@ class MorePage extends ConsumerWidget {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
+              tile(
+                icon: LucideIcons.bookOpen,
+                color: C.lavender,
+                title: tr('Care & HRT Guides'),
+                subtitle: tr(
+                    'Evidence-informed articles, dosing math & safety tips'),
+                onTap: () => openPage(const GuidesPage()),
+              ),
+              const Divider(height: 1, indent: 68),
+              tile(
+                icon: LucideIcons.sparkles,
+                color: C.magenta,
+                title: tr('Twilight Sanctuary'),
+                subtitle: tr(
+                    'Calming ripples, safety practice & moonlight lantern'),
+                onTap: () => openPage(const SanctuaryPage()),
+              ),
+              const Divider(height: 1, indent: 68),
               tile(
                 icon: LucideIcons.heartPulse,
                 color: Pastel.sky,

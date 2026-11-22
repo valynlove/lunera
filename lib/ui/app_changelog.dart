@@ -42,10 +42,47 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.1.16',
+      dateEn: 'November 22, 2026',
+      dateId: '22 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Twilight Sanctuary Mini-Experiences: Added Starlight Ripples & Breath (calming 4-4-6 touch ripple canvas), Safety & Dosing Sense (5-question interactive practice linking back to guides), and Moonlight Lantern (gentle, no-punishment daily light companion) under More -> Care & Assistant Tools.',
+          textId:
+              'Suaka Senja (Twilight Sanctuary): Menambahkan Riak Bintang & Napas Tenang (kanvas riak sentuh 4-4-6), Kepekaan Keamanan & Dosis (latihan 5 soal interaktif yang tertaut ke panduan), dan Lentera Cahaya Bulan (pendamping cahaya harian tanpa penalti) di menu More -> Care & Assistant Tools.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.15',
+      dateEn: 'November 22, 2026',
+      dateId: '22 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Care & HRT Guides Library: Added 13 offline-first, bilingual (EN/ID) educational and harm-reduction guides accessible via shortcut cards, including a non-judgmental starting guide, dosing math, lab units, safe injection & rotation, medical red flags, and physical/emotional timelines.',
+          textId:
+              'Pustaka Panduan Perawatan & HRT: Menambahkan 13 panduan edukasi dan harm reduction dwibahasa (EN/ID) yang sepenuhnya offline melalui kartu pintasan langsung, mencakup panduan memulai dengan aman tanpa menghakimi, hitungan dosis, satuan lab, teknik suntik & rotasi aman, tanda bahaya medis, serta linimasa perubahan fisik/emosional.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Contextual Guide Links: Added quick guide shortcuts inside the Levels page and Injection Site Rotation sheet for instant reference.',
+          textId:
+              'Tautan Panduan Kontekstual: Menambahkan pintasan panduan cepat langsung dari halaman Levels dan panel Rotasi Titik Suntik.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.1.14',
       dateEn: 'November 21, 2026',
       dateId: '21 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

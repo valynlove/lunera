@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../guides_data.dart';
 import '../l10n.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
+import 'article_page.dart';
 
 /// Status kesiapan jaringan dan riwayat suntik untuk satu lokasi.
 class SiteStatus {
@@ -557,6 +559,19 @@ class SiteRotationSheet extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (guideById('site_rotation') case final guide?)
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ArticlePage(article: guide),
+                      ),
+                    );
+                  },
+                  icon: const Icon(LucideIcons.bookOpen, size: 20),
+                  color: C.iconDefault,
+                  tooltip: tr('Site Rotation Guide'),
+                ),
               IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.x)),
             ],
           ),

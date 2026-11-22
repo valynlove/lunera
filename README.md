@@ -12,7 +12,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-A58BFF?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-D76ABF?logo=firebase&logoColor=white)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-7DE2C7?labelColor=11102B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.14-F2A17C?labelColor=11102B)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.1.16-F2A17C?labelColor=11102B)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Direct Download APK](https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk) • [📋 Changelog](CHANGELOG.md)
 
@@ -57,6 +57,8 @@ Lunera combines **Midnight Aurora** depth with **Vice City Sunset** warmth acros
 - 📅 **Dual-View Timeline & Schedule:** Interactive calendar picker navigation, rolling interval scheduling, and dose history logs.
 - 🔔 **Scheduled Dose Reminders:** Offline-capable native local notifications (`flutter_local_notifications`) with exact alarm receivers and high-importance sound/vibration channels.
 - 📖 **Mood & Body Observation Journal:** Daily emotional state logging, physical transition observation notes, and category filters.
+- 📚 **Care & HRT Guides:** Offline-first, bilingual (EN/ID) educational and harm-reduction library covering dosing math, lab units, safe injection & rotation, medical red flags, and non-judgmental starting guidance.
+- ✨ **Twilight Sanctuary:** Calming touch-ripple 4-4-6 breathing canvas, interactive safety & dosing quiz, and a no-punishment daily Moonlight Lantern companion.
 - 📦 **Supply & Equipment Tracking:** Manage inventory for vials, syringes, alcohol wipes, and needles with automatic stock deduction upon dose intake.
 - 💾 **Dual Local & Cloud Safety:** Completely offline JSON export/import, standalone CSV/JSON dose history export, and secure cloud synchronization via Firebase Cloud Firestore.
 - 🌐 **Bilingual Localization:** Full native support for English (default) and Bahasa Indonesia with dynamic runtime switching.

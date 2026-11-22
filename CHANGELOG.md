@@ -4,6 +4,21 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.16] - 2026-11-22
+
+### Added
+- **Twilight Sanctuary Mini-Experiences (`lib/sanctuary_data.dart`, `lib/ui/sanctuary/`):** Added three gentle, offline-first experiences accessible from *More → Care & Assistant Tools*:
+  - **Starlight Ripples & Breath:** Interactive touch-ripple starlight canvas paired with a calm 4-4-6 breathing orb, toggleable soft haptics, reduced-motion support, and zero score pressure.
+  - **Safety & Dosing Sense:** 5-question randomized practice rounds drawn from 12 bilingual questions (`mg` to `mL` dosing math, syringe scales, lab trough timing, sterile technique, and medical red flags) with encouraging explanations and direct links to related Care & HRT Guides.
+  - **Moonlight Lantern:** Gentle daily spark companion (`SharedPreferences`) that grows calmly across stages and never dims or penalizes skipped days.
+
+## [2.1.15] - 2026-11-22
+
+### Added
+- **Offline Care & HRT Guides Library (`lib/guides_data.dart`, `lib/guides/`, `lib/ui/guides_page.dart`, `lib/ui/article_page.dart`):** Added 13 bilingual (EN/ID), evidence-informed, non-judgmental educational and harm-reduction articles presented as direct shortcut cards with category filters, read-progress indicators, key takeaways, callout warnings, and trusted clinical references (WPATH SOC 8, Endocrine Society, UCSF Transgender Care).
+- **Inclusive Starting & Harm-Reduction Guidance:** Added a pinned *"Starting HRT Safely & Navigating Independently"* guide supporting users across clinical and DIY paths—covering safe expectations, critical risk warnings, dosing math (`mg` vs `mL`), sterile injection practices, budget-conscious lab timing, medical red flags, and privacy protection.
+- **Contextual Guide Shortcuts (`lib/ui/more.dart`, `lib/ui/levels/levels_page.dart`, `lib/ui/site_map.dart`):** Added Care & HRT Guides entry in the Feature Hub along with direct guide shortcuts inside Levels and Injection Site Rotation.
+
 ## [2.1.14] - 2026-11-21
 
 ### Added

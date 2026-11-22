@@ -26,7 +26,25 @@ class LevelsPage extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       children: [
         // 1. Header Judul
-        Text(tr('Levels'), style: display(40)),
+        Row(
+          children: [
+            Expanded(child: Text(tr('Levels'), style: display(40))),
+            if (guideById('peak_trough') case final guide?)
+              IconButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ArticlePage(article: guide),
+                    ),
+                  );
+                },
+                icon: const Icon(LucideIcons.bookOpen, size: 22),
+                color: C.iconDefault,
+                tooltip: tr('Peak, Trough & Labs Guide'),
+              ),
+          ],
+        ),
         const SizedBox(height: 14),
 
         // 2. Baris Aksi Seimbang
