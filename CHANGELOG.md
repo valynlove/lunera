@@ -4,6 +4,25 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.10] - 2026-11-23
+
+### Changed
+- **HRT Time-Lapse Stage Ordering (`assets/images/timelapse/`):** Remapped the 5-stage Feminizing (MtF) and Masculinizing (FtM) sprite progressions to depict a full pre-HRT to post-HRT transition across `stage_0` through `stage_4`.
+
+## [2.2.9] - 2026-11-23
+
+### Added
+- **HRT Time-Lapse Visual Sprites & Portal Frame (`assets/images/timelapse/`):** Sliced and baseline-aligned the 5 Feminizing (MtF) stage sprites (`mtf_stage_0.png`–`4.png`), revised the 5 Masculinizing (FtM) stage sprites with gradual silhouette/jawline/stubble progression (`ftm_stage_0.png`–`4.png`), standardized `mtf_stage_3.png` thigh-high socks, and extracted `portal_frame.png`.
+- **HRT Time-Lapse Tests (`test/hrt_timelapse_test.dart`):** Added asset integrity checks and widget interaction tests covering pathway switching and 5-stage scrubbing.
+
+### Changed
+- **HRT Time-Lapse Canvas (`lib/ui/sanctuary/hrt_timelapse_page.dart`, `pubspec.yaml`):** Registered `assets/images/timelapse/` and layered the crescent-moon portal frame behind the crossfading stage sprites.
+
+## [2.2.8] - 2026-11-23
+
+### Added
+- **HRT Time-Lapse Visual Skeleton (`lib/ui/sanctuary/hrt_timelapse_page.dart`, `lib/ui/sanctuary/sanctuary_page.dart`):** Added an interactive Time-Lapse Visual explorer inside Twilight Sanctuary with Feminizing (MtF) and Masculinizing (FtM) pathway toggles, a 5-stage timeline scrubber (`Day 1` to `12–24+ Mo`), smooth crossfade asset placeholders (`assets/images/timelapse/`), stage milestone highlights, and companion notes.
+
 ## [2.2.7] - 2026-11-23
 
 ### Changed

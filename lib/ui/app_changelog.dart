@@ -42,10 +42,52 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.7',
+      version: '2.2.10',
       dateEn: 'November 23, 2026',
       dateId: '23 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'HRT Time-Lapse Stage Ordering: Remapped the 5-stage Feminizing (MtF) and Masculinizing (FtM) sprite progressions to depict a full pre-HRT to post-HRT transition across stage_0 through stage_4.',
+          textId:
+              'Urutan Tahap Time-Lapse HRT: Menyelaraskan urutan 5 tahap progresi sprite Feminizing (MtF) dan Masculinizing (FtM) agar menggambarkan transisi lengkap pra-HRT hingga pasca-HRT dari stage_0 hingga stage_4.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.9',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'HRT Time-Lapse Sprites & Portal Frame: Sliced and baseline-aligned 5 Feminizing (MtF) and 5 Masculinizing (FtM) stage sprites, standardized thigh-high socks on mtf_stage_3, and extracted portal_frame.png.',
+          textId:
+              'Sprite Time-Lapse HRT & Bingkai Portal: Memotong dan menyelaraskan 5 sprite tahap Feminizing (MtF) dan 5 Masculinizing (FtM), menyamakan kaus kaki paha pada mtf_stage_3, dan mengekstrak portal_frame.png.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.8',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'HRT Time-Lapse Visual Explorer: Interactive visual progression explorer inside Twilight Sanctuary with Feminizing and Masculinizing pathway toggles, 5-stage timeline scrubber (Day 1 to 12–24+ Mo), smooth crossfades, and milestone tips.',
+          textId:
+              'Eksplorasi Visual Time-Lapse HRT: Penjelajah progresi visual interaktif di Suaka Senja dengan pilihan jalur Feminisasi dan Maskulinisasi, penggeser linimasa 5-tahap (Hari 1 hingga 12–24+ Bulan), transisi crossfade mulus, dan tip tonggak perkembangan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.7',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

@@ -10,6 +10,7 @@ import '../../sanctuary_data.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
 import '../companion_avatar.dart';
+import 'hrt_timelapse_page.dart';
 import 'moonlight_lantern_page.dart';
 import 'safety_quiz_page.dart';
 import 'starlight_breath_page.dart';
@@ -176,6 +177,16 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
               badgeText: tr('{0} {0?spark|sparks}', [_state.sparks]),
               showMintDot: canLight,
               onTap: () => _open(const MoonlightLanternPage()),
+            ),
+            gap(14),
+            _SanctuaryCard(
+              icon: LucideIcons.clock,
+              accent: C.magenta,
+              title: tr('HRT Time-Lapse'),
+              subtitle: tr(
+                  'Explore gentle visual milestones across feminizing and masculinizing timelines'),
+              badgeText: tr('Interactive • Preview'),
+              onTap: () => _open(const HrtTimelapsePage()),
             ),
             if (_voiceUnlocked) ...[
               gap(14),

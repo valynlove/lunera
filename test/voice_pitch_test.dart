@@ -355,6 +355,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Voice Pitch Studio'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Voice Pitch Studio'), findsOneWidget);
     });
 
@@ -526,6 +531,11 @@ void main() {
       );
       fakeRepo.emit([remoteItem, olderRemote]);
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Voice Pitch Studio'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Voice Pitch Studio'), findsOneWidget);
 
       // Open VoicePitchPage under the same ProviderScope with synthetic PCM stream.

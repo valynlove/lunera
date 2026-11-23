@@ -56,12 +56,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.2.7'));
+      expect(UpdateCheckerService.currentVersion, equals('2.2.10'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.2.7'));
+      expect(AppChangelog.releases.first.version, equals('2.2.10'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
