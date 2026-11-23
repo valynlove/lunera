@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 import 'models.dart';
@@ -18,44 +19,81 @@ String _verb(Therapy t) => switch (t.route) {
     };
 
 /// Format judul & isi pengingat dosis sesuai mode privasi layar kunci.
-(String, String) doseNotificationText(Therapy t, Prefs prefs, {String place = ''}) {
+(String, String) doseNotificationText(Therapy t, Prefs prefs,
+    {String place = ''}) {
   if (prefs.discreetNotify == 'wellness') {
-    return (tr('Routine Reminder ✦'), tr('Time for your daily hydration and wellness routine.'));
+    return (
+      tr('Routine Reminder ✦'),
+      tr('Time for your daily hydration and wellness routine.')
+    );
   }
   if (prefs.discreetNotify == 'minimal') {
     return ('Lunera ✦', tr('Gentle reminder.'));
   }
   return (
     '${_verb(t)}: ${t.name}',
-    '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', ${tr('site: {0}', [tr(place)])}'}',
+    '${fmt(t.dose)} ${t.doseUnit}${place.isEmpty ? '' : ', ${tr('site: {0}', [
+            tr(place)
+          ])}'}',
   );
 }
 
 /// Format judul & isi pengingat stok menipis sesuai mode privasi layar kunci.
 (String, String) lowSupplyNotificationText(Supply s, Prefs prefs) {
   if (prefs.discreetNotify == 'wellness') {
-    return (tr('Routine Supplies ✦'), tr('One of your daily wellness essentials is running low.'));
+    return (
+      tr('Routine Supplies ✦'),
+      tr('One of your daily wellness essentials is running low.')
+    );
   }
   if (prefs.discreetNotify == 'minimal') {
     return ('Lunera ✦', tr('Gentle reminder.'));
   }
   return (
     tr('Running low'),
-    s.generic ? tr('{0}: {1} left', [s.name, fmt(s.qty)]) : tr('{0}: {1} {1?dose|doses} left', [s.name, s.doses]),
+    s.generic
+        ? tr('{0}: {1} left', [s.name, fmt(s.qty)])
+        : tr('{0}: {1} {1?dose|doses} left', [s.name, s.doses]),
   );
 }
 
 /// Format judul & isi pengingat masa simpan / kedaluwarsa sesuai mode privasi layar kunci.
 (String, String) expiryNotificationText(Supply s, int leadDays, Prefs prefs) {
   if (prefs.discreetNotify == 'wellness') {
-    return (tr('Routine Supplies ✦'), tr('Check the shelf-life of your daily wellness essentials.'));
+    return (
+      tr('Routine Supplies ✦'),
+      tr('Check the shelf-life of your daily wellness essentials.')
+    );
   }
   if (prefs.discreetNotify == 'minimal') {
     return ('Lunera ✦', tr('Gentle reminder.'));
   }
   return (
-    leadDays == 0 ? tr('Medication expires today') : tr('Medication expiring soon'),
-    leadDays == 0 ? s.name : tr('{0}: {1} {1?day|days} left', [s.name, leadDays]),
+    leadDays == 0
+        ? tr('Medication expires today')
+        : tr('Medication expiring soon'),
+    leadDays == 0
+        ? s.name
+        : tr('{0}: {1} {1?day|days} left', [s.name, leadDays]),
+  );
+}
+
+/// Format judul & isi pengingat cek lab trough sesuai mode privasi layar kunci.
+(String, String) troughLabNotificationText(Slot slot, Prefs prefs) {
+  if (prefs.discreetNotify == 'wellness') {
+    return (
+      tr('Health & Lab Timing ✦'),
+      tr('Upcoming schedule check-in reminder.')
+    );
+  }
+  if (prefs.discreetNotify == 'minimal') {
+    return ('Lunera ✦', tr('Gentle reminder.'));
+  }
+  final hhmm =
+      '${slot.at.hour.toString().padLeft(2, '0')}:${slot.at.minute.toString().padLeft(2, '0')}';
+  return (
+    tr('Trough bloodwork window'),
+    tr('Consider bloodwork before taking {0} at {1}.', [slot.t.name, hhmm]),
   );
 }
 
@@ -170,12 +208,17 @@ class AppNotifier {
   bool _ready = false;
   Future<void> _chain = Future.value();
 
-  bool get supported => !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+  bool get supported =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   AndroidFlutterLocalNotificationsPlugin? get _android =>
-      _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
   IOSFlutterLocalNotificationsPlugin? get _ios =>
-      _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+      _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
 
   /// Handles foreground notification responses (both snooze and Mark taken).
   static Future<void> handleNotificationResponse(NotificationResponse r) async {
@@ -273,12 +316,16 @@ class AppNotifier {
       await a.requestExactAlarmsPermission();
       return ok ?? false;
     }
-    return await _ios?.requestPermissions(alert: true, badge: true, sound: true) ?? false;
+    return await _ios?.requestPermissions(
+            alert: true, badge: true, sound: true) ??
+        false;
   }
 
-  Future<bool> _canExact() async => (await _android?.canScheduleExactNotifications()) ?? false;
+  Future<bool> _canExact() async =>
+      (await _android?.canScheduleExactNotifications()) ?? false;
 
-  int _id(Therapy t, DateTime at) => '${t.id}|${slotKey(at)}'.hashCode & 0x7fffffff;
+  int _id(Therapy t, DateTime at) =>
+      '${t.id}|${slotKey(at)}'.hashCode & 0x7fffffff;
 
   Future<void> test([Prefs? prefs]) async {
     if (!supported) return;
@@ -292,7 +339,78 @@ class AppNotifier {
       title = 'Lunera ✦';
       body = tr('Gentle reminder.');
     }
-    await _plugin.show(id: 1, title: title, body: body, notificationDetails: _details);
+    await _plugin.show(
+        id: 1, title: title, body: body, notificationDetails: _details);
+  }
+
+  static const _troughReminderPrefKey = 'labs.trough_reminder_at';
+  static const _troughPayload = 'trough_lab';
+  static int get _troughReminderId =>
+      'trough_lab_reminder'.hashCode & 0x7fffffff;
+
+  /// Returns the currently scheduled future trough bloodwork reminder time, if any.
+  Future<DateTime?> getScheduledTroughReminder({DateTime? now}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_troughReminderPrefKey);
+    if (raw == null || raw.isEmpty) return null;
+    final at = DateTime.tryParse(raw);
+    final refNow = now ?? DateTime.now();
+    if (at == null || !at.isAfter(refNow)) {
+      await prefs.remove(_troughReminderPrefKey);
+      return null;
+    }
+    return at;
+  }
+
+  /// Schedules a one-shot trough bloodwork reminder 2 hours before [slot] (or 15 min
+  /// prior if <2h remain while [slot] is still in the future). Returns null if past.
+  Future<DateTime?> scheduleTroughLabReminder({
+    required Slot slot,
+    required Prefs prefs,
+    DateTime? now,
+  }) async {
+    final refNow = now ?? DateTime.now();
+    var alertAt = slot.at.subtract(const Duration(hours: 2));
+    if (!alertAt.isAfter(refNow)) {
+      alertAt = slot.at.subtract(const Duration(minutes: 15));
+      if (!alertAt.isAfter(refNow)) return null;
+    }
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_troughReminderPrefKey, alertAt.toIso8601String());
+
+    if (supported) {
+      try {
+        await init();
+        final mode = await _canExact()
+            ? AndroidScheduleMode.exactAllowWhileIdle
+            : AndroidScheduleMode.inexactAllowWhileIdle;
+        final (title, body) = troughLabNotificationText(slot, prefs);
+        await _plugin.zonedSchedule(
+          id: _troughReminderId,
+          title: title,
+          body: body,
+          scheduledDate: tz.TZDateTime(tz.local, alertAt.year, alertAt.month,
+              alertAt.day, alertAt.hour, alertAt.minute),
+          notificationDetails: _details,
+          androidScheduleMode: mode,
+          payload: _troughPayload,
+        );
+      } catch (e) {
+        debugPrint('Failed to schedule trough lab reminder: $e');
+      }
+    }
+    return alertAt;
+  }
+
+  /// Cancels any active or stored trough bloodwork reminder.
+  Future<void> cancelTroughLabReminder() async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.remove(_troughReminderPrefKey);
+    if (!supported) return;
+    try {
+      await init();
+      await _plugin.cancel(id: _troughReminderId);
+    } catch (_) {}
   }
 
   Future<void> cancelAll() async {
@@ -302,14 +420,18 @@ class AppNotifier {
   }
 
   /// Jadwalkan ulang semua pengingat (diserialkan agar tidak saling menimpa).
-  Future<void> sync(List<Therapy> ths, List<DoseLog> logs, List<Supply> supplies, Prefs prefs) {
-    _chain = _chain.then((_) => _sync(ths, logs, supplies, prefs)).catchError((Object e) {
+  Future<void> sync(List<Therapy> ths, List<DoseLog> logs,
+      List<Supply> supplies, Prefs prefs) {
+    _chain = _chain
+        .then((_) => _sync(ths, logs, supplies, prefs))
+        .catchError((Object e) {
       debugPrint(tr('Failed to schedule notifications: {0}', [e]));
     });
     return _chain;
   }
 
-  Future<void> _sync(List<Therapy> ths, List<DoseLog> logs, List<Supply> supplies, Prefs prefs) async {
+  Future<void> _sync(List<Therapy> ths, List<DoseLog> logs,
+      List<Supply> supplies, Prefs prefs) async {
     if (!supported) return;
     await init();
     if (!prefs.notify) {
@@ -327,12 +449,15 @@ class AppNotifier {
       }
     } catch (_) {}
     for (final req in await _plugin.pendingNotificationRequests()) {
-      if (!keepSnooze(req.payload, pendingKeys)) {
+      if (!keepSnooze(req.payload, pendingKeys) &&
+          req.payload != _troughPayload) {
         await _plugin.cancel(id: req.id);
       }
     }
     final now = DateTime.now();
-    final mode = await _canExact() ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle;
+    final mode = await _canExact()
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
     final desc = [...logs]..sort((a, b) => b.at.compareTo(a.at));
     final slots = [
       for (final s in buildSlots(ths, logs, prefs, back: 0, ahead: 21))
@@ -348,28 +473,39 @@ class AppNotifier {
         id: _id(t, s.at),
         title: title,
         body: body,
-        scheduledDate: tz.TZDateTime(tz.local, s.at.year, s.at.month, s.at.day, s.at.hour, s.at.minute),
+        scheduledDate: tz.TZDateTime(
+            tz.local, s.at.year, s.at.month, s.at.day, s.at.hour, s.at.minute),
         notificationDetails: _doseDetails,
         androidScheduleMode: mode,
-        payload: snoozePayload(therapyId: t.id, slot: slot, title: title, body: body),
+        payload: snoozePayload(
+            therapyId: t.id, slot: slot, title: title, body: body),
       );
     }
 
     // Stok hampir habis: pagi pukul 09:00, tiga hari berturut-turut selama masih menipis.
-    Future<void> at9(DateTime at, String key, String title, String body) => _plugin.zonedSchedule(
+    Future<void> at9(DateTime at, String key, String title, String body) =>
+        _plugin.zonedSchedule(
           id: key.hashCode & 0x7fffffff,
           title: title,
           body: body,
-          scheduledDate: tz.TZDateTime(tz.local, at.year, at.month, at.day, at.hour, at.minute),
+          scheduledDate: tz.TZDateTime(
+              tz.local, at.year, at.month, at.day, at.hour, at.minute),
           notificationDetails: _details,
           androidScheduleMode: mode,
         );
-    final firstMorning = now.hour < 9 ? DateTime(now.year, now.month, now.day, 9) : DateTime(now.year, now.month, now.day + 1, 9);
+    final firstMorning = now.hour < 9
+        ? DateTime(now.year, now.month, now.day, 9)
+        : DateTime(now.year, now.month, now.day + 1, 9);
     for (final s in supplies) {
       if (s.low && !s.expired) {
         final (title, body) = lowSupplyNotificationText(s, prefs);
         for (var d = 0; d < 3; d++) {
-          await at9(DateTime(firstMorning.year, firstMorning.month, firstMorning.day + d, 9), 'low|${s.id}|$d', title, body);
+          await at9(
+              DateTime(firstMorning.year, firstMorning.month,
+                  firstMorning.day + d, 9),
+              'low|${s.id}|$d',
+              title,
+              body);
         }
       }
       final e = s.expiry;

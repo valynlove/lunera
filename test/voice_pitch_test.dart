@@ -194,6 +194,74 @@ void main() {
           VoiceTestResult.tryFrom('x', {...firestoreMap, 'avgHz': 0}), isNull);
       expect(
           VoiceTestResult.tryFrom('x', {...firestoreMap, 'at': 'bad'}), isNull);
+
+      // Optional contextTag round-trips cleanly while remaining backward compatible
+      final withTag = VoiceTestResult(
+        id: 'tag_1',
+        at: at,
+        avgHz: 198.0,
+        minHz: 185.0,
+        maxHz: 210.0,
+        category: VoicePitchCategory.softHigh,
+        contextTag: 'warmed_up',
+      );
+      expect(withTag.toMap()['contextTag'], equals('warmed_up'));
+      expect(
+        VoiceTestResult.fromJson(withTag.toJson())?.contextTag,
+        equals('warmed_up'),
+      );
+      expect(
+        VoiceTestResult.tryFrom('tag_1', withTag.toMap())?.contextTag,
+        equals('warmed_up'),
+      );
+      expect(original.toMap().containsKey('contextTag'), isFalse);
+      expect(VoiceTestResult.tryFrom('no_tag', firestoreMap)?.contextTag, isNull);
+    });
+
+    test('analyzes resonance brightness, vocal weight, warmup steps, and tags',
+        () {
+      final silent =
+          synthesizePcm16Sine(frequencyHz: 140.0, durationMs: 90, amplitude: 0);
+      expect(analyzeVoiceToneFromPcm16(silent), isNull);
+
+      final pureWarm = synthesizePcm16Sine(frequencyHz: 140.0, durationMs: 90);
+      final warmAnalysis = analyzeVoiceToneFromPcm16(pureWarm, f0Hz: 140.0);
+      expect(warmAnalysis, isNotNull);
+      expect(warmAnalysis!.brightnessScore, lessThan(0.36));
+      expect(warmAnalysis.weightScore, lessThan(0.36));
+      expect(warmAnalysis.brightnessLabel, isNotEmpty);
+      expect(warmAnalysis.weightLabel, isNotEmpty);
+
+      // Heavy & bright upper-harmonic waveform at 200 Hz -> up to 2400 Hz
+      final brightHeavyPcm = synthesizePcm16Harmonic(
+        frequencyHz: 200.0,
+        harmonicWeights: const [0.25, 0.5, 0.7, 0.9, 1.0, 1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7],
+        durationMs: 90,
+      );
+      final brightHeavyAnalysis =
+          analyzeVoiceToneFromPcm16(brightHeavyPcm, f0Hz: 200.0);
+      expect(brightHeavyAnalysis, isNotNull);
+      expect(brightHeavyAnalysis!.brightnessScore, greaterThan(0.60));
+      expect(brightHeavyAnalysis.weightScore, greaterThan(0.55));
+
+      expect(voiceWarmupSteps.length, equals(4));
+      expect(voiceReferenceTones.length, equals(4));
+      for (final step in voiceWarmupSteps) {
+        L10n.notifier.value = 'en';
+        expect(step.title, isNotEmpty);
+        expect(step.subtitle, isNotEmpty);
+        expect(step.tip, isNotEmpty);
+        expect(step.durationSeconds, greaterThan(0));
+        L10n.notifier.value = 'id';
+        expect(step.title, isNotEmpty);
+        expect(step.tip, isNotEmpty);
+      }
+      L10n.notifier.value = 'en';
+      expect(voiceContextTagLabel('warmed_up'), equals('Warmed up'));
+      L10n.notifier.value = 'id';
+      expect(voiceContextTagLabel('warmed_up'), equals('Sudah pemanasan'));
+      L10n.notifier.value = 'en';
+      expect(voiceContextTagLabel(null), isNull);
     });
 
     test(
@@ -347,6 +415,24 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
+        find.text('Voice Size / Resonance'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Voice Size / Resonance'), findsOneWidget);
+      expect(find.text('Vocal Weight'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Warmed up'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('Warmed up'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Warmed up'));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
         find.text('Save result (numbers only)'),
         200,
         scrollable: find.byType(Scrollable).first,
@@ -361,6 +447,45 @@ void main() {
       final saved = await VoiceStore.loadResults();
       expect(saved.length, equals(1));
       expect(saved.first.category, equals(VoicePitchCategory.softHigh));
+      expect(saved.first.contextTag, equals('warmed_up'));
+    });
+
+    testWidgets(
+        'Quiet Warm-up tab guides through 4 SOVTE steps cleanly',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(Brightness.dark),
+          home: const VoicePitchPage(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Quiet Warm-up'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Step 1 of 4'), findsOneWidget);
+      expect(find.text('Neck, Jaw & Shoulder Release'), findsOneWidget);
+      expect(find.text('20s'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Start step'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Start step'));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('19s'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Pause warm-up'));
+      await tester.pump();
+      await tester.tap(find.text('Pause warm-up'));
+      await tester.pump();
+      expect(find.text('Start step'), findsOneWidget);
+
+      await tester.ensureVisible(find.byTooltip('Next step'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Next step'));
+      await tester.pumpAndSettle();
+      expect(find.text('Step 2 of 4'), findsOneWidget);
+      expect(find.text('SOVTE: Straw or Lip Trill'), findsOneWidget);
     });
 
     testWidgets(

@@ -16,6 +16,7 @@ class _DoctorReportData {
     required this.adherenceLines,
     required this.labSections,
     required this.estimateLines,
+    required this.symptomLines,
   });
 
   final String generatedText;
@@ -25,6 +26,7 @@ class _DoctorReportData {
   final List<(String hormoneName, String? targetLine, List<String> rows)>
       labSections;
   final List<String> estimateLines;
+  final List<String> symptomLines;
 }
 
 _DoctorReportData _collectDoctorReportData({
@@ -34,6 +36,7 @@ _DoctorReportData _collectDoctorReportData({
   required Map<String, List<double>> targets,
   required Prefs prefs,
   required DateTime now,
+  List<JournalEntry> journal = const [],
   int months = 3,
 }) {
   final df = DateFormat('d MMM y', L10n.code);
@@ -129,6 +132,22 @@ _DoctorReportData _collectDoctorReportData({
     estimateLines.add(tr('None'));
   }
 
+  final symptomCounts = <String, int>{};
+  for (final e in journal) {
+    if (!e.at.isBefore(from) && !e.at.isAfter(now)) {
+      for (final s in e.symptoms) {
+        if (symptomPresets.containsKey(s)) {
+          symptomCounts[s] = (symptomCounts[s] ?? 0) + 1;
+        }
+      }
+    }
+  }
+  final symptomLines = [
+    for (final entry in symptomPresets.entries)
+      if ((symptomCounts[entry.key] ?? 0) > 0)
+        '${tr(entry.value.$1)}: ${symptomCounts[entry.key]}x',
+  ];
+
   return _DoctorReportData(
     generatedText: tr('Generated: {0}', [df.format(now)]),
     periodText: tr('Period: {0} to {1}', [df.format(from), df.format(now)]),
@@ -136,12 +155,13 @@ _DoctorReportData _collectDoctorReportData({
     adherenceLines: adherenceLines,
     labSections: labSections,
     estimateLines: estimateLines,
+    symptomLines: symptomLines,
   );
 }
 
 /// Membuat ringkasan teks Markdown untuk diskusi konsultasi dokter/endokrinolog.
-/// Hanya menyertakan data klinis terstruktur; catatan bebas, jurnal, stok, ukuran tubuh,
-/// dan email akun sengaja dikecualikan demi privasi.
+/// Hanya menyertakan data klinis terstruktur & check-in gejala terstruktur; catatan bebas,
+/// isi jurnal teks, stok, ukuran tubuh, dan email akun sengaja dikecualikan demi privasi.
 String buildDoctorReport({
   required List<Therapy> therapies,
   required List<DoseLog> logs,
@@ -149,6 +169,7 @@ String buildDoctorReport({
   required Map<String, List<double>> targets,
   required Prefs prefs,
   required DateTime now,
+  List<JournalEntry> journal = const [],
   int months = 3,
 }) {
   final d = _collectDoctorReportData(
@@ -158,6 +179,7 @@ String buildDoctorReport({
     targets: targets,
     prefs: prefs,
     now: now,
+    journal: journal,
     months: months,
   );
 
@@ -195,6 +217,14 @@ String buildDoctorReport({
     ..writeln('## ${tr('Model estimates now')}');
   for (final line in d.estimateLines) {
     buf.writeln('- $line');
+  }
+  if (d.symptomLines.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('## ${tr('Reported symptoms & check-ins')}');
+    for (final line in d.symptomLines) {
+      buf.writeln('- $line');
+    }
   }
   buf
     ..writeln()
@@ -264,7 +294,7 @@ class _PdfLine {
 
 /// Generates an A4 print-ready PDF 1.4 version of the Doctor Visit Summary
 /// using pure Dart with zero external PDF/image dependencies, strictly excluding
-/// private notes, journal entries, supplies, and measurements.
+/// private notes, free-text journal entries, supplies, and measurements.
 Future<Uint8List> buildDoctorReportPdf({
   required List<Therapy> therapies,
   required List<DoseLog> logs,
@@ -272,6 +302,7 @@ Future<Uint8List> buildDoctorReportPdf({
   required Map<String, List<double>> targets,
   required Prefs prefs,
   required DateTime now,
+  List<JournalEntry> journal = const [],
   int months = 3,
 }) async {
   final d = _collectDoctorReportData(
@@ -281,6 +312,7 @@ Future<Uint8List> buildDoctorReportPdf({
     targets: targets,
     prefs: prefs,
     now: now,
+    journal: journal,
     months: months,
   );
 
@@ -310,6 +342,12 @@ Future<Uint8List> buildDoctorReportPdf({
     const _PdfLine('', gap: 6),
     _PdfLine(tr('Model estimates now'), bold: true, size: 12.5, gap: 4),
     for (final line in d.estimateLines) _PdfLine('- $line'),
+    if (d.symptomLines.isNotEmpty) ...[
+      const _PdfLine('', gap: 6),
+      _PdfLine(tr('Reported symptoms & check-ins'),
+          bold: true, size: 12.5, gap: 4),
+      for (final line in d.symptomLines) _PdfLine('- $line'),
+    ],
     const _PdfLine('', gap: 10),
     const _PdfLine(
         '--------------------------------------------------------------------------------',

@@ -12,6 +12,7 @@ import '../../l10n.dart';
 import '../../repo.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
+import '../companion_avatar.dart';
 
 /// Optional, easter-egg Voice Pitch Studio with gentle dysphoria awareness,
 /// quiet no-mic warm-up mode, reading prompts, live on-device Hz estimation,
@@ -35,24 +36,34 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
   int _passageIndex = 0;
   String? _customPrompt;
 
-  // Live pitch detection state (RAM only)
+  // Live pitch & spectral tone state (RAM only)
   AudioRecorder? _recorder;
   StreamSubscription<Uint8List>? _streamSub;
   final List<int> _pcmBuffer = [];
   final List<double> _samples = [];
   final List<double> _contourPoints = [];
+  final List<double> _brightnessSamples = [];
+  final List<double> _weightSamples = [];
   bool _listening = false;
   double? _liveHz;
+  VoiceToneAnalysis? _latestTone;
   String? _statusNote;
+  String? _selectedContextTag;
+
+  // Gentle reference tone highlight timer
+  double? _playingToneHz;
+  Timer? _toneHighlightTimer;
 
   // Customizable target comfort zone
   VoiceTargetRange _targetRange = const VoiceTargetRange();
   bool _showTargetEditor = false;
 
-  // Quiet warm-up timer state (no microphone)
+  // Guided 4-step quiet warm-up state (no microphone)
   Timer? _warmupTimer;
-  int _warmupSecondsLeft = 60;
+  int _warmupStepIndex = 0;
+  int _warmupSecondsLeft = voiceWarmupSteps.first.durationSeconds;
   bool _warmupRunning = false;
+  bool _warmupCompleted = false;
 
   // Saved numeric history
   List<VoiceTestResult> _results = const [];
@@ -83,6 +94,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
   void dispose() {
     _voiceSub?.cancel();
     _warmupTimer?.cancel();
+    _toneHighlightTimer?.cancel();
     _stopListeningSync();
     _recorder?.dispose();
     super.dispose();
@@ -148,7 +160,11 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
       _statusNote = null;
       _samples.clear();
       _contourPoints.clear();
+      _brightnessSamples.clear();
+      _weightSamples.clear();
       _liveHz = null;
+      _latestTone = null;
+      _selectedContextTag = null;
       _savedCurrentSession = false;
       _pcmBuffer.clear();
     });
@@ -220,6 +236,11 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
         latestHz = hz;
         _samples.add(hz);
         _contourPoints.add(hz);
+        final tone = analyzeVoiceToneFromPcm16(frame, sampleRate: 16000, f0Hz: hz);
+        if (tone != null) {
+          _brightnessSamples.add(tone.brightnessScore);
+          _weightSamples.add(tone.weightScore);
+        }
       }
     }
     if (_contourPoints.length > _maxContourPoints) {
@@ -227,8 +248,44 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
     }
 
     if (latestHz != null && mounted) {
-      setState(() => _liveHz = latestHz);
+      VoiceToneAnalysis? smoothedTone;
+      if (_brightnessSamples.isNotEmpty) {
+        final windowCount = math.min(4, _brightnessSamples.length);
+        var bSum = 0.0;
+        var wSum = 0.0;
+        for (var i = _brightnessSamples.length - windowCount;
+            i < _brightnessSamples.length;
+            i++) {
+          bSum += _brightnessSamples[i];
+          wSum += _weightSamples[i];
+        }
+        smoothedTone = VoiceToneAnalysis(
+          brightnessScore: bSum / windowCount,
+          weightScore: wSum / windowCount,
+        );
+      }
+      setState(() {
+        _liveHz = latestHz;
+        _latestTone = smoothedTone ?? _latestTone;
+      });
     }
+  }
+
+  Future<void> _playReferenceTone(double hz) async {
+    HapticFeedback.selectionClick();
+    if (_listening) {
+      await _stopListening();
+    }
+    _toneHighlightTimer?.cancel();
+    if (mounted) {
+      setState(() => _playingToneHz = hz);
+    }
+    _toneHighlightTimer = Timer(const Duration(milliseconds: 1400), () {
+      if (mounted && _playingToneHz == hz) {
+        setState(() => _playingToneHz = null);
+      }
+    });
+    unawaited(playVoiceReferenceTone(hz));
   }
 
   Future<void> _stopListening() async {
@@ -305,6 +362,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
       minHz: minVal,
       maxHz: maxVal,
       category: categorizePitchHz(avg),
+      contextTag: _selectedContextTag,
     );
     final updated = await VoiceStore.saveResult(res);
     final syncFuture = _repo?.saveVoiceResult(res);
@@ -343,17 +401,22 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
     Navigator.pop(context);
   }
 
-  void _toggleWarmupTimer() {
+  void _selectWarmupStep(int index, {bool autoStart = false}) {
     HapticFeedback.selectionClick();
-    if (_warmupRunning) {
-      _warmupTimer?.cancel();
-      setState(() => _warmupRunning = false);
-      return;
+    _warmupTimer?.cancel();
+    final clamped = index.clamp(0, voiceWarmupSteps.length - 1);
+    setState(() {
+      _warmupStepIndex = clamped;
+      _warmupSecondsLeft = voiceWarmupSteps[clamped].durationSeconds;
+      _warmupCompleted = false;
+      _warmupRunning = autoStart;
+    });
+    if (autoStart) {
+      _startWarmupTick();
     }
-    if (_warmupSecondsLeft <= 0) {
-      _warmupSecondsLeft = 60;
-    }
-    setState(() => _warmupRunning = true);
+  }
+
+  void _startWarmupTick() {
     _warmupTimer?.cancel();
     _warmupTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
@@ -363,14 +426,41 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
       if (_warmupSecondsLeft > 1) {
         setState(() => _warmupSecondsLeft--);
       } else {
-        t.cancel();
         HapticFeedback.lightImpact();
-        setState(() {
-          _warmupSecondsLeft = 0;
-          _warmupRunning = false;
-        });
+        if (_warmupStepIndex < voiceWarmupSteps.length - 1) {
+          setState(() {
+            _warmupStepIndex++;
+            _warmupSecondsLeft =
+                voiceWarmupSteps[_warmupStepIndex].durationSeconds;
+          });
+        } else {
+          t.cancel();
+          setState(() {
+            _warmupSecondsLeft = 0;
+            _warmupRunning = false;
+            _warmupCompleted = true;
+          });
+        }
       }
     });
+  }
+
+  void _toggleWarmupTimer() {
+    HapticFeedback.selectionClick();
+    if (_warmupCompleted) {
+      _selectWarmupStep(0, autoStart: true);
+      return;
+    }
+    if (_warmupRunning) {
+      _warmupTimer?.cancel();
+      setState(() => _warmupRunning = false);
+      return;
+    }
+    if (_warmupSecondsLeft <= 0) {
+      _warmupSecondsLeft = voiceWarmupSteps[_warmupStepIndex].durationSeconds;
+    }
+    setState(() => _warmupRunning = true);
+    _startWarmupTick();
   }
 
   @override
@@ -385,6 +475,17 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
     final category = displayHz == null ? null : categorizePitchHz(displayHz);
     final metrics = computeVoiceSessionMetrics(_samples, _targetRange);
     final passage = pickVoicePassage(index: _passageIndex);
+    VoiceToneAnalysis? displayTone;
+    if (_listening && _latestTone != null) {
+      displayTone = _latestTone;
+    } else if (_brightnessSamples.isNotEmpty) {
+      final bAvg = _brightnessSamples.reduce((a, b) => a + b) /
+          _brightnessSamples.length;
+      final wAvg =
+          _weightSamples.reduce((a, b) => a + b) / _weightSamples.length;
+      displayTone =
+          VoiceToneAnalysis(brightnessScore: bAvg, weightScore: wAvg);
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -791,6 +892,13 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                         ],
                       ),
                     ],
+                    gap(12),
+                    _ToneBalanceCard(tone: displayTone),
+                    gap(12),
+                    _ReferenceToneStrip(
+                      playingHz: _playingToneHz,
+                      onPlay: _playReferenceTone,
+                    ),
                     gap(8),
                     Text(
                       tr('Pitch is only one piece alongside resonance & comfort.'),
@@ -861,7 +969,34 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                             ),
                           ],
                         )
-                      else
+                      else ...[
+                        Text(
+                          tr('Session tag (optional)'),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: Pastel.mist.withValues(alpha: 0.72),
+                          ),
+                        ),
+                        gap(6),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            for (final tag in voiceContextTags)
+                              _SelectableChip(
+                                label: tr(tag.$2),
+                                selected: _selectedContextTag == tag.$1,
+                                color: C.lavender,
+                                onTap: () => setState(() =>
+                                    _selectedContextTag =
+                                        _selectedContextTag == tag.$1
+                                            ? null
+                                            : tag.$1),
+                              ),
+                          ],
+                        ),
+                        gap(12),
                         OutlinedButton.icon(
                           onPressed: _saveSessionResult,
                           icon: const Icon(LucideIcons.bookmarkCheck, size: 17),
@@ -873,6 +1008,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                             shape: const StadiumBorder(),
                           ),
                         ),
+                      ],
                     ],
                   ],
                 ),
@@ -930,42 +1066,186 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                   gap(8),
                 ],
             ] else ...[
-              // Quiet Warm-up (No-Mic)
-              AppCard(
-                highlight: true,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    iconBadge(LucideIcons.wind, Pastel.mint,
-                        size: 52, iconSize: 26),
-                    gap(12),
-                    Text(
-                      '${_warmupSecondsLeft}s',
-                      style: display(42, color: Colors.white),
-                    ),
-                    gap(8),
-                    Text(
-                      tr('Relax your jaw and shoulders. Hum gently on a comfortable note without pushing volume.'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        color: Pastel.mist.withValues(alpha: 0.88),
-                        height: 1.45,
+              // Guided 4-Step SOVTE & Resonance Quiet Warm-up (No-Mic)
+              Builder(builder: (_) {
+                final step = voiceWarmupSteps[_warmupStepIndex];
+                final progress = _warmupCompleted
+                    ? 1.0
+                    : (_warmupStepIndex + 1) / voiceWarmupSteps.length;
+                return AppCard(
+                  highlight: true,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _MetaBadge(
+                            text: tr('Step {0} of {1}', [
+                              _warmupStepIndex + 1,
+                              voiceWarmupSteps.length,
+                            ]),
+                            color: C.lavender,
+                          ),
+                          Text(
+                            '${(progress * 100).round()}%',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: C.iconDefault,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    gap(16),
-                    pillButton(
-                      _warmupRunning
-                          ? tr('Pause warm-up')
-                          : tr('Start 60s warm-up'),
-                      _toggleWarmupTimer,
-                      icon:
-                          _warmupRunning ? LucideIcons.pause : LucideIcons.play,
-                      color: C.aurora,
-                    ),
-                  ],
-                ),
-              ),
+                      gap(10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 5,
+                          backgroundColor: C.midnight.withValues(alpha: 0.7),
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(Pastel.mint),
+                        ),
+                      ),
+                      gap(18),
+                      if (_warmupCompleted) ...[
+                        const CompanionAvatar(
+                          mood: CompanionMood.laugh,
+                          size: 78,
+                          glowColor: Pastel.mint,
+                        ),
+                        gap(12),
+                        Text(
+                          tr('Warm-up complete!'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        gap(8),
+                        Text(
+                          tr('Your voice is gently warmed up. Switch to Live Voice Test anytime you feel ready.'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            color: Pastel.mist.withValues(alpha: 0.88),
+                            height: 1.45,
+                          ),
+                        ),
+                        gap(16),
+                        pillButton(
+                          tr('Restart routine'),
+                          _toggleWarmupTimer,
+                          icon: LucideIcons.rotateCcw,
+                          color: Pastel.mint,
+                        ),
+                      ] else ...[
+                        iconBadge(LucideIcons.wind, Pastel.mint,
+                            size: 50, iconSize: 24),
+                        gap(10),
+                        Text(
+                          '${_warmupSecondsLeft}s',
+                          style: display(42, color: Colors.white),
+                        ),
+                        gap(8),
+                        Text(
+                          step.title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        gap(6),
+                        Text(
+                          step.subtitle,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            color: Pastel.mist.withValues(alpha: 0.88),
+                            height: 1.45,
+                          ),
+                        ),
+                        gap(12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: C.midnight.withValues(alpha: 0.62),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                                color: C.lavender.withValues(alpha: 0.16)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(LucideIcons.sparkles,
+                                  size: 16, color: Pastel.mint),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  step.tip,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Pastel.mist.withValues(alpha: 0.85),
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        gap(16),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: _warmupStepIndex > 0
+                                  ? () => _selectWarmupStep(_warmupStepIndex - 1)
+                                  : null,
+                              icon: const Icon(LucideIcons.chevronLeft),
+                              tooltip: tr('Previous step'),
+                            ),
+                            Expanded(
+                              child: pillButton(
+                                _warmupRunning
+                                    ? tr('Pause warm-up')
+                                    : tr('Start step'),
+                                _toggleWarmupTimer,
+                                icon: _warmupRunning
+                                    ? LucideIcons.pause
+                                    : LucideIcons.play,
+                                color: C.aurora,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                if (_warmupStepIndex <
+                                    voiceWarmupSteps.length - 1) {
+                                  _selectWarmupStep(_warmupStepIndex + 1);
+                                } else {
+                                  HapticFeedback.selectionClick();
+                                  _warmupTimer?.cancel();
+                                  setState(() {
+                                    _warmupRunning = false;
+                                    _warmupSecondsLeft = 0;
+                                    _warmupCompleted = true;
+                                  });
+                                }
+                              },
+                              icon: const Icon(LucideIcons.chevronRight),
+                              tooltip: tr('Next step'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              }),
             ],
 
             gap(24),
@@ -1527,6 +1807,219 @@ class _VoiceTrendChartCard extends StatelessWidget {
   }
 }
 
+class _ToneBalanceCard extends StatelessWidget {
+  const _ToneBalanceCard({required this.tone});
+
+  final VoiceToneAnalysis? tone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: C.midnight.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: C.lavender.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _BalanceGaugeBar(
+            title: tr('Voice Size / Resonance'),
+            valueLabel: tone?.brightnessLabel,
+            score: tone?.brightnessScore,
+            leftLabel: tr('Warm tone'),
+            rightLabel: tr('Bright tone'),
+            gradientColors: const [C.violet, Pastel.mint, C.rose],
+          ),
+          gap(10),
+          _BalanceGaugeBar(
+            title: tr('Vocal Weight'),
+            valueLabel: tone?.weightLabel,
+            score: tone?.weightScore,
+            leftLabel: tr('Light weight'),
+            rightLabel: tr('Heavy weight'),
+            gradientColors: const [Pastel.mint, C.lavender, C.coral],
+          ),
+          gap(8),
+          Text(
+            tr('Approximate visual guide from your phone mic — resonance & comfort matter most.'),
+            style: TextStyle(
+              fontSize: 10.8,
+              color: Pastel.mist.withValues(alpha: 0.65),
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceGaugeBar extends StatelessWidget {
+  const _BalanceGaugeBar({
+    required this.title,
+    required this.valueLabel,
+    required this.score,
+    required this.leftLabel,
+    required this.rightLabel,
+    required this.gradientColors,
+  });
+
+  final String title;
+  final String? valueLabel;
+  final double? score;
+  final String leftLabel;
+  final String rightLabel;
+  final List<Color> gradientColors;
+
+  @override
+  Widget build(BuildContext context) {
+    final norm = score?.clamp(0.0, 1.0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              valueLabel ?? '—',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: valueLabel != null
+                    ? C.lavender
+                    : Pastel.mist.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+        gap(5),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final w = constraints.maxWidth;
+            return SizedBox(
+              height: 14,
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      gradient: LinearGradient(colors: gradientColors),
+                    ),
+                  ),
+                  if (norm != null)
+                    Positioned(
+                      left: (w - 12) * norm,
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: C.aurora, width: 2),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+        gap(2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(leftLabel,
+                style: const TextStyle(fontSize: 10, color: C.iconDefault)),
+            Text(rightLabel,
+                style: const TextStyle(fontSize: 10, color: C.iconDefault)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ReferenceToneStrip extends StatelessWidget {
+  const _ReferenceToneStrip({
+    required this.playingHz,
+    required this.onPlay,
+  });
+
+  final double? playingHz;
+  final ValueChanged<double> onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: C.midnight.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: C.lavender.withValues(alpha: 0.14)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.volume2, size: 15, color: C.lavender),
+              const SizedBox(width: 6),
+              Text(
+                tr('Reference tone'),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: C.lavender,
+                ),
+              ),
+            ],
+          ),
+          gap(3),
+          Text(
+            tr('Tap a gentle tone as a starting anchor before speaking.'),
+            style: TextStyle(
+              fontSize: 11,
+              color: Pastel.mist.withValues(alpha: 0.68),
+            ),
+          ),
+          gap(8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final tone in voiceReferenceTones)
+                _SelectableChip(
+                  label: '${tone.hz.round()} Hz • ${tone.label}',
+                  selected:
+                      playingHz != null && (playingHz! - tone.hz).abs() < 0.5,
+                  color: tone.color,
+                  onTap: () => onPlay(tone.hz),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SavedResultTile extends StatelessWidget {
   const _SavedResultTile({required this.result, required this.onDelete});
 
@@ -1536,6 +2029,7 @@ class _SavedResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stamp = DateFormat('d MMM y • HH:mm', L10n.code).format(result.at);
+    final tagLabel = voiceContextTagLabel(result.contextTag);
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
@@ -1563,6 +2057,10 @@ class _SavedResultTile extends StatelessWidget {
                     color: Pastel.mist.withValues(alpha: 0.76),
                   ),
                 ),
+                if (tagLabel != null) ...[
+                  gap(5),
+                  _MetaBadge(text: tagLabel, color: C.lavender),
+                ],
               ],
             ),
           ),

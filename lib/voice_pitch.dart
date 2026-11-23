@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/material.dart' show Color;
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n.dart';
@@ -456,6 +457,325 @@ VoiceSessionMetrics? computeVoiceSessionMetrics(
   );
 }
 
+/// Real-time spectral estimate of vocal size (brightness) and vocal fold weight (RAM only).
+class VoiceToneAnalysis {
+  const VoiceToneAnalysis({
+    required this.brightnessScore,
+    required this.weightScore,
+  });
+
+  /// Normalized 0.0 (warm / larger space) to 1.0 (bright / smaller space).
+  final double brightnessScore;
+
+  /// Normalized 0.0 (light & soft) to 1.0 (thick / heavy).
+  final double weightScore;
+
+  String get brightnessLabel {
+    if (brightnessScore < 0.36) return tr('Warm / Larger Space');
+    if (brightnessScore <= 0.64) return tr('Balanced Resonance');
+    return tr('Bright / Smaller Space');
+  }
+
+  String get weightLabel {
+    if (weightScore < 0.36) return tr('Light & Soft');
+    if (weightScore <= 0.64) return tr('Balanced Weight');
+    return tr('Thick / Heavy');
+  }
+}
+
+void _fftInPlace(Float64List re, Float64List im) {
+  final n = re.length;
+  var j = 0;
+  for (var i = 1; i < n; i++) {
+    var bit = n >> 1;
+    while ((j & bit) != 0) {
+      j ^= bit;
+      bit >>= 1;
+    }
+    j ^= bit;
+    if (i < j) {
+      final tr = re[i];
+      re[i] = re[j];
+      re[j] = tr;
+      final ti = im[i];
+      im[i] = im[j];
+      im[j] = ti;
+    }
+  }
+  for (var len = 2; len <= n; len <<= 1) {
+    final ang = -2.0 * math.pi / len;
+    final wLenRe = math.cos(ang);
+    final wLenIm = math.sin(ang);
+    for (var i = 0; i < n; i += len) {
+      var wRe = 1.0;
+      var wIm = 0.0;
+      final half = len >> 1;
+      for (var k = 0; k < half; k++) {
+        final uRe = re[i + k];
+        final uIm = im[i + k];
+        final vIdx = i + k + half;
+        final vRe = re[vIdx] * wRe - im[vIdx] * wIm;
+        final vIm = re[vIdx] * wIm + im[vIdx] * wRe;
+        re[i + k] = uRe + vRe;
+        im[i + k] = uIm + vIm;
+        re[vIdx] = uRe - vRe;
+        im[vIdx] = uIm - vIm;
+        final nextWRe = wRe * wLenRe - wIm * wLenIm;
+        wIm = wRe * wLenIm + wIm * wLenRe;
+        wRe = nextWRe;
+      }
+    }
+  }
+}
+
+/// Estimates spectral brightness (resonance proxy) and harmonic tilt (vocal weight proxy)
+/// entirely in memory from little-endian 16-bit mono PCM audio. Returns null on silence.
+VoiceToneAnalysis? analyzeVoiceToneFromPcm16(
+  Uint8List pcmBytes, {
+  int sampleRate = 16000,
+  double? f0Hz,
+}) {
+  const fftSize = 1024;
+  final sampleCount = pcmBytes.length ~/ 2;
+  if (sampleRate <= 0 || sampleCount < fftSize) return null;
+
+  final data = ByteData.sublistView(pcmBytes);
+  final startOffset = (sampleCount - fftSize) ~/ 2;
+
+  var mean = 0.0;
+  var energy = 0.0;
+  final raw = Float64List(fftSize);
+  for (var i = 0; i < fftSize; i++) {
+    final s = data.getInt16((startOffset + i) * 2, Endian.little) / 32768.0;
+    raw[i] = s;
+    mean += s;
+    energy += s * s;
+  }
+  if (math.sqrt(energy / fftSize) < 0.008) return null;
+  mean /= fftSize;
+
+  final re = Float64List(fftSize);
+  final im = Float64List(fftSize);
+  for (var i = 0; i < fftSize; i++) {
+    final hann = 0.5 * (1.0 - math.cos(2.0 * math.pi * i / (fftSize - 1)));
+    re[i] = (raw[i] - mean) * hann;
+  }
+  _fftInPlace(re, im);
+
+  final binHz = sampleRate / fftSize;
+  const half = fftSize ~/ 2;
+  final mag = Float64List(half);
+
+  var weightedFreqSum = 0.0;
+  var totalBandMag = 0.0;
+  var peakF0Mag = 0.0;
+  double? estimatedF0 = (f0Hz != null && f0Hz >= 60.0 && f0Hz <= 400.0) ? f0Hz : null;
+
+  for (var k = 1; k < half; k++) {
+    final m = math.sqrt(re[k] * re[k] + im[k] * im[k]);
+    mag[k] = m;
+    final freq = k * binHz;
+    if (freq >= 85.0 && freq <= 4500.0) {
+      weightedFreqSum += freq * m;
+      totalBandMag += m;
+    }
+    if (estimatedF0 == null && freq >= 65.0 && freq <= 380.0 && m > peakF0Mag) {
+      peakF0Mag = m;
+      estimatedF0 = freq;
+    }
+  }
+
+  if (totalBandMag <= 1e-9) return null;
+  final centroid = weightedFreqSum / totalBandMag;
+  final brightness = ((centroid - 450.0) / 1400.0).clamp(0.0, 1.0);
+
+  var weight = 0.5;
+  if (estimatedF0 != null) {
+    final f0 = estimatedF0;
+    final h1Min = f0 * 0.72;
+    final h1Max = f0 * 1.38;
+    final h2Min = f0 * 1.5;
+    final h2Max = math.min(2600.0, f0 * 8.5);
+    var h1Sum = 0.0;
+    var h2PlusSum = 0.0;
+    for (var k = 1; k < half; k++) {
+      final freq = k * binHz;
+      if (freq >= h1Min && freq <= h1Max) {
+        h1Sum += mag[k];
+      } else if (freq >= h2Min && freq <= h2Max) {
+        h2PlusSum += mag[k];
+      }
+    }
+    final denom = h1Sum + h2PlusSum;
+    if (denom > 1e-9) {
+      final harmonicRatio = h2PlusSum / denom;
+      weight = ((harmonicRatio - 0.15) / 0.68).clamp(0.0, 1.0);
+    }
+  }
+
+  return VoiceToneAnalysis(
+    brightnessScore: brightness,
+    weightScore: weight,
+  );
+}
+
+/// Generates a synthetic harmonic PCM16 waveform in RAM for testing spectral balance.
+Uint8List synthesizePcm16Harmonic({
+  required double frequencyHz,
+  required List<double> harmonicWeights,
+  int sampleRate = 16000,
+  int durationMs = 80,
+  double amplitude = 0.5,
+}) {
+  final count = (sampleRate * durationMs / 1000).round();
+  final out = ByteData(count * 2);
+  final weightSum = harmonicWeights.fold<double>(0.0, (s, w) => s + w.abs());
+  final norm = weightSum > 1e-9 ? weightSum : 1.0;
+  final clampedAmp = amplitude.clamp(0.0, 0.99);
+  for (var i = 0; i < count; i++) {
+    var v = 0.0;
+    for (var h = 0; h < harmonicWeights.length; h++) {
+      v += harmonicWeights[h] *
+          math.sin(2.0 * math.pi * frequencyHz * (h + 1) * i / sampleRate);
+    }
+    final sample = (v / norm) * clampedAmp;
+    out.setInt16(i * 2, (sample * 32767).round().clamp(-32768, 32767),
+        Endian.little);
+  }
+  return out.buffer.asUint8List();
+}
+
+/// Guided silent/SOVTE warm-up step (zero microphone required).
+class VoiceWarmupStep {
+  const VoiceWarmupStep({
+    required this.titleEn,
+    required this.titleId,
+    required this.subtitleEn,
+    required this.subtitleId,
+    required this.tipEn,
+    required this.tipId,
+    required this.durationSeconds,
+  });
+
+  final String titleEn;
+  final String titleId;
+  final String subtitleEn;
+  final String subtitleId;
+  final String tipEn;
+  final String tipId;
+  final int durationSeconds;
+
+  bool get _isId => L10n.code == 'id';
+  String get title => _isId ? titleId : titleEn;
+  String get subtitle => _isId ? subtitleId : subtitleEn;
+  String get tip => _isId ? tipId : tipEn;
+}
+
+const List<VoiceWarmupStep> voiceWarmupSteps = [
+  VoiceWarmupStep(
+    titleEn: 'Neck, Jaw & Shoulder Release',
+    titleId: 'Rilekskan Leher, Rahang & Bahu',
+    subtitleEn:
+        'Let your shoulders drop and gently unclench your jaw for a tension-free start.',
+    subtitleId:
+        'Turunkan bahumu perlahan dan kendurkan rahang agar tenggorokan bebas ketegangan.',
+    tipEn:
+        'Roll shoulders back twice and take 3 slow breaths through your mouth like fogging glass.',
+    tipId:
+        'Putar bahu ke belakang dua kali dan tarik 3 napas pelan seperti mengembun kaca.',
+    durationSeconds: 20,
+  ),
+  VoiceWarmupStep(
+    titleEn: 'SOVTE: Straw or Lip Trill',
+    titleId: 'SOVTE: Sedotan atau Getar Bibir',
+    subtitleEn:
+        'Hum softly into an imaginary straw or do gentle lip trills to lighten vocal weight.',
+    subtitleId:
+        'Bergumam pelan lewat sedotan imajiner atau getarkan bibir ringan untuk meringankan suara.',
+    tipEn:
+        'Keep airflow steady and easy—if it tickles or feels tight, soften the volume.',
+    tipId:
+        'Jaga aliran udara tetap ringan—kalau terasa mengganjal, kecilkan volume.',
+    durationSeconds: 30,
+  ),
+  VoiceWarmupStep(
+    titleEn: 'Small Space Resonance Glide',
+    titleId: 'Geser Resonansi Ruang Kecil',
+    subtitleEn:
+        'Whisper softly from "ahh" toward "ih/ee" without forcing pitch, feeling sound move forward.',
+    subtitleId:
+        'Berbisik pelan dari "ahh" ke "ih/ee" tanpa memaksa nada tinggi, rasakan suara maju ke depan.',
+    tipEn: 'Think of sounding smaller and lighter rather than louder.',
+    tipId: 'Bayangkan ruang mulut terasa lebih kecil dan ringan, bukan lebih keras.',
+    durationSeconds: 25,
+  ),
+  VoiceWarmupStep(
+    titleEn: 'Hydration & Soft Hum',
+    titleId: 'Minum Air & Gumam Nyaman',
+    subtitleEn:
+        'Take a sip of room-temperature water and end with an easy conversational hum.',
+    subtitleId:
+        'Minum seteguk air bersuhu ruang lalu akhiri dengan gumam santai di nada bicara nyaman.',
+    tipEn: 'Hydrated vocal folds vibrate smoothly with noticeably less effort.',
+    tipId: 'Pita suara yang terhidrasi bergetar lebih halus dengan usaha jauh lebih ringan.',
+    durationSeconds: 15,
+  ),
+];
+
+/// Preset pitch-pipe frequency button metadata.
+class VoiceReferenceTone {
+  const VoiceReferenceTone({
+    required this.hz,
+    required this.labelKey,
+    required this.color,
+  });
+
+  final double hz;
+  final String labelKey;
+  final Color color;
+
+  String get label => tr(labelKey);
+}
+
+const List<VoiceReferenceTone> voiceReferenceTones = [
+  VoiceReferenceTone(hz: 125.0, labelKey: 'Deep tone', color: C.violet),
+  VoiceReferenceTone(hz: 165.0, labelKey: 'Neutral pitch', color: Pastel.mint),
+  VoiceReferenceTone(hz: 195.0, labelKey: 'Warm femme', color: C.rose),
+  VoiceReferenceTone(hz: 225.0, labelKey: 'Bright femme', color: C.magenta),
+];
+
+const MethodChannel _voiceAudioChannel =
+    MethodChannel('com.example.ritme/app_utils');
+
+/// Plays a brief soft sine reference tone on supported devices (returns false otherwise).
+Future<bool> playVoiceReferenceTone(double hz, {int durationMs = 1400}) async {
+  try {
+    final ok = await _voiceAudioChannel.invokeMethod<bool>(
+      'playReferenceTone',
+      {'hz': hz, 'durationMs': durationMs},
+    );
+    return ok ?? false;
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Optional short condition tags users can attach to a saved pitch result.
+const List<(String key, String en, String id)> voiceContextTags = [
+  ('morning', 'Morning', 'Pagi hari'),
+  ('warmed_up', 'Warmed up', 'Sudah pemanasan'),
+  ('relaxed', 'Relaxed', 'Santai'),
+  ('tired', 'Tired', 'Lelah'),
+];
+
+String? voiceContextTagLabel(String? key) {
+  if (key == null) return null;
+  for (final item in voiceContextTags) {
+    if (item.$1 == key) return L10n.code == 'id' ? item.$3 : item.$2;
+  }
+  return null;
+}
+
 /// Numeric-only voice pitch session summary. Never stores raw audio recordings.
 class VoiceTestResult {
   const VoiceTestResult({
@@ -465,6 +785,7 @@ class VoiceTestResult {
     required this.minHz,
     required this.maxHz,
     required this.category,
+    this.contextTag,
   });
 
   final String id;
@@ -473,6 +794,7 @@ class VoiceTestResult {
   final double minHz;
   final double maxHz;
   final VoicePitchCategory category;
+  final String? contextTag;
 
   static DateTime? _parseDate(dynamic v) {
     if (v is Timestamp) return v.toDate();
@@ -499,6 +821,7 @@ class VoiceTestResult {
         'minHz': double.parse(minHz.toStringAsFixed(1)),
         'maxHz': double.parse(maxHz.toStringAsFixed(1)),
         'category': category.key,
+        if (contextTag != null) 'contextTag': contextTag,
       };
 
   /// Numeric-only Firestore map. Never stores raw audio recordings.
@@ -508,6 +831,7 @@ class VoiceTestResult {
         'minHz': double.parse(minHz.toStringAsFixed(1)),
         'maxHz': double.parse(maxHz.toStringAsFixed(1)),
         'category': category.key,
+        if (contextTag != null) 'contextTag': contextTag,
       };
 
   static VoiceTestResult? tryFrom(String id, Map<String, dynamic> m) {
@@ -523,6 +847,10 @@ class VoiceTestResult {
         max == null) {
       return null;
     }
+    final rawTag = m['contextTag'];
+    final tag = (rawTag is String && rawTag.trim().isNotEmpty)
+        ? rawTag.trim()
+        : null;
     return VoiceTestResult(
       id: cleanId,
       at: at,
@@ -530,6 +858,7 @@ class VoiceTestResult {
       minHz: min,
       maxHz: max,
       category: VoicePitchCategoryMeta.fromKey(m['category'] as String?),
+      contextTag: tag,
     );
   }
 
@@ -748,7 +1077,8 @@ class VoiceStore {
           x.avgHz != y.avgHz ||
           x.minHz != y.minHz ||
           x.maxHz != y.maxHz ||
-          x.category != y.category) {
+          x.category != y.category ||
+          x.contextTag != y.contextTag) {
         return false;
       }
     }

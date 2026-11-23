@@ -1,11 +1,16 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lunera/milestones.dart';
 import 'package:lunera/models.dart';
+import 'package:lunera/notifications.dart';
 import 'package:lunera/profile.dart';
+import 'package:lunera/schedule.dart';
 import 'package:lunera/sim.dart';
 import 'package:lunera/ui/site_map.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('Lunera Models & Helpers Tests', () {
     test('Hormone preset conversion works properly', () {
       final e2 = presetOf('estradiol');
@@ -478,6 +483,113 @@ Note: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCATION / PIC
       const scAngle = '45°';
       expect(imAngle, equals('90°'));
       expect(scAngle, equals('45°'));
+    });
+
+    test('computeInjectionVolume computes mL and U-100 units safely', () {
+      final vol = computeInjectionVolume(
+          doseMg: 6.0, concentrationMgPerMl: 40.0);
+      expect(vol, isNotNull);
+      expect(vol!.volumeMl, closeTo(0.15, 0.001));
+      expect(vol.syringeUnits, closeTo(15.0, 0.01));
+
+      expect(
+          computeInjectionVolume(doseMg: 0, concentrationMgPerMl: 40), isNull);
+      expect(
+          computeInjectionVolume(doseMg: 5, concentrationMgPerMl: -20), isNull);
+      expect(
+          computeInjectionVolume(
+              doseMg: double.nan, concentrationMgPerMl: 40),
+          isNull);
+    });
+
+    test('JournalEntry symptoms serialization and backward compatibility', () {
+      final withSymptoms = JournalEntry(
+        id: 'j_sym',
+        at: DateTime(2026, 11, 20, 9, 0),
+        symptoms: const ['hot_flashes', 'fatigue'],
+      );
+      final map = withSymptoms.toMap();
+      expect(map['symptoms'], equals(['hot_flashes', 'fatigue']));
+
+      final parsed = JournalEntry.from('j_sym', map);
+      expect(parsed.hasSymptoms, isTrue);
+      expect(parsed.symptoms, equals(['hot_flashes', 'fatigue']));
+
+      final legacy = JournalEntry.from('j_old', {
+        'at': '2026-11-19T08:00:00.000Z',
+        'mood': 'calm',
+      });
+      expect(legacy.hasSymptoms, isFalse);
+      expect(legacy.symptoms, isEmpty);
+    });
+
+    test('MilestoneStore persists private milestones, optional photos, and deletes', () async {
+      SharedPreferences.setMockInitialValues({});
+      expect(await MilestoneStore.loadMilestones(), isEmpty);
+
+      final item = TransitionMilestone(
+        id: 'ms_1',
+        at: DateTime(2026, 11, 23),
+        title: '3 Months Checkpoint',
+        tag: 'month_3',
+        note: 'Steady energy and calmer mornings',
+        photoBase64: 'AQID',
+      );
+      await MilestoneStore.saveMilestone(item);
+
+      final loaded = await MilestoneStore.loadMilestones();
+      expect(loaded.length, equals(1));
+      expect(loaded.first.title, equals('3 Months Checkpoint'));
+      expect(loaded.first.tag, equals('month_3'));
+      expect(loaded.first.photoBase64, equals('AQID'));
+      expect(loaded.first.hasPhoto, isTrue);
+
+      await MilestoneStore.deleteMilestone('ms_1');
+      expect(await MilestoneStore.loadMilestones(), isEmpty);
+    });
+
+    test('Trough bloodwork notification formats discreet mode and stores reminder timestamp', () async {
+      SharedPreferences.setMockInitialValues({});
+      final therapy = Therapy(
+        id: 't1',
+        hormoneId: 'estradiol',
+        name: 'Estradiol Valerate',
+        dose: 4,
+        doseUnit: 'mg',
+        start: DateTime(2026, 11, 1),
+        route: 'inj',
+      );
+      final futureSlot = Slot(
+        therapy,
+        DateTime.now().add(const Duration(days: 2)),
+        null,
+        'upcoming',
+      );
+
+      final wellness = troughLabNotificationText(
+        futureSlot,
+        const Prefs(discreetNotify: 'wellness'),
+      );
+      expect(wellness.$1, contains('Health'));
+
+      final explicit = troughLabNotificationText(
+        futureSlot,
+        const Prefs(discreetNotify: 'off'),
+      );
+      expect(explicit.$2, contains('Estradiol Valerate'));
+
+      final scheduled = await AppNotifier.instance.scheduleTroughLabReminder(
+        slot: futureSlot,
+        prefs: const Prefs(discreetNotify: 'off'),
+      );
+      expect(scheduled, isNotNull);
+      expect(
+        await AppNotifier.instance.getScheduledTroughReminder(),
+        equals(scheduled),
+      );
+
+      await AppNotifier.instance.cancelTroughLabReminder();
+      expect(await AppNotifier.instance.getScheduledTroughReminder(), isNull);
     });
   });
 }

@@ -111,6 +111,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final labs = ref.read(labsProvider).value ?? const [];
     final targets = ref.read(targetsProvider).value ?? const {};
     final prefs = ref.read(prefsProvider).value ?? const Prefs();
+    final journal = ref.read(journalProvider).value ?? const <JournalEntry>[];
     final now = DateTime.now();
 
     try {
@@ -122,6 +123,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           targets: targets,
           prefs: prefs,
           now: now,
+          journal: journal,
           months: months,
         );
         final stamp = DateFormat('yyyy-MM-dd_HH-mm').format(now);
@@ -150,6 +152,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         targets: targets,
         prefs: prefs,
         now: now,
+        journal: journal,
         months: months,
       );
       if (kIsWeb) {

@@ -15,6 +15,22 @@ Timestamp _t(DateTime d) => Timestamp.fromDate(d);
 double? parseNum(String? s) => s == null ? null : double.tryParse(s.trim().replaceAll(',', '.'));
 String fmt(double v) => v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(1);
 
+/// Computes liquid draw volume (mL) and equivalent U-100 insulin syringe units
+/// for a given [doseMg] and vial [concentrationMgPerMl]. Returns null on invalid inputs.
+({double volumeMl, double syringeUnits})? computeInjectionVolume({
+  required double doseMg,
+  required double concentrationMgPerMl,
+}) {
+  if (!doseMg.isFinite ||
+      !concentrationMgPerMl.isFinite ||
+      doseMg <= 0 ||
+      concentrationMgPerMl <= 0) {
+    return null;
+  }
+  final ml = doseMg / concentrationMgPerMl;
+  return (volumeMl: ml, syringeUnits: ml * 100.0);
+}
+
 /// Hormon untuk hasil lab. `units`: satuan -> faktor ke satuan dasar (satuan pertama).
 class HormonePreset {
   const HormonePreset(this.id, this.en, this.units);
@@ -623,27 +639,65 @@ const moods = moodTypes;
 /// Bagian tubuh untuk observasi transisi di jurnal.
 const bodyAreas = ['Skin', 'Breasts', 'Body shape', 'Hair', 'Energy', 'Sleep'];
 
+/// Presets gejala & kondisi terstruktur untuk check-in harian dan ringkasan konsultasi dokter.
+const symptomPresets = <String, (String, IconData)>{
+  'steady_energy': ('Steady energy', LucideIcons.zap),
+  'fatigue': ('Fatigue / Low energy', LucideIcons.batteryLow),
+  'restful_sleep': ('Restful sleep', LucideIcons.moon),
+  'insomnia': ('Restless sleep', LucideIcons.cloudMoon),
+  'hot_flashes': ('Hot flashes / Warmth', LucideIcons.flame),
+  'headache': ('Headache', LucideIcons.activity),
+  'tender_chest': ('Chest / Breast tenderness', LucideIcons.heartPulse),
+  'site_soreness': ('Injection site soreness', LucideIcons.syringe),
+  'skin_softening': ('Skin / Texture shift', LucideIcons.sparkles),
+  'calm_focus': ('Calm focus', LucideIcons.sun),
+};
+
 class JournalEntry {
-  const JournalEntry({required this.id, required this.at, this.mood, this.body = const {}, this.text});
+  const JournalEntry({
+    required this.id,
+    required this.at,
+    this.mood,
+    this.body = const {},
+    this.symptoms = const [],
+    this.text,
+  });
   final String id;
   final DateTime at;
   final String? mood; // happy | calm | neutral | low | anxious
   final Map<String, String> body; // area -> catatan
+  final List<String> symptoms; // daftar kunci dari symptomPresets
   final String? text; // catatan umum bebas
 
   bool get hasMood => mood != null && mood!.isNotEmpty;
   bool get hasBody => body.isNotEmpty;
+  bool get hasSymptoms => symptoms.isNotEmpty;
   bool get hasText => text != null && text!.trim().isNotEmpty;
 
-  Map<String, dynamic> toMap() => {'at': _t(at), 'mood': mood, 'body': body, 'text': text};
+  Map<String, dynamic> toMap() => {
+        'at': _t(at),
+        'mood': mood,
+        'body': body,
+        if (symptoms.isNotEmpty) 'symptoms': symptoms,
+        'text': text,
+      };
 
   factory JournalEntry.from(String id, Map<String, dynamic> m) => JournalEntry(
         id: id,
         at: _d(m['at']),
         mood: m['mood'],
         body: m['body'] is Map
-            ? {for (final e in (m['body'] as Map).entries) _key(e.key as String): e.value as String}
+            ? {
+                for (final e in (m['body'] as Map).entries)
+                  _key(e.key as String): e.value as String
+              }
             : const <String, String>{},
+        symptoms: m['symptoms'] is List
+            ? [
+                for (final x in m['symptoms'] as List)
+                  if (x is String && x.trim().isNotEmpty) x.trim()
+              ]
+            : const <String>[],
         text: m['text'],
       );
 }

@@ -194,25 +194,55 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
     );
   }
 
+  Widget _buildAvatarView({required bool isFront}) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Pastel.lilac.withValues(alpha: 0.14),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        Image.asset(
+          isFront ? 'assets/images/body_front.png' : 'assets/images/body_back.png',
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (_, __, ___) => const Icon(
+            LucideIcons.user,
+            color: Pastel.lilac,
+            size: 42,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFrontView(Map<String, SiteStatus> statuses) {
     return LayoutBuilder(builder: (context, constraints) {
       final totalWidth = constraints.maxWidth;
       const height = 310.0;
-      final podWidth = (totalWidth - 90) / 2;
+      final avatarWidth = (totalWidth * 0.34).clamp(96.0, 148.0);
+      final podWidth = (totalWidth - avatarWidth - 8) / 2;
 
       return SizedBox(
         height: height,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Center Anatomical Silhouette
+            // Center Chibi Avatar (Front)
             Positioned(
               top: 0,
               bottom: 0,
-              width: 80,
-              child: CustomPaint(
-                painter: _AnatomyPainter(isFront: true),
-              ),
+              width: avatarWidth,
+              child: _buildAvatarView(isFront: true),
             ),
 
             // Right-side Body Sites (Viewer's Left)
@@ -268,21 +298,20 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
     return LayoutBuilder(builder: (context, constraints) {
       final totalWidth = constraints.maxWidth;
       const height = 280.0;
-      final podWidth = (totalWidth - 90) / 2;
+      final avatarWidth = (totalWidth * 0.34).clamp(96.0, 148.0);
+      final podWidth = (totalWidth - avatarWidth - 8) / 2;
 
       return SizedBox(
         height: height,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Center Anatomical Silhouette (Back)
+            // Center Chibi Avatar (Back)
             Positioned(
               top: 0,
               bottom: 0,
-              width: 80,
-              child: CustomPaint(
-                painter: _AnatomyPainter(isFront: false),
-              ),
+              width: avatarWidth,
+              child: _buildAvatarView(isFront: false),
             ),
 
             // Right Buttock (Viewer's Left)
@@ -429,108 +458,6 @@ class _SiteCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Menggambar siluet tubuh anatomi halus untuk panduan injeksi
-class _AnatomyPainter extends CustomPainter {
-  _AnatomyPainter({required this.isFront});
-  final bool isFront;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final cx = w / 2;
-
-    final fillPaint = Paint()
-      ..color = Pastel.lilac.withValues(alpha: 0.18)
-      ..style = PaintingStyle.fill;
-
-    final strokePaint = Paint()
-      ..color = Pastel.lilac.withValues(alpha: 0.40)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-
-    // Head
-    canvas.drawCircle(Offset(cx, h * 0.08), h * 0.045, fillPaint);
-    canvas.drawCircle(Offset(cx, h * 0.08), h * 0.045, strokePaint);
-
-    // Neck
-    canvas.drawRect(
-      Rect.fromCenter(center: Offset(cx, h * 0.13), width: w * 0.18, height: h * 0.04),
-      fillPaint,
-    );
-
-    // Torso Path
-    final body = Path();
-    body.moveTo(cx - w * 0.45, h * 0.16); // Left shoulder
-    body.lineTo(cx + w * 0.45, h * 0.16); // Right shoulder
-    body.quadraticBezierTo(cx + w * 0.35, h * 0.32, cx + w * 0.30, h * 0.40); // Waist
-    body.quadraticBezierTo(cx + w * 0.42, h * 0.48, cx + w * 0.38, h * 0.54); // Hip
-    body.lineTo(cx - w * 0.38, h * 0.54); // Hip base
-    body.quadraticBezierTo(cx - w * 0.42, h * 0.48, cx - w * 0.30, h * 0.40); // Waist
-    body.quadraticBezierTo(cx - w * 0.35, h * 0.32, cx - w * 0.45, h * 0.16); // Shoulder
-    body.close();
-
-    canvas.drawPath(body, fillPaint);
-    canvas.drawPath(body, strokePaint);
-
-    // Arms
-    final armStroke = Paint()
-      ..color = Pastel.lilac.withValues(alpha: 0.28)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = w * 0.14;
-
-    canvas.drawLine(Offset(cx - w * 0.48, h * 0.18), Offset(cx - w * 0.60, h * 0.42), armStroke);
-    canvas.drawLine(Offset(cx + w * 0.48, h * 0.18), Offset(cx + w * 0.60, h * 0.42), armStroke);
-
-    // Legs / Thighs
-    final legStroke = Paint()
-      ..color = Pastel.lilac.withValues(alpha: 0.26)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = w * 0.22;
-
-    canvas.drawLine(Offset(cx - w * 0.20, h * 0.56), Offset(cx - w * 0.18, h * 0.94), legStroke);
-    canvas.drawLine(Offset(cx + w * 0.20, h * 0.56), Offset(cx + w * 0.18, h * 0.94), legStroke);
-
-    // Target Injection Region Indicators
-    final dotPaint = Paint()..color = Pastel.lilac;
-    final ringPaint = Paint()
-      ..color = Colors.white70
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-
-    if (isFront) {
-      // Deltoids (Arms)
-      canvas.drawCircle(Offset(cx - w * 0.52, h * 0.25), 4, dotPaint);
-      canvas.drawCircle(Offset(cx - w * 0.52, h * 0.25), 4, ringPaint);
-      canvas.drawCircle(Offset(cx + w * 0.52, h * 0.25), 4, dotPaint);
-      canvas.drawCircle(Offset(cx + w * 0.52, h * 0.25), 4, ringPaint);
-
-      // Abdomen
-      canvas.drawCircle(Offset(cx - w * 0.14, h * 0.42), 4, dotPaint);
-      canvas.drawCircle(Offset(cx - w * 0.14, h * 0.42), 4, ringPaint);
-      canvas.drawCircle(Offset(cx + w * 0.14, h * 0.42), 4, dotPaint);
-      canvas.drawCircle(Offset(cx + w * 0.14, h * 0.42), 4, ringPaint);
-
-      // Vastus Lateralis (Thighs)
-      canvas.drawCircle(Offset(cx - w * 0.22, h * 0.68), 4, dotPaint);
-      canvas.drawCircle(Offset(cx - w * 0.22, h * 0.68), 4, ringPaint);
-      canvas.drawCircle(Offset(cx + w * 0.22, h * 0.68), 4, dotPaint);
-      canvas.drawCircle(Offset(cx + w * 0.22, h * 0.68), 4, ringPaint);
-    } else {
-      // Gluteus / Buttocks (Dorsogluteal & Ventrogluteal)
-      canvas.drawCircle(Offset(cx - w * 0.20, h * 0.48), 5, dotPaint);
-      canvas.drawCircle(Offset(cx - w * 0.20, h * 0.48), 5, ringPaint);
-      canvas.drawCircle(Offset(cx + w * 0.20, h * 0.48), 5, dotPaint);
-      canvas.drawCircle(Offset(cx + w * 0.20, h * 0.48), 5, ringPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_AnatomyPainter oldDelegate) => oldDelegate.isFront != isFront;
 }
 
 /// Modal Sheet untuk melihat ringkasan rotasi dan kesehatan lokasi suntik

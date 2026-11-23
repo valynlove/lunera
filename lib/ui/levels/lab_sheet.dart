@@ -62,6 +62,11 @@ class _LabSheetState extends ConsumerState<LabSheet> {
   Widget build(BuildContext context) {
     final u = unit ?? h.base;
     final editing = widget.initial != null;
+    final parsedVal = parseNum(value.text);
+    final showEquivalents =
+        parsedVal != null && parsedVal.isFinite && parsedVal > 0 && h.units.length > 1;
+    final currentFactor = h.units[u] ?? 1.0;
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(editing ? tr('Edit lab result') : tr('New lab result'),
           style: display(28)),
@@ -106,6 +111,7 @@ class _LabSheetState extends ConsumerState<LabSheet> {
           Expanded(
             child: TextField(
                 controller: value,
+                onChanged: (_) => setState(() {}),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(labelText: tr('Value'))),
@@ -124,6 +130,34 @@ class _LabSheetState extends ConsumerState<LabSheet> {
             },
           ),
       ]),
+      if (showEquivalents) ...[
+        gap(10),
+        Text(
+          tr('Converted equivalents:'),
+          style: TextStyle(
+              fontSize: 11.5, color: Pastel.mist.withValues(alpha: 0.78)),
+        ),
+        gap(4),
+        Wrap(spacing: 8, runSpacing: 4, children: [
+          for (final other in h.units.keys)
+            if (other != u)
+              ActionChip(
+                avatar: const Icon(LucideIcons.arrowLeftRight,
+                    size: 14, color: C.lavender),
+                label: Text(
+                    '${fmt(parsedVal * (currentFactor / (h.units[other] ?? 1.0)))} $other'),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  final nextVal =
+                      parsedVal * (currentFactor / (h.units[other] ?? 1.0));
+                  setState(() {
+                    value.text = fmt(nextVal);
+                    unit = other;
+                  });
+                },
+              ),
+        ]),
+      ],
       gap(10),
       OutlinedButton.icon(
         onPressed: () async {

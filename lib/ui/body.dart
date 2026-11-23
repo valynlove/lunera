@@ -1,15 +1,23 @@
+import 'dart:convert';
+
+import 'package:file_selector/file_selector.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../lock.dart';
+import '../milestones.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
 import 'journal.dart';
+import 'companion_avatar.dart';
 import '../l10n.dart';
 
-/// Tubuh & perubahan: ringkasan, garis waktu jurnal, dan kalkulator ukuran badan & pakaian.
+/// Tubuh & perubahan: ringkasan, garis waktu jurnal, ukuran badan, dan milestone privat.
 class BodyPage extends ConsumerStatefulWidget {
   const BodyPage({super.key});
   @override
@@ -17,11 +25,31 @@ class BodyPage extends ConsumerStatefulWidget {
 }
 
 // Bagian yang digambar pada siluet, urut dari atas, beserta posisi label (pecahan tinggi).
-const _onBody = [('Hair', .06), ('Breasts', .22), ('Skin', .38), ('Body shape', .54)];
+const _onBody = [('Hair', .16), ('Breasts', .36), ('Skin', .54), ('Body shape', .72)];
 
 class _BodyPageState extends ConsumerState<BodyPage> {
   int tab = 0;
   String area = bodyAreas.first;
+  List<TransitionMilestone> _milestones = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMilestones();
+  }
+
+  Future<void> _loadMilestones() async {
+    try {
+      final list = await MilestoneStore.loadMilestones();
+      if (mounted) setState(() => _milestones = list);
+    } catch (_) {}
+  }
+
+  Future<void> _deleteMilestone(String id) async {
+    HapticFeedback.mediumImpact();
+    final updated = await MilestoneStore.deleteMilestone(id);
+    if (mounted) setState(() => _milestones = updated);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +118,50 @@ class _BodyPageState extends ConsumerState<BodyPage> {
           final maxW = cons.maxWidth;
           const h = 420.0;
           final diagramW = maxW > 460.0 ? 440.0 : maxW;
+          const aspectRatio = 372.0 / 682.0;
+          final maxAvatarW = diagramW * 0.43;
+          const maxAvatarH = h * 0.96;
+          final avatarW = (maxAvatarH * aspectRatio).clamp(0.0, maxAvatarW);
+          final avatarH = avatarW / aspectRatio;
+          final avatarRect = Rect.fromCenter(
+            center: Offset(diagramW * 0.22, h * 0.50),
+            width: avatarW,
+            height: avatarH,
+          );
           return Center(
             child: SizedBox(
               width: diagramW,
               height: h,
               child: Stack(children: [
-                Positioned.fill(child: CustomPaint(painter: _BodyPainter(C.peony))),
+                Positioned.fromRect(
+                  rect: avatarRect,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          C.peony.withValues(alpha: 0.14),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                    child: Image.asset(
+                      'assets/images/body_front.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                      errorBuilder: (_, __, ___) => Icon(
+                        LucideIcons.user,
+                        color: C.peony,
+                        size: 48,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _BodyCalloutPainter(C.peony, avatarRect),
+                  ),
+                ),
                 for (final a in _onBody) callout(a.$1, a.$2, diagramW, h),
               ]),
             ),
@@ -139,6 +205,14 @@ class _BodyPageState extends ConsumerState<BodyPage> {
     ]);
 
     final sizeTab = _SizeTab(measurements: measurements);
+    final milestonesTab = _MilestonesTab(
+      milestones: _milestones,
+      onDelete: _deleteMilestone,
+      onEdit: (m) async {
+        await showSheet(context, MilestoneSheet(initial: m));
+        await _loadMilestones();
+      },
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -153,6 +227,7 @@ class _BodyPageState extends ConsumerState<BodyPage> {
               (0, tr('Overview')),
               (1, tr('Timeline')),
               (2, tr('Size & Measures')),
+              (3, tr('Milestones')),
             ],
             value: tab,
             onChanged: (v) => setState(() => tab = v),
@@ -162,11 +237,22 @@ class _BodyPageState extends ConsumerState<BodyPage> {
             overview
           else if (tab == 1)
             detail
+          else if (tab == 2)
+            sizeTab
           else
-            sizeTab,
+            milestonesTab,
           gap(16),
           if (tab == 2)
             pillButton(tr('Log Measurement'), () => showSheet(context, const MeasurementSheet()), icon: LucideIcons.ruler)
+          else if (tab == 3)
+            pillButton(
+              tr('Add Milestone'),
+              () async {
+                await showSheet(context, const MilestoneSheet());
+                await _loadMilestones();
+              },
+              icon: LucideIcons.bookmarkPlus,
+            )
           else
             pillButton(tr('Log a change'), () => showSheet(context, const JournalSheet()), icon: LucideIcons.plus),
         ]),
@@ -1355,46 +1441,45 @@ class _MeasurementSheetState extends ConsumerState<MeasurementSheet> {
   }
 }
 
-class _BodyPainter extends CustomPainter {
-  _BodyPainter(this.color);
+class _BodyCalloutPainter extends CustomPainter {
+  _BodyCalloutPainter(this.color, this.avatarRect);
   final Color color;
+  final Rect avatarRect;
 
   @override
   void paint(Canvas canvas, Size s) {
     final w = s.width, h = s.height;
-    final sw = (w * .3).clamp(80.0, h * 0.25);
-    final cx = (w * .2).clamp(55.0, sw * 0.75);
-    final fill = Paint()..color = color.withValues(alpha: .26);
-    final stroke = Paint()
-      ..color = color.withValues(alpha: .26)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(Offset(cx, h * .065), h * .05, fill);
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(cx, h * .12), width: sw * .16, height: h * .05), const Radius.circular(6)), fill);
-    final torso = Path()
-      ..moveTo(cx - .55 * sw, h * .15)
-      ..quadraticBezierTo(cx, h * .12, cx + .55 * sw, h * .15)
-      ..cubicTo(cx + .5 * sw, h * .24, cx + .3 * sw, h * .30, cx + .3 * sw, h * .36)
-      ..cubicTo(cx + .3 * sw, h * .40, cx + .55 * sw, h * .43, cx + .6 * sw, h * .50)
-      ..lineTo(cx - .6 * sw, h * .50)
-      ..cubicTo(cx - .55 * sw, h * .43, cx - .3 * sw, h * .40, cx - .3 * sw, h * .36)
-      ..cubicTo(cx - .3 * sw, h * .30, cx - .5 * sw, h * .24, cx - .55 * sw, h * .15)
-      ..close();
-    canvas.drawPath(torso, fill);
-    stroke.strokeWidth = sw * .1;
-    canvas.drawLine(Offset(cx - .62 * sw, h * .17), Offset(cx - .82 * sw, h * .40), stroke);
-    canvas.drawLine(Offset(cx + .62 * sw, h * .17), Offset(cx + .82 * sw, h * .40), stroke);
-    stroke.strokeWidth = sw * .24;
-    canvas.drawLine(Offset(cx - .27 * sw, h * .52), Offset(cx - .24 * sw, h * .93), stroke);
-    canvas.drawLine(Offset(cx + .27 * sw, h * .52), Offset(cx + .24 * sw, h * .93), stroke);
-
-    // titik di tubuh dan garis ke label (urut sama dengan _onBody)
     final labelX = w * .46 - 6;
+    // Titik kalibrasi proporsi chibi (urut sama dengan _onBody)
     final marks = [
-      (Offset(cx + h * .05, h * .065), _onBody[0].$2 * h),
-      (Offset(cx + .22 * sw, h * .22), _onBody[1].$2 * h),
-      (Offset(cx + .82 * sw, h * .33), _onBody[2].$2 * h),
-      (Offset(cx + .52 * sw, h * .46), _onBody[3].$2 * h),
+      (
+        Offset(
+          avatarRect.left + avatarRect.width * 0.72,
+          avatarRect.top + avatarRect.height * 0.14,
+        ),
+        _onBody[0].$2 * h,
+      ),
+      (
+        Offset(
+          avatarRect.left + avatarRect.width * 0.62,
+          avatarRect.top + avatarRect.height * 0.41,
+        ),
+        _onBody[1].$2 * h,
+      ),
+      (
+        Offset(
+          avatarRect.left + avatarRect.width * 0.78,
+          avatarRect.top + avatarRect.height * 0.49,
+        ),
+        _onBody[2].$2 * h,
+      ),
+      (
+        Offset(
+          avatarRect.left + avatarRect.width * 0.70,
+          avatarRect.top + avatarRect.height * 0.56,
+        ),
+        _onBody[3].$2 * h,
+      ),
     ];
     final line = Paint()
       ..color = color.withValues(alpha: .55)
@@ -1412,5 +1497,407 @@ class _BodyPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BodyPainter o) => o.color != color;
+  bool shouldRepaint(_BodyCalloutPainter o) =>
+      o.color != color || o.avatarRect != avatarRect;
+}
+
+Uint8List? _tryDecodePhoto(String? b64) {
+  if (b64 == null || b64.isEmpty) return null;
+  try {
+    return base64Decode(b64);
+  } catch (_) {
+    return null;
+  }
+}
+
+class _MilestonesTab extends StatelessWidget {
+  const _MilestonesTab({
+    required this.milestones,
+    required this.onDelete,
+    required this.onEdit,
+  });
+
+  final List<TransitionMilestone> milestones;
+  final Future<void> Function(String id) onDelete;
+  final Future<void> Function(TransitionMilestone item) onEdit;
+
+  void _viewPhoto(BuildContext context, Uint8List bytes, String title) {
+    showDialog<void>(
+      context: context,
+      builder: (d) => Dialog(
+        backgroundColor: C.midnight,
+        insetPadding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, color: Colors.white),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(d),
+                  icon: const Icon(LucideIcons.x),
+                ),
+              ],
+            ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 460),
+              child: InteractiveViewer(
+                child: Image.memory(bytes, fit: BoxFit.contain),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final df = DateFormat('d MMM y', L10n.code);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: C.lavender.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: C.lavender.withValues(alpha: 0.28)),
+          ),
+          child: Row(
+            children: [
+              const Icon(LucideIcons.shieldCheck, size: 18, color: C.lavender),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  tr('Stored privately on this device behind your PIN / biometric lock.'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Pastel.mist.withValues(alpha: 0.88),
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        gap(14),
+        if (milestones.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: cardBox(context),
+            child: Column(
+              children: [
+                const CompanionAvatar(
+                  mood: CompanionMood.love,
+                  size: 78,
+                  glowColor: C.lavender,
+                ),
+                gap(12),
+                Text(
+                  tr('No milestones saved yet. Record meaningful steps or private progress photos here.'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Pastel.mist.withValues(alpha: 0.82),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          for (final m in milestones) ...[
+            Builder(builder: (context) {
+              final tagLabel = milestoneTagLabel(m.tag);
+              final photoBytes = _tryDecodePhoto(m.photoBase64);
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: cardBox(context),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        if (tagLabel != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: C.peony.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                  color: C.peony.withValues(alpha: 0.4)),
+                            ),
+                            child: Text(
+                              tagLabel,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: C.lavender,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(
+                          child: Text(
+                            df.format(m.at),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Pastel.mist.withValues(alpha: 0.72),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => onEdit(m),
+                          icon: const Icon(LucideIcons.pencil, size: 16),
+                          color: C.iconDefault,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            if (await confirm(
+                                context, tr('Delete this milestone?'))) {
+                              await onDelete(m.id);
+                            }
+                          },
+                          icon: const Icon(LucideIcons.trash2, size: 16),
+                          color: C.iconDefault,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                    gap(6),
+                    Text(
+                      m.title,
+                      style: const TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (m.note != null && m.note!.isNotEmpty) ...[
+                      gap(4),
+                      Text(
+                        m.note!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Pastel.mist.withValues(alpha: 0.86),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                    if (photoBytes != null) ...[
+                      gap(10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: InkWell(
+                          onTap: () => _viewPhoto(context, photoBytes, m.title),
+                          child: Image.memory(
+                            photoBytes,
+                            height: 190,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      gap(4),
+                      Text(
+                        tr('Tap photo to view full size'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Pastel.mist.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }),
+          ],
+      ],
+    );
+  }
+}
+
+/// Bottom sheet to create or edit a local private transition milestone & optional photo.
+class MilestoneSheet extends StatefulWidget {
+  const MilestoneSheet({super.key, this.initial});
+
+  final TransitionMilestone? initial;
+
+  @override
+  State<MilestoneSheet> createState() => _MilestoneSheetState();
+}
+
+class _MilestoneSheetState extends State<MilestoneSheet> {
+  late final TextEditingController _title =
+      TextEditingController(text: widget.initial?.title ?? '');
+  late final TextEditingController _note =
+      TextEditingController(text: widget.initial?.note ?? '');
+  late DateTime _at = widget.initial?.at ?? DateTime.now();
+  late String? _tag = widget.initial?.tag;
+  late String? _photoBase64 = widget.initial?.photoBase64;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickPhoto() async {
+    await Lock.instance.suppressLockDuring(() async {
+      Uint8List? bytes;
+      try {
+        final picker = ImagePicker();
+        final picked = await picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 1200,
+          maxHeight: 1200,
+          imageQuality: 78,
+        );
+        if (picked != null) bytes = await picked.readAsBytes();
+      } catch (_) {
+        // Fallback for desktop or file picker platforms.
+        try {
+          const group =
+              XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
+          final f = await openFile(acceptedTypeGroups: const [group]);
+          if (f != null) bytes = await f.readAsBytes();
+        } catch (_) {}
+      }
+      if (bytes != null && mounted) {
+        setState(() => _photoBase64 = base64Encode(bytes!));
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    final t = _title.text.trim();
+    if (t.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('Enter a title for this milestone.'))));
+      return;
+    }
+    HapticFeedback.lightImpact();
+    final item = TransitionMilestone(
+      id: widget.initial?.id ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
+      at: _at,
+      title: t,
+      tag: _tag,
+      note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+      photoBase64: _photoBase64,
+    );
+    await MilestoneStore.saveMilestone(item);
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final editing = widget.initial != null;
+    final photoBytes = _tryDecodePhoto(_photoBase64);
+    final df = DateFormat('d MMM y', L10n.code);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(editing ? tr('Edit milestone') : tr('Add Milestone'),
+            style: display(28)),
+        gap(14),
+        Text(tr('Milestone tag (optional)')),
+        gap(6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final preset in milestonePresetTags)
+              ChoiceChip(
+                label: Text(tr(preset.$2)),
+                selected: _tag == preset.$1,
+                onSelected: (v) =>
+                    setState(() => _tag = v ? preset.$1 : null),
+              ),
+          ],
+        ),
+        gap(12),
+        TextField(
+          controller: _title,
+          decoration: InputDecoration(
+            labelText: tr('Milestone title'),
+            hintText: tr('E.g. 3 months on HRT'),
+          ),
+        ),
+        gap(10),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final d = await showDatePicker(
+              context: context,
+              initialDate: _at,
+              firstDate: DateTime(2000),
+              lastDate: DateTime.now(),
+            );
+            if (d != null && mounted) setState(() => _at = d);
+          },
+          icon: const Icon(LucideIcons.calendar, size: 17),
+          label: Text(df.format(_at)),
+        ),
+        gap(10),
+        TextField(
+          controller: _note,
+          maxLines: 3,
+          minLines: 2,
+          decoration: InputDecoration(labelText: tr('Note (optional)')),
+        ),
+        gap(12),
+        if (photoBytes != null) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.memory(photoBytes,
+                height: 150, width: double.infinity, fit: BoxFit.cover),
+          ),
+          gap(8),
+        ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _pickPhoto,
+              icon: const Icon(LucideIcons.imagePlus, size: 17),
+              label: Text(photoBytes == null
+                  ? tr('Add private photo')
+                  : tr('Change photo')),
+            ),
+            if (photoBytes != null)
+              TextButton.icon(
+                onPressed: () => setState(() => _photoBase64 = null),
+                icon: const Icon(LucideIcons.trash2, size: 16),
+                label: Text(tr('Remove photo')),
+              ),
+          ],
+        ),
+        gap(18),
+        SizedBox(
+          width: double.infinity,
+          child: pillButton(
+              editing ? tr('Save changes') : tr('Save'), _save),
+        ),
+      ],
+    );
+  }
 }

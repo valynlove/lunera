@@ -42,10 +42,94 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.2',
+      version: '2.2.7',
       dateEn: 'November 23, 2026',
       dateId: '23 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Body Diagram Midriff Outfit Update: Updated front and back Lunera body diagram artwork (assets/images/body_front.png, assets/images/body_back.png) to the sports-bra & shorts outfit so abdominal subcutaneous injection sites and body waist contours remain clearly visible.',
+          textId:
+              'Pembaruan Ilustrasi Tubuh Sporty: Memperbarui aset depan dan belakang (body_front.png, body_back.png) ke outfit sports-bra & celana pendek agar area suntik perut dan lekuk pinggang terlihat lebih jelas.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.6',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Body & Injection Map Chibi Avatar Upgrade: Replaced the vector silhouettes on Injection Site Rotation (front & back views) and the Body & Changes Overview diagram with Lunera front/back sporty chibi artwork and recalibrated callout pointers.',
+          textId:
+              'Pembaruan Avatar Rotasi Injeksi & Ringkasan Tubuh: Mengganti siluet vektor pada Rotasi Lokasi Injeksi (tampak depan & belakang) serta diagram Ringkasan Tubuh & Perubahan dengan ilustrasi chibi depan/belakang beserta kalibrasi titik penunjuk.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.5',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Expanded Lunera Companion Expressions: Cleaned and registered 8 new chibi companion moods (annoyed, confused, cry, facepalm, laugh, love, shocked, shy) in CompanionMood — expanding the set to 20 expressions while preserving all floating expression icons.',
+          textId:
+              'Ekspresi Pendamping Lunera Diperluas: Membersihkan dan mendaftarkan 8 ekspresi chibi baru (annoyed, confused, cry, facepalm, laugh, love, shocked, shy) ke CompanionMood menjadi total 20 ekspresi dengan seluruh ikon melayang tetap terjaga.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Contextual Companion Art Integration: Added mood expressions across Care Guides search empty state (confused), Private Milestones empty state on Body (love), and Voice Pitch Studio warm-up completion (laugh).',
+          textId:
+              'Integrasi Kontekstual Pendamping: Menampilkan ekspresi Lunera pada status pencarian kosong di Panduan (confused), tab Milestone privat di Tubuh (love), dan penyelesaian pemanasan Voice Pitch Studio (laugh).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.4',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Search, Calculators & Lab Timing: Added keyword search to Care Guides, 30/90-day filters in History, interactive unit conversion in Lab entry, a vial & syringe mL calculator in Dose logging, and scheduled 2-hour-prior trough bloodwork reminders.',
+          textId:
+              'Pencarian, Kalkulator & Pengingat Lab: Menambahkan pencarian kata kunci di Panduan, filter 30/90 hari di Riwayat, konverter satuan lab interaktif, kalkulator volume vial & syringe di form suntikan, serta pengingat terjadwal 2 jam sebelum jadwal lab trough.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Structured Symptom Check-ins & Private Milestones: Added filterable symptom presets in Journal with automatic summary inclusion in the Doctor Visit Report (Markdown & PDF), plus a pin-locked Milestones & Progress Photo gallery on the Body page.',
+          textId:
+              'Check-in Gejala & Galeri Milestone Privat: Menambahkan pilihan gejala terstruktur di Jurnal yang terangkum otomatis ke Laporan Dokter (Markdown & PDF), serta tab Milestone & foto progres lokal di balik kunci PIN/biometrik pada halaman Tubuh.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.3',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Voice Pitch Studio Stage 2 (Resonance, Weight & Guided SOVTE): Added live in-RAM Voice Size/Brightness and Vocal Weight meters, 4-step SOVTE Guided Quiet Warm-up, Gentle Reference Tone (Pitch Pipe), and optional Session Context Tags.',
+          textId:
+              'Pengembangan Voice Pitch Studio Tahap 2 (Resonansi, Ketebalan & Pemanasan Terpandu): Menambahkan indikator langsung Kecerahan/Ruang Suara dan Ketebalan Suara (di RAM), rutinitas Pemanasan Tenang 4 langkah bergaya SOVTE, Nada Referensi lembut, dan tag kondisi sesi opsional.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.2',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,

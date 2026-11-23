@@ -16,7 +16,15 @@ enum CompanionMood {
   wave,
   remind,
   sleepy,
-  wink;
+  wink,
+  annoyed,
+  confused,
+  cry,
+  facepalm,
+  laugh,
+  love,
+  shocked,
+  shy;
 
   String get assetPath => 'assets/images/companion/$name.png';
 }

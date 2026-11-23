@@ -31,7 +31,15 @@ class _JournalViewState extends ConsumerState<JournalView> {
   @override
   Widget build(BuildContext context) {
     final all = <JournalEntry>[...(ref.watch(journalProvider).value ?? <JournalEntry>[])]..sort((a, b) => b.at.compareTo(a.at));
-    final shown = all.where((e) => switch (filter) { 'mood' => e.hasMood, 'body' => e.hasBody, 'text' => e.hasText, _ => true }).toList();
+    final shown = all
+        .where((e) => switch (filter) {
+              'mood' => e.hasMood,
+              'body' => e.hasBody,
+              'symptoms' => e.hasSymptoms,
+              'text' => e.hasText,
+              _ => true,
+            })
+        .toList();
 
     final rows = <Widget>[];
     DateTime? day;
@@ -62,7 +70,13 @@ class _JournalViewState extends ConsumerState<JournalView> {
       ),
       gap(12),
       PillTabs<String>(
-        items: [('all', tr('All')), ('mood', tr('Mood')), ('body', tr('Body')), ('text', tr('Notes'))],
+        items: [
+          ('all', tr('All')),
+          ('mood', tr('Mood')),
+          ('body', tr('Body')),
+          ('symptoms', tr('Symptoms')),
+          ('text', tr('Notes')),
+        ],
         value: filter,
         onChanged: (v) => setState(() => filter = v),
       ),
@@ -83,9 +97,17 @@ class JournalTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final m = e.mood == null ? null : moods[e.mood];
-    final title = (m == null ? null : tr(m.$1)) ?? (e.hasBody ? tr('Body changes') : tr('Notes'));
+    final title = (m == null ? null : tr(m.$1)) ??
+        (e.hasSymptoms
+            ? tr('Symptom check-in')
+            : (e.hasBody ? tr('Body changes') : tr('Notes')));
+    final symptomSummary = [
+      for (final s in e.symptoms)
+        if (symptomPresets[s] case final p?) tr(p.$1),
+    ].join(', ');
     final lines = [
       DateFormat('HH:mm').format(e.at),
+      if (symptomSummary.isNotEmpty) symptomSummary,
       if (e.hasText) e.text!,
       for (final b in e.body.entries) '${tr(b.key)}: ${b.value}',
     ];
@@ -97,7 +119,15 @@ class JournalTile extends StatelessWidget {
         onTap: () => showSheet(context, JournalSheet(initial: e)),
         leading: CircleAvatar(
           backgroundColor: C.peony.withValues(alpha: .14),
-          child: Icon(m?.$2 ?? (e.hasBody ? LucideIcons.accessibility : LucideIcons.notebookPen), color: C.peony),
+          child: Icon(
+            m?.$2 ??
+                (e.hasSymptoms
+                    ? LucideIcons.heartPulse
+                    : (e.hasBody
+                        ? LucideIcons.accessibility
+                        : LucideIcons.notebookPen)),
+            color: C.peony,
+          ),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: Text(lines.join('\n'), maxLines: 6, overflow: TextOverflow.ellipsis),
@@ -123,6 +153,7 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
   late final Map<String, TextEditingController> ctrls = {
     for (final b in (widget.initial?.body ?? const <String, String>{}).entries) b.key: TextEditingController(text: b.value),
   };
+  late final Set<String> symptoms = {...(widget.initial?.symptoms ?? const <String>[])};
 
   Future<void> _pick() async {
     final d = await showDatePicker(context: context, initialDate: at, firstDate: DateTime(2000), lastDate: DateTime.now());
@@ -138,11 +169,18 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
         if (c.value.text.trim().isNotEmpty) c.key: c.value.text.trim(),
     };
     final note = text.text.trim();
-    if (mood == null && body.isEmpty && note.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Fill in at least one: mood, body changes, or a note.'))));
+    if (mood == null && body.isEmpty && symptoms.isEmpty && note.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Fill in at least one: mood, symptoms, body changes, or a note.'))));
       return;
     }
-    final entry = JournalEntry(id: widget.initial?.id ?? '', at: at, mood: mood, body: body, text: note.isEmpty ? null : note);
+    final entry = JournalEntry(
+      id: widget.initial?.id ?? '',
+      at: at,
+      mood: mood,
+      body: body,
+      symptoms: symptoms.toList(),
+      text: note.isEmpty ? null : note,
+    );
     final repo = ref.read(repoProvider);
     if (widget.initial == null) {
       repo?.addJournal(entry);
@@ -181,6 +219,24 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
         icon: const Icon(LucideIcons.clock, size: 18),
         label: Text(DateFormat('d MMM y, HH:mm', L10n.code).format(at)),
       ),
+      gap(14),
+      Text(tr('Symptoms & check-in')),
+      gap(4),
+      Wrap(spacing: 8, runSpacing: 4, children: [
+        for (final s in symptomPresets.entries)
+          FilterChip(
+            avatar: Icon(s.value.$2, size: 15),
+            label: Text(tr(s.value.$1)),
+            selected: symptoms.contains(s.key),
+            onSelected: (v) => setState(() {
+              if (v) {
+                symptoms.add(s.key);
+              } else {
+                symptoms.remove(s.key);
+              }
+            }),
+          ),
+      ]),
       gap(14),
       Text(tr('Body changes')),
       gap(4),

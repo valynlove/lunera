@@ -87,6 +87,14 @@ void main() {
         labs: labs,
         targets: targets,
         prefs: const Prefs(dayStart: 0),
+        journal: [
+          JournalEntry(
+            id: 'j1',
+            at: now.subtract(const Duration(days: 2)),
+            symptoms: const ['hot_flashes', 'fatigue'],
+            text: 'SECRET_JOURNAL_TEXT_DO_NOT_LEAK',
+          ),
+        ],
         now: now,
         months: 3,
       );
@@ -102,6 +110,11 @@ void main() {
       expect(report, contains('180 pg/mL (In range)'));
       // Old lab (> 3 months ago) excluded
       expect(report, isNot(contains('999 pg/mL')));
+      // Structured symptoms included while free-text journal note stays excluded
+      expect(report, contains('Reported symptoms & check-ins'));
+      expect(report, contains('Hot flashes / Warmth: 1x'));
+      expect(report, contains('Fatigue / Low energy: 1x'));
+      expect(report, isNot(contains('SECRET_JOURNAL_TEXT_DO_NOT_LEAK')));
       // Model estimate included
       expect(report, contains('model estimate, not a lab result'));
       // Free-text notes excluded for privacy

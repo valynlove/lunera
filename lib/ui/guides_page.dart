@@ -23,12 +23,36 @@ class GuidesPage extends StatefulWidget {
 
 class _GuidesPageState extends State<GuidesPage> {
   late GuideCategory? _filter = widget.initialCategory;
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _query = '';
   Set<String> _readIds = <String>{};
 
   @override
   void initState() {
     super.initState();
     _loadReadIds();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  bool _matchesQuery(GuideArticle a, String q) {
+    if (a.title.toLowerCase().contains(q) ||
+        a.subtitle.toLowerCase().contains(q) ||
+        a.category.label.toLowerCase().contains(q)) {
+      return true;
+    }
+    for (final s in a.sections) {
+      if (s.heading.toLowerCase().contains(q) ||
+          s.paragraphs.any((p) => p.toLowerCase().contains(q)) ||
+          s.bullets.any((b) => b.toLowerCase().contains(q))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> _loadReadIds() async {
@@ -53,11 +77,16 @@ class _GuidesPageState extends State<GuidesPage> {
   @override
   Widget build(BuildContext context) {
     final startArticle = guideArticles.where((a) => a.isStartHere).firstOrNull;
-    final showPinnedStart = _filter == null && startArticle != null;
+    final q = _query.trim().toLowerCase();
+    final hasQuery = q.isNotEmpty;
+    final showPinnedStart = !hasQuery && _filter == null && startArticle != null;
 
     final filtered = [
       for (final a in guideArticles)
-        if (_filter == null ? !a.isStartHere : a.category == _filter) a,
+        if ((hasQuery || (_filter == null ? !a.isStartHere : a.category == _filter)) &&
+            (_filter == null || a.category == _filter) &&
+            (!hasQuery || _matchesQuery(a, q)))
+          a,
     ];
 
     return Scaffold(
@@ -107,7 +136,26 @@ class _GuidesPageState extends State<GuidesPage> {
                 ],
               ),
             ),
-            gap(16),
+            gap(14),
+            TextField(
+              controller: _searchCtrl,
+              onChanged: (v) => setState(() => _query = v),
+              decoration: InputDecoration(
+                hintText: tr('Search guides, topics, or keywords...'),
+                prefixIcon: const Icon(LucideIcons.search, size: 18),
+                suffixIcon: hasQuery
+                    ? IconButton(
+                        tooltip: tr('Clear search'),
+                        icon: const Icon(LucideIcons.x, size: 16),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
+              ),
+            ),
+            gap(12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -139,7 +187,31 @@ class _GuidesPageState extends State<GuidesPage> {
               ),
             ],
             gap(16),
-            LayoutBuilder(
+            if (filtered.isEmpty)
+              AppCard(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    const CompanionAvatar(
+                      mood: CompanionMood.confused,
+                      size: 58,
+                      glowColor: C.lavender,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        tr('No guides match your search.'),
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          color: Pastel.mist.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              LayoutBuilder(
               builder: (context, constraints) {
                 final twoCols = constraints.maxWidth >= 720;
                 if (!twoCols) {

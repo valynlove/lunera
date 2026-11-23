@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "2.2.2";
+const APP_VERSION = "2.2.7";
 
 // Fetch latest release tag and APK asset link from GitHub API
 function fetchLatestReleaseVersion() {

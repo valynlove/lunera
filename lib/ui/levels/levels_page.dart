@@ -316,13 +316,50 @@ class _LevelCard extends ConsumerWidget {
   }
 }
 
-class _TroughReminderCard extends StatelessWidget {
+class _TroughReminderCard extends ConsumerStatefulWidget {
   const _TroughReminderCard({required this.reminder});
 
   final TroughLabReminder reminder;
 
   @override
+  ConsumerState<_TroughReminderCard> createState() =>
+      _TroughReminderCardState();
+}
+
+class _TroughReminderCardState extends ConsumerState<_TroughReminderCard> {
+  DateTime? _scheduledAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScheduled();
+  }
+
+  Future<void> _loadScheduled() async {
+    try {
+      final at = await AppNotifier.instance.getScheduledTroughReminder();
+      if (mounted) setState(() => _scheduledAt = at);
+    } catch (_) {}
+  }
+
+  Future<void> _toggleReminder(Slot slot) async {
+    HapticFeedback.selectionClick();
+    if (_scheduledAt != null) {
+      await AppNotifier.instance.cancelTroughLabReminder();
+      if (mounted) setState(() => _scheduledAt = null);
+      return;
+    }
+    final prefs = ref.read(prefsProvider).value ?? const Prefs();
+    final at = await AppNotifier.instance.scheduleTroughLabReminder(
+      slot: slot,
+      prefs: prefs,
+    );
+    if (mounted) setState(() => _scheduledAt = at);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final reminder = widget.reminder;
     final slot = reminder.nextTroughSlot;
     final String routineText;
     if (reminder.daysSinceLastLab == null) {
@@ -392,6 +429,36 @@ class _TroughReminderCard extends StatelessWidget {
                     height: 1.35,
                   ),
                 ),
+                if (slot != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () => _toggleReminder(slot),
+                    icon: Icon(
+                      _scheduledAt != null
+                          ? LucideIcons.bellRing
+                          : LucideIcons.bellPlus,
+                      size: 15,
+                    ),
+                    label: Text(
+                      _scheduledAt != null
+                          ? tr('Trough reminder set')
+                          : tr('Remind me 2h before trough'),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor:
+                          _scheduledAt != null ? Pastel.mint : C.lavender,
+                      side: BorderSide(
+                        color: (_scheduledAt != null ? Pastel.mint : C.lavender)
+                            .withValues(alpha: 0.45),
+                      ),
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

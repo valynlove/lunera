@@ -116,6 +116,26 @@ void main() {
       expect(find.text('Trusted references'), findsOneWidget);
     });
 
+    testWidgets('searches guides by keyword across articles', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(Brightness.dark),
+          home: const GuidesPage(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'trough');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Peak, Trough & Steady State Explained'), findsOneWidget);
+      expect(find.text('Voice Resonance & Pacing Studio'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'zzznomatch');
+      await tester.pumpAndSettle();
+      expect(find.text('No guides match your search.'), findsOneWidget);
+    });
+
     testWidgets('switches article content to Indonesian when L10n is id',
         (tester) async {
       L10n.notifier.value = 'id';

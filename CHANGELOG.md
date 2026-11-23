@@ -4,6 +4,41 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.7] - 2026-11-23
+
+### Changed
+- **Body & Injection Map Artwork Refinement (`assets/images/body_front.png`, `assets/images/body_back.png`, `lib/ui/body.dart`):** Replaced the body diagram front/back sprites with the open-midriff sports-bra & shorts Lunera artwork so abdominal injection zones and waist contours are clearly visible, and updated the `BodyPage` overview aspect ratio (`372.0 / 682.0`).
+
+## [2.2.6] - 2026-11-23
+
+### Added
+- **Front & Back Body Avatar Assets (`assets/images/body_front.png`, `assets/images/body_back.png`):** Split and cleaned the sporty Lunera chibi front and back poses into transparent assets.
+
+### Changed
+- **Injection Site Rotation & Body Overview Diagrams (`lib/ui/site_map.dart`, `lib/ui/body.dart`):** Replaced `_AnatomyPainter` and `_BodyPainter` vector silhouettes with the front/back Lunera avatar views, widened the center avatar lane in `InjectionSiteMap`, and recalibrated the four callout pointers on the Body & Changes Overview tab.
+
+## [2.2.5] - 2026-11-23
+
+### Added
+- **Expanded Companion Expressions (`assets/images/companion/`, `lib/ui/companion_avatar.dart`):** Cleaned transparent backdrops while preserving all floating expression glyphs, renamed the 8 new chibi sprites (`annoyed`, `confused`, `cry`, `facepalm`, `laugh`, `love`, `shocked`, `shy`), and registered all 20 moods in `CompanionMood`.
+
+### Changed
+- **Contextual UI Companion Art (`lib/ui/guides_page.dart`, `lib/ui/body.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`):** Integrated `CompanionMood.confused` for empty Care Guides search results, `CompanionMood.love` for the Private Milestones empty state, and `CompanionMood.laugh` upon finishing Voice Pitch Studio's SOVTE Quiet Warm-up.
+
+## [2.2.4] - 2026-11-23
+
+### Added
+- **Care Guides Search, History Date Filters, Lab Unit Converter & Syringe Calculator (`lib/ui/guides_page.dart`, `lib/ui/history.dart`, `lib/ui/levels/lab_sheet.dart`, `lib/ui/sheets.dart`, `lib/models.dart`):** Added full-text guide keyword search, All/30d/90d history filters, one-tap hormone unit conversion chips inside `LabSheet`, and a live `mg` → `mL` / `U-100` vial & syringe draw-volume calculator inside `DoseSheet`.
+- **Structured Symptom Check-Ins, Doctor Visit Summary Integration & Trough Lab Notifications (`lib/models.dart`, `lib/ui/journal.dart`, `lib/doctor_report.dart`, `lib/notifications.dart`, `lib/ui/levels/levels_page.dart`):** Added structured `JournalEntry.symptoms` presets filterable in Journal and summarized in clinician exports (while continuing to exclude free-text notes), plus opt-in scheduled 2-hour-prior trough bloodwork reminders via `AppNotifier`.
+- **On-Device Private Transition Milestones & Locked Photo Gallery (`lib/milestones.dart`, `lib/ui/body.dart`):** Added a local-only milestone timeline and optional photo vault behind Lunera's biometric/PIN lock (`Lock.instance.suppressLockDuring`) on `BodyPage`.
+
+## [2.2.3] - 2026-11-23
+
+### Added
+- **In-RAM Spectral Resonance & Vocal Weight Meters (`lib/voice_pitch.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`):** Added pure-Dart FFT analysis (`analyzeVoiceToneFromPcm16`) displaying live `Voice Size / Resonance` (`Warm / Larger Space` ↔ `Bright / Smaller Space`) and `Vocal Weight` (`Light & Soft` ↔ `Thick / Heavy`) guidance bars entirely in RAM with zero audio saved.
+- **4-Step SOVTE-Inspired Guided Quiet Warm-up (`lib/voice_pitch.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`):** Upgraded the Quiet Warm-up tab into a 4-stage interactive routine (`Neck, Jaw & Shoulder Release`, `SOVTE: Straw or Lip Trill`, `Small Space Resonance Glide`, `Hydration & Soft Hum`) with step countdown, navigation controls, and posture/airflow tips.
+- **Gentle Reference Tone (Pitch Pipe) & Session Context Tags (`android/app/src/main/kotlin/com/example/ritme/MainActivity.kt`, `lib/voice_pitch.dart`):** Added soft envelope-shaped sine reference tones (`125`, `165`, `195`, `225 Hz`) on Android alongside optional session tags (`Morning`, `Warmed up`, `Relaxed`, `Tired`) persisted seamlessly in local storage, JSON backups, and Cloud Firestore.
+
 ## [2.2.2] - 2026-11-23
 
 ### Added

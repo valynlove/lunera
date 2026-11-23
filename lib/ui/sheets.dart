@@ -46,6 +46,11 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
   late List<String> places = [...(widget.edit?.places ?? (widget.suggested.isEmpty ? <String>[] : [widget.suggested]))];
   late String injType = widget.edit?.injType ?? widget.t.injType ?? 'im';
   late String? supplyId = widget.supplies.any((s) => s.id == widget.t.supplyId) ? widget.t.supplyId : null;
+  late double _calcConcentration = () {
+    final s = widget.supplies.where((x) => x.id == supplyId).firstOrNull;
+    final dpu = s?.dosePerUnit;
+    return (dpu != null && dpu > 0) ? dpu : 40.0;
+  }();
   final generics = <String>{};
 
   late bool isCombination = widget.t.secondaryHormoneId != null || widget.edit?.secondaryDose != null;
@@ -208,6 +213,7 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
       gap(16),
       TextField(
         controller: amount,
+        onChanged: (_) => setState(() {}),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
           labelText: isCombination
@@ -217,6 +223,66 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
           helperText: t.compound != null ? compoundPresets.where((p) => p.id == t.compound).firstOrNull?.name : null,
         ),
       ),
+      if (t.route == 'inj' && t.doseUnit.trim().toLowerCase() == 'mg') ...[
+        gap(10),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: C.deepCard,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: C.lavender.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(LucideIcons.syringe, size: 16, color: C.lavender),
+                  const SizedBox(width: 8),
+                  Text(
+                    tr('Vial & syringe calculator'),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12.5,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+              gap(8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  for (final c in const [10.0, 20.0, 40.0, 50.0, 100.0, 200.0, 250.0])
+                    ChoiceChip(
+                      label: Text('${fmt(c)} mg/mL',
+                          style: const TextStyle(fontSize: 11.5)),
+                      selected: (_calcConcentration - c).abs() < 0.01,
+                      onSelected: (_) => setState(() => _calcConcentration = c),
+                    ),
+                ],
+              ),
+              if (computeInjectionVolume(
+                    doseMg: parseNum(amount.text) ?? 0,
+                    concentrationMgPerMl: _calcConcentration,
+                  )
+                  case final vol?) ...[
+                gap(8),
+                Text(
+                  tr('Draw volume: {0} mL ({1} U-100 units)',
+                      [vol.volumeMl.toStringAsFixed(2), fmt(vol.syringeUnits)]),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: Pastel.mint,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
       if (isCombination) ...[
         gap(10),
         Container(

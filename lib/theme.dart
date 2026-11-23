@@ -307,14 +307,21 @@ class PillTabs<T> extends StatelessWidget {
                       : null,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(
-                  it.$2,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: it.$1 == value
-                        ? Colors.white
-                        : fg.withValues(alpha: 0.72),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      it.$2,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: it.$1 == value
+                            ? Colors.white
+                            : fg.withValues(alpha: 0.72),
+                      ),
+                    ),
                   ),
                 ),
               ),

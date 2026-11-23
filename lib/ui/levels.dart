@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../guides_data.dart';
 import '../models.dart';
+import '../notifications.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../sim.dart';
