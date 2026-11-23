@@ -213,6 +213,8 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
         ),
         Image.asset(
           isFront ? 'assets/images/body_front.png' : 'assets/images/body_back.png',
+          width: double.infinity,
+          height: double.infinity,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.medium,
           errorBuilder: (_, __, ___) => const Icon(
@@ -228,9 +230,9 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
   Widget _buildFrontView(Map<String, SiteStatus> statuses) {
     return LayoutBuilder(builder: (context, constraints) {
       final totalWidth = constraints.maxWidth;
-      const height = 310.0;
-      final avatarWidth = (totalWidth * 0.34).clamp(96.0, 148.0);
-      final podWidth = (totalWidth - avatarWidth - 8) / 2;
+      const height = 326.0;
+      final avatarWidth = (totalWidth * 0.41).clamp(116.0, 176.0);
+      final podWidth = (totalWidth - avatarWidth - 6) / 2;
 
       return SizedBox(
         height: height,
@@ -297,9 +299,9 @@ class _InjectionSiteMapState extends State<InjectionSiteMap> {
   Widget _buildBackView(Map<String, SiteStatus> statuses) {
     return LayoutBuilder(builder: (context, constraints) {
       final totalWidth = constraints.maxWidth;
-      const height = 280.0;
-      final avatarWidth = (totalWidth * 0.34).clamp(96.0, 148.0);
-      final podWidth = (totalWidth - avatarWidth - 8) / 2;
+      const height = 300.0;
+      final avatarWidth = (totalWidth * 0.41).clamp(116.0, 176.0);
+      final podWidth = (totalWidth - avatarWidth - 6) / 2;
 
       return SizedBox(
         height: height,

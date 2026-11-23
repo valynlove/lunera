@@ -42,10 +42,24 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.10',
+      version: '2.2.11',
       dateEn: 'November 23, 2026',
       dateId: '23 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Larger Body & Injection Map Avatar Framing: Expanded the center avatar lane in Injection Site Rotation (front & back) and tightened the Body & Changes Overview container framing so the character fills vertical space more naturally with minimal empty gap.',
+          textId:
+              'Proporsi Avatar Lebih Besar & Rapi: Memperlebar ruang avatar tengah pada Rotasi Lokasi Suntik (depan & belakang) serta merapikan bingkai diagram Ringkasan Tubuh & Perubahan agar karakter tampil lebih besar dengan ruang kosong minimal.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.10',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

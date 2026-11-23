@@ -4,6 +4,11 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.11] - 2026-11-23
+
+### Changed
+- **Body & Injection Map Framing (`lib/ui/site_map.dart`, `lib/ui/body.dart`):** Widened the center avatar lane (`41%`, `116–176` px) in `InjectionSiteMap` and enlarged the `BodyPage` overview sprite box (`48%` width inside `380` px height) while rebalancing callout card alignment (`left: 50%`) to eliminate excess vertical/horizontal whitespace.
+
 ## [2.2.10] - 2026-11-23
 
 ### Changed

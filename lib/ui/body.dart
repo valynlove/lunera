@@ -25,7 +25,7 @@ class BodyPage extends ConsumerStatefulWidget {
 }
 
 // Bagian yang digambar pada siluet, urut dari atas, beserta posisi label (pecahan tinggi).
-const _onBody = [('Hair', .16), ('Breasts', .36), ('Skin', .54), ('Body shape', .72)];
+const _onBody = [('Hair', .16), ('Breasts', .37), ('Skin', .58), ('Body shape', .79)];
 
 class _BodyPageState extends ConsumerState<BodyPage> {
   int tab = 0;
@@ -70,7 +70,7 @@ class _BodyPageState extends ConsumerState<BodyPage> {
     Widget callout(String name, double fy, double w, double h) {
       final l = latestNotes[name];
       return Positioned(
-        left: w * .46,
+        left: w * .50,
         right: 0,
         top: fy * h - 24,
         child: GestureDetector(
@@ -116,15 +116,15 @@ class _BodyPageState extends ConsumerState<BodyPage> {
         decoration: cardBox(context),
         child: LayoutBuilder(builder: (c, cons) {
           final maxW = cons.maxWidth;
-          const h = 420.0;
+          const h = 380.0;
           final diagramW = maxW > 460.0 ? 440.0 : maxW;
           const aspectRatio = 372.0 / 682.0;
-          final maxAvatarW = diagramW * 0.43;
+          final maxAvatarW = diagramW * 0.48;
           const maxAvatarH = h * 0.96;
           final avatarW = (maxAvatarH * aspectRatio).clamp(0.0, maxAvatarW);
           final avatarH = avatarW / aspectRatio;
           final avatarRect = Rect.fromCenter(
-            center: Offset(diagramW * 0.22, h * 0.50),
+            center: Offset(diagramW * 0.24, h * 0.50),
             width: avatarW,
             height: avatarH,
           );
@@ -1449,7 +1449,7 @@ class _BodyCalloutPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size s) {
     final w = s.width, h = s.height;
-    final labelX = w * .46 - 6;
+    final labelX = w * .50 - 6;
     // Titik kalibrasi proporsi chibi (urut sama dengan _onBody)
     final marks = [
       (
