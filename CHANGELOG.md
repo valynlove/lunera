@@ -4,6 +4,21 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2026-11-23
+
+### Added
+- **Expanded 8-Tier Plain-Language Voice Categories (`lib/voice_pitch.dart`, `lib/l10n_id.dart`):** Expanded `VoicePitchCategory` from 3 to 8 intuitive tiers (`Very Deep Voice`, `Deep Voice`, `Low Conversational`, `Balanced Low-Mid`, `Neutral Middle`, `Soft Warm Feminine`, `Bright Clear Feminine`, `Very Light & High`) with plain-language descriptions while preserving backward compatibility for legacy `'low'`, `'neutral'`, and `'high'` records.
+- **Article / Passage Reading Mode (`lib/voice_pitch.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`):** Added 6 bilingual editorial/magazine reading passages (`VoiceReadingPassage`) with topic and reading-duration badges plus a mode toggle between short sentences and scrollable passages.
+- **Live Pitch Contour, Custom Target Range & Progress Trend Chart (`lib/ui/sanctuary/voice_pitch_page.dart`):** Added a real-time `_LivePitchContourChart`, persisted `VoiceTargetRange` presets and range slider, session metrics (`In target %`, intonation spread), and an `fl_chart` historical `Progress trend` graph showing session averages against min–max bounds and the target zone.
+
+## [2.2.1] - 2026-11-23
+
+### Added
+- **Voice Pitch Studio Cloud Firestore & JSON Backup Sync (`lib/voice_pitch.dart`, `lib/repo.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`, `lib/ui/sanctuary/sanctuary_page.dart`):** Synchronizes numeric-only `VoiceTestResult` summaries (`avgHz`, `minHz`, `maxHz`, `category`, `at`) across signed-in devices via the `users/{uid}/voiceResults` collection and `Repo` JSON export/import while remaining 100% offline-first and never storing raw audio.
+
+### Fixed
+- **Cross-Device Discovery, Migration & Deletion Consistency (`lib/voice_pitch.dart`):** Added `VoiceStore.reconcileWithRemote` to automatically upload legacy local-only results on first sync, propagate cross-device deletions without resurrecting removed entries during offline writes, and auto-unlock Voice Pitch Studio in `SanctuaryPage` on secondary devices when synced results exist (while respecting an explicit local hide).
+
 ## [2.2.0] - 2026-11-23
 
 ### Added

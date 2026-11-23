@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:record/record.dart';
 
 import '../../l10n.dart';
+import '../../repo.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
 
@@ -25,8 +27,12 @@ class VoicePitchPage extends StatefulWidget {
 }
 
 class _VoicePitchPageState extends State<VoicePitchPage> {
+  static const int _maxContourPoints = 48;
+
   int _mode = 0; // 0: Live Voice Test, 1: Quiet Warm-up
+  int _readingMode = 0; // 0: Short prompt, 1: Article passage
   int _promptIndex = 0;
+  int _passageIndex = 0;
   String? _customPrompt;
 
   // Live pitch detection state (RAM only)
@@ -34,9 +40,14 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
   StreamSubscription<Uint8List>? _streamSub;
   final List<int> _pcmBuffer = [];
   final List<double> _samples = [];
+  final List<double> _contourPoints = [];
   bool _listening = false;
   double? _liveHz;
   String? _statusNote;
+
+  // Customizable target comfort zone
+  VoiceTargetRange _targetRange = const VoiceTargetRange();
+  bool _showTargetEditor = false;
 
   // Quiet warm-up timer state (no microphone)
   Timer? _warmupTimer;
@@ -46,29 +57,74 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
   // Saved numeric history
   List<VoiceTestResult> _results = const [];
   bool _savedCurrentSession = false;
+  Repo? _repo;
+  StreamSubscription<List<VoiceTestResult>>? _voiceSub;
 
   @override
   void initState() {
     super.initState();
-    _promptIndex = math.Random().nextInt(voiceReadingPrompts.length);
+    final rng = math.Random();
+    _promptIndex = rng.nextInt(voiceReadingPrompts.length);
+    _passageIndex = rng.nextInt(voiceReadingPassages.length);
     _loadResults();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final repo = maybeRepoFrom(context);
+    if (identical(repo, _repo)) return;
+    _repo = repo;
+    _voiceSub?.cancel();
+    _voiceSub = repo?.voiceResults().listen(_onRemoteResults);
+  }
+
+  @override
   void dispose() {
+    _voiceSub?.cancel();
     _warmupTimer?.cancel();
     _stopListeningSync();
     _recorder?.dispose();
     super.dispose();
   }
 
+  Future<void> _onRemoteResults(List<VoiceTestResult> remote) async {
+    try {
+      final repo = _repo;
+      final merged = await VoiceStore.reconcileWithRemote(
+        remote,
+        uploadMissing: repo?.saveVoiceResult,
+      );
+      if (!mounted) return;
+      setState(() => _results = merged);
+    } catch (_) {
+      // Offline/auth transient error: keep current local history.
+    }
+  }
+
   Future<void> _loadResults() async {
     try {
       final list = await VoiceStore.loadResults();
+      final target = await VoiceStore.loadTargetRange();
       if (!mounted) return;
-      setState(() => _results = list);
+      setState(() {
+        _results = list;
+        _targetRange = target;
+      });
     } catch (_) {
       // Ignore storage read errors gracefully.
+    }
+  }
+
+  Future<void> _setTargetRange(VoiceTargetRange range,
+      {bool persist = true}) async {
+    setState(() => _targetRange = range);
+    if (!persist) return;
+    try {
+      final saved = await VoiceStore.saveTargetRange(range);
+      if (mounted) setState(() => _targetRange = saved);
+    } catch (_) {
+      // Keep in-memory selection on transient storage errors.
     }
   }
 
@@ -91,6 +147,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
     setState(() {
       _statusNote = null;
       _samples.clear();
+      _contourPoints.clear();
       _liveHz = null;
       _savedCurrentSession = false;
       _pcmBuffer.clear();
@@ -162,7 +219,11 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
       if (hz != null) {
         latestHz = hz;
         _samples.add(hz);
+        _contourPoints.add(hz);
       }
+    }
+    if (_contourPoints.length > _maxContourPoints) {
+      _contourPoints.removeRange(0, _contourPoints.length - _maxContourPoints);
     }
 
     if (latestHz != null && mounted) {
@@ -186,24 +247,31 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
     HapticFeedback.selectionClick();
     setState(() {
       _customPrompt = null;
-      _promptIndex = (_promptIndex + 1 + math.Random().nextInt(3)) %
-          voiceReadingPrompts.length;
+      if (_readingMode == 1) {
+        _passageIndex = (_passageIndex + 1 + math.Random().nextInt(2)) %
+            voiceReadingPassages.length;
+      } else {
+        _promptIndex = (_promptIndex + 1 + math.Random().nextInt(3)) %
+            voiceReadingPrompts.length;
+      }
     });
   }
 
   Future<void> _editCustomPrompt() async {
-    final ctrl = TextEditingController(
-      text: _customPrompt ?? pickVoicePrompt(index: _promptIndex),
-    );
+    final fallback = _readingMode == 1
+        ? pickVoicePassage(index: _passageIndex).body
+        : pickVoicePrompt(index: _promptIndex);
+    final ctrl = TextEditingController(text: _customPrompt ?? fallback);
     final updated = await showDialog<String>(
       context: context,
       builder: (d) => AlertDialog(
         title: Text(tr('Custom reading prompt')),
         content: TextField(
           controller: ctrl,
-          maxLines: 3,
+          maxLines: 5,
           decoration: InputDecoration(
-            hintText: tr('Type a comfortable sentence to read aloud...'),
+            hintText: tr(
+                'Type or paste any comfortable sentence or short paragraph to read aloud...'),
           ),
         ),
         actions: [
@@ -239,6 +307,8 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
       category: categorizePitchHz(avg),
     );
     final updated = await VoiceStore.saveResult(res);
+    final syncFuture = _repo?.saveVoiceResult(res);
+    if (syncFuture != null) unawaited(syncFuture);
     if (!mounted) return;
     setState(() {
       _results = updated;
@@ -249,13 +319,18 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
   Future<void> _deleteResult(String id) async {
     HapticFeedback.selectionClick();
     final updated = await VoiceStore.deleteResult(id);
+    final syncFuture = _repo?.deleteVoiceResult(id);
+    if (syncFuture != null) unawaited(syncFuture);
     if (!mounted) return;
     setState(() => _results = updated);
   }
 
   Future<void> _clearAllResults() async {
     HapticFeedback.selectionClick();
-    await VoiceStore.clearResults();
+    final knownIds = [for (final r in _results) r.id];
+    await VoiceStore.clearResults(knownIds: knownIds);
+    final syncFuture = _repo?.clearVoiceResults(knownIds: knownIds);
+    if (syncFuture != null) unawaited(syncFuture);
     if (!mounted) return;
     setState(() => _results = const []);
   }
@@ -308,6 +383,8 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
     final maxHz = _samples.isEmpty ? null : _samples.reduce(math.max);
     final displayHz = _liveHz ?? avgHz;
     final category = displayHz == null ? null : categorizePitchHz(displayHz);
+    final metrics = computeVoiceSessionMetrics(_samples, _targetRange);
+    final passage = pickVoicePassage(index: _passageIndex);
 
     return Scaffold(
       body: SafeArea(
@@ -379,7 +456,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
             gap(16),
 
             if (_mode == 0) ...[
-              // Reading prompt card
+              // Reading prompt / article passage card
               AppCard(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -404,7 +481,9 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                           onPressed: _shufflePrompt,
                           icon: const Icon(LucideIcons.refreshCw, size: 17),
                           color: C.iconDefault,
-                          tooltip: tr('Shuffle prompt'),
+                          tooltip: _readingMode == 1
+                              ? tr('Shuffle passage')
+                              : tr('Shuffle prompt'),
                           visualDensity: VisualDensity.compact,
                         ),
                         IconButton(
@@ -417,21 +496,98 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                       ],
                     ),
                     gap(8),
-                    Text(
-                      '"$promptText"',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                        height: 1.45,
-                      ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _SelectableChip(
+                          label: tr('Short prompt'),
+                          selected: _readingMode == 0,
+                          onTap: () => setState(() {
+                            _readingMode = 0;
+                            _customPrompt = null;
+                          }),
+                        ),
+                        _SelectableChip(
+                          label: tr('Article passage'),
+                          selected: _readingMode == 1,
+                          onTap: () => setState(() {
+                            _readingMode = 1;
+                            _customPrompt = null;
+                          }),
+                        ),
+                      ],
                     ),
+                    gap(10),
+                    if (_customPrompt != null)
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 155),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            '"$_customPrompt"',
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (_readingMode == 1) ...[
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          _MetaBadge(
+                            text: passage.topic,
+                            color: C.violet,
+                          ),
+                          _MetaBadge(
+                            text: tr('~{0}s read', [passage.estSeconds]),
+                            color: Pastel.mint,
+                          ),
+                        ],
+                      ),
+                      gap(8),
+                      Text(
+                        passage.title,
+                        style: const TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      gap(6),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 165),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            passage.body,
+                            style: TextStyle(
+                              fontSize: 13.8,
+                              color: Pastel.mist.withValues(alpha: 0.92),
+                              height: 1.55,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ] else
+                      Text(
+                        '"$promptText"',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                          height: 1.45,
+                        ),
+                      ),
                   ],
                 ),
               ),
               gap(14),
 
-              // Live pitch meter card
+              // Live pitch meter & contour card
               AppCard(
                 highlight: true,
                 padding: const EdgeInsets.all(18),
@@ -442,7 +598,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                       style: display(44, color: Colors.white),
                     ),
                     gap(8),
-                    if (category != null)
+                    if (category != null) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
@@ -460,8 +616,17 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                             color: category.color,
                           ),
                         ),
-                      )
-                    else
+                      ),
+                      gap(4),
+                      Text(
+                        category.description,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Pastel.mist.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ] else
                       Text(
                         _listening
                             ? tr('Speak comfortably at your own pace...')
@@ -471,9 +636,162 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                           color: Pastel.mist.withValues(alpha: 0.78),
                         ),
                       ),
-                    gap(16),
-                    _PitchGaugeBar(hz: displayHz),
+                    gap(12),
+                    _LivePitchContourChart(
+                      points: _contourPoints,
+                      target: _targetRange,
+                    ),
                     gap(10),
+                    _PitchGaugeBar(hz: displayHz, target: _targetRange),
+                    gap(10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            tr('Target: {0}–{1} Hz', [
+                              _targetRange.minHz.round(),
+                              _targetRange.maxHz.round(),
+                            ]),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Pastel.mint.withValues(alpha: 0.92),
+                            ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => setState(
+                              () => _showTargetEditor = !_showTargetEditor),
+                          icon: Icon(
+                            _showTargetEditor
+                                ? LucideIcons.chevronUp
+                                : LucideIcons.slidersHorizontal,
+                            size: 14,
+                          ),
+                          label: Text(
+                            tr('Adjust target'),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_showTargetEditor) ...[
+                      gap(6),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: C.midnight.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: C.lavender.withValues(alpha: 0.16)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tr('Target zone'),
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: Pastel.mist.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            gap(6),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                _SelectableChip(
+                                  label: tr('Masculine'),
+                                  selected: _targetRange ==
+                                      VoiceTargetRange.masculine,
+                                  color: C.violet,
+                                  onTap: () => _setTargetRange(
+                                      VoiceTargetRange.masculine),
+                                ),
+                                _SelectableChip(
+                                  label: tr('Neutral pitch'),
+                                  selected:
+                                      _targetRange == VoiceTargetRange.neutral,
+                                  color: Pastel.mint,
+                                  onTap: () =>
+                                      _setTargetRange(VoiceTargetRange.neutral),
+                                ),
+                                _SelectableChip(
+                                  label: tr('Feminine'),
+                                  selected:
+                                      _targetRange == VoiceTargetRange.feminine,
+                                  color: C.rose,
+                                  onTap: () => _setTargetRange(
+                                      VoiceTargetRange.feminine),
+                                ),
+                              ],
+                            ),
+                            RangeSlider(
+                              values: RangeValues(
+                                _targetRange.minHz.clamp(80.0, 275.0),
+                                _targetRange.maxHz.clamp(85.0, 280.0),
+                              ),
+                              min: 80,
+                              max: 280,
+                              divisions: 40,
+                              activeColor: Pastel.mint,
+                              inactiveColor:
+                                  C.lavender.withValues(alpha: 0.22),
+                              labels: RangeLabels(
+                                '${_targetRange.minHz.round()} Hz',
+                                '${_targetRange.maxHz.round()} Hz',
+                              ),
+                              onChanged: (v) {
+                                final minV = v.start;
+                                final maxV = math.max(minV + 5.0, v.end);
+                                _setTargetRange(
+                                  VoiceTargetRange(minHz: minV, maxHz: maxV),
+                                  persist: false,
+                                );
+                              },
+                              onChangeEnd: (v) {
+                                final minV = v.start;
+                                final maxV = math.max(minV + 5.0, v.end);
+                                _setTargetRange(
+                                  VoiceTargetRange(minHz: minV, maxHz: maxV),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (metrics != null) ...[
+                      gap(8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _MetaBadge(
+                            text: tr('In target: {0}%',
+                                [metrics.inTargetPercent.round()]),
+                            color: Pastel.mint,
+                          ),
+                          _MetaBadge(
+                            text: tr('Intonation: {0} Hz • {1}', [
+                              metrics.spreadHz.round(),
+                              metrics.intonationLabel,
+                            ]),
+                            color: C.lavender,
+                          ),
+                        ],
+                      ),
+                    ],
+                    gap(8),
                     Text(
                       tr('Pitch is only one piece alongside resonance & comfort.'),
                       textAlign: TextAlign.center,
@@ -494,7 +812,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                         ),
                       ),
                     ],
-                    gap(16),
+                    gap(14),
                     SizedBox(
                       width: double.infinity,
                       child: pillButton(
@@ -502,9 +820,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                             ? tr('Stop voice check')
                             : tr('Start live voice check'),
                         _toggleListening,
-                        icon: _listening
-                            ? LucideIcons.square
-                            : LucideIcons.mic,
+                        icon: _listening ? LucideIcons.square : LucideIcons.mic,
                         color: _listening ? C.coral : C.aurora,
                       ),
                     ),
@@ -590,6 +906,10 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                 ),
               ),
               gap(10),
+              if (_results.length >= 2) ...[
+                _VoiceTrendChartCard(results: _results, target: _targetRange),
+                gap(12),
+              ],
               if (_results.isEmpty)
                 AppCard(
                   padding: const EdgeInsets.all(16),
@@ -639,9 +959,8 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                           ? tr('Pause warm-up')
                           : tr('Start 60s warm-up'),
                       _toggleWarmupTimer,
-                      icon: _warmupRunning
-                          ? LucideIcons.pause
-                          : LucideIcons.play,
+                      icon:
+                          _warmupRunning ? LucideIcons.pause : LucideIcons.play,
                       color: C.aurora,
                     ),
                   ],
@@ -668,26 +987,270 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
   }
 }
 
-class _PitchGaugeBar extends StatelessWidget {
-  const _PitchGaugeBar({required this.hz});
+class _SelectableChip extends StatelessWidget {
+  const _SelectableChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.color = C.aurora,
+  });
 
-  final double? hz;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    const minScale = 85.0;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected
+                ? color.withValues(alpha: 0.22)
+                : C.midnight.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected
+                  ? color.withValues(alpha: 0.85)
+                  : C.lavender.withValues(alpha: 0.18),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? Colors.white : Pastel.mist.withValues(alpha: 0.78),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MetaBadge extends StatelessWidget {
+  const _MetaBadge({required this.text, required this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _LivePitchContourChart extends StatelessWidget {
+  const _LivePitchContourChart({
+    required this.points,
+    required this.target,
+  });
+
+  final List<double> points;
+  final VoiceTargetRange target;
+
+  @override
+  Widget build(BuildContext context) {
+    final snapshot = List<double>.of(points);
+    return Container(
+      height: 76,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: C.midnight.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: C.lavender.withValues(alpha: 0.16)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomPaint(
+            painter: _PitchContourPainter(
+              points: snapshot,
+              target: target,
+            ),
+          ),
+          if (snapshot.isEmpty)
+            Center(
+              child: Text(
+                tr('Live pitch contour'),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: Pastel.mist.withValues(alpha: 0.45),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PitchContourPainter extends CustomPainter {
+  _PitchContourPainter({
+    required this.points,
+    required this.target,
+  })  : _count = points.length,
+        _last = points.isEmpty ? null : points.last;
+
+  final List<double> points;
+  final VoiceTargetRange target;
+  final int _count;
+  final double? _last;
+
+  static const double _minHz = 65.0;
+  static const double _maxHz = 290.0;
+
+  double _yFor(double hz, double h) {
+    final norm = ((hz - _minHz) / (_maxHz - _minHz)).clamp(0.0, 1.0);
+    return (h - 8) - norm * (h - 16);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // Target comfort band fill
+    final topY = _yFor(target.maxHz, h);
+    final bottomY = _yFor(target.minHz, h);
+    canvas.drawRect(
+      Rect.fromLTRB(0, topY, w, bottomY),
+      Paint()..color = Pastel.mint.withValues(alpha: 0.12),
+    );
+    final targetEdgePaint = Paint()
+      ..color = Pastel.mint.withValues(alpha: 0.28)
+      ..strokeWidth = 1;
+    canvas.drawLine(Offset(0, topY), Offset(w, topY), targetEdgePaint);
+    canvas.drawLine(Offset(0, bottomY), Offset(w, bottomY), targetEdgePaint);
+
+    // Subtle reference lines (100, 180, 240 Hz)
+    final guidePaint = Paint()
+      ..color = C.lavender.withValues(alpha: 0.08)
+      ..strokeWidth = 1;
+    for (final hz in const [100.0, 180.0, 240.0]) {
+      final y = _yFor(hz, h);
+      canvas.drawLine(Offset(0, y), Offset(w, y), guidePaint);
+    }
+
+    if (points.isEmpty) return;
+
+    if (points.length == 1) {
+      final pt = Offset(w * 0.5, _yFor(points.first, h));
+      canvas.drawCircle(
+        pt,
+        6,
+        Paint()..color = C.aurora.withValues(alpha: 0.35),
+      );
+      canvas.drawCircle(pt, 3.5, Paint()..color = Colors.white);
+      return;
+    }
+
+    final offsets = <Offset>[];
+    final stepX = (w - 16) / (points.length - 1);
+    for (var i = 0; i < points.length; i++) {
+      offsets.add(Offset(8 + i * stepX, _yFor(points[i], h)));
+    }
+
+    final linePath = Path()..moveTo(offsets.first.dx, offsets.first.dy);
+    for (var i = 0; i < offsets.length - 1; i++) {
+      final curr = offsets[i];
+      final next = offsets[i + 1];
+      final mid = Offset((curr.dx + next.dx) * 0.5, (curr.dy + next.dy) * 0.5);
+      linePath.quadraticBezierTo(curr.dx, curr.dy, mid.dx, mid.dy);
+    }
+    linePath.lineTo(offsets.last.dx, offsets.last.dy);
+
+    final fillPath = Path.from(linePath)
+      ..lineTo(offsets.last.dx, h)
+      ..lineTo(offsets.first.dx, h)
+      ..close();
+
+    canvas.drawPath(
+      fillPath,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            C.aurora.withValues(alpha: 0.28),
+            C.aurora.withValues(alpha: 0.01),
+          ],
+        ).createShader(Rect.fromLTWH(0, 0, w, h)),
+    );
+
+    canvas.drawPath(
+      linePath,
+      Paint()
+        ..color = C.lavender
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..strokeCap = StrokeCap.round,
+    );
+
+    final latest = offsets.last;
+    canvas.drawCircle(
+      latest,
+      6,
+      Paint()..color = C.rose.withValues(alpha: 0.36),
+    );
+    canvas.drawCircle(latest, 3.5, Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PitchContourPainter old) =>
+      old.target != target || old._count != _count || old._last != _last;
+}
+
+class _PitchGaugeBar extends StatelessWidget {
+  const _PitchGaugeBar({required this.hz, required this.target});
+
+  final double? hz;
+  final VoiceTargetRange target;
+
+  @override
+  Widget build(BuildContext context) {
+    const minScale = 65.0;
     const maxScale = 280.0;
     final norm = hz == null
         ? null
         : ((hz! - minScale) / (maxScale - minScale)).clamp(0.0, 1.0);
+    final tMinNorm =
+        ((target.minHz - minScale) / (maxScale - minScale)).clamp(0.0, 1.0);
+    final tMaxNorm =
+        ((target.maxHz - minScale) / (maxScale - minScale)).clamp(0.0, 1.0);
 
     return Column(
       children: [
         LayoutBuilder(
           builder: (context, constraints) {
             final w = constraints.maxWidth;
+            final bracketLeft = w * tMinNorm;
+            final bracketWidth = math.max(4.0, w * (tMaxNorm - tMinNorm));
             return SizedBox(
-              height: 18,
+              height: 20,
               child: Stack(
                 alignment: Alignment.centerLeft,
                 children: [
@@ -696,8 +1259,23 @@ class _PitchGaugeBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       gradient: const LinearGradient(
-                        colors: [C.violet, C.lavender, C.rose],
-                        stops: [0.25, 0.50, 0.85],
+                        colors: [C.aurora, C.violet, Pastel.mint, C.rose, C.coral],
+                        stops: [0.10, 0.32, 0.54, 0.78, 0.96],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: bracketLeft,
+                    width: bracketWidth,
+                    child: Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        color: Pastel.mint.withValues(alpha: 0.16),
+                        border: Border.all(
+                          color: Pastel.mint.withValues(alpha: 0.72),
+                          width: 1.2,
+                        ),
                       ),
                     ),
                   ),
@@ -720,17 +1298,231 @@ class _PitchGaugeBar extends StatelessWidget {
           },
         ),
         gap(4),
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('85 Hz', style: TextStyle(fontSize: 10.5, color: C.iconDefault)),
-            Text('155–185 Hz',
+            const Text('65 Hz',
                 style: TextStyle(fontSize: 10.5, color: C.iconDefault)),
-            Text('280 Hz',
+            Text(
+              '${target.minHz.round()}–${target.maxHz.round()} Hz',
+              style: const TextStyle(fontSize: 10.5, color: Pastel.mint),
+            ),
+            const Text('280 Hz',
                 style: TextStyle(fontSize: 10.5, color: C.iconDefault)),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _VoiceTrendChartCard extends StatelessWidget {
+  const _VoiceTrendChartCard({required this.results, required this.target});
+
+  final List<VoiceTestResult> results;
+  final VoiceTargetRange target;
+
+  @override
+  Widget build(BuildContext context) {
+    final ordered = results.take(20).toList().reversed.toList();
+    if (ordered.length < 2) return const SizedBox.shrink();
+
+    final overallAvg =
+        ordered.fold<double>(0, (s, r) => s + r.avgHz) / ordered.length;
+    var minSample = ordered.first.minHz;
+    var maxSample = ordered.first.maxHz;
+    for (final r in ordered) {
+      if (r.minHz < minSample) minSample = r.minHz;
+      if (r.maxHz > maxSample) maxSample = r.maxHz;
+    }
+    final minY = math.min(60.0, (minSample - 15.0).clamp(40.0, 200.0));
+    final maxY = math.max(290.0, (maxSample + 15.0).clamp(150.0, 380.0));
+
+    final avgSpots = [
+      for (var i = 0; i < ordered.length; i++) FlSpot(i.toDouble(), ordered[i].avgHz),
+    ];
+    final maxSpots = [
+      for (var i = 0; i < ordered.length; i++) FlSpot(i.toDouble(), ordered[i].maxHz),
+    ];
+    final minSpots = [
+      for (var i = 0; i < ordered.length; i++) FlSpot(i.toDouble(), ordered[i].minHz),
+    ];
+    final totalX = (ordered.length - 1).toDouble();
+
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(14, 14, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.trendingUp, size: 16, color: C.lavender),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  tr('Progress trend'),
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              _MetaBadge(
+                text: tr('{0} sessions', [ordered.length]),
+                color: C.lavender,
+              ),
+            ],
+          ),
+          gap(4),
+          Text(
+            tr('Overall avg: {0} Hz', [overallAvg.round()]),
+            style: TextStyle(
+              fontSize: 11.5,
+              color: Pastel.mist.withValues(alpha: 0.78),
+            ),
+          ),
+          gap(12),
+          SizedBox(
+            height: 168,
+            child: LineChart(
+              LineChartData(
+                minX: 0,
+                maxX: totalX,
+                minY: minY,
+                maxY: maxY,
+                gridData: FlGridData(
+                  drawVerticalLine: false,
+                  horizontalInterval: 50,
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: C.lavender.withValues(alpha: 0.08),
+                    strokeWidth: 1,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(),
+                  rightTitles: const AxisTitles(),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 36,
+                      interval: 50,
+                      getTitlesWidget: (v, _) => Text(
+                        '${v.round()}',
+                        style: const TextStyle(
+                            fontSize: 10.5, color: C.iconDefault),
+                      ),
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 24,
+                      interval: math.max(totalX / 3, 1),
+                      getTitlesWidget: (v, _) {
+                        final idx = v.round().clamp(0, ordered.length - 1);
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            DateFormat('d MMM', L10n.code)
+                                .format(ordered[idx].at),
+                            style: const TextStyle(
+                                fontSize: 10, color: C.iconDefault),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                rangeAnnotations: RangeAnnotations(
+                  horizontalRangeAnnotations: [
+                    HorizontalRangeAnnotation(
+                      y1: target.minHz,
+                      y2: target.maxHz,
+                      color: Pastel.mint.withValues(alpha: 0.12),
+                    ),
+                  ],
+                ),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (touched) => [
+                      for (final s in touched)
+                        LineTooltipItem(
+                          '${s.y.round()} Hz',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: maxSpots,
+                    isCurved: true,
+                    preventCurveOverShooting: true,
+                    color: C.rose.withValues(alpha: 0.40),
+                    barWidth: 1.3,
+                    dashArray: [4, 4],
+                    dotData: const FlDotData(show: false),
+                  ),
+                  LineChartBarData(
+                    spots: minSpots,
+                    isCurved: true,
+                    preventCurveOverShooting: true,
+                    color: C.violet.withValues(alpha: 0.40),
+                    barWidth: 1.3,
+                    dashArray: [4, 4],
+                    dotData: const FlDotData(show: false),
+                  ),
+                  LineChartBarData(
+                    spots: avgSpots,
+                    isCurved: true,
+                    curveSmoothness: 0.3,
+                    preventCurveOverShooting: true,
+                    color: C.lavender,
+                    barWidth: 2.8,
+                    isStrokeCapRound: true,
+                    dotData: FlDotData(
+                      getDotPainter: (spot, _, __, ___) {
+                        final inTarget = target.contains(spot.y);
+                        return FlDotCirclePainter(
+                          radius: 3.6,
+                          color: inTarget ? Pastel.mint : C.lavender,
+                          strokeWidth: 1.5,
+                          strokeColor: C.midnight,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          C.aurora.withValues(alpha: 0.22),
+                          C.aurora.withValues(alpha: 0.01),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          gap(6),
+          Text(
+            tr('Target zone shaded • Solid line shows session average'),
+            style: TextStyle(
+              fontSize: 10.5,
+              color: Pastel.mist.withValues(alpha: 0.62),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

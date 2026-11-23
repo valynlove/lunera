@@ -279,6 +279,77 @@ void main() {
       expect(rescuedLog!.used, equals({'sup_ok': 1.0}));
       expect(decremented, equals({'sup_ok': -1.0}));
     });
+
+    test('Repo validates voiceResults backup rows and preserves backward compatibility', () {
+      final repo = Repo('dummy_uid');
+
+      final backupWithVoice = {
+        'metadata': {'app': 'lunera', 'version': 1},
+        'data': {
+          'voiceResults': [
+            {
+              'id': 'vr1',
+              'at': {r'$ts': '2026-11-22T18:00:00.000Z'},
+              'avgHz': 198.5,
+              'minHz': 182.0,
+              'maxHz': 214.0,
+              'category': 'high',
+            },
+            {
+              'id': 'vr2',
+              'at': '2026-11-22T19:00:00.000Z',
+              'avgHz': 168.0,
+              'minHz': 155.0,
+              'maxHz': 180.0,
+            },
+          ],
+        }
+      };
+      expect(repo.validate(backupWithVoice), equals(2));
+
+      // Backups without voiceResults remain valid (v2.2.0 and earlier)
+      expect(
+        repo.validate({'metadata': {'app': 'lunera', 'version': 1}, 'data': {}}),
+        equals(0),
+      );
+
+      // Rejects invalid metrics, dates, or category type
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'voiceResults': [
+              {
+                'id': 'vr_bad_hz',
+                'at': '2026-11-22T18:00:00.000Z',
+                'avgHz': 0,
+                'minHz': 150.0,
+                'maxHz': 180.0,
+              }
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => repo.validate({
+          'metadata': {'app': 'lunera'},
+          'data': {
+            'voiceResults': [
+              {
+                'id': 'vr_bad_cat',
+                'at': '2026-11-22T18:00:00.000Z',
+                'avgHz': 180.0,
+                'minHz': 165.0,
+                'maxHz': 195.0,
+                'category': 123,
+              }
+            ]
+          }
+        }),
+        throwsFormatException,
+      );
+    });
   });
 }
 

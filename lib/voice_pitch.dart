@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/material.dart' show Color;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,35 +11,86 @@ import 'l10n.dart';
 import 'theme.dart';
 
 /// Soft, non-judgmental voice pitch range categories for self-reference only.
-enum VoicePitchCategory { low, neutral, high }
+enum VoicePitchCategory {
+  veryDeep,
+  deep,
+  low,
+  midLow,
+  neutral,
+  softHigh,
+  bright,
+  veryHigh,
+}
 
 extension VoicePitchCategoryMeta on VoicePitchCategory {
   String get label {
     switch (this) {
+      case VoicePitchCategory.veryDeep:
+        return tr('Very Deep Voice');
+      case VoicePitchCategory.deep:
+        return tr('Deep Voice');
       case VoicePitchCategory.low:
-        return tr('Low / Masculine Range');
+        return tr('Low Conversational');
+      case VoicePitchCategory.midLow:
+        return tr('Balanced Low-Mid');
       case VoicePitchCategory.neutral:
-        return tr('Neutral / Overlap Range');
-      case VoicePitchCategory.high:
-        return tr('Bright / Feminine Range');
+        return tr('Neutral Middle');
+      case VoicePitchCategory.softHigh:
+        return tr('Soft Warm Feminine');
+      case VoicePitchCategory.bright:
+        return tr('Bright Clear Feminine');
+      case VoicePitchCategory.veryHigh:
+        return tr('Very Light & High');
+    }
+  }
+
+  String get description {
+    switch (this) {
+      case VoicePitchCategory.veryDeep:
+        return tr('Very low, heavy speaking tone');
+      case VoicePitchCategory.deep:
+        return tr('Steady, deep speaking voice');
+      case VoicePitchCategory.low:
+        return tr('Relaxed, everyday lower voice');
+      case VoicePitchCategory.midLow:
+        return tr('Middle voice leaning slightly low');
+      case VoicePitchCategory.neutral:
+        return tr('Balanced gender-neutral middle tone');
+      case VoicePitchCategory.softHigh:
+        return tr('Gentle, natural feminine speaking voice');
+      case VoicePitchCategory.bright:
+        return tr('Light, bright everyday feminine voice');
+      case VoicePitchCategory.veryHigh:
+        return tr('Very high, airy speaking tone');
     }
   }
 
   String get rangeHint => switch (this) {
-        VoicePitchCategory.low => '~85–155 Hz',
-        VoicePitchCategory.neutral => '~155–185 Hz',
-        VoicePitchCategory.high => '~185–265+ Hz',
+        VoicePitchCategory.veryDeep => '~65–100 Hz',
+        VoicePitchCategory.deep => '~100–125 Hz',
+        VoicePitchCategory.low => '~125–150 Hz',
+        VoicePitchCategory.midLow => '~150–170 Hz',
+        VoicePitchCategory.neutral => '~170–190 Hz',
+        VoicePitchCategory.softHigh => '~190–215 Hz',
+        VoicePitchCategory.bright => '~215–245 Hz',
+        VoicePitchCategory.veryHigh => '~245+ Hz',
       };
 
   Color get color => switch (this) {
+        VoicePitchCategory.veryDeep => C.aurora,
+        VoicePitchCategory.deep => C.violet,
         VoicePitchCategory.low => C.violet,
-        VoicePitchCategory.neutral => C.lavender,
-        VoicePitchCategory.high => C.rose,
+        VoicePitchCategory.midLow => C.lavender,
+        VoicePitchCategory.neutral => Pastel.mint,
+        VoicePitchCategory.softHigh => C.rose,
+        VoicePitchCategory.bright => C.magenta,
+        VoicePitchCategory.veryHigh => C.coral,
       };
 
   String get key => name;
 
   static VoicePitchCategory fromKey(String? raw) {
+    if (raw == 'high') return VoicePitchCategory.softHigh;
     for (final c in VoicePitchCategory.values) {
       if (c.name == raw) return c;
     }
@@ -45,11 +98,16 @@ extension VoicePitchCategoryMeta on VoicePitchCategory {
   }
 }
 
-/// Maps fundamental frequency [hz] to a gentle overlapping pitch category.
+/// Maps fundamental frequency [hz] to a gentle 8-tier pitch category.
 VoicePitchCategory categorizePitchHz(double hz) {
-  if (hz < 155.0) return VoicePitchCategory.low;
-  if (hz <= 185.0) return VoicePitchCategory.neutral;
-  return VoicePitchCategory.high;
+  if (hz < 100.0) return VoicePitchCategory.veryDeep;
+  if (hz < 125.0) return VoicePitchCategory.deep;
+  if (hz < 150.0) return VoicePitchCategory.low;
+  if (hz < 170.0) return VoicePitchCategory.midLow;
+  if (hz < 190.0) return VoicePitchCategory.neutral;
+  if (hz < 215.0) return VoicePitchCategory.softHigh;
+  if (hz < 245.0) return VoicePitchCategory.bright;
+  return VoicePitchCategory.veryHigh;
 }
 
 /// Detects fundamental frequency (F0 in Hz) from little-endian 16-bit mono PCM
@@ -223,6 +281,181 @@ String pickVoicePrompt({int? index, math.Random? random}) {
   return L10n.code == 'id' ? pair.$2 : pair.$1;
 }
 
+/// Multi-sentence editorial reading passage (EN/ID) for longer natural speech practice.
+class VoiceReadingPassage {
+  const VoiceReadingPassage({
+    required this.titleEn,
+    required this.titleId,
+    required this.topicEn,
+    required this.topicId,
+    required this.bodyEn,
+    required this.bodyId,
+    required this.estSeconds,
+  });
+
+  final String titleEn;
+  final String titleId;
+  final String topicEn;
+  final String topicId;
+  final String bodyEn;
+  final String bodyId;
+  final int estSeconds;
+
+  bool get _isId => L10n.code == 'id';
+  String get title => _isId ? titleId : titleEn;
+  String get topic => _isId ? topicId : topicEn;
+  String get body => _isId ? bodyId : bodyEn;
+}
+
+const List<VoiceReadingPassage> voiceReadingPassages = [
+  VoiceReadingPassage(
+    titleEn: 'Evening Green Spaces in Modern Cities',
+    titleId: 'Ruang Hijau Kota Menjelang Senja',
+    topicEn: 'Urban Feature',
+    topicId: 'Liputan Kota',
+    estSeconds: 40,
+    bodyEn:
+        'As afternoon heat begins to fade, small neighborhood parks often turn into the calmest corners of a busy city. Commuters pause along shaded benches, cyclists roll home past rows of rain trees, and warm streetlamps flicker to life one by one. Urban planners note that even modest pocket gardens noticeably soften traffic noise, invite unhurried conversation, and give residents a natural place to breathe before evening settles in.',
+    bodyId:
+        'Ketika panas siang mulai mereda, taman lingkungan sering berubah menjadi sudut paling tenang di tengah kota yang padat. Para pekerja singgah sejenak di bangku teduh, pesepeda melintas pulang di bawah deretan trembesi, dan lampu jalan hangat mulai menyala satu per satu. Perencana kota mencatat bahwa taman saku berukuran kecil sekalipun efektif meredam kebisingan lalu lintas sekaligus menghadirkan ruang nyaman untuk berbincang santai menjelang malam.',
+  ),
+  VoiceReadingPassage(
+    titleEn: 'Patience Behind a Slow Morning Pour-Over',
+    titleId: 'Ketelitian di Balik Seduhan Kopi Pagi',
+    topicEn: 'Culture & Craft',
+    topicId: 'Gaya Hidup',
+    estSeconds: 38,
+    bodyEn:
+        'Stepping inside a quiet coffee bar before rush hour reveals a surprisingly steady rhythm. Rather than hurrying through orders, baristas weigh freshly ground beans, watch the water bloom slowly over the filter, and check the aroma rising with the steam. Regular guests say the appeal is only partly about flavor. Much of the comfort comes from spending three unhurried minutes watching simple craft unfold cleanly from start to finish.',
+    bodyId:
+        'Memasuki kedai kopi kecil sebelum jam sibuk memperlihatkan ritme kerja yang terasa tenang dan terukur. Alih-alih terburu-buru mengejar pesanan, peracik kopi menimbang biji sangrai, membiarkan air panas menyeduh secara perlahan di atas kertas saring, lalu memastikan aroma yang keluar tetap seimbang. Banyak pelanggan setia mengaku bahwa daya tariknya bukan semata rasa, melainkan momen singkat menyaksikan ketelitian sederhana dari awal hingga selesai.',
+  ),
+  VoiceReadingPassage(
+    titleEn: 'Looking Up at Dark-Sky Sanctuaries',
+    titleId: 'Menatap Langit Gelap di Cagar Bintang',
+    topicEn: 'Science Desk',
+    topicId: 'Laporan Sains',
+    estSeconds: 42,
+    bodyEn:
+        'Far beyond highway billboards and bright storefronts, several coastal towns now dim outdoor lighting after nine o’clock to protect clear night skies. Within weeks of installing shielded warm lamps, residents noticed familiar constellations returning overhead along with fireflies near the reeds. Astronomers visiting the area explain that lower glare also helps nocturnal birds navigate safely, proving that small lighting adjustments can quickly restore a sense of stillness.',
+    bodyId:
+        'Jauh dari papan reklame jalan utama dan deretan pertokoan terang, beberapa kota pesisir mulai meredupkan lampu luar ruangan setelah pukul sembilan malam demi menjaga kejernihan langit. Dalam beberapa pekan setelah pemasangan lampu hangat berpenutup arah, rasi bintang kembali terlihat jelas bersama kunang-kunang di sekitar rerumputan. Para astronom menjelaskan bahwa berkurangnya silau juga membantu navigasi burung malam secara alami dan mengembalikan ketenangan suasana malam.',
+  ),
+  VoiceReadingPassage(
+    titleEn: 'How Neighborhood Libraries Stay Relevant',
+    titleId: 'Bagaimana Perpustakaan Warga Tetap Hidup',
+    topicEn: 'Community Notes',
+    topicId: 'Wacana Komunitas',
+    estSeconds: 40,
+    bodyEn:
+        'On Saturday mornings, the wooden reading room down the avenue fills with an unexpected mix of visitors. Students spread notebooks beside sunlit windows, retirees trade newspaper clippings over tea, and younger readers browse illustrated science books near the corner shelves. Volunteers say the space thrives not because it chases trends, but because it stays warm, accessible, and genuinely welcoming to anyone looking for quiet company.',
+    bodyId:
+        'Setiap Sabtu pagi, ruang baca berkayu di ujung jalan itu dipenuhi pengunjung dari berbagai usia. Pelajar membuka buku catatan di dekat jendela yang terang, warga senior bertukar kliping berita sambil menikmati teh hangat, sementara pembaca muda memilih buku sains bergambar di sudut ruangan. Para relawan menilai tempat ini bertahan bukan karena mengejar tren, melainkan karena tetap hangat, mudah diakses, dan ramah bagi siapa pun.',
+  ),
+  VoiceReadingPassage(
+    titleEn: 'Unhurried Rituals for Calmer Mornings',
+    titleId: 'Kebiasaan Sederhana untuk Pagi yang Tenang',
+    topicEn: 'Wellness Column',
+    topicId: 'Kolom Keseharian',
+    estSeconds: 36,
+    bodyEn:
+        'Before checking overnight notifications, taking five calm minutes near an open window can change the pace of an entire day. Stretching gently, drinking a glass of room-temperature water, and speaking your first words softly help both posture and breath stay relaxed. Habits researchers emphasize that consistency matters far more than intensity, turning small everyday pauses into reliable anchors throughout busy weeks.',
+    bodyId:
+        'Sebelum memeriksa deretan notifikasi ponsel, meluangkan lima menit tenang di dekat jendela terbuka sering mengubah suasana seharian penuh. Peregangan ringan, segelas air putih hangat, dan berbicara dengan nada santai membantu bahu serta napas terasa lebih lepas. Peneliti kebiasaan menegaskan bahwa konsistensi jauh lebih bermakna daripada target besar, sehingga jeda kecil setiap pagi perlahan menjadi jangkar yang menenangkan.',
+  ),
+  VoiceReadingPassage(
+    titleEn: 'Reading Coastal Tides Under Moonlight',
+    titleId: 'Membaca Pasang Surut Laut di Bawah Bulan',
+    topicEn: 'Nature & Climate',
+    topicId: 'Sains & Alam',
+    estSeconds: 42,
+    bodyEn:
+        'Along rocky coves and wooden piers, every rise and fall of the tide follows an ancient gravitational conversation between Earth, Sun, and Moon. Local weather stations record subtle shifts hour by hour, allowing ferries and small fishing boats to plan safe crossings without guesswork. Standing by the shoreline at dusk, observers can watch calm ripples trace that steady celestial timing right up to the sand.',
+    bodyId:
+        'Di sepanjang teluk berbatu dan dermaga kayu, setiap naik turunnya air laut mengikuti tarikan gravitasi teratur antara Bumi, Matahari, dan Bulan. Stasiun cuaca pesisir mencatat perubahan tinggi muka air dari jam ke jam agar kapal penyeberangan serta perahu nelayan dapat merencanakan perjalanan dengan aman. Saat berdiri di tepi pantai menjelang malam, riak tenang tersebut memperlihatkan keteraturan alam semesta di depan mata.',
+  ),
+];
+
+VoiceReadingPassage pickVoicePassage({int? index, math.Random? random}) {
+  final i = index != null
+      ? index % voiceReadingPassages.length
+      : (random ?? math.Random()).nextInt(voiceReadingPassages.length);
+  return voiceReadingPassages[i];
+}
+
+/// Customizable pitch comfort zone (in Hz) for real-time feedback and trend charts.
+class VoiceTargetRange {
+  const VoiceTargetRange({this.minHz = 165.0, this.maxHz = 215.0});
+
+  static const masculine = VoiceTargetRange(minHz: 100.0, maxHz: 145.0);
+  static const neutral = VoiceTargetRange(minHz: 155.0, maxHz: 185.0);
+  static const feminine = VoiceTargetRange(minHz: 185.0, maxHz: 230.0);
+
+  final double minHz;
+  final double maxHz;
+
+  bool contains(double hz) => hz >= minHz && hz <= maxHz;
+
+  @override
+  bool operator ==(Object other) =>
+      other is VoiceTargetRange && other.minHz == minHz && other.maxHz == maxHz;
+
+  @override
+  int get hashCode => Object.hash(minHz, maxHz);
+}
+
+/// Computed pitch stats for a live or finished voice session (RAM only).
+class VoiceSessionMetrics {
+  const VoiceSessionMetrics({
+    required this.avgHz,
+    required this.minHz,
+    required this.maxHz,
+    required this.inTargetPercent,
+    required this.spreadHz,
+    required this.intonationLabel,
+  });
+
+  final double avgHz;
+  final double minHz;
+  final double maxHz;
+  final double inTargetPercent;
+  final double spreadHz;
+  final String intonationLabel;
+}
+
+VoiceSessionMetrics? computeVoiceSessionMetrics(
+  List<double> samples,
+  VoiceTargetRange target,
+) {
+  if (samples.isEmpty) return null;
+  var sum = 0.0;
+  var minVal = samples.first;
+  var maxVal = samples.first;
+  var inTarget = 0;
+  for (final hz in samples) {
+    sum += hz;
+    if (hz < minVal) minVal = hz;
+    if (hz > maxVal) maxVal = hz;
+    if (target.contains(hz)) inTarget++;
+  }
+  final avg = sum / samples.length;
+  final spread = maxVal - minVal;
+  final pct = (inTarget * 100.0) / samples.length;
+  final label = spread < 18.0
+      ? tr('Steady / Flat')
+      : (spread <= 55.0
+          ? tr('Natural Inflection')
+          : tr('Expressive Range'));
+  return VoiceSessionMetrics(
+    avgHz: avg,
+    minHz: minVal,
+    maxHz: maxVal,
+    inTargetPercent: pct,
+    spreadHz: spread,
+    intonationLabel: label,
+  );
+}
+
 /// Numeric-only voice pitch session summary. Never stores raw audio recordings.
 class VoiceTestResult {
   const VoiceTestResult({
@@ -241,6 +474,24 @@ class VoiceTestResult {
   final double maxHz;
   final VoicePitchCategory category;
 
+  static DateTime? _parseDate(dynamic v) {
+    if (v is Timestamp) return v.toDate();
+    if (v is DateTime) return v;
+    if (v is String) return DateTime.tryParse(v);
+    if (v is Map && v[r'$ts'] is String) {
+      return DateTime.tryParse(v[r'$ts'] as String);
+    }
+    return null;
+  }
+
+  static double? _finitePositive(dynamic v) {
+    if (v is num) {
+      final d = v.toDouble();
+      return (d.isFinite && d > 0) ? d : null;
+    }
+    return null;
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'at': at.toIso8601String(),
@@ -250,29 +501,53 @@ class VoiceTestResult {
         'category': category.key,
       };
 
-  static VoiceTestResult? fromJson(Map<String, dynamic> json) {
-    final id = json['id'];
-    final atRaw = json['at'];
-    final avg = (json['avgHz'] as num?)?.toDouble();
-    final min = (json['minHz'] as num?)?.toDouble();
-    final max = (json['maxHz'] as num?)?.toDouble();
-    if (id is! String ||
-        atRaw is! String ||
+  /// Numeric-only Firestore map. Never stores raw audio recordings.
+  Map<String, dynamic> toMap() => {
+        'at': Timestamp.fromDate(at),
+        'avgHz': double.parse(avgHz.toStringAsFixed(1)),
+        'minHz': double.parse(minHz.toStringAsFixed(1)),
+        'maxHz': double.parse(maxHz.toStringAsFixed(1)),
+        'category': category.key,
+      };
+
+  static VoiceTestResult? tryFrom(String id, Map<String, dynamic> m) {
+    final cleanId = id.trim();
+    final at = _parseDate(m['at']);
+    final avg = _finitePositive(m['avgHz']);
+    final min = _finitePositive(m['minHz']);
+    final max = _finitePositive(m['maxHz']);
+    if (cleanId.isEmpty ||
+        at == null ||
         avg == null ||
         min == null ||
         max == null) {
       return null;
     }
-    final at = DateTime.tryParse(atRaw);
-    if (at == null) return null;
     return VoiceTestResult(
-      id: id,
+      id: cleanId,
       at: at,
       avgHz: avg,
       minHz: min,
       maxHz: max,
-      category: VoicePitchCategoryMeta.fromKey(json['category'] as String?),
+      category: VoicePitchCategoryMeta.fromKey(m['category'] as String?),
     );
+  }
+
+  factory VoiceTestResult.from(String id, Map<String, dynamic> m) =>
+      tryFrom(id, m) ??
+      VoiceTestResult(
+        id: id,
+        at: DateTime.fromMillisecondsSinceEpoch(0),
+        avgHz: 0,
+        minHz: 0,
+        maxHz: 0,
+        category: VoicePitchCategoryMeta.fromKey(m['category'] as String?),
+      );
+
+  static VoiceTestResult? fromJson(Map<String, dynamic> json) {
+    final id = json['id'];
+    if (id is! String) return null;
+    return tryFrom(id, json);
   }
 }
 
@@ -280,7 +555,44 @@ class VoiceTestResult {
 class VoiceStore {
   static const _unlockedKey = 'sanctuary.voice_unlocked';
   static const _resultsKey = 'sanctuary.voice_results';
+  static const _syncedIdsKey = 'sanctuary.voice_synced_ids';
+  static const _targetMinKey = 'sanctuary.voice_target_min';
+  static const _targetMaxKey = 'sanctuary.voice_target_max';
   static const _maxSaved = 50;
+
+  static VoiceTargetRange _normalizeTarget(double minHz, double maxHz) {
+    final clampedMin = minHz.clamp(80.0, 275.0).toDouble();
+    final clampedMax = maxHz.clamp(clampedMin + 5.0, 280.0).toDouble();
+    return VoiceTargetRange(minHz: clampedMin, maxHz: clampedMax);
+  }
+
+  static Future<VoiceTargetRange> loadTargetRange() async {
+    final prefs = await SharedPreferences.getInstance();
+    final minVal = prefs.getDouble(_targetMinKey);
+    final maxVal = prefs.getDouble(_targetMaxKey);
+    if (minVal == null || maxVal == null) {
+      return const VoiceTargetRange();
+    }
+    return _normalizeTarget(minVal, maxVal);
+  }
+
+  static Future<VoiceTargetRange> saveTargetRange(
+      VoiceTargetRange range) async {
+    final normalized = _normalizeTarget(range.minHz, range.maxHz);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_targetMinKey, normalized.minHz);
+    await prefs.setDouble(_targetMaxKey, normalized.maxHz);
+    return normalized;
+  }
+
+  static final Set<String> _locallyDeletedIds = <String>{};
+  static bool _locallyClearedAll = false;
+
+  @visibleForTesting
+  static void resetSessionStateForTest() {
+    _locallyDeletedIds.clear();
+    _locallyClearedAll = false;
+  }
 
   static Future<bool> isUnlocked() async {
     final prefs = await SharedPreferences.getInstance();
@@ -294,6 +606,10 @@ class VoiceStore {
 
   static Future<List<VoiceTestResult>> loadResults() async {
     final prefs = await SharedPreferences.getInstance();
+    return _loadResultsFromPrefs(prefs);
+  }
+
+  static List<VoiceTestResult> _loadResultsFromPrefs(SharedPreferences prefs) {
     final rawList = prefs.getStringList(_resultsKey) ?? const <String>[];
     final out = <VoiceTestResult>[];
     for (final raw in rawList) {
@@ -313,28 +629,134 @@ class VoiceStore {
 
   static Future<List<VoiceTestResult>> saveResult(
       VoiceTestResult result) async {
-    final existing = await loadResults();
+    _locallyDeletedIds.remove(result.id);
+    _locallyClearedAll = false;
+    final prefs = await SharedPreferences.getInstance();
+    final existing = _loadResultsFromPrefs(prefs);
     final updated = [result, ...existing.where((r) => r.id != result.id)]
         .take(_maxSaved)
         .toList();
-    await _writeResults(updated);
+    await _writeResultsToPrefs(prefs, updated);
     return updated;
   }
 
   static Future<List<VoiceTestResult>> deleteResult(String id) async {
-    final existing = await loadResults();
+    _locallyDeletedIds.add(id);
+    final prefs = await SharedPreferences.getInstance();
+    final existing = _loadResultsFromPrefs(prefs);
     final updated = existing.where((r) => r.id != id).toList();
-    await _writeResults(updated);
+    await _writeResultsToPrefs(prefs, updated);
+    final synced =
+        (prefs.getStringList(_syncedIdsKey) ?? const <String>[]).toSet()
+          ..remove(id);
+    await prefs.setStringList(_syncedIdsKey, synced.toList());
     return updated;
   }
 
-  static Future<void> clearResults() async {
+  static Future<void> clearResults(
+      {Iterable<String> knownIds = const []}) async {
     final prefs = await SharedPreferences.getInstance();
+    final existing = _loadResultsFromPrefs(prefs);
+    for (final r in existing) {
+      _locallyDeletedIds.add(r.id);
+    }
+    _locallyDeletedIds.addAll(knownIds);
+    _locallyClearedAll = true;
     await prefs.remove(_resultsKey);
+    await prefs.remove(_syncedIdsKey);
   }
 
-  static Future<void> _writeResults(List<VoiceTestResult> results) async {
+  /// Merges local SharedPreferences history with Cloud Firestore snapshots.
+  /// Uploads legacy local-only entries (when [uploadMissing] is supplied),
+  /// propagates cross-device deletions, respects same-session local deletes,
+  /// and auto-unlocks Voice Pitch Studio on new devices with synced results.
+  static Future<List<VoiceTestResult>> reconcileWithRemote(
+    List<VoiceTestResult> remote, {
+    Future<void> Function(VoiceTestResult result)? uploadMissing,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
+    final local = _loadResultsFromPrefs(prefs);
+
+    if (_locallyClearedAll) {
+      if (remote.isEmpty) {
+        _locallyClearedAll = false;
+        await prefs.remove(_syncedIdsKey);
+        return const [];
+      }
+      return local;
+    }
+
+    final previouslySynced =
+        (prefs.getStringList(_syncedIdsKey) ?? const <String>[]).toSet();
+    final byId = <String, VoiceTestResult>{};
+    final remoteIds = <String>{};
+
+    for (final r in remote) {
+      remoteIds.add(r.id);
+      if (_locallyDeletedIds.contains(r.id)) continue;
+      byId[r.id] = r;
+    }
+
+    final missingOnRemote = <VoiceTestResult>[];
+    for (final l in local) {
+      if (_locallyDeletedIds.contains(l.id)) continue;
+      if (!remoteIds.contains(l.id) && previouslySynced.contains(l.id)) {
+        continue;
+      }
+      byId[l.id] = l;
+      if (!remoteIds.contains(l.id)) {
+        missingOnRemote.add(l);
+      }
+    }
+
+    final merged = byId.values.toList()
+      ..sort((a, b) => b.at.compareTo(a.at));
+    final capped = merged.take(_maxSaved).toList();
+
+    if (!_sameResults(local, capped)) {
+      await _writeResultsToPrefs(prefs, capped);
+    }
+
+    final nextSynced = <String>[
+      for (final r in remote)
+        if (!_locallyDeletedIds.contains(r.id)) r.id,
+    ];
+    await prefs.setStringList(_syncedIdsKey, nextSynced);
+
+    if (capped.isNotEmpty && !prefs.containsKey(_unlockedKey)) {
+      await prefs.setBool(_unlockedKey, true);
+    }
+
+    if (uploadMissing != null && missingOnRemote.isNotEmpty) {
+      final cappedIds = {for (final r in capped) r.id};
+      for (final item in missingOnRemote) {
+        if (!cappedIds.contains(item.id)) continue;
+        await uploadMissing(item);
+      }
+    }
+
+    return capped;
+  }
+
+  static bool _sameResults(List<VoiceTestResult> a, List<VoiceTestResult> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      final x = a[i];
+      final y = b[i];
+      if (x.id != y.id ||
+          x.at.millisecondsSinceEpoch != y.at.millisecondsSinceEpoch ||
+          x.avgHz != y.avgHz ||
+          x.minHz != y.minHz ||
+          x.maxHz != y.maxHz ||
+          x.category != y.category) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static Future<void> _writeResultsToPrefs(
+      SharedPreferences prefs, List<VoiceTestResult> results) async {
     await prefs.setStringList(
       _resultsKey,
       [for (final r in results) jsonEncode(r.toJson())],

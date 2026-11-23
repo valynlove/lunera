@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../l10n.dart';
+import '../../repo.dart';
 import '../../sanctuary_data.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
@@ -25,11 +28,46 @@ class SanctuaryPage extends StatefulWidget {
 class _SanctuaryPageState extends State<SanctuaryPage> {
   LanternState _state = const LanternState();
   bool _voiceUnlocked = false;
+  Repo? _repo;
+  StreamSubscription<List<VoiceTestResult>>? _voiceSub;
 
   @override
   void initState() {
     super.initState();
     _loadState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final repo = maybeRepoFrom(context);
+    if (identical(repo, _repo)) return;
+    _repo = repo;
+    _voiceSub?.cancel();
+    _voiceSub = repo?.voiceResults().listen(_onRemoteVoiceResults);
+  }
+
+  @override
+  void dispose() {
+    _voiceSub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _onRemoteVoiceResults(List<VoiceTestResult> remote) async {
+    try {
+      final repo = _repo;
+      await VoiceStore.reconcileWithRemote(
+        remote,
+        uploadMissing: repo?.saveVoiceResult,
+      );
+      final voiceUnlocked = await VoiceStore.isUnlocked();
+      if (!mounted) return;
+      if (voiceUnlocked != _voiceUnlocked) {
+        setState(() => _voiceUnlocked = voiceUnlocked);
+      }
+    } catch (_) {
+      // Offline/auth transient error: keep current Sanctuary card state.
+    }
   }
 
   Future<void> _loadState() async {

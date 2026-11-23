@@ -42,10 +42,45 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.0',
+      version: '2.2.2',
       dateEn: 'November 23, 2026',
       dateId: '23 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Voice Pitch Studio Expansion (Stage 1): Expanded pitch ranges into 8 plain-language tiers, added multi-sentence article reading passages, live pitch contour tracing, customizable target comfort zones, session stability metrics, and a historical progress trend chart.',
+          textId:
+              'Pengembangan Voice Pitch Studio (Tahap 1): Memperluas kategori suara menjadi 8 rentang berbahasa awam, menambah wacana bacaan gaya artikel, jejak nada langsung (live contour), zona target kustom, metrik intonasi, dan grafik tren progres.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.1',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Voice Pitch Studio Cloud & Backup Sync: Synchronizes numeric-only Voice Pitch Studio session results across devices via Cloud Firestore and includes them in JSON backups without ever storing audio.',
+          textId:
+              'Sinkronisasi Awan & Cadangan Voice Pitch Studio: Menyinkronkan hasil angka Voice Pitch Studio antar perangkat melalui Cloud Firestore serta menyertakannya dalam cadangan JSON tanpa menyimpan audio.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Cross-Device Studio Auto-Unlock & Delete Protection: Signing into another device automatically unlocks Voice Pitch Studio when synced results exist and keeps local or cross-device deletions in sync.',
+          textId:
+              'Auto-Unlock Studio & Sinkronisasi Penghapusan Antar Perangkat: Login di perangkat lain otomatis membuka Voice Pitch Studio bila ada hasil tersinkron dan menjaga status penghapusan tetap konsisten.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.0',
+      dateEn: 'November 23, 2026',
+      dateId: '23 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,

@@ -4,9 +4,11 @@ import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'models.dart';
 import 'l10n.dart';
+import 'voice_pitch.dart';
 
 /// Status sinkronisasi real-time otomatis latar belakang.
 enum SyncStatus { idle, syncing, queuedOffline, synced, error }
@@ -72,7 +74,8 @@ class Repo {
     'targets',
     'prefs',
     'journal',
-    'measurements'
+    'measurements',
+    'voiceResults'
   ];
   CollectionReference<Map<String, dynamic>> _c(String n) =>
       FirebaseFirestore.instance.collection('users/$uid/$n');
@@ -308,6 +311,15 @@ class Repo {
   Stream<List<JournalEntry>> journal() => _watch('journal', JournalEntry.from);
   Stream<List<BodyMeasurement>> measurements() =>
       _watch('measurements', BodyMeasurement.from);
+  Stream<List<VoiceTestResult>> voiceResults() =>
+      _c('voiceResults').snapshots().map((s) {
+        final out = <VoiceTestResult>[
+          for (final d in s.docs)
+            if (VoiceTestResult.tryFrom(d.id, d.data()) case final r?) r,
+        ];
+        out.sort((a, b) => b.at.compareTo(a.at));
+        return out;
+      });
   Stream<Map<String, List<double>>> targets() =>
       _c('targets').snapshots().map((s) => {
             for (final d in s.docs)
@@ -345,6 +357,44 @@ class Repo {
 
   Future<void> deleteMeasurement(String id) =>
       _safeWrite(() => _c('measurements').doc(id).delete());
+
+  Future<void> saveVoiceResult(VoiceTestResult r) {
+    final id = r.id.trim();
+    final ref =
+        id.isEmpty ? _c('voiceResults').doc() : _c('voiceResults').doc(id);
+    return _safeWrite(() => ref.set(r.toMap()), targetDocs: [ref]);
+  }
+
+  Future<void> deleteVoiceResult(String id) =>
+      _safeWrite(() => _c('voiceResults').doc(id).delete());
+
+  Future<void> clearVoiceResults(
+      {Iterable<String> knownIds = const []}) async {
+    final refs = <String, DocumentReference<Map<String, dynamic>>>{
+      for (final id in knownIds)
+        if (id.trim().isNotEmpty) id: _c('voiceResults').doc(id),
+    };
+    try {
+      final s = await _c('voiceResults').get().timeout(_wait);
+      for (final d in s.docs) {
+        refs[d.id] = d.reference;
+      }
+    } catch (_) {
+      // Offline or timed out fetching doc list: knownIds still get queued for deletion.
+    }
+    if (refs.isEmpty) return;
+    final list = refs.values.toList();
+    for (var i = 0; i < list.length; i += 400) {
+      final chunk = list.sublist(i, math.min(i + 400, list.length));
+      await _safeWrite(() {
+        final b = FirebaseFirestore.instance.batch();
+        for (final ref in chunk) {
+          b.delete(ref);
+        }
+        return b.commit();
+      });
+    }
+  }
 
   Future<void> setTarget(String h, double lo, double hi) {
     final ref = _c('targets').doc(h);
@@ -727,6 +777,19 @@ class Repo {
       case 'journal':
       case 'measurements':
         return _isValidDate(r['at']);
+      case 'voiceResults':
+        final avg = _finiteNum(r['avgHz']);
+        final min = _finiteNum(r['minHz']);
+        final max = _finiteNum(r['maxHz']);
+        final cat = r['category'];
+        return _isValidDate(r['at']) &&
+            avg != null &&
+            avg > 0 &&
+            min != null &&
+            min > 0 &&
+            max != null &&
+            max > 0 &&
+            (cat == null || cat is String);
       case 'targets':
         return _finiteNum(r['low']) != null && _finiteNum(r['high']) != null;
       default:
@@ -858,10 +921,21 @@ final journalProvider = StreamProvider<List<JournalEntry>>(
     (r) => r.watch(repoProvider)?.journal() ?? Stream.value([]));
 final measurementsProvider = StreamProvider<List<BodyMeasurement>>((r) =>
     r.watch(repoProvider)?.measurements() ?? Stream.value(<BodyMeasurement>[]));
+final voiceResultsProvider = StreamProvider<List<VoiceTestResult>>((r) =>
+    r.watch(repoProvider)?.voiceResults() ?? Stream.value(<VoiceTestResult>[]));
 final tabProvider = StateProvider<int>(
     (_) => 2); // tab aktif di Shell (default: 2 = Beranda/Home)
 final prefsProvider = StreamProvider<Prefs>(
     (r) => r.watch(repoProvider)?.prefs() ?? Stream.value(const Prefs()));
+
+/// Reads [repoProvider] when a [ProviderScope] ancestor exists; returns null in standalone widget trees/tests.
+Repo? maybeRepoFrom(BuildContext context) {
+  try {
+    return ProviderScope.containerOf(context, listen: false).read(repoProvider);
+  } catch (_) {
+    return null;
+  }
+}
 
 /// Notifier reaktif untuk memantau status antrean sinkronisasi latar belakang.
 class SyncNotifier extends Notifier<SyncState> {
