@@ -15,9 +15,39 @@ class SuppliesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final items = <Supply>[...(ref.watch(suppliesProvider).value ?? <Supply>[])]
       ..sort((a, b) => a.name.compareTo(b.name));
+    final ths = items.isEmpty
+        ? const <Therapy>[]
+        : (ref.watch(therapiesProvider).valueOrNull ?? const <Therapy>[]);
     final meds = items.where((s) => !s.generic).toList();
     final gens = items.where((s) => s.generic).toList();
     final lowCount = items.where((s) => s.low).length;
+
+    final forecasts = {for (final s in items) s.id: estimateSupplyForecast(s, ths)};
+    final criticalCount = forecasts.values.where((f) => f != null && (f.urgency == RefillUrgency.critical || f.urgency == RefillUrgency.depleted)).length;
+    final reorderSoonCount = forecasts.values.where((f) => f != null && f.urgency == RefillUrgency.reorderSoon).length;
+
+    final bannerColor = criticalCount > 0
+        ? C.coral
+        : (reorderSoonCount > 0 || lowCount > 0 ? C.amber : C.peony);
+    final bannerIcon = criticalCount > 0
+        ? LucideIcons.alertTriangle
+        : (reorderSoonCount > 0
+            ? LucideIcons.truck
+            : (lowCount > 0 ? LucideIcons.package : LucideIcons.truck));
+    final bannerTitle = criticalCount > 0
+        ? tr('{0} {0?item needs|items need} urgent reorder', [criticalCount])
+        : (reorderSoonCount > 0
+            ? tr('Refill window approaching for {0} {0?item|items}', [reorderSoonCount])
+            : (lowCount > 0
+                ? tr('{0} {0?item is|items are} running low', [lowCount])
+                : tr('Discreet Shipping & Pickup Assistant')));
+    final bannerSubtitle = criticalCount > 0
+        ? tr('Stock is under 7 days. Plan your reorder now to prevent gaps in therapy.')
+        : (reorderSoonCount > 0
+            ? tr('Recommended reorder date approaching within the next 7–14 days.')
+            : (lowCount > 0
+                ? tr('Generate a discreet "Hold at Agent" delivery order template.')
+                : tr('Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.')));
     Widget head(String s) => Padding(
         padding: const EdgeInsets.fromLTRB(4, 6, 0, 10),
         child: Text(s,
@@ -91,20 +121,16 @@ class SuppliesPage extends ConsumerWidget {
               margin: const EdgeInsets.only(bottom: 14),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:
-                    (lowCount > 0 ? C.amber : C.peony).withValues(alpha: 0.10),
+                color: bannerColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                    color: (lowCount > 0 ? C.amber : C.peony)
-                        .withValues(alpha: 0.25)),
+                    color: bannerColor.withValues(alpha: 0.25)),
               ),
               child: Row(
                 children: [
                   Icon(
-                    lowCount > 0
-                        ? LucideIcons.package
-                        : LucideIcons.truck,
-                    color: lowCount > 0 ? C.amber : C.peony,
+                    bannerIcon,
+                    color: bannerColor,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -113,20 +139,13 @@ class SuppliesPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          lowCount > 0
-                              ? tr('{0} {0?item is|items are} running low',
-                                  [lowCount])
-                              : tr('Discreet Shipping & Pickup Assistant'),
+                          bannerTitle,
                           style: const TextStyle(
                               fontWeight: FontWeight.w700, fontSize: 13),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          lowCount > 0
-                              ? tr(
-                                  'Generate a discreet "Hold at Agent" delivery order template.')
-                              : tr(
-                                  'Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.'),
+                          bannerSubtitle,
                           style: TextStyle(
                             fontSize: 11,
                             color: Theme.of(context)
@@ -164,6 +183,71 @@ class SuppliesPage extends ConsumerWidget {
   }
 }
 
+Widget _forecastChip(BuildContext context, SupplyForecast f) {
+  final (color, icon, text) = switch (f.urgency) {
+    RefillUrgency.depleted => (
+      C.peony,
+      LucideIcons.circleAlert,
+      tr('Depleted • Reorder immediately'),
+    ),
+    RefillUrgency.critical => (
+      C.coral,
+      LucideIcons.alertTriangle,
+      tr('Order now • Depletes on {0}',
+          [DateFormat('d MMM', L10n.code).format(f.runOutDate)]),
+    ),
+    RefillUrgency.reorderSoon => (
+      C.amber,
+      LucideIcons.truck,
+      tr('Reorder by {0} ({1}-day buffer)', [
+        DateFormat('d MMM', L10n.code).format(f.reorderDate),
+        f.bufferDays,
+      ]),
+    ),
+    RefillUrgency.healthy => (
+      C.lagoon,
+      LucideIcons.calendarCheck,
+      f.daysLeft >= 14
+          ? tr('Est. ~{0} {0?week|weeks} left (until {1})', [
+              (f.daysLeft / 7).round(),
+              DateFormat('d MMM y', L10n.code).format(f.runOutDate),
+            ])
+          : tr('Est. ~{0} {0?day|days} left (until {1})', [
+              f.daysLeft,
+              DateFormat('d MMM y', L10n.code).format(f.runOutDate),
+            ]),
+    ),
+  };
+
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: color.withValues(alpha: 0.32), width: 1),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12.5, color: color),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _MedCard extends ConsumerWidget {
   const _MedCard(this.s);
   final Supply s;
@@ -175,17 +259,6 @@ class _MedCard extends ConsumerWidget {
     final repo = ref.read(repoProvider);
     final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
     final forecast = estimateSupplyForecast(s, ths);
-    final forecastText = forecast == null
-        ? null
-        : (forecast.daysLeft >= 14
-            ? tr('Est. ~{0} {0?week|weeks} left (until {1})', [
-                (forecast.daysLeft / 7).round(),
-                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
-              ])
-            : tr('Est. ~{0} {0?day|days} left (until {1})', [
-                forecast.daysLeft,
-                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
-              ]));
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       child: Material(
@@ -231,24 +304,21 @@ class _MedCard extends ConsumerWidget {
               Text(low
                   ? tr('{0} {0?dose|doses} left, restock soon', [s.doses])
                   : tr('{0} {0?dose|doses} left', [s.doses])),
-              if (forecastText != null) ...[
-                gap(2),
-                Text(
-                  forecastText,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: Pastel.lilac.withValues(alpha: 0.9)),
-                ),
+              if (forecast != null) ...[
+                gap(6),
+                _forecastChip(context, forecast),
               ],
               if (s.expiry != null)
-                Text(
-                    tr(expired ? 'Expired since {0}' : 'Expires {0}',
-                        [DateFormat('d MMM y', L10n.code).format(s.expiry!)]),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: expired ? C.peony : null)),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                      tr(expired ? 'Expired since {0}' : 'Expires {0}',
+                          [DateFormat('d MMM y', L10n.code).format(s.expiry!)]),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: expired ? C.peony : null)),
+                ),
             ]),
           ),
         ),
@@ -266,17 +336,6 @@ class _GenericCard extends ConsumerWidget {
     final repo = ref.read(repoProvider);
     final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
     final forecast = estimateSupplyForecast(s, ths);
-    final forecastText = forecast == null
-        ? null
-        : (forecast.daysLeft >= 14
-            ? tr('Est. ~{0} {0?week|weeks} left (until {1})', [
-                (forecast.daysLeft / 7).round(),
-                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
-              ])
-            : tr('Est. ~{0} {0?day|days} left (until {1})', [
-                forecast.daysLeft,
-                DateFormat('d MMM y', L10n.code).format(forecast.runOutDate),
-              ]));
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -297,13 +356,10 @@ class _GenericCard extends ConsumerWidget {
                   children: [
                     Text(s.name,
                         style: const TextStyle(fontWeight: FontWeight.w700)),
-                    if (forecastText != null)
-                      Text(
-                        forecastText,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Pastel.lilac.withValues(alpha: 0.85),
-                            fontSize: 11),
-                      ),
+                    if (forecast != null) ...[
+                      const SizedBox(height: 4),
+                      _forecastChip(context, forecast),
+                    ],
                   ],
                 ),
               ),

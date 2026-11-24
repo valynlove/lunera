@@ -6,7 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'consultation_prep.dart';
+import 'milestones.dart';
 import 'models.dart';
+import 'moments.dart';
 import 'l10n.dart';
 import 'voice_pitch.dart';
 
@@ -321,13 +324,18 @@ class Repo {
         return out;
       });
   Stream<Map<String, List<double>>> targets() =>
-      _c('targets').snapshots().map((s) => {
-            for (final d in s.docs)
-              d.id: [
-                (d['low'] as num).toDouble(),
-                (d['high'] as num).toDouble()
-              ]
-          });
+      _c('targets').snapshots().map((s) {
+        final out = <String, List<double>>{};
+        for (final d in s.docs) {
+          final data = d.data();
+          final low = data['low'];
+          final high = data['high'];
+          if (low is num && high is num && low.isFinite && high.isFinite) {
+            out[d.id] = [low.toDouble(), high.toDouble()];
+          }
+        }
+        return out;
+      });
 
   // Operasi tulis non-blocking (dilindungi pelacakan per-operasi, verifikasi antrean offline, dan timeout 4 detik)
   Future<void> addTherapy(Therapy t) {
@@ -710,6 +718,24 @@ class Repo {
         for (final d in s.docs) {'id': d.id, ...d.data()}
       ];
     }
+    try {
+      final milestones = await MilestoneStore.loadMilestones(uid);
+      if (milestones.isNotEmpty) {
+        data['milestones'] = [for (final m in milestones) m.toJson()];
+      }
+    } catch (_) {}
+    try {
+      final moments = await MomentsController.loadDirect(uid);
+      if (moments.isNotEmpty) {
+        data['moments'] = [for (final m in moments) m.toMap()];
+      }
+    } catch (_) {}
+    try {
+      final consult = await ConsultationController.loadDirect(uid);
+      if (consult != null) {
+        data['consultation'] = [consult.toMap()];
+      }
+    } catch (_) {}
     return const JsonEncoder.withIndent('  ', _enc).convert({
       // Kompatibilitas cadangan: mendukung tanda pengenal Lunera dan 'ritme' untuk backup lama.
       'metadata': {
@@ -792,6 +818,12 @@ class Repo {
             (cat == null || cat is String);
       case 'targets':
         return _finiteNum(r['low']) != null && _finiteNum(r['high']) != null;
+      case 'milestones':
+        return r['title'] is String && _isValidDate(r['at']);
+      case 'moments':
+        return r['title'] is String && _isValidDate(r['at']);
+      case 'consultation':
+        return r['id'] is String;
       default:
         return true;
     }
@@ -809,6 +841,19 @@ class Repo {
     }
     var n = 0;
     for (final k in _cols) {
+      final rows = raw['data'][k];
+      if (rows == null) continue;
+      if (rows is! List) {
+        throw FormatException(tr('The "{0}" section is invalid.', [k]));
+      }
+      for (final r in rows) {
+        if (r is! Map || !_isValidDocId(r['id']) || !_isValidRow(k, r)) {
+          throw FormatException(tr('The "{0}" section is corrupted.', [k]));
+        }
+      }
+      n += rows.length;
+    }
+    for (final k in const ['milestones', 'moments', 'consultation']) {
       final rows = raw['data'][k];
       if (rows == null) continue;
       if (rows is! List) {
@@ -853,6 +898,34 @@ class Repo {
       }
       // Saat offline, penulisan tetap antre dan terkirim otomatis begitu online.
       await b.commit().timeout(_wait, onTimeout: () {});
+    }
+    final dataMap = raw['data'] as Map? ?? const {};
+    final rawMilestones = dataMap['milestones'] as List?;
+    if (rawMilestones != null) {
+      await MilestoneStore.importMilestones(
+        rawMilestones,
+        replace: replace,
+        uid: uid,
+      );
+    }
+    final rawMoments = dataMap['moments'] as List?;
+    if (rawMoments != null) {
+      await MomentsController.importMoments(
+        rawMoments,
+        replace: replace,
+        uid: uid,
+      );
+    }
+    final rawConsultation = dataMap['consultation'] as List?;
+    if (rawConsultation != null && rawConsultation.isNotEmpty) {
+      final sessionMap = rawConsultation.first;
+      if (sessionMap is Map) {
+        await ConsultationController.importSession(
+          sessionMap.cast<String, dynamic>(),
+          replace: replace,
+          uid: uid,
+        );
+      }
     }
   }
 

@@ -230,21 +230,35 @@ Widget appBackdrop(BuildContext context, Widget? child) {
 
 /// Layered dark card decoration with subtle lavender hairline border and ambient shadow.
 BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = false}) {
-  final t = Theme.of(c);
   return BoxDecoration(
-    color: t.colorScheme.surface.withValues(alpha: 0.90),
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: highlight
+          ? [
+              C.nebula.withValues(alpha: 0.90),
+              C.surface.withValues(alpha: 0.92),
+              C.deepCard.withValues(alpha: 0.95),
+            ]
+          : [
+              C.nebula.withValues(alpha: 0.70),
+              C.surface.withValues(alpha: 0.84),
+              C.deepCard.withValues(alpha: 0.88),
+            ],
+      stops: const [0.0, 0.55, 1.0],
+    ),
     borderRadius: BorderRadius.circular(radius),
     border: Border.all(
       color: highlight
           ? C.violet.withValues(alpha: 0.55)
-          : C.lavender.withValues(alpha: 0.16),
+          : C.lavender.withValues(alpha: 0.18),
       width: highlight ? 1.2 : 1.0,
     ),
     boxShadow: [
       BoxShadow(
         color: (highlight ? C.aurora : C.voidBg)
-            .withValues(alpha: highlight ? 0.20 : 0.42),
-        blurRadius: highlight ? 22 : 16,
+            .withValues(alpha: highlight ? 0.22 : 0.44),
+        blurRadius: highlight ? 24 : 18,
         offset: const Offset(0, 4),
       ),
     ],
@@ -629,10 +643,15 @@ Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
       context: c,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (b) => Padding(
-        padding:
-            EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(b).viewInsets.bottom + 24),
-        child: SingleChildScrollView(child: w),
+      builder: (b) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Padding(
+            padding:
+                EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(b).viewInsets.bottom + 24),
+            child: SingleChildScrollView(child: w),
+          ),
+        ),
       ),
     );
 
@@ -665,13 +684,28 @@ class AppCard extends StatelessWidget {
 
     return Container(
       decoration: ShapeDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.90),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: highlight
+              ? [
+                  C.nebula.withValues(alpha: 0.90),
+                  C.surface.withValues(alpha: 0.92),
+                  C.deepCard.withValues(alpha: 0.95),
+                ]
+              : [
+                  C.nebula.withValues(alpha: 0.70),
+                  C.surface.withValues(alpha: 0.84),
+                  C.deepCard.withValues(alpha: 0.88),
+                ],
+          stops: const [0.0, 0.55, 1.0],
+        ),
         shape: shape,
         shadows: [
           BoxShadow(
             color: (highlight ? C.aurora : C.voidBg)
-                .withValues(alpha: highlight ? 0.20 : 0.42),
-            blurRadius: highlight ? 22 : 16,
+                .withValues(alpha: highlight ? 0.22 : 0.44),
+            blurRadius: highlight ? 24 : 18,
             offset: const Offset(0, 4),
           ),
         ],

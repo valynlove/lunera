@@ -56,12 +56,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.2.11'));
+      expect(UpdateCheckerService.currentVersion, equals('2.2.30'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.2.11'));
+      expect(AppChangelog.releases.first.version, equals('2.2.30'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -77,6 +77,25 @@ void main() {
       }
       expect(File('assets/images/body_front.png').existsSync(), isTrue);
       expect(File('assets/images/body_back.png').existsSync(), isTrue);
+    });
+
+    testWidgets('CompanionAvatar supports reduced-motion accessibility mode',
+        (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: MediaQuery(
+              data: MediaQueryData(disableAnimations: true),
+              child: CompanionAvatar(
+                mood: CompanionMood.cheer,
+                enablePulse: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(CompanionAvatar), findsOneWidget);
     });
 
     testWidgets('InjectionSiteMap renders without layout exception',
@@ -150,6 +169,7 @@ void main() {
       expect(find.text('Site'), findsOneWidget);
       expect(find.byType(FilterChip), findsWidgets);
       expect(find.text('Left thigh'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Log'), findsOneWidget);
 
       // Tap on another chip to toggle selection
       await tester.tap(find.text('Right thigh'));
@@ -322,6 +342,13 @@ void main() {
       expect(find.text(tr('Security & Privacy')), findsOneWidget);
       expect(find.text(tr('Preferences')), findsOneWidget);
       expect(find.text(tr('Appearance')), findsNothing);
+
+      // Verify PillTabs segmentation
+      expect(find.text(tr('Clinical')), findsOneWidget);
+      await tester.tap(find.text(tr('Clinical')));
+      await tester.pumpAndSettle();
+      expect(find.text(tr('Therapy & Clinical')), findsOneWidget);
+      expect(find.text(tr('Preferences')), findsNothing);
     });
 
     testWidgets(
@@ -995,6 +1022,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.widgetWithText(FilledButton, 'Save'), findsWidgets);
       expect(
         tester
             .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '>'))

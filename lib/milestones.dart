@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n.dart';
@@ -83,9 +84,34 @@ class TransitionMilestone {
 class MilestoneStore {
   static const _storageKey = 'body.private_milestones';
 
-  static Future<List<TransitionMilestone>> loadMilestones() async {
+  static String? _authUid() {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _resolveKey([String? uid]) {
+    final targetUid = uid ?? _authUid();
+    if (targetUid != null && targetUid.isNotEmpty) {
+      return '${_storageKey}_$targetUid';
+    }
+    return _storageKey;
+  }
+
+  static Future<List<TransitionMilestone>> loadMilestones([String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    return _decodeList(prefs.getStringList(_storageKey) ?? const <String>[]);
+    final key = _resolveKey(uid);
+    // Legacy migration: if scoped key is empty but legacy un-scoped key exists, migrate it
+    if (key != _storageKey && !prefs.containsKey(key) && prefs.containsKey(_storageKey)) {
+      final legacy = prefs.getStringList(_storageKey);
+      if (legacy != null) {
+        await prefs.setStringList(key, legacy);
+        await prefs.remove(_storageKey);
+      }
+    }
+    return _decodeList(prefs.getStringList(key) ?? const <String>[]);
   }
 
   static List<TransitionMilestone> _decodeList(List<String> rawList) {
@@ -106,33 +132,79 @@ class MilestoneStore {
   }
 
   static Future<List<TransitionMilestone>> saveMilestone(
-      TransitionMilestone item) async {
+      TransitionMilestone item, [String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
+    final key = _resolveKey(uid);
     final existing = _decodeList(
-        prefs.getStringList(_storageKey) ?? const <String>[]);
+        prefs.getStringList(key) ?? const <String>[]);
     final updated = [item, ...existing.where((m) => m.id != item.id)]
       ..sort((a, b) => b.at.compareTo(a.at));
     await prefs.setStringList(
-      _storageKey,
+      key,
       [for (final m in updated) jsonEncode(m.toJson())],
     );
     return updated;
   }
 
-  static Future<List<TransitionMilestone>> deleteMilestone(String id) async {
+  static Future<void> importMilestones(
+    List<dynamic> rawList, {
+    required bool replace,
+    String? uid,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
+    final key = _resolveKey(uid);
+    final items = <TransitionMilestone>[];
+    for (final r in rawList) {
+      if (r is Map) {
+        final parsed = TransitionMilestone.fromJson(r.cast<String, dynamic>());
+        if (parsed != null) items.add(parsed);
+      }
+    }
+    if (replace) {
+      await prefs.setStringList(
+        key,
+        [for (final m in items) jsonEncode(m.toJson())],
+      );
+    } else {
+      final existing = await loadMilestones(uid);
+      final existingIds = {for (final m in existing) m.id};
+      final merged = [
+        ...existing,
+        ...items.where((m) => !existingIds.contains(m.id)),
+      ]..sort((a, b) => b.at.compareTo(a.at));
+      await prefs.setStringList(
+        key,
+        [for (final m in merged) jsonEncode(m.toJson())],
+      );
+    }
+  }
+
+  static Future<List<TransitionMilestone>> deleteMilestone(String id, [String? uid]) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = _resolveKey(uid);
     final existing = _decodeList(
-        prefs.getStringList(_storageKey) ?? const <String>[]);
+        prefs.getStringList(key) ?? const <String>[]);
     final updated = existing.where((m) => m.id != id).toList();
     await prefs.setStringList(
-      _storageKey,
+      key,
       [for (final m in updated) jsonEncode(m.toJson())],
     );
     return updated;
+  }
+
+  static Future<void> clearLocal([String? uid]) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = _resolveKey(uid);
+    await prefs.remove(key);
+    await prefs.remove(_storageKey);
   }
 
   static Future<void> clearForTest() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_storageKey);
+    final uid = _authUid();
+    if (uid != null && uid.isNotEmpty) {
+      await prefs.remove('${_storageKey}_$uid');
+    }
   }
 }

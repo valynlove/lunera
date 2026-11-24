@@ -17,7 +17,8 @@ const Map<String, String> idStrings = {
   '[City & Postal Code]': '[Kota & Kode Pos]',
   '[Your Name / Alias]': '[Nama / Aliasmu]',
   '[Your Phone Number]': '[Nomor HP-mu]',
-  'A new version of Lunera is ready with the latest improvements:': 'Versi baru Lunera telah siap dengan pembaruan terkini:',
+  'A new version of Lunera is ready with the latest improvements:':
+      'Versi baru Lunera telah siap dengan pembaruan terkini:',
   'About & Support': 'Tentang & Dukungan',
   'About {0}': 'Tentang {0}',
   'Above target': 'Di atas target',
@@ -26,11 +27,14 @@ const Map<String, String> idStrings = {
   'Account Profile': 'Profil Akun',
   'Account username': 'Username akun',
   'Active': 'Aktif',
-  'Active (PIN + Biometrics) • Timeout: {0}': 'Aktif (PIN + Biometrik) • Batas waktu: {0}',
+  'Active (PIN + Biometrics) • Timeout: {0}':
+      'Aktif (PIN + Biometrik) • Batas waktu: {0}',
   'Active (PIN) • Timeout: {0}': 'Aktif (PIN) • Batas waktu: {0}',
-  'Add combination medication (second active ingredient)': 'Tambah obat kombinasi (bahan aktif kedua)',
+  'Add combination medication (second active ingredient)':
+      'Tambah obat kombinasi (bahan aktif kedua)',
   'Active compound': 'Kandungan senyawa aktif',
-  'Active compound (chemical / ester):': 'Kandungan senyawa aktif (kimia / ester):',
+  'Active compound (chemical / ester):':
+      'Kandungan senyawa aktif (kimia / ester):',
   'Active compound:': 'Kandungan senyawa aktif:',
   'Add': 'Tambah',
   'Add Lab Result': 'Tambah Hasil Lab',
@@ -41,8 +45,10 @@ const Map<String, String> idStrings = {
   'Add schedule': 'Tambah jadwal',
   'Add therapy': 'Tambah terapi',
   'Add time': 'Tambah jam',
-  'Add your first medication to start tracking your schedule.': 'Tambahkan obat pertamamu untuk mulai menghitung jadwal.',
-  'Address template copied to clipboard!': 'Template alamat disalin ke papan klip!',
+  'Add your first medication to start tracking your schedule.':
+      'Tambahkan obat pertamamu untuk mulai menghitung jadwal.',
+  'Address template copied to clipboard!':
+      'Template alamat disalin ke papan klip!',
   'Adherence and mood patterns': 'Kepatuhan dan pola suasana hati',
   'Adherence trends and mood patterns': 'Tren kepatuhan dan pola suasana hati',
   'Advanced': 'Lanjutan',
@@ -59,18 +65,24 @@ const Map<String, String> idStrings = {
   'App PIN & Biometrics': 'PIN Aplikasi & Biometrik',
   'App PIN lock protection': 'Perlindungan kunci PIN aplikasi',
   'Appearance': 'Tampilan',
-  'Appearance, units, injection sites, reminders': 'Tampilan, satuan, lokasi suntik, pengingat',
-  'Appearance, units, reminders, security & backup': 'Tampilan, unit, pengingat, keamanan & cadangan data',
+  'Appearance, units, injection sites, reminders':
+      'Tampilan, satuan, lokasi suntik, pengingat',
+  'Appearance, units, reminders, security & backup':
+      'Tampilan, unit, pengingat, keamanan & cadangan data',
   'Arcane Astral': 'Arcane Astral',
   'Arcane Astral & Honey Gold': 'Arcane Astral & Madu Emas',
-  'Are you sure you want to exit the application?': 'Apakah kamu yakin ingin keluar dari aplikasi?',
-  'Are you sure you want to remove your profile photo?': 'Apakah kamu yakin ingin menghapus foto profil ini?',
+  'Are you sure you want to exit the application?':
+      'Apakah kamu yakin ingin keluar dari aplikasi?',
+  'Are you sure you want to remove your profile photo?':
+      'Apakah kamu yakin ingin menghapus foto profil ini?',
   'As needed': 'Saat perlu',
   'at {0}': 'pukul {0}',
   'Athletic': 'Atletis',
   'Auto-sync ready': 'Sinkronisasi otomatis siap',
-  'Automatic background sync keeps your data safe across devices.': 'Sinkronisasi otomatis latar belakang menjaga data Anda aman di seluruh perangkat.',
-  'Average by days since your last dose (day 0 = dose day).': 'Rata-rata menurut hari sejak dosis terakhir (hari 0 = hari dosis).',
+  'Automatic background sync keeps your data safe across devices.':
+      'Sinkronisasi otomatis latar belakang menjaga data Anda aman di seluruh perangkat.',
+  'Average by days since your last dose (day 0 = dose day).':
+      'Rata-rata menurut hari sejak dosis terakhir (hari 0 = hari dosis).',
   'Back': 'Kembali',
   'Back (Glutes)': 'Belakang (Bokong)',
   'Back up now': 'Cadangkan sekarang',
@@ -80,7 +92,8 @@ const Map<String, String> idStrings = {
   'Baseline': 'Awal',
   'Below target': 'Di bawah target',
   'Benzoate': 'Benzoat',
-  'Best for Excel, Google Sheets, or sharing with a doctor.': 'Cocok untuk Excel, Google Sheets, atau dibagikan ke dokter.',
+  'Best for Excel, Google Sheets, or sharing with a doctor.':
+      'Cocok untuk Excel, Google Sheets, atau dibagikan ke dokter.',
   'Bicalutamide': 'Bikalutamid',
   'Bioidentical testosterone (gel)': 'Testosteron bioidentik (gel)',
   'Blood Tests & Lab Markers': 'Hasil Tes Darah & Indikator Lab',
@@ -110,12 +123,16 @@ const Map<String, String> idStrings = {
   'Change photo': 'Ganti foto',
   'Change photo and nickname': 'Ganti foto dan nama panggilan',
   'Change PIN': 'Ubah PIN',
-  'Change takes time. Record things as they are, then compare again a few weeks later.': 'Perubahan butuh waktu. Catat apa adanya, lalu bandingkan lagi beberapa minggu kemudian.',
-  'Chart in {0} (change in Settings). The green area is the target you set with your doctor.': 'Grafik dalam {0} (ubah di Pengaturan). Area hijau adalah target yang kamu atur sendiri bersama dokter.',
+  'Change takes time. Record things as they are, then compare again a few weeks later.':
+      'Perubahan butuh waktu. Catat apa adanya, lalu bandingkan lagi beberapa minggu kemudian.',
+  'Chart in {0} (change in Settings). The green area is the target you set with your doctor.':
+      'Grafik dalam {0} (ubah di Pengaturan). Area hijau adalah target yang kamu atur sendiri bersama dokter.',
   'Check for Updates': 'Periksa Pembaruan',
-  'Check the shelf-life of your daily wellness essentials.': 'Periksa masa simpan perlengkapan rutin harianmu.',
+  'Check the shelf-life of your daily wellness essentials.':
+      'Periksa masa simpan perlengkapan rutin harianmu.',
   'Checking for updates...': 'Memeriksa pembaruan...',
-  'Choose which therapy you would like guidance for:': 'Pilih terapi mana yang ingin dipandu:',
+  'Choose which therapy you would like guidance for:':
+      'Pilih terapi mana yang ingin dipandu:',
   'Close': 'Tutup',
   'Cloud backup': 'Cadangan awan',
   'Cloud Sync & Storage': 'Sinkronisasi Cloud & Penyimpanan',
@@ -123,7 +140,8 @@ const Map<String, String> idStrings = {
   'Comfort band': 'Pita longgar',
   'Complete & Log Dose': 'Selesai & Catat Dosis',
   'Completed': 'Selesai',
-  'Contains a 2nd active ingredient (e.g. Cyclofem with Estradiol + Progestin)': 'Mengandung bahan aktif kedua (mis. Cyclofem: Estradiol + Progestin)',
+  'Contains a 2nd active ingredient (e.g. Cyclofem with Estradiol + Progestin)':
+      'Mengandung bahan aktif kedua (mis. Cyclofem: Estradiol + Progestin)',
   'Continue': 'Lanjutkan',
   'Copy Template to Clipboard': 'Salin Format ke Papan Klip',
   'Could not pick a photo: {0}': 'Tidak dapat memilih foto: {0}',
@@ -153,41 +171,55 @@ const Map<String, String> idStrings = {
   'Deduct from supply:': 'Potong stok dari:',
   'Delete': 'Hapus',
   'Delete all sample data?': 'Hapus semua data contoh?',
-  'Delete this entry? Supplies used will be returned to stock.': 'Hapus catatan ini? Stok yang terpakai akan dikembalikan.',
+  'Delete this entry? Supplies used will be returned to stock.':
+      'Hapus catatan ini? Stok yang terpakai akan dikembalikan.',
   'Delete this journal entry?': 'Hapus entri jurnal ini?',
   'Delete this lab result?': 'Hapus hasil lab ini?',
   'Delete this measurement entry?': 'Hapus catatan ukuran ini?',
   'Delete this supply?': 'Hapus stok ini?',
-  'Delete this therapy? Its dose history is kept.': 'Hapus terapi ini? Riwayat dosisnya tetap tersimpan.',
+  'Delete this therapy? Its dose history is kept.':
+      'Hapus terapi ini? Riwayat dosisnya tetap tersimpan.',
   'Details': 'Detail',
   'Diff': 'Selisih',
   'Difference': 'Selisih',
   'Discreet Pickup Assistant': 'Asisten Ambil Sendiri (Ekspedisi)',
-  'Discreet Shipping & Pickup Assistant': 'Asisten Pengiriman & Titik Ambil Ekspedisi',
-  'Disguise notification text to protect your privacy when received in public or around family.': 'Samarkan teks notifikasi demi menjaga privasimu saat muncul di tempat umum atau di sekitar keluarga.',
-  'Disguise the lock screen as a functional calculator. Type your 6-digit PIN and press "=" to unlock.': 'Samarkan layar kunci sebagai kalkulator fungsional. Ketik 6-digit PIN lalu tekan "=" untuk membuka.',
+  'Discreet Shipping & Pickup Assistant':
+      'Asisten Pengiriman & Titik Ambil Ekspedisi',
+  'Disguise notification text to protect your privacy when received in public or around family.':
+      'Samarkan teks notifikasi demi menjaga privasimu saat muncul di tempat umum atau di sekitar keluarga.',
+  'Disguise the lock screen as a functional calculator. Type your 6-digit PIN and press "=" to unlock.':
+      'Samarkan layar kunci sebagai kalkulator fungsional. Ketik 6-digit PIN lalu tekan "=" untuk membuka.',
   'District & City': 'Kecamatan & Kota',
-  'Do not put weight on the leg you are injecting. Insert needle smoothly at a 90° angle. Push the plunger slowly (about 10 seconds per mL) for minimal pressure.': 'Jangan menumpukan beban pada kaki yang disuntik. Masukkan jarum dengan tenang pada sudut 90°. Dorong obat perlahan (sekitar 10 detik per mL) agar tekanan minimal.',
+  'Do not put weight on the leg you are injecting. Insert needle smoothly at a 90° angle. Push the plunger slowly (about 10 seconds per mL) for minimal pressure.':
+      'Jangan menumpukan beban pada kaki yang disuntik. Masukkan jarum dengan tenang pada sudut 90°. Dorong obat perlahan (sekitar 10 detik per mL) agar tekanan minimal.',
   'Don\'t have an account?': 'Belum punya akun?',
   'Done': 'Selesai',
   'Dose': 'Dosis',
   'Dose ({0})': 'Dosis ({0})',
   'Dose reminders': 'Pengingat dosis',
   'Dose unit type': 'Tipe satuan dosis',
-  'Doses after midnight still count toward the previous day.': 'Dosis lewat tengah malam masih dihitung hari sebelumnya.',
-  'Doses past midnight are counted toward yesterday.': 'Dosis lewat tengah malam dihitung sebagai hari kemarin.',
-  'Doses you log will show up here with full administration history.': 'Dosis yang kamu catat akan muncul di sini lengkap dengan riwayat pemberiannya.',
+  'Doses after midnight still count toward the previous day.':
+      'Dosis lewat tengah malam masih dihitung hari sebelumnya.',
+  'Doses past midnight are counted toward yesterday.':
+      'Dosis lewat tengah malam dihitung sebagai hari kemarin.',
+  'Doses you log will show up here with full administration history.':
+      'Dosis yang kamu catat akan muncul di sini lengkap dengan riwayat pemberiannya.',
   'Drops': 'Tetes',
   'Dutasteride': 'Dutasterid',
   'Dydrogesterone': 'Didrogesteron',
-  'E.g. 40 for 40 mg/mL. If filled in, usage is calculated from the dose (mg).': 'Mis. 40 untuk 40 mg/mL. Jika diisi, pemakaian dihitung dari dosis (mg).',
-  'e.g. brand on packaging (Progynova, Cyclofem, Androcur)': 'mis. merek kemasan (Progynova, Cyclofem, Androcur)',
-  'e.g. Drop Point J&T Cabang Sudirman': 'misal: Drop Point J&T Cabang Sudirman',
+  'E.g. 40 for 40 mg/mL. If filled in, usage is calculated from the dose (mg).':
+      'Mis. 40 untuk 40 mg/mL. Jika diisi, pemakaian dihitung dari dosis (mg).',
+  'e.g. brand on packaging (Progynova, Cyclofem, Androcur)':
+      'mis. merek kemasan (Progynova, Cyclofem, Androcur)',
+  'e.g. Drop Point J&T Cabang Sudirman':
+      'misal: Drop Point J&T Cabang Sudirman',
   'e.g. EU 39 / 40': 'misal: EU 39 / 40',
   'e.g. Jl. Jend. Sudirman No. 45': 'misal: Jl. Jend. Sudirman No. 45',
-  'e.g. Kec. Menteng, Jakarta Pusat 10310': 'misal: Kec. Menteng, Jakarta Pusat 10310',
+  'e.g. Kec. Menteng, Jakarta Pusat 10310':
+      'misal: Kec. Menteng, Jakarta Pusat 10310',
   'e.g. Lunaria': 'mis. Lunaria',
-  'E.g. measured morning before breakfast': 'Mis. diukur pagi hari sebelum sarapan',
+  'E.g. measured morning before breakfast':
+      'Mis. diukur pagi hari sebelum sarapan',
   'e.g. Olivia': 'misal: Olivia',
   'Edit entry': 'Ubah catatan',
   'Edit journal entry': 'Ubah jurnal',
@@ -199,33 +231,42 @@ const Map<String, String> idStrings = {
   'Email': 'Email',
   'Enanthate': 'Enantat',
   'Energy': 'Energi',
-  'Enjoy your rest day or log a dose manually if needed.': 'Nikmati hari istirahatmu atau catat dosis manual jika diperlukan.',
-  'Enter a dose for the second active ingredient.': 'Isi dosis untuk bahan aktif kedua.',
+  'Enjoy your rest day or log a dose manually if needed.':
+      'Nikmati hari istirahatmu atau catat dosis manual jika diperlukan.',
+  'Enter a dose for the second active ingredient.':
+      'Isi dosis untuk bahan aktif kedua.',
   'Enter a dose.': 'Isi dosis.',
   'Enter PIN': 'Masukkan PIN',
   'Enter the dose amount.': 'Isi jumlah dosis.',
   'Enter your current PIN': 'Masukkan PIN lama',
   'Enter your PIN to turn it off': 'Masukkan PIN untuk mematikan',
   'Enter your username or email.': 'Isi username atau email.',
-  'Enter your username/email and password.': 'Isi username/email dan kata sandi.',
+  'Enter your username/email and password.':
+      'Isi username/email dan kata sandi.',
   'Equipment': 'Perlengkapan',
   'estimated': 'perkiraan',
   'Ester / simulation profile ({0}):': 'Profil ester / simulasi ({0}):',
   'Estimated Bra & Chest Size': 'Perkiraan Ukuran Bra & Dada',
   'Estimated Bra Size': 'Perkiraan Ukuran Bra',
   'Estimated Clothing Fit': 'Perkiraan Ukuran Pakaian',
-  'Estimated estradiol, {0} pg/mL now': 'Perkiraan estradiol, {0} pg/mL sekarang',
-  'Estimated from dose entries, dots = lab results': 'Perkiraan dari catatan dosis, titik = hasil lab',
-  'Estimated from fixed schedules. "As needed" doses aren\'t counted.': 'Perkiraan dari jadwal tetap. Dosis "saat perlu" tidak dihitung.',
-  'Estimated levels use an average model and can differ from lab results. Dosing decisions always stay with your doctor.': 'Perkiraan level memakai model rata-rata dan bisa berbeda dari hasil lab. Keputusan dosis selalu bersama dokter.',
+  'Estimated estradiol, {0} pg/mL now':
+      'Perkiraan estradiol, {0} pg/mL sekarang',
+  'Estimated from dose entries, dots = lab results':
+      'Perkiraan dari catatan dosis, titik = hasil lab',
+  'Estimated from fixed schedules. "As needed" doses aren\'t counted.':
+      'Perkiraan dari jadwal tetap. Dosis "saat perlu" tidak dihitung.',
+  'Estimated levels use an average model and can differ from lab results. Dosing decisions always stay with your doctor.':
+      'Perkiraan level memakai model rata-rata dan bisa berbeda dari hasil lab. Keputusan dosis selalu bersama dokter.',
   'Estimated Shoe Size': 'Perkiraan Ukuran Sepatu',
   'Estimated {0}': 'Perkiraan {0}',
   'Estimated {0}, {1} {2} now': 'Perkiraan {0}, {1} {2} sekarang',
-  'Estimates use an average model, not lab results. Everyone\'s levels differ, and dosing decisions stay with your doctor.': 'Perkiraan memakai model rata-rata, bukan hasil lab. Level tiap orang berbeda, dan keputusan dosis tetap bersama dokter.',
+  'Estimates use an average model, not lab results. Everyone\'s levels differ, and dosing decisions stay with your doctor.':
+      'Perkiraan memakai model rata-rata, bukan hasil lab. Level tiap orang berbeda, dan keputusan dosis tetap bersama dokter.',
   'Estradiol benzoate': 'Estradiol benzoat',
   'Estradiol cypionate': 'Estradiol sipionat',
   'Estradiol enanthate': 'Estradiol enantat',
-  'Estradiol ester (for level simulation):': 'Ester estradiol (untuk simulasi level):',
+  'Estradiol ester (for level simulation):':
+      'Ester estradiol (untuk simulasi level):',
   'Estradiol gel (transdermal)': 'Estradiol gel (transdermal)',
   'Estradiol hemihydrate': 'Estradiol hemihidrat',
   'Estradiol undecylate': 'Estradiol undesilat',
@@ -254,31 +295,38 @@ const Map<String, String> idStrings = {
   'Export backup file (JSON)': 'Ekspor berkas cadangan (JSON)',
   'Export Dose History': 'Ekspor Riwayat Dosis',
   'Export dose history (CSV / JSON)': 'Ekspor riwayat dosis (CSV / JSON)',
-  'Export your injection and dose log history only.': 'Ekspor riwayat suntikan dan dosis saja.',
+  'Export your injection and dose log history only.':
+      'Ekspor riwayat suntikan dan dosis saja.',
   'Failed to save profile: {0}': 'Gagal menyimpan profil: {0}',
   'Failed to schedule notifications: {0}': 'Gagal menjadwalkan notifikasi: {0}',
   'Failed: {0}': 'Gagal: {0}',
   'File downloaded.': 'File diunduh.',
   'File on this device': 'File di perangkat',
-  'Fill in at least one: mood, body changes, or a note.': 'Isi minimal satu: suasana hati, perubahan tubuh, atau catatan.',
-  'Fill your account with sample therapies, entries, lab results, and supplies to try the app. Everything is marked "(sample)" and can be removed without touching your data.': 'Isi akunmu dengan terapi, catatan, hasil lab, dan stok contoh untuk mencoba aplikasi. Semuanya diberi tanda "(contoh)" dan bisa dihapus tanpa menyentuh datamu.',
+  'Fill in at least one: mood, body changes, or a note.':
+      'Isi minimal satu: suasana hati, perubahan tubuh, atau catatan.',
+  'Fill your account with sample therapies, entries, lab results, and supplies to try the app. Everything is marked "(sample)" and can be removed without touching your data.':
+      'Isi akunmu dengan terapi, catatan, hasil lab, dan stok contoh untuk mencoba aplikasi. Semuanya diberi tanda "(contoh)" dan bisa dihapus tanpa menyentuh datamu.',
   'Finasteride': 'Finasterid',
   'Fingerprint or face': 'Sidik jari atau wajah',
-  'Firestore rules are out of date. Paste firestore.rules and publish.': 'Aturan Firestore belum diperbarui. Tempel isi firestore.rules lalu Publish.',
+  'Firestore rules are out of date. Paste firestore.rules and publish.':
+      'Aturan Firestore belum diperbarui. Tempel isi firestore.rules lalu Publish.',
   'Fit to lab results ({0})': 'Sesuaikan ke hasil lab ({0})',
   'Follow system': 'Ikuti sistem',
   'Foot Length': 'Panjang Telapak Kaki',
   'Foot Length ({0})': 'Panjang Telapak Kaki ({0})',
   'Forgot password?': 'Lupa kata sandi?',
   'Forgot PIN?': 'Lupa PIN?',
-  'Format package for pickup at courier branch (Hold at Location)': 'Format paket ambil mandiri di agen demi menjaga privasi',
+  'Format package for pickup at courier branch (Hold at Location)':
+      'Format paket ambil mandiri di agen demi menjaga privasi',
   'Fri': 'Jum',
   'Front': 'Depan',
   'Full Bust': 'Lingkar Dada',
   'Full Bust ({0})': 'Lingkar Dada ({0})',
   'Gallery': 'Galeri',
-  'Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.': 'Buat template alamat ambil di agen ekspedisi agar paket tidak sampai ke rumah keluarga.',
-  'Generate a discreet "Hold at Agent" delivery order template.': 'Buat template pemesanan ambil di agen ekspedisi secara privat.',
+  'Generate "Hold at Agent" delivery templates to prevent packages arriving at family home.':
+      'Buat template alamat ambil di agen ekspedisi agar paket tidak sampai ke rumah keluarga.',
+  'Generate a discreet "Hold at Agent" delivery order template.':
+      'Buat template pemesanan ambil di agen ekspedisi secara privat.',
   'Generated Order Template:': 'Template Alamat yang Dihasilkan:',
   'Gentle reminder.': 'Pengingat lembut untukmu.',
   'Gently Pinch the Skin Fold': 'Cubit Lembut Lipatan Kulit',
@@ -296,11 +344,13 @@ const Map<String, String> idStrings = {
   'Height (cm)': 'Tinggi badan (cm)',
   'Hide details in widgets': 'Sembunyikan detail di widget',
   'Hide details on widgets': 'Sembunyikan rincian pada widget',
-  'Hides app preview in Recent Apps and blocks screenshots to protect medical privacy.': 'Sembunyikan pratinjau aplikasi di menu Aplikasi Terkini dan blokir tangkapan layar untuk melindungi privasi medis.',
+  'Hides app preview in Recent Apps and blocks screenshots to protect medical privacy.':
+      'Sembunyikan pratinjau aplikasi di menu Aplikasi Terkini dan blokir tangkapan layar untuk melindungi privasi medis.',
   'Hips': 'Pinggul',
   'Hips ({0})': 'Hips ({0})',
   'History': 'Riwayat',
-  'Hold-at-agent delivery template for safe private pickup.': 'Template alamat ambil di agen ekspedisi demi privasi pengiriman.',
+  'Hold-at-agent delivery template for safe private pickup.':
+      'Template alamat ambil di agen ekspedisi demi privasi pengiriman.',
   'Home': 'Beranda',
   'Home Screen Widgets': 'Widget Layar Utama',
   'Home screen widgets': 'Widget layar utama',
@@ -311,7 +361,8 @@ const Map<String, String> idStrings = {
   'How are you feeling today?': 'Bagaimana perasaanmu hari ini?',
   'How it\'s taken': 'Cara pakai',
   'Hydroxyprogesterone caproate': 'Hidroksiprogesteron kaproat',
-  'If the account exists, a reset link has been sent to its email. Check your spam folder too.': 'Jika akunnya ada, tautan atur ulang sudah dikirim ke emailnya. Cek juga folder spam.',
+  'If the account exists, a reset link has been sent to its email. Check your spam folder too.':
+      'Jika akunnya ada, tautan atur ulang sudah dikirim ke emailnya. Cek juga folder spam.',
   'Immediately': 'Segera',
   'Implant': 'Implan',
   'Import': 'Impor',
@@ -320,31 +371,39 @@ const Map<String, String> idStrings = {
   'Import {0} {0?dose entry|dose entries}?': 'Impor {0} catatan dosis?',
   'Import {0} {0?record|records}': 'Impor {0} catatan',
   'Import, export, backups': 'Impor, ekspor, cadangan',
-  'Imported {0} {0?dose entry|dose entries}.': 'Berhasil mengimpor {0} catatan dosis.',
+  'Imported {0} {0?dose entry|dose entries}.':
+      'Berhasil mengimpor {0} catatan dosis.',
   'In range': 'Dalam rentang',
   'inches': 'inci',
   'Injection': 'Suntik',
   'Injection & Patch Sites': 'Lokasi Suntik & Patch',
   'Injection and patch sites': 'Lokasi suntik dan patch',
-  'Injection complete! Logged to history and site rotation updated.': 'Suntikan selesai! Tercatat ke riwayat dan rotasi lokasi diperbarui.',
+  'Injection complete! Logged to history and site rotation updated.':
+      'Suntikan selesai! Tercatat ke riwayat dan rotasi lokasi diperbarui.',
   'Injection method': 'Metode suntik',
   'Injection Site Rotation': 'Rotasi Lokasi Injeksi',
   'Inseam': 'Panjang Kaki',
   'Inseam ({0})': 'Panjang Kaki ({0})',
   'Insights': 'Wawasan',
   'Insights & Patterns': 'Wawasan & Pola',
-  'Interactive body map & injection tissue resting tracker': 'Peta tubuh interaktif & pelacak pemulihan jaringan suntik',
-  'Interactive step-by-step breathing, prep, and slow injection guide.': 'Panduan interaktif langkah demi langkah: napas, persiapan, dan suntik perlahan.',
+  'Interactive body map & injection tissue resting tracker':
+      'Peta tubuh interaktif & pelacak pemulihan jaringan suntik',
+  'Interactive step-by-step breathing, prep, and slow injection guide.':
+      'Panduan interaktif langkah demi langkah: napas, persiapan, dan suntik perlahan.',
   'Intramuscular (90°)': 'Intramuskular / IM (90°)',
   'Intramuscular (IM)': 'Intramuskular (IM)',
   'Invalid dose history CSV header.': 'Header CSV riwayat dosis tidak valid.',
   'Invalid dose history file.': 'Berkas riwayat dosis tidak valid.',
-  'Invalid dose value in history file.': 'Nilai dosis pada berkas riwayat tidak valid.',
+  'Invalid dose value in history file.':
+      'Nilai dosis pada berkas riwayat tidak valid.',
   'Invalid email format.': 'Format email tidak valid.',
-  'Invalid timestamp in dose history file.': 'Format waktu pada berkas riwayat dosis tidak valid.',
-  'is a tracking and reminder tool, not a substitute for medical advice. ': 'adalah alat pencatat dan pengingat, bukan pengganti saran medis. ',
+  'Invalid timestamp in dose history file.':
+      'Format waktu pada berkas riwayat dosis tidak valid.',
+  'is a tracking and reminder tool, not a substitute for medical advice. ':
+      'adalah alat pencatat dan pengingat, bukan pengganti saran medis. ',
   'Journal': 'Jurnal',
-  'Keep a copy of your data in your Firebase account. Useful for going back to an earlier state.': 'Simpan salinan datamu di akun Firebase-mu. Berguna untuk kembali ke kondisi sebelumnya.',
+  'Keep a copy of your data in your Firebase account. Useful for going back to an earlier state.':
+      'Simpan salinan datamu di akun Firebase-mu. Berguna untuk kembali ke kondisi sebelumnya.',
   'Lab result': 'Hasil lab',
   'Lab result {0}': 'Hasil lab {0}',
   'Lab result, {0}': 'Hasil lab, {0}',
@@ -369,25 +428,35 @@ const Map<String, String> idStrings = {
   'Lock with PIN': 'Kunci dengan PIN',
   'Log': 'Catat',
   'Log a change': 'Catat perubahan',
-  'Log at least 2 measurements to view your progression trends over time.': 'Catat minimal 2 pengukuran untuk melihat tren perkembangan fisik dari waktu ke waktu.',
+  'Log at least 2 measurements to view your progression trends over time.':
+      'Catat minimal 2 pengukuran untuk melihat tren perkembangan fisik dari waktu ke waktu.',
   'Log dose': 'Catat dosis',
-  'Log a dose or add your first blood test result to view hormone curves.': 'Catat dosis atau tambah hasil tes darah pertamamu untuk melihat kurva hormon.',
+  'Log a dose or add your first blood test result to view hormone curves.':
+      'Catat dosis atau tambah hasil tes darah pertamamu untuk melihat kurva hormon.',
   'Log First Measurement': 'Catat Ukuran Pertama',
   'Log in': 'Masuk',
-  'Log in to continue your therapy rhythm.': 'Masuk untuk melanjutkan ritme terapimu.',
+  'Log in to continue your therapy rhythm.':
+      'Masuk untuk melanjutkan ritme terapimu.',
   'Log injection': 'Catat suntikan',
   'Log Measurement': 'Catat Ukuran',
   'Log Measurements': 'Catat Ukuran',
   'Log out': 'Keluar',
-  'Log out and remove the lock from this device? Cloud lock protection remains active on your account.': 'Keluar dari akun dan hapus kunci dari perangkat ini? Perlindungan kunci cloud tetap aktif di akunmu.',
-  'Log out and turn off the lock? You\'ll need to log in again with your password.': 'Keluar dari akun dan matikan kunci? Kamu perlu masuk lagi dengan kata sandi.',
-  'Log your first dose on the Home tab to see estimated levels.': 'Catat dosis pertamamu di tab Beranda untuk melihat perkiraan level.',
-  'Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.': 'Tekan lama layar utama, pilih Widget, lalu cari Lunera: tersedia widget penghitung HRT, jadwal, dan grafik level.',
-  'Long-press your home screen, choose Widgets, then find Lunera: widgets for time on therapy, schedule, and level chart are available.': 'Tahan layar utama, pilih Widget, lalu cari Lunera: tersedia widget lama terapi, jadwal, dan grafik level.',
+  'Log out and remove the lock from this device? Cloud lock protection remains active on your account.':
+      'Keluar dari akun dan hapus kunci dari perangkat ini? Perlindungan kunci cloud tetap aktif di akunmu.',
+  'Log out and turn off the lock? You\'ll need to log in again with your password.':
+      'Keluar dari akun dan matikan kunci? Kamu perlu masuk lagi dengan kata sandi.',
+  'Log your first dose on the Home tab to see estimated levels.':
+      'Catat dosis pertamamu di tab Beranda untuk melihat perkiraan level.',
+  'Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.':
+      'Tekan lama layar utama, pilih Widget, lalu cari Lunera: tersedia widget penghitung HRT, jadwal, dan grafik level.',
+  'Long-press your home screen, choose Widgets, then find Lunera: widgets for time on therapy, schedule, and level chart are available.':
+      'Tahan layar utama, pilih Widget, lalu cari Lunera: tersedia widget lama terapi, jadwal, dan grafik level.',
   'Low': 'Murung',
   'Lower limit': 'Batas bawah',
-  'Lowercase letters, numbers, dots, underscores (3 to 20)': 'Huruf kecil, angka, titik, garis bawah (3 sampai 20)',
-  'Lunera is a personal tracking tool and not a substitute for professional medical advice.': 'Lunera adalah alat pencatat pribadi dan bukan pengganti saran medis profesional.',
+  'Lowercase letters, numbers, dots, underscores (3 to 20)':
+      'Huruf kecil, angka, titik, garis bawah (3 sampai 20)',
+  'Lunera is a personal tracking tool and not a substitute for professional medical advice.':
+      'Lunera adalah alat pencatat pribadi dan bukan pengganti saran medis profesional.',
   'Lunera User': 'Pengguna Lunera',
   'Manage Cloud Backups': 'Kelola Cadangan Cloud',
   'Manage cloud backups & history': 'Kelola riwayat cadangan cloud',
@@ -399,7 +468,8 @@ const Map<String, String> idStrings = {
   'Measurement History': 'Riwayat Ukuran',
   'Medical Disclaimer': 'Penafian Medis',
   'Medication': 'Obat',
-  'Medication and injection schedule reminders': 'Pengingat jadwal obat dan suntikan',
+  'Medication and injection schedule reminders':
+      'Pengingat jadwal obat dan suntikan',
   'Medication expires today': 'Obat kedaluwarsa hari ini',
   'Medication expiring soon': 'Obat segera kedaluwarsa',
   'Medication name': 'Nama obat',
@@ -407,10 +477,14 @@ const Map<String, String> idStrings = {
   'Medroxyprogesterone acetate (MPA)': 'Medroksiprogesteron asetat (MPA)',
   'Medroxyprogesterone suspension (MPA)': 'Suspensi medroksiprogesteron (MPA)',
   'Merge': 'Gabungkan',
-  'Merge injection and dose logs from a CSV or JSON history file.': 'Gabungkan catatan suntikan dan dosis dari berkas riwayat CSV atau JSON.',
-  'Merge into your dose history ({0} new, {1} updated). Existing history and supply stock will not be removed.': 'Gabungkan ke riwayat dosismu ({0} baru, {1} diperbarui). Riwayat lama dan stok perlengkapan tidak akan dihapus.',
-  'Merge: records from the file are added or updated, and your current data stays.\n\n': 'Gabungkan: catatan dari file ditambahkan atau diperbarui, datamu sekarang tetap ada.\n\n',
-  'Merges or restores a backup file into this device.': 'Gabungkan atau pulihkan berkas cadangan ke perangkat ini.',
+  'Merge injection and dose logs from a CSV or JSON history file.':
+      'Gabungkan catatan suntikan dan dosis dari berkas riwayat CSV atau JSON.',
+  'Merge into your dose history ({0} new, {1} updated). Existing history and supply stock will not be removed.':
+      'Gabungkan ke riwayat dosismu ({0} baru, {1} diperbarui). Riwayat lama dan stok perlengkapan tidak akan dihapus.',
+  'Merge: records from the file are added or updated, and your current data stays.\n\n':
+      'Gabungkan: catatan dari file ditambahkan atau diperbarui, datamu sekarang tetap ada.\n\n',
+  'Merges or restores a backup file into this device.':
+      'Gabungkan atau pulihkan berkas cadangan ke perangkat ini.',
   'Micronized progesterone': 'Progesteron mikronisasi',
   'Minimal': 'Minimalis',
   'Missed': 'Terlewat',
@@ -421,13 +495,17 @@ const Map<String, String> idStrings = {
   'Mood across your cycle': 'Suasana hati sepanjang siklus',
   'Mood, last 30 days': 'Suasana hati 30 hari',
   'More': 'Lainnya',
-  'Name (e.g. Estradiol valerate 40 mg/mL)': 'Nama (mis. Estradiol valerat 40 mg/mL)',
+  'Name (e.g. Estradiol valerate 40 mg/mL)':
+      'Nama (mis. Estradiol valerat 40 mg/mL)',
   'Name (optional)': 'Nama (opsional)',
-  'Need guidance? Try Guided Calm Injection': 'Butuh panduan? Coba Panduan Suntik Tenang',
+  'Need guidance? Try Guided Calm Injection':
+      'Butuh panduan? Coba Panduan Suntik Tenang',
   'Needle': 'Jarum',
   'Needle dead space (µL)': 'Ruang mati jarum (µL)',
-  'Needs a therapy with a repeating schedule (every 2 days or more).': 'Butuh terapi dengan jadwal berulang (selang 2 hari atau lebih).',
-  'Needs at least 6 mood entries after logged doses, and 2 entries on each day being compared. Currently {0} {0?entry|entries}.': 'Butuh sedikitnya 6 entri suasana hati setelah dosis tercatat, dan 2 entri di tiap hari yang dibandingkan. Saat ini ada {0} entri.',
+  'Needs a therapy with a repeating schedule (every 2 days or more).':
+      'Butuh terapi dengan jadwal berulang (selang 2 hari atau lebih).',
+  'Needs at least 6 mood entries after logged doses, and 2 entries on each day being compared. Currently {0} {0?entry|entries}.':
+      'Butuh sedikitnya 6 entri suasana hati setelah dosis tercatat, dan 2 entri di tiap hari yang dibandingkan. Saat ini ada {0} entri.',
   'Needs attention': 'Perlu perhatian',
   'Neutral': 'Biasa',
   'NEW': 'BARU',
@@ -436,54 +514,74 @@ const Map<String, String> idStrings = {
   'New lab result': 'Hasil lab baru',
   'New supply': 'Stok baru',
   'New therapy': 'Terapi baru',
-  'Machine-readable dose history file.': 'Berkas riwayat dosis terstruktur dalam format JSON.',
+  'Machine-readable dose history file.':
+      'Berkas riwayat dosis terstruktur dalam format JSON.',
   'Next 7 days': '7 hari ke depan',
   'Next week': 'Minggu berikutnya',
-  'Next suggested: {0}. Rotating sites prevents scar tissue and discomfort.': 'Saran berikutnya: {0}. Rotasi titik suntik mencegah jaringan parut dan rasa nyeri.',
+  'Next suggested: {0}. Rotating sites prevents scar tissue and discomfort.':
+      'Saran berikutnya: {0}. Rotasi titik suntik mencegah jaringan parut dan rasa nyeri.',
   'next up, {0} of {1} done': 'berikutnya, {0} dari {1} selesai',
   'next: {0}': 'berikutnya: {0}',
   'Nickname': 'Nama Panggilan',
-  'No data yet. Log a dose or add your first blood test result.': 'Belum ada data. Catat dosis atau tambahkan hasil tes darah pertamamu.',
-  'No dose history entries found in file.': 'Tidak ada catatan riwayat dosis di dalam berkas.',
+  'No data yet. Log a dose or add your first blood test result.':
+      'Belum ada data. Catat dosis atau tambahkan hasil tes darah pertamamu.',
+  'No dose history entries found in file.':
+      'Tidak ada catatan riwayat dosis di dalam berkas.',
   'No dose history to export yet.': 'Belum ada riwayat dosis untuk diekspor.',
-  'No doses logged for this therapy yet.': 'Belum ada dosis tercatat untuk terapi ini.',
+  'No doses logged for this therapy yet.':
+      'Belum ada dosis tercatat untuk terapi ini.',
   'No doses scheduled': 'Tidak ada jadwal dosis',
   'no entries': 'belum ada',
   'No entries yet': 'Belum ada catatan',
   'no entries yet': 'belum ada catatan',
-  'No entries yet. Doses you log will show up here.': 'Belum ada catatan. Dosis yang kamu catat muncul di sini.',
-  'No entries yet. Log your mood, body changes, or anything you want to remember.': 'Belum ada entri. Catat suasana hati, perubahan tubuh, atau apa pun yang ingin kamu ingat.',
+  'No entries yet. Doses you log will show up here.':
+      'Belum ada catatan. Dosis yang kamu catat muncul di sini.',
+  'No entries yet. Log your mood, body changes, or anything you want to remember.':
+      'Belum ada entri. Catat suasana hati, perubahan tubuh, atau apa pun yang ingin kamu ingat.',
   'No history entries yet': 'Belum ada riwayat dosis',
-  'No injection therapies found. Add one in Home first.': 'Tidak ditemukan terapi injeksi. Tambahkan di Home terlebih dahulu.',
+  'No injection therapies found. Add one in Home first.':
+      'Tidak ditemukan terapi injeksi. Tambahkan di Home terlebih dahulu.',
   'No internet connection.': 'Tidak ada koneksi internet.',
   'No level data yet': 'Belum ada data kadar hormon',
-  'No mood entries yet. Log one from the card on the home screen.': 'Belum ada entri suasana hati. Catat dari kartu di beranda.',
-  'No notes for {0} yet. Add one with the "Log a change" button.': 'Belum ada catatan untuk {0}. Tambahkan lewat tombol "Catat perubahan".',
+  'No mood entries yet. Log one from the card on the home screen.':
+      'Belum ada entri suasana hati. Catat dari kartu di beranda.',
+  'No notes for {0} yet. Add one with the "Log a change" button.':
+      'Belum ada catatan untuk {0}. Tambahkan lewat tombol "Catat perubahan".',
   'No simulation': 'Tanpa simulasi',
-  'No supplies yet. Track medication, syringes, needles, and other supplies here.': 'Belum ada stok. Catat obat, spuit, jarum, dan perlengkapan lainnya di sini.',
+  'No supplies yet. Track medication, syringes, needles, and other supplies here.':
+      'Belum ada stok. Catat obat, spuit, jarum, dan perlengkapan lainnya di sini.',
   'No supply': 'Tanpa stok',
   'No therapies yet': 'Belum ada terapi',
   'Not available on this device.': 'Tidak tersedia di perangkat ini.',
-  'Not enough data yet. Log your doses and journal for a few days to see a summary.': 'Belum cukup data. Catat dosis dan jurnalmu beberapa hari untuk melihat ringkasan.',
-  'Not enough records with this measurement yet.': 'Belum cukup catatan dengan pengukuran ini.',
+  'Not enough data yet. Log your doses and journal for a few days to see a summary.':
+      'Belum cukup data. Catat dosis dan jurnalmu beberapa hari untuk melihat ringkasan.',
+  'Not enough records with this measurement yet.':
+      'Belum cukup catatan dengan pengukuran ini.',
   'Note': 'Catatan',
   'Note (optional)': 'Catatan (opsional)',
   'Notes': 'Catatan',
   'Notes (optional)': 'Catatan (opsional)',
   'Nothing scheduled for this day.': 'Tidak ada jadwal di hari ini.',
-  'Notification permission denied. Turn it on in system settings.': 'Izin notifikasi ditolak. Aktifkan lewat pengaturan sistem.',
-  'Notification permission was denied. Enable it in system settings.': 'Izin notifikasi ditolak. Aktifkan di pengaturan sistem.',
-  'Notification Privacy (Lockscreen Masking)': 'Privasi Notifikasi (Penyamaran Layar Kunci)',
-  'Notifications appear at scheduled times, even offline.': 'Notifikasi muncul pada jam jadwal, juga saat offline.',
+  'Notification permission denied. Turn it on in system settings.':
+      'Izin notifikasi ditolak. Aktifkan lewat pengaturan sistem.',
+  'Notification permission was denied. Enable it in system settings.':
+      'Izin notifikasi ditolak. Aktifkan di pengaturan sistem.',
+  'Notification Privacy (Lockscreen Masking)':
+      'Privasi Notifikasi (Penyamaran Layar Kunci)',
+  'Notifications appear at scheduled times, even offline.':
+      'Notifikasi muncul pada jam jadwal, juga saat offline.',
   'Notifications are off: {0}': 'Notifikasi tidak aktif: {0}',
   'Office Street Address': 'Alamat Jalan Kantor Agen',
   'Offline': 'Offline',
   'Offline local storage': 'Penyimpanan lokal offline',
   'Offline queued': 'Antrean offline',
-  'One of your daily wellness essentials is running low.': 'Salah satu perlengkapan rutin harianmu hampir habis.',
+  'One of your daily wellness essentials is running low.':
+      'Salah satu perlengkapan rutin harianmu hampir habis.',
   'Online': 'Online',
-  'Only available in the Android and iOS apps.': 'Hanya tersedia di aplikasi Android dan iOS.',
-  'Only available on Android and iOS apps.': 'Hanya tersedia di aplikasi Android dan iOS.',
+  'Only available in the Android and iOS apps.':
+      'Hanya tersedia di aplikasi Android dan iOS.',
+  'Only available on Android and iOS apps.':
+      'Hanya tersedia di aplikasi Android dan iOS.',
   'Open': 'Buka',
   'Open details': 'Buka detail',
   'Open {0}': 'Buka {0}',
@@ -494,19 +592,25 @@ const Map<String, String> idStrings = {
   'Other site': 'Lokasi lain',
   'Overview': 'Ringkasan',
   'Password': 'Kata sandi',
-  'Password is too weak (at least 6 characters).': 'Kata sandi terlalu lemah (minimal 6 karakter).',
-  'Personal health & therapy tracking application': 'Aplikasi pencatat terapi & kesehatan pribadi',
+  'Password is too weak (at least 6 characters).':
+      'Kata sandi terlalu lemah (minimal 6 karakter).',
+  'Personal health & therapy tracking application':
+      'Aplikasi pencatat terapi & kesehatan pribadi',
   'Phone': 'No. HP',
   'Phone / WhatsApp': 'No. HP / WhatsApp',
   'Pick at least one day.': 'Pilih minimal satu hari.',
   'Pickup': 'Titik Ambil',
   'Pickup Assistant': 'Asisten Titik Ambil',
   'PIN lock and biometrics': 'Kunci PIN dan biometrik',
-  'PIN protects your medical data and automatically syncs across your devices.': 'PIN melindungi data medismu dan otomatis tersinkronkan antarperangkat.',
-  'Pinch a 2-3 cm fold of fatty tissue. Insert needle at a 45° to 90° angle smoothly. Inject slowly, then release the skin fold.': 'Cubit lipatan lemak 2-3 cm. Masukkan jarum dengan sudut 45° hingga 90° secara lembut. Suntik perlahan, lalu lepaskan lipatan kulit.',
+  'PIN protects your medical data and automatically syncs across your devices.':
+      'PIN melindungi data medismu dan otomatis tersinkronkan antarperangkat.',
+  'Pinch a 2-3 cm fold of fatty tissue. Insert needle at a 45° to 90° angle smoothly. Inject slowly, then release the skin fold.':
+      'Cubit lipatan lemak 2-3 cm. Masukkan jarum dengan sudut 45° hingga 90° secara lembut. Suntik perlahan, lalu lepaskan lipatan kulit.',
   'PINs don\'t match. Start again.': 'PIN tidak cocok. Ulangi dari awal.',
-  'Please enter at least one measurement.': 'Harap masukkan setidaknya satu ukuran.',
-  'Populate your account with sample therapies, logs, lab results, and stock to test the app. All marked as "(sample)" and can be safely deleted.': 'Isi akunmu dengan contoh terapi, log, hasil lab, dan stok untuk mencoba aplikasi. Semua ditandai "(contoh)" dan dapat dihapus dengan aman.',
+  'Please enter at least one measurement.':
+      'Harap masukkan setidaknya satu ukuran.',
+  'Populate your account with sample therapies, logs, lab results, and stock to test the app. All marked as "(sample)" and can be safely deleted.':
+      'Isi akunmu dengan contoh terapi, log, hasil lab, dan stok untuk mencoba aplikasi. Semua ditandai "(contoh)" dan dapat dihapus dengan aman.',
   'Preferences': 'Preferensi',
   'Previous week': 'Minggu sebelumnya',
   'Privacy Shield': 'Perisai Privasi',
@@ -521,7 +625,8 @@ const Map<String, String> idStrings = {
   'Progression Trends': 'Tren Perkembangan',
   'Prolactin': 'Prolaktin',
   'Propionate': 'Propionat',
-  'Protect your therapy logs with a 6-digit PIN and biometrics.': 'Lindungi data terapi Anda dengan PIN 6 digit dan biometrik.',
+  'Protect your therapy logs with a 6-digit PIN and biometrics.':
+      'Lindungi data terapi Anda dengan PIN 6 digit dan biometrik.',
   'Quantity': 'Jumlah',
   'Ready': 'Siap',
   'Ready • Never used': 'Siap • Belum pernah dipakai',
@@ -543,11 +648,13 @@ const Map<String, String> idStrings = {
   'Repeat interval must be at least 1 day.': 'Ulangi tiap minimal 1 hari.',
   'Repeat PIN': 'Ulangi PIN',
   'Replace all': 'Ganti semua',
-  'Replace all: your current data is deleted first, then filled from the file.': 'Ganti semua: data sekarang dihapus dulu, lalu diisi dari file.',
+  'Replace all: your current data is deleted first, then filled from the file.':
+      'Ganti semua: data sekarang dihapus dulu, lalu diisi dari file.',
   'Reset': 'Atur Ulang',
   'Reset password': 'Atur ulang kata sandi',
   'Review': 'Tinjau',
-  'Review and catch up on pending doses': 'Tinjau dan selesaikan dosis tertunda',
+  'Review and catch up on pending doses':
+      'Tinjau dan selesaikan dosis tertunda',
   'Resting': 'Istirahat',
   'Resting • Injected today': 'Istirahat • Disuntik hari ini',
   'Resting • Injected yesterday': 'Istirahat • Disuntik kemarin',
@@ -561,7 +668,8 @@ const Map<String, String> idStrings = {
   'Right thigh': 'Paha kanan',
   'Rose Quartz & Peony': 'Kuarsa Mawar & Peoni',
   'Rotate': 'Putar',
-  'Rotate your injection sites regularly to allow muscle and subcutaneous tissue to heal.': 'Rotasi lokasi suntik secara teratur agar otot dan jaringan subkutan dapat pulih optimal.',
+  'Rotate your injection sites regularly to allow muscle and subcutaneous tissue to heal.':
+      'Rotasi lokasi suntik secara teratur agar otot dan jaringan subkutan dapat pulih optimal.',
   'Routine Reminder ✦': 'Pengingat Rutin ✦',
   'Routine Supplies ✦': 'Perlengkapan Rutin ✦',
   'Running low': 'Stok hampir habis',
@@ -570,18 +678,22 @@ const Map<String, String> idStrings = {
   'Sample data': 'Data contoh',
   'Sat': 'Sab',
   'Save': 'Simpan',
-  'Save all your data to a single JSON file, or restore from a file. No internet needed.': 'Simpan semua datamu ke satu file JSON, atau pulihkan dari file. Tidak butuh internet.',
+  'Save all your data to a single JSON file, or restore from a file. No internet needed.':
+      'Simpan semua datamu ke satu file JSON, atau pulihkan dari file. Tidak butuh internet.',
   'Save and add another hormone': 'Simpan dan tambah hormon lain',
   'Save changes': 'Simpan perubahan',
   'Save Cloud Backup Now': 'Simpan Cadangan Cloud Sekarang',
-  'Save combination settings to therapy': 'Simpan pengaturan kombinasi ke terapi',
+  'Save combination settings to therapy':
+      'Simpan pengaturan kombinasi ke terapi',
   'Save Measurements': 'Simpan Ukuran',
-  'Save or share a copy of all your therapy data.': 'Simpan atau bagikan salinan seluruh data terapi Anda.',
+  'Save or share a copy of all your therapy data.':
+      'Simpan atau bagikan salinan seluruh data terapi Anda.',
   'Save Profile': 'Simpan Profil',
   'Save supply': 'Simpan stok',
   'Save target': 'Simpan target',
   'Save therapy': 'Simpan terapi',
-  'Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.': 'Skala: 1 cemas, 2 murung, 3 biasa, 4 tenang, 5 senang.',
+  'Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.':
+      'Skala: 1 cemas, 2 murung, 3 biasa, 4 tenang, 5 senang.',
   'Schedule': 'Jadwal',
   'Schedule repeat': 'Pengulangan jadwal',
   'Second active category': 'Kategori bahan aktif kedua',
@@ -591,11 +703,13 @@ const Map<String, String> idStrings = {
   'Security': 'Keamanan',
   'Security & Privacy': 'Keamanan & Privasi',
   'See Detail': 'Lihat Detail',
-  'See what\'s new in v{version} and past releases': 'Lihat apa yang baru di v{version} dan rilis sebelumnya',
+  'See what\'s new in v{version} and past releases':
+      'Lihat apa yang baru di v{version} dan rilis sebelumnya',
   'Select active compound': 'Pilih kandungan senyawa',
   'Select Courier / Expedition': 'Pilih Kurir / Ekspedisi',
   'Select Injection Therapy': 'Pilih Terapi Injeksi',
-  'Selection order determines next suggested site, alternating from top to bottom.': 'Urutan pilihan menentukan saran lokasi berikutnya, bergantian dari atas ke bawah.',
+  'Selection order determines next suggested site, alternating from top to bottom.':
+      'Urutan pilihan menentukan saran lokasi berikutnya, bergantian dari atas ke bawah.',
   'Send link': 'Kirim tautan',
   'Send test notification': 'Kirim notifikasi uji coba',
   'Set target': 'Atur target',
@@ -609,15 +723,19 @@ const Map<String, String> idStrings = {
   'Show body map': 'Tampilkan peta tubuh',
   'Show chips': 'Tampilkan daftar chip',
   'Show on History tab.': 'Tampilkan pada tab Riwayat.',
-  'Shown in greetings on the Home screen and profile card.': 'Ditampilkan pada sapaan di layar Beranda dan kartu profil.',
+  'Shown in greetings on the Home screen and profile card.':
+      'Ditampilkan pada sapaan di layar Beranda dan kartu profil.',
   'Shown on the History tab.': 'Tampil di tab Riwayat.',
   'Sign In / Create Account': 'Masuk / Buat Akun',
   'Sign out': 'Keluar akun',
   'Sign up': 'Daftar',
-  'Signature Arcane Astral sanctuary with mystical amethyst and honey gold highlights.': 'Suaka khas Arcane Astral dengan sorotan mystical amethyst dan honey gold.',
-  'Signature nocturnal sanctuary with soft pastel highlights.': 'Suaka malam khas dengan sorotan pastel lembut.',
+  'Signature Arcane Astral sanctuary with mystical amethyst and honey gold highlights.':
+      'Suaka khas Arcane Astral dengan sorotan mystical amethyst dan honey gold.',
+  'Signature nocturnal sanctuary with soft pastel highlights.':
+      'Suaka malam khas dengan sorotan pastel lembut.',
   'Simulation profile ({0}):': 'Profil simulasi ({0}):',
-  'Sister Sizes (Equivalent Cup Volume):': 'Ukuran Pengganti (Volume Cup Setara):',
+  'Sister Sizes (Equivalent Cup Volume):':
+      'Ukuran Pengganti (Volume Cup Setara):',
   'Site': 'Lokasi',
   'Site Rotation & Health': 'Rotasi Lokasi & Kesehatan',
   'site: {0}': 'lokasi: {0}',
@@ -625,13 +743,15 @@ const Map<String, String> idStrings = {
   'Skin': 'Kulit',
   'Skip': 'Lewati',
   'Skip this dose': 'Lewati dosis ini',
-  'Skip this dose? It won\'t count as taken and its reminder will stop.': 'Lewati dosis ini? Dosis tidak dihitung sebagai sudah diminum dan pengingatnya berhenti.',
+  'Skip this dose? It won\'t count as taken and its reminder will stop.':
+      'Lewati dosis ini? Dosis tidak dihitung sebagai sudah diminum dan pengingatnya berhenti.',
   'Skipped, scheduled {0}': 'Dilewati, jadwal {0}',
   'Sleep': 'Tidur',
   'Snug band': 'Pita ketat',
   'Solstice Sunset & Gold': 'Senja Solstice & Emas',
   'Something went wrong: {0}': 'Terjadi kesalahan: {0}',
-  'Some changes could not be synced.': 'Sebagian perubahan belum dapat disinkronkan.',
+  'Some changes could not be synced.':
+      'Sebagian perubahan belum dapat disinkronkan.',
   'Queued offline ({0} pending)': 'Antrean offline ({0} tertunda)',
   'Spironolactone': 'Spironolakton',
   'Spironolactone (sample)': 'Spironolakton (contoh)',
@@ -641,7 +761,8 @@ const Map<String, String> idStrings = {
   'Start 30s Timer': 'Mulai Timer 30 Detik',
   'Start: {0}': 'Mulai: {0}',
   'Step {0} of 4 • {1}': 'Langkah {0} dari 4 • {1}',
-  'Step-by-step calming procedure with breathing timer': 'Panduan suntik terarah dengan timer pernapasan',
+  'Step-by-step calming procedure with breathing timer':
+      'Panduan suntik terarah dengan timer pernapasan',
   'Strength: mg per unit (optional)': 'Kadar: mg per satuan (opsional)',
   'Structured Data (JSON)': 'Data Terstruktur (JSON)',
   'Subcutaneous (45°)': 'Subkutan / SubQ (45°)',
@@ -653,18 +774,22 @@ const Map<String, String> idStrings = {
   'Supply alert ({0})': 'Peringatan stok ({0})',
   'Supply alerts ({0})': 'Peringatan stok ({0})',
   'Suppository': 'Supositoria',
-  'Swab the skin with an alcohol wipe in a firm, circular motion. Waiting 30 seconds for it to air-dry completely prevents stinging and irritation!': 'Usap kulit dengan tisu alkohol secara memutar dan mantap. Menunggu 30 detik hingga kering alami mencegah rasa perih dan iritasi!',
+  'Swab the skin with an alcohol wipe in a firm, circular motion. Waiting 30 seconds for it to air-dry completely prevents stinging and irritation!':
+      'Usap kulit dengan tisu alkohol secara memutar dan mantap. Menunggu 30 detik hingga kering alami mencegah rasa perih dan iritasi!',
   'Sync failed': 'Sinkronisasi gagal',
   'Sync failed: {0}': 'Sinkronisasi gagal: {0}',
   'Sync error': 'Gangguan sinkronisasi',
-  'Sync timed out before confirmation.': 'Waktu sinkronisasi habis sebelum konfirmasi server.',
+  'Sync timed out before confirmation.':
+      'Waktu sinkronisasi habis sebelum konfirmasi server.',
   'Syncing in background...': 'Menyinkronkan di latar belakang...',
   'Syncing in progress...': 'Sedang menyinkronkan...',
   'Syringe': 'Spuit',
   'Syringe (sample)': 'Spuit (contoh)',
   'System': 'Sistem',
-  'Take a moment for yourself today.': 'Luangkan sejenak waktu untuk dirimu hari ini.',
-  'Tap "Update Now" to download and install the new APK.': 'Ketuk "Perbarui Sekarang" untuk mengunduh dan memasang APK baru.',
+  'Take a moment for yourself today.':
+      'Luangkan sejenak waktu untuk dirimu hari ini.',
+  'Tap "Update Now" to download and install the new APK.':
+      'Ketuk "Perbarui Sekarang" untuk mengunduh dan memasang APK baru.',
   'Tap to review and log or skip': 'Ketuk untuk tinjau dan catat atau lewati',
   'target': 'target',
   'Teal and peony': 'Teal dan peony',
@@ -677,22 +802,29 @@ const Map<String, String> idStrings = {
   'That username is taken.': 'Username sudah dipakai.',
   'The "{0}" section is corrupted.': 'Bagian "{0}" rusak.',
   'The "{0}" section is invalid.': 'Bagian "{0}" tidak valid.',
-  'The next dose follows when you last logged a dose, not the start date.': 'Jadwal berikutnya mengikuti kapan kamu terakhir mencatat dosis, bukan tanggal mulai.',
-  'The order you pick sets the suggested next site, rotating from top to bottom.': 'Urutan pemilihan menentukan saran lokasi berikutnya, bergantian dari atas ke bawah.',
-  'The therapy for this entry was deleted. Delete the entry?': 'Terapi untuk catatan ini sudah dihapus. Hapus catatannya?',
+  'The next dose follows when you last logged a dose, not the start date.':
+      'Jadwal berikutnya mengikuti kapan kamu terakhir mencatat dosis, bukan tanggal mulai.',
+  'The order you pick sets the suggested next site, rotating from top to bottom.':
+      'Urutan pemilihan menentukan saran lokasi berikutnya, bergantian dari atas ke bawah.',
+  'The therapy for this entry was deleted. Delete the entry?':
+      'Terapi untuk catatan ini sudah dihapus. Hapus catatannya?',
   'Therapy & Clinical': 'Terapi & Klinis',
   'Therapy category': 'Kategori terapi',
   'Therapy deleted': 'Terapi dihapus',
   'Thigh': 'Paha',
   'Thigh & Calf': 'Paha & Betis',
   'Thigh ({0})': 'Paha ({0})',
-  'This email is already registered. Try logging in.': 'Email ini sudah terdaftar. Coba masuk.',
-  'This is a full backup file. Use "Import backup file (JSON)" in Settings instead.': 'Ini adalah berkas cadangan penuh. Gunakan menu "Impor berkas cadangan (JSON)" di Pengaturan.',
-  'This is a pattern from your own notes, not cause and effect. Many other things affect mood.': 'Ini pola dari catatanmu sendiri, bukan sebab-akibat. Banyak hal lain memengaruhi suasana hati.',
+  'This email is already registered. Try logging in.':
+      'Email ini sudah terdaftar. Coba masuk.',
+  'This is a full backup file. Use "Import backup file (JSON)" in Settings instead.':
+      'Ini adalah berkas cadangan penuh. Gunakan menu "Impor berkas cadangan (JSON)" di Pengaturan.',
+  'This is a pattern from your own notes, not cause and effect. Many other things affect mood.':
+      'Ini pola dari catatanmu sendiri, bukan sebab-akibat. Banyak hal lain memengaruhi suasana hati.',
   'This is not a Lunera backup file.': 'Ini bukan file cadangan Lunera.',
   'This week': 'Minggu ini',
   'Thu': 'Kam',
-  'Time for your daily hydration and wellness routine.': 'Waktunya minum air dan rutinitas harianmu.',
+  'Time for your daily hydration and wellness routine.':
+      'Waktunya minum air dan rutinitas harianmu.',
   'Time for your injection': 'Waktunya suntik',
   'Time for your medication': 'Waktunya pakai obat',
   'Time to change your patch': 'Waktunya ganti patch',
@@ -701,23 +833,28 @@ const Map<String, String> idStrings = {
   'Timeline': 'Garis waktu',
   'Timeline by body area': 'Garis waktu per bagian tubuh',
   'Timeline from your journal': 'Garis waktu dari jurnalmu',
-  'Timeline of physical milestones from your journal': 'Linimasa perkembangan fisik dari jurnal',
+  'Timeline of physical milestones from your journal':
+      'Linimasa perkembangan fisik dari jurnal',
   'Times': 'Jam',
   'Today': 'Hari ini',
   'Today, {0}': 'Hari ini, {0}',
   'Today you feel {0}': 'Hari ini kamu merasa {0}',
-  'Too many attempts. Try again in 30 seconds.': 'Terlalu banyak percobaan. Coba lagi dalam 30 detik.',
-  'Too many attempts. Try again later.': 'Terlalu banyak percobaan. Coba lagi nanti.',
+  'Too many attempts. Try again in 30 seconds.':
+      'Terlalu banyak percobaan. Coba lagi dalam 30 detik.',
+  'Too many attempts. Try again later.':
+      'Terlalu banyak percobaan. Coba lagi nanti.',
   'Top / Shirt': 'Atasan / Baju',
   'Track time on therapy': 'Hitung lama menjalani terapi',
-  'Track your bust, underbust, waist, and hips to accurately calculate your bra size, cup letter, clothing fit (tops & pants), and body proportions over time.': 'Catat lingkar dada, bawah dada, pinggang, dan pinggul untuk menghitung ukuran bra, cup, ukuran pakaian (atasan & bawahan), serta proporsi tubuhmu secara akurat.',
+  'Track your bust, underbust, waist, and hips to accurately calculate your bra size, cup letter, clothing fit (tops & pants), and body proportions over time.':
+      'Catat lingkar dada, bawah dada, pinggang, dan pinggul untuk menghitung ukuran bra, cup, ukuran pakaian (atasan & bawahan), serta proporsi tubuhmu secara akurat.',
   'Transdermal gel (daily)': 'Gel transdermal (harian)',
   'Tue': 'Sel',
   'Undecanoate (Nebido)': 'Undekanoat (Nebido)',
   'Undecylate': 'Undesilat',
   'Underbust': 'Bawah Dada',
   'Underbust ({0})': 'Bawah Dada ({0})',
-  'Underbust {0} {1} • Full Bust {2} {1} (Diff: +{3} cm)': 'Bawah dada {0} {1} • Lingkar dada {2} {1} (Selisih: +{3} cm)',
+  'Underbust {0} {1} • Full Bust {2} {1} (Diff: +{3} cm)':
+      'Bawah dada {0} {1} • Lingkar dada {2} {1} (Selisih: +{3} cm)',
   'Undo': 'Batalkan',
   'Undo "skip" for this dose?': 'Batalkan "lewati" untuk dosis ini?',
   'Unit': 'Satuan',
@@ -729,19 +866,24 @@ const Map<String, String> idStrings = {
   'Upper limit': 'Batas atas',
   'Used per dose (unit above)': 'Terpakai per dosis (satuan di atas)',
   'Username': 'Username',
-  'Username and email are used for login authentication and cannot be changed.': 'Username dan email digunakan untuk autentikasi masuk dan tidak dapat diubah.',
-  'Username must be 3 to 20 characters: lowercase letters, numbers, dots, or underscores.': 'Username 3 sampai 20 karakter: huruf kecil, angka, titik, atau garis bawah.',
+  'Username and email are used for login authentication and cannot be changed.':
+      'Username dan email digunakan untuk autentikasi masuk dan tidak dapat diubah.',
+  'Username must be 3 to 20 characters: lowercase letters, numbers, dots, or underscores.':
+      'Username 3 sampai 20 karakter: huruf kecil, angka, titik, atau garis bawah.',
   'Username or email': 'Username atau email',
   'Valerate': 'Valerat',
   'Value': 'Nilai',
-  'Version 0.1\\n\\n{0} is a tracking and reminder tool, not a substitute for medical advice. ': 'Versi 0.1\\n\\n{0} adalah alat pencatat dan pengingat, bukan pengganti saran medis. ',
+  'Version 0.1\\n\\n{0} is a tracking and reminder tool, not a substitute for medical advice. ':
+      'Versi 0.1\\n\\n{0} adalah alat pencatat dan pengingat, bukan pengganti saran medis. ',
   'Version Changelog': 'Catatan Rilis & Versi',
-  'View and restore past cloud snapshots': 'Lihat dan pulihkan salinan riwayat cloud',
+  'View and restore past cloud snapshots':
+      'Lihat dan pulihkan salinan riwayat cloud',
   'View full schedule in Calendar': 'Lihat jadwal lengkap di Kalender',
   'View lab history & calibrate': 'Lihat riwayat lab & kalibrasi',
   'View Photo': 'Lihat Foto',
   'View Site Rotation & Health': 'Lihat Rotasi & Kesehatan Titik Suntik',
-  'View source code, release notes, and issue tracker.': 'Lihat kode sumber, catatan rilis, dan pelacak masalah.',
+  'View source code, release notes, and issue tracker.':
+      'Lihat kode sumber, catatan rilis, dan pelacak masalah.',
   'Violet and mint': 'Violet dan mint',
   'Waist': 'Pinggang',
   'Waist & Hips': 'Pinggang & Pinggul',
@@ -750,7 +892,8 @@ const Map<String, String> idStrings = {
   'Wait a moment before trying again.': 'Tunggu sebentar sebelum mencoba lagi.',
   'Wait for Alcohol to Dry': 'Tunggu Alkohol Mengering',
   'Wasted (mL)': 'Terbuang (mL)',
-  'We\'ll send a reset link to your account email.': 'Kami kirim tautan atur ulang ke email akunmu.',
+  'We\'ll send a reset link to your account email.':
+      'Kami kirim tautan atur ulang ke email akunmu.',
   'Wed': 'Rab',
   'Weekly': 'Mingguan',
   'Weight': 'Berat Badan',
@@ -763,25 +906,38 @@ const Map<String, String> idStrings = {
   'WHR Ratio': 'Rasio Pinggang-Pinggul',
   'Widget clear failed: {0}': 'Widget gagal dikosongkan: {0}',
   'Widget update failed: {0}': 'Widget gagal diperbarui: {0}',
-  'Widgets only display the app name. Useful if your home screen is seen by others.': 'Widget hanya menampilkan nama aplikasi. Berguna bila layar utamamu terlihat orang lain.',
-  'Widgets show only the app name. Useful if others can see your home screen.': 'Widget hanya menampilkan nama aplikasi. Berguna jika layar utamamu terlihat orang lain.',
-  'Withdraw needle gently, apply light pressure with cotton or a bandage. Safely place the used needle into your sharps container.': 'Tarik jarum perlahan, tekan lembut dengan kapas atau plester. Masukkan jarum bekas dengan aman ke dalam wadah tertutupmu.',
+  'Widgets only display the app name. Useful if your home screen is seen by others.':
+      'Widget hanya menampilkan nama aplikasi. Berguna bila layar utamamu terlihat orang lain.',
+  'Widgets show only the app name. Useful if others can see your home screen.':
+      'Widget hanya menampilkan nama aplikasi. Berguna jika layar utamamu terlihat orang lain.',
+  'Withdraw needle gently, apply light pressure with cotton or a bandage. Safely place the used needle into your sharps container.':
+      'Tarik jarum perlahan, tekan lembut dengan kapas atau plester. Masukkan jarum bekas dengan aman ke dalam wadah tertutupmu.',
   'Within range': 'Dalam rentang target',
   'Working...': 'Memproses...',
   'Write': 'Tulis',
   'Wrong PIN.': 'PIN salah.',
   'Wrong username/email or password.': 'Username/email atau kata sandi salah.',
-  'You are in a safe, unhurried space. Relax your shoulders, unclamp your jaw, and take a slow breath. You are in total control of your pace.': 'Kamu berada di ruang yang aman dan tidak terburu-buru. Lemaskan bahumu, rilekskan rahangmu, dan tarik napas perlahan. Kamu memegang kendali penuh atas ritmemu.',
-  'You are using the latest version of Lunera (v{0}). ✨': 'Kamu menggunakan versi terbaru Lunera (v{0}). ✨',
-  'You can enter your packaging brand or keep the compound name.': 'Bisa diisi merek kemasan atau dibiarkan nama senyawa.',
+  'You are in a safe, unhurried space. Relax your shoulders, unclamp your jaw, and take a slow breath. You are in total control of your pace.':
+      'Kamu berada di ruang yang aman dan tidak terburu-buru. Lemaskan bahumu, rilekskan rahangmu, dan tarik napas perlahan. Kamu memegang kendali penuh atas ritmemu.',
+  'You are using the latest version of Lunera (v{0}). ✨':
+      'Kamu menggunakan versi terbaru Lunera (v{0}). ✨',
+  'You can enter your packaging brand or keep the compound name.':
+      'Bisa diisi merek kemasan atau dibiarkan nama senyawa.',
   'You Did It! ✦': 'Hebat Sekali! ✦',
-  'You\'re offline. Changes will sync when you\'re back online.': 'Belum ada koneksi. Perubahan akan terkirim saat kamu online.',
-  'Your data is too large for a single cloud backup. Use file export instead.': 'Data terlalu besar untuk satu cadangan awan. Pakai ekspor file.',
-  'Your mood stays fairly steady throughout the cycle.': 'Suasana hatimu relatif stabil sepanjang siklus.',
-  'Your mood tends to be best on day {0} after your dose (average {1}) ': 'Suasana hatimu cenderung paling baik di hari ke-{0} setelah dosis (rata-rata {1}) ',
-  'Your PIN is stored only on this device.': 'PIN tersimpan hanya di perangkat ini.',
-  'Your records are stored locally on this device. Sign in to back up and sync across devices.': 'Data Anda tersimpan secara lokal di perangkat ini. Masuk untuk mencadangkan dan menyelaraskan antar perangkat.',
-  'Your username is for logging in, and your email is for account recovery.': 'Username dipakai untuk masuk, email untuk pemulihan akun.',
+  'You\'re offline. Changes will sync when you\'re back online.':
+      'Belum ada koneksi. Perubahan akan terkirim saat kamu online.',
+  'Your data is too large for a single cloud backup. Use file export instead.':
+      'Data terlalu besar untuk satu cadangan awan. Pakai ekspor file.',
+  'Your mood stays fairly steady throughout the cycle.':
+      'Suasana hatimu relatif stabil sepanjang siklus.',
+  'Your mood tends to be best on day {0} after your dose (average {1}) ':
+      'Suasana hatimu cenderung paling baik di hari ke-{0} setelah dosis (rata-rata {1}) ',
+  'Your PIN is stored only on this device.':
+      'PIN tersimpan hanya di perangkat ini.',
+  'Your records are stored locally on this device. Sign in to back up and sync across devices.':
+      'Data Anda tersimpan secara lokal di perangkat ini. Masuk untuk mencadangkan dan menyelaraskan antar perangkat.',
+  'Your username is for logging in, and your email is for account recovery.':
+      'Username dipakai untuk masuk, email untuk pemulihan akun.',
   '{0?day|days} ago': 'hari lalu',
   '{0?day|days} late': 'hari terlambat',
   '{0?day|days} left': 'hari lagi',
@@ -795,7 +951,8 @@ const Map<String, String> idStrings = {
   '{0} missed {0?dose|doses}': '{0} dosis terlewat',
   '{0} of {1} {1?dose|doses} today': '{0} dari {1} dosis hari ini',
   '{0} pending': '{0} tertunda',
-  '{0} pending changes will sync automatically when online.': '{0} perubahan tertunda akan otomatis tersinkron saat online.',
+  '{0} pending changes will sync automatically when online.':
+      '{0} perubahan tertunda akan otomatis tersinkron saat online.',
   '{0} saved. Enter the next hormone.': '{0} tersimpan. Isi hormon berikutnya.',
   '{0} skipped': '{0} dilewati',
   '{0} taken': '{0} diminum',
@@ -803,7 +960,8 @@ const Map<String, String> idStrings = {
   '{0} to {1}': '{0} sampai {1}',
   '{0} {0?day|days}': '{0} hari',
   '{0} {0?dose|doses} left': '{0} dosis tersisa',
-  '{0} {0?dose|doses} left, restock soon': '{0} dosis tersisa, segera isi ulang',
+  '{0} {0?dose|doses} left, restock soon':
+      '{0} dosis tersisa, segera isi ulang',
   '{0} {0?dose|doses} logged': '{0} dosis tercatat',
   '{0} {0?entry|entries} ready to export.': '{0} catatan siap diekspor.',
   '{0} {0?item is|items are} running low': '{0} barang hampir habis',
@@ -819,77 +977,106 @@ const Map<String, String> idStrings = {
   '{0}: {1} {1?day|days} left': '{0}: {1} hari lagi',
   '{0}: {1} {1?dose|doses} left': '{0}: {1} dosis tersisa',
   'µg/day': 'µg/hari',
-  '• Ask seller to describe package neutrally (e.g. "Health Vitamins / Supplement").\n• Track package until "Arrived at Drop Point", then go directly to pick it up with your tracking receipt & ID.': '• Minta penjual menuliskan nama barang netral (misal: "Vitamin / Suplemen Kesehatan").\n• Pantau resi sampai status "Sampai di Drop Point", lalu datang langsung ke kantor agen membawa bukti resi & nomor HP.',
-  'A serene celestial sanctuary for hormone journeys and mindful health tracking—every phase, your own.': 'Suaka surgawi yang tenang untuk perjalanan hormon dan pelacakan kesehatan yang penuh perhatian—setiap fase, milikmu.',
+  '• Ask seller to describe package neutrally (e.g. "Health Vitamins / Supplement").\n• Track package until "Arrived at Drop Point", then go directly to pick it up with your tracking receipt & ID.':
+      '• Minta penjual menuliskan nama barang netral (misal: "Vitamin / Suplemen Kesehatan").\n• Pantau resi sampai status "Sampai di Drop Point", lalu datang langsung ke kantor agen membawa bukti resi & nomor HP.',
+  'A serene celestial sanctuary for hormone journeys and mindful health tracking—every phase, your own.':
+      'Suaka surgawi yang tenang untuk perjalanan hormon dan pelacakan kesehatan yang penuh perhatian—setiap fase, milikmu.',
   'Brand Lore & Philosophy': 'Filosofi & Lore Lunera',
-  'Lunera was created with a clear purpose: tracking hormone therapy and physical transitions should feel peaceful, empowering, and respectful—never cold or clinical.': 'Lunera dibangun dengan satu tujuan: memantau terapi hormon dan transisi fisik seharusnya terasa menenangkan, memberdayakan, dan bermartabat—bukan dingin atau menegangkan.',
+  'Lunera was created with a clear purpose: tracking hormone therapy and physical transitions should feel peaceful, empowering, and respectful—never cold or clinical.':
+      'Lunera dibangun dengan satu tujuan: memantau terapi hormon dan transisi fisik seharusnya terasa menenangkan, memberdayakan, dan bermartabat—bukan dingin atau menegangkan.',
   'The Moon Phase Rhythms': 'Irama Fase Rembulan',
-  'Hormones fluctuate in graceful physiological waves. Lunera honors your body\'s unique cadence with personalized cycles and gentle rhythms.': 'Kadar hormon berfluktuasi dalam gelombang fisiologis alami. Lunera menghormati ritme unik tubuhmu dengan siklus yang dipersonalisasi.',
+  'Hormones fluctuate in graceful physiological waves. Lunera honors your body\'s unique cadence with personalized cycles and gentle rhythms.':
+      'Kadar hormon berfluktuasi dalam gelombang fisiologis alami. Lunera menghormati ritme unik tubuhmu dengan siklus yang dipersonalisasi.',
   'The Celestial Sanctuary': 'Suaka Surgawi & Privasi',
-  'Your personal health data is sacred. Lunera guards your journey with offline-first sovereignty, PBKDF2 encryption, and biometric privacy.': 'Data kesehatan pribadimu sangat berharga. Lunera menjaganya dengan kedaulatan offline-first, enkripsi PBKDF2, dan privasi biometrik.',
+  'Your personal health data is sacred. Lunera guards your journey with offline-first sovereignty, PBKDF2 encryption, and biometric privacy.':
+      'Data kesehatan pribadimu sangat berharga. Lunera menjaganya dengan kedaulatan offline-first, enkripsi PBKDF2, dan privasi biometrik.',
   'The Guiding Star': 'Bintang Pemandu',
-  'Scientific pharmacokinetic curves, intelligent injection site rotation, and supply alerts illuminate your path with clinical clarity.': 'Kurva farmakokinetik ilmiah, rotasi lokasi injeksi cerdas, dan pengingat stok menerangi langkahmu dengan kejelasan klinis.',
+  'Scientific pharmacokinetic curves, intelligent injection site rotation, and supply alerts illuminate your path with clinical clarity.':
+      'Kurva farmakokinetik ilmiah, rotasi lokasi injeksi cerdas, dan pengingat stok menerangi langkahmu dengan kejelasan klinis.',
   'The Arcane Astral Canvas': 'Kanvas Astral Malam Hari',
   'The Eternal Dusk Canvas': 'Kanvas Eternal Dusk',
-  'An atmospheric midnight aurora and twilight sunset aesthetic designed to calm anxiety, replacing stark clinical charts with serene warmth.': 'Estetika aurora tengah malam dan senja hangat untuk meredakan kecemasan, menggantikan grafik klinis yang kaku dengan ketenangan.',
-  'A nocturnal midnight aesthetic designed to reduce anxiety, replacing stark sterile hospital charts with celestial tranquility.': 'Estetika beludru malam yang dirancang untuk mengurangi kecemasan, menggantikan grafik klinis yang kaku dengan ketenangan kosmik.',
+  'An atmospheric midnight aurora and twilight sunset aesthetic designed to calm anxiety, replacing stark clinical charts with serene warmth.':
+      'Estetika aurora tengah malam dan senja hangat untuk meredakan kecemasan, menggantikan grafik klinis yang kaku dengan ketenangan.',
+  'A nocturnal midnight aesthetic designed to reduce anxiety, replacing stark sterile hospital charts with celestial tranquility.':
+      'Estetika beludru malam yang dirancang untuk mengurangi kecemasan, menggantikan grafik klinis yang kaku dengan ketenangan kosmik.',
   'Core Principles': 'Prinsip Utama',
   'Offline-First Architecture': 'Arsitektur Offline-First',
-  'Fast local storage with zero network dependency and complete privacy.': 'Penyimpanan lokal cepat tanpa ketergantungan jaringan dan privasi penuh.',
+  'Fast local storage with zero network dependency and complete privacy.':
+      'Penyimpanan lokal cepat tanpa ketergantungan jaringan dan privasi penuh.',
   'Biometric & Privacy Guard': 'Keamanan Biometrik & Privasi',
-  'Instant privacy shield, decoy calculator mode, and discreet push alerts.': 'Perlindungan privasi instan, mode kalkulator samaran, dan notifikasi tersamar.',
+  'Instant privacy shield, decoy calculator mode, and discreet push alerts.':
+      'Perlindungan privasi instan, mode kalkulator samaran, dan notifikasi tersamar.',
   'Clinical Pharmacokinetics': 'Farmakokinetik Klinis',
-  'Advanced mathematical simulations modeled for steady-state hormone levels.': 'Simulasi matematis ilmiah untuk memodelkan kadar hormon dalam tubuh.',
+  'Advanced mathematical simulations modeled for steady-state hormone levels.':
+      'Simulasi matematis ilmiah untuk memodelkan kadar hormon dalam tubuh.',
   'Smart Site Rotation': 'Rotasi Lokasi Injeksi Cerdas',
-  'Automated injection mapping to prevent lipohypertrophy and tissue fatigue.': 'Pemetaan injeksi otomatis untuk mencegah lipohipertrofi dan kelelahan jaringan tubuh.',
+  'Automated injection mapping to prevent lipohypertrophy and tissue fatigue.':
+      'Pemetaan injeksi otomatis untuk mencegah lipohipertrofi dan kelelahan jaringan tubuh.',
   'App Information': 'Informasi Aplikasi',
   'Developer': 'Pengembang',
   'License': 'Lisensi',
   'Source Code': 'Kode Sumber',
   'Send Feedback': 'Kirim Masukan',
-  'Please wait {0}s before trying again.': 'Mohon tunggu {0} detik sebelum mencoba lagi.',
+  'Please wait {0}s before trying again.':
+      'Mohon tunggu {0} detik sebelum mencoba lagi.',
   'Face Unlock': 'Buka dengan Wajah',
   'Fingerprint Unlock': 'Buka dengan Sidik Jari',
   'Biometric Unlock': 'Buka dengan Biometrik',
-  'No fingerprint or face biometrics enrolled on this device.': 'Belum ada sidik jari atau wajah yang terdaftar di perangkat ini.',
-  'Unlock the app quickly using Face Unlock alongside your PIN.': 'Buka aplikasi lebih cepat menggunakan Face Unlock selain PIN.',
-  'Unlock the app quickly using your fingerprint alongside your PIN.': 'Buka aplikasi lebih cepat menggunakan sidik jari selain PIN.',
-  'Verify your identity to enable Biometric Unlock': 'Verifikasi identitasmu untuk mengaktifkan Buka dengan Biometrik',
+  'No fingerprint or face biometrics enrolled on this device.':
+      'Belum ada sidik jari atau wajah yang terdaftar di perangkat ini.',
+  'Unlock the app quickly using Face Unlock alongside your PIN.':
+      'Buka aplikasi lebih cepat menggunakan Face Unlock selain PIN.',
+  'Unlock the app quickly using your fingerprint alongside your PIN.':
+      'Buka aplikasi lebih cepat menggunakan sidik jari selain PIN.',
+  'Verify your identity to enable Biometric Unlock':
+      'Verifikasi identitasmu untuk mengaktifkan Buka dengan Biometrik',
   'PIN lock enabled.': 'Kunci PIN diaktifkan.',
   'PIN lock disabled.': 'Kunci PIN dinonaktifkan.',
   'Biometric unlock enabled.': 'Buka dengan biometrik diaktifkan.',
   'Biometric unlock disabled.': 'Buka dengan biometrik dinonaktifkan.',
-  'Biometric verification failed or canceled.': 'Verifikasi biometrik gagal atau dibatalkan.',
-  'Enter 6-digit PIN or use Face Unlock': 'Masukkan PIN 6 angka atau gunakan Face Unlock',
-  'Enter 6-digit PIN or scan fingerprint': 'Masukkan PIN 6 angka atau pindai sidik jari',
+  'Biometric verification failed or canceled.':
+      'Verifikasi biometrik gagal atau dibatalkan.',
+  'Enter 6-digit PIN or use Face Unlock':
+      'Masukkan PIN 6 angka atau gunakan Face Unlock',
+  'Enter 6-digit PIN or scan fingerprint':
+      'Masukkan PIN 6 angka atau pindai sidik jari',
   'Unlock with biometric': 'Buka dengan biometrik',
-  'You have {0} unsynced offline changes. Signing out will clear local data on this device and unsynced changes may be lost. Sign out anyway?': 'Anda memiliki {0} perubahan offline yang belum tersinkron. Keluar akan menghapus data lokal di perangkat ini dan perubahan yang belum tersinkron dapat hilang. Tetap keluar?',
-  'Sign out of your account? Local cached data and device lock settings will be cleared from this device, while your cloud data remains safe.': 'Keluar dari akun Anda? Data cache lokal dan pengaturan kunci di perangkat ini akan dibersihkan, sementara data cloud Anda tetap aman.',
+  'You have {0} unsynced offline changes. Signing out will clear local data on this device and unsynced changes may be lost. Sign out anyway?':
+      'Anda memiliki {0} perubahan offline yang belum tersinkron. Keluar akan menghapus data lokal di perangkat ini dan perubahan yang belum tersinkron dapat hilang. Tetap keluar?',
+  'Sign out of your account? Local cached data and device lock settings will be cleared from this device, while your cloud data remains safe.':
+      'Keluar dari akun Anda? Data cache lokal dan pengaturan kunci di perangkat ini akan dibersihkan, sementara data cloud Anda tetap aman.',
   'Transdermal gel (daily, rough)': 'Gel transdermal (harian, perkiraan)',
-  'Window peak ≈ {0} {1} · trough ≈ {2} {1}': 'Puncak rentang ≈ {0} {1} · terendah ≈ {2} {1}',
+  'Window peak ≈ {0} {1} · trough ≈ {2} {1}':
+      'Puncak rentang ≈ {0} {1} · terendah ≈ {2} {1}',
   'Include upcoming doses': 'Sertakan dosis terjadwal',
-  'Projection assumes upcoming doses are taken as scheduled.': 'Proyeksi mengasumsikan dosis mendatang dijalankan sesuai jadwal.',
+  'Projection assumes upcoming doses are taken as scheduled.':
+      'Proyeksi mengasumsikan dosis mendatang dijalankan sesuai jadwal.',
   'Doctor visit summary': 'Ringkasan konsultasi dokter',
   'Generated: {0}': 'Dibuat: {0}',
   'Period: {0} to {1}': 'Periode: {0} sampai {1}',
   'Active therapies': 'Terapi aktif',
   'None': 'Tidak ada',
   'Adherence': 'Kepatuhan',
-  'No scheduled doses in this period': 'Tidak ada jadwal dosis pada periode ini',
+  'No scheduled doses in this period':
+      'Tidak ada jadwal dosis pada periode ini',
   'Lab results in period': 'Hasil lab dalam periode',
   'No lab results in this period': 'Tidak ada hasil lab pada periode ini',
   'Target': 'Target',
   'Model estimates now': 'Perkiraan model saat ini',
   'model estimate, not a lab result': 'perkiraan model, bukan hasil lab',
-  'Generated by Lunera for discussion with your clinician. Estimates are statistical models, not diagnoses.': 'Dibuat oleh Lunera untuk diskusi dengan dokter Anda. Perkiraan berupa model statistik, bukan diagnosis.',
-  'Share a text summary of therapies, adherence and lab results': 'Bagikan ringkasan teks terapi, kepatuhan, dan hasil lab',
-  'This summary contains personal health information. Only share it with people you trust.': 'Ringkasan ini berisi informasi kesehatan pribadi. Bagikan hanya kepada orang yang Anda percaya.',
+  'Generated by Lunera for discussion with your clinician. Estimates are statistical models, not diagnoses.':
+      'Dibuat oleh Lunera untuk diskusi dengan dokter Anda. Perkiraan berupa model statistik, bukan diagnosis.',
+  'Share a text summary of therapies, adherence and lab results':
+      'Bagikan ringkasan teks terapi, kepatuhan, dan hasil lab',
+  'This summary contains personal health information. Only share it with people you trust.':
+      'Ringkasan ini berisi informasi kesehatan pribadi. Bagikan hanya kepada orang yang Anda percaya.',
   '3 months': '3 bulan',
   '6 months': '6 bulan',
   'Summary copied to clipboard.': 'Ringkasan disalin ke papan klip.',
   'Lunera doctor visit summary': 'Ringkasan konsultasi dokter Lunera',
   'Passphrase cannot be empty.': 'Kata sandi tidak boleh kosong.',
-  'This encrypted backup is damaged or unsupported.': 'Berkas cadangan terenkripsi ini rusak atau tidak didukung.',
+  'This encrypted backup is damaged or unsupported.':
+      'Berkas cadangan terenkripsi ini rusak atau tidak didukung.',
   'Wrong passphrase or damaged file.': 'Kata sandi salah atau berkas rusak.',
   'Export backup': 'Ekspor cadangan',
   'Plain JSON': 'JSON biasa',
@@ -898,14 +1085,17 @@ const Map<String, String> idStrings = {
   'Confirm passphrase': 'Konfirmasi kata sandi',
   'Use at least 8 characters.': 'Gunakan minimal 8 karakter.',
   'Passphrases do not match.': 'Kata sandi tidak cocok.',
-  'If you forget this passphrase, the backup cannot be recovered.': 'Jika Anda lupa kata sandi ini, berkas cadangan tidak dapat dipulihkan.',
+  'If you forget this passphrase, the backup cannot be recovered.':
+      'Jika Anda lupa kata sandi ini, berkas cadangan tidak dapat dipulihkan.',
   'Encrypted backup': 'Cadangan terenkripsi',
   'Unlock': 'Buka',
   'Snooze 15 min': 'Tunda 15 mnt',
   'Snooze 30 min': 'Tunda 30 mnt',
   'Care & HRT Guides': 'Panduan Perawatan & HRT',
-  'Evidence-informed articles, dosing math & safety tips': 'Artikel terkurasi, hitungan dosis & tips keamanan',
-  'Calm, evidence-informed guides for every path — whether doctor-guided or independent.': 'Panduan tenang berbasis bukti untuk setiap jalan — baik didampingi dokter maupun mandiri.',
+  'Evidence-informed articles, dosing math & safety tips':
+      'Artikel terkurasi, hitungan dosis & tips keamanan',
+  'Calm, evidence-informed guides for every path — whether doctor-guided or independent.':
+      'Panduan tenang berbasis bukti untuk setiap jalan — baik didampingi dokter maupun mandiri.',
   'Basics & Regimens': 'Dasar & Regimen',
   'Labs & Levels': 'Lab & Kadar Hormon',
   'Safety & Harm Reduction': 'Keamanan & Harm Reduction',
@@ -922,24 +1112,31 @@ const Map<String, String> idStrings = {
   'Log Lab Result': 'Catat Hasil Lab',
   'Open Security Settings': 'Buka Pengaturan Keamanan',
   'Open Insights': 'Buka Insights',
-  'This guide provides general educational and harm-reduction information only. It is not a prescription or substitute for individualized medical care.': 'Panduan ini hanya berisi informasi edukatif umum dan pengurangan risiko (harm reduction). Ini bukan resep atau pengganti perawatan medis pribadi.',
+  'This guide provides general educational and harm-reduction information only. It is not a prescription or substitute for individualized medical care.':
+      'Panduan ini hanya berisi informasi edukatif umum dan pengurangan risiko (harm reduction). Ini bukan resep atau pengganti perawatan medis pribadi.',
   'Trusted references': 'Referensi tepercaya',
   'Peak, Trough & Labs Guide': 'Panduan Peak, Trough & Lab',
   'Site Rotation Guide': 'Panduan Rotasi Titik Suntik',
   'Twilight Sanctuary': 'Suaka Senja',
-  'Calming ripples, safety practice & moonlight lantern': 'Riak penenang, latihan keamanan & lentera cahaya bulan',
-  'Gentle breathing, safety practice, and a quiet light — always at your own pace.': 'Napas tenang, latihan keamanan, dan cahaya lembut — selalu sesuai ritmemu sendiri.',
+  'Calming ripples, safety practice & moonlight lantern':
+      'Riak penenang, latihan keamanan & lentera cahaya bulan',
+  'Gentle breathing, safety practice, and a quiet light — always at your own pace.':
+      'Napas tenang, latihan keamanan, dan cahaya lembut — selalu sesuai ritmemu sendiri.',
   'Starlight Ripples & Breath': 'Riak Bintang & Napas Tenang',
-  'Tap ripples and follow a slow 4-4-6 breath to ease tension': 'Sentuh riak air dan ikuti ritme napas pelan 4-4-6 untuk meredakan ketegangan',
+  'Tap ripples and follow a slow 4-4-6 breath to ease tension':
+      'Sentuh riak air dan ikuti ritme napas pelan 4-4-6 untuk meredakan ketegangan',
   'No score • Calming': 'Tanpa skor • Menenangkan',
   'Safety & Dosing Sense': 'Kepekaan Keamanan & Dosis',
-  '5-question practice on dosing math, labs, and safe care': 'Latihan 5 soal seputar hitungan dosis, lab, dan perawatan aman',
+  '5-question practice on dosing math, labs, and safe care':
+      'Latihan 5 soal seputar hitungan dosis, lab, dan perawatan aman',
   'Best: {0}/5': 'Terbaik: {0}/5',
   '5 quick questions': '5 pertanyaan singkat',
   'Moonlight Lantern': 'Lentera Cahaya Bulan',
-  'Light a quiet spark each day you visit — never wilts if you rest': 'Nyalakan percik cahaya lembut tiap hari berkunjung — tak pernah layu saat istirahat',
+  'Light a quiet spark each day you visit — never wilts if you rest':
+      'Nyalakan percik cahaya lembut tiap hari berkunjung — tak pernah layu saat istirahat',
   '{0} {0?spark|sparks}': '{0} percik cahaya',
-  'No timers, leaderboards, or penalties here. Step in whenever you need a calm minute or a quick safety refresher.': 'Tidak ada timer, papan skor, atau penalti di sini. Mampirlah kapan pun kamu butuh satu menit yang tenang atau penyegaran singkat.',
+  'No timers, leaderboards, or penalties here. Step in whenever you need a calm minute or a quick safety refresher.':
+      'Tidak ada timer, papan skor, atau penalti di sini. Mampirlah kapan pun kamu butuh satu menit yang tenang atau penyegaran singkat.',
   'Inhale softly': 'Tarik napas pelan',
   'Hold gently': 'Tahan lembut',
   'Exhale slowly': 'Hembuskan perlahan',
@@ -947,18 +1144,23 @@ const Map<String, String> idStrings = {
   'Paused': 'Dijeda',
   'Gentle haptics on': 'Getar lembut aktif',
   'Gentle haptics off': 'Getar lembut mati',
-  'Tap anywhere on the lake to send ripples of light': 'Ketuk di mana saja pada permukaan danau untuk memancarkan riak cahaya',
+  'Tap anywhere on the lake to send ripples of light':
+      'Ketuk di mana saja pada permukaan danau untuk memancarkan riak cahaya',
   'Resume breath': 'Lanjutkan napas',
   'Pause breath': 'Jeda napas',
   'Question {0} of {1}': 'Pertanyaan {0} dari {1}',
   'Next question': 'Pertanyaan berikutnya',
   'See summary': 'Lihat ringkasan',
   'Great safety instincts!': 'Naluri keamananmu sangat baik!',
-  'You nailed every safety and dosing check this round. Keep carrying that calm confidence.': 'Kamu menjawab tepat seluruh pengecekan keamanan dan dosis di ronde ini. Pertahankan ketenangan dan ketelitianmu.',
+  'You nailed every safety and dosing check this round. Keep carrying that calm confidence.':
+      'Kamu menjawab tepat seluruh pengecekan keamanan dan dosis di ronde ini. Pertahankan ketenangan dan ketelitianmu.',
   'Solid awareness!': 'Pemahaman yang mantap!',
-  'You have a strong grasp of the essentials. Revisit any explanation or guide anytime you want a refresher.': 'Kamu sudah menguasai poin-poin penting. Kunjungi kembali penjelasan atau panduan kapan saja jika ingin mengulang.',
-  'Every practice builds confidence': 'Setiap latihan membangun rasa percaya diri',
-  'No pressure at all—these calculations and timing rules take a little practice. The guides are always right here offline.': 'Tak perlu terbebani—hitungan dan aturan waktu ini memang perlu sedikit latihan. Panduannya selalu siap offline di sini.',
+  'You have a strong grasp of the essentials. Revisit any explanation or guide anytime you want a refresher.':
+      'Kamu sudah menguasai poin-poin penting. Kunjungi kembali penjelasan atau panduan kapan saja jika ingin mengulang.',
+  'Every practice builds confidence':
+      'Setiap latihan membangun rasa percaya diri',
+  'No pressure at all—these calculations and timing rules take a little practice. The guides are always right here offline.':
+      'Tak perlu terbebani—hitungan dan aturan waktu ini memang perlu sedikit latihan. Panduannya selalu siap offline di sini.',
   'Round Complete': 'Sesi Selesai',
   'Personal best: {0}/5': 'Skor terbaik pribadi: {0}/5',
   'Play another round': 'Mainkan sesi lain',
@@ -973,8 +1175,10 @@ const Map<String, String> idStrings = {
   'Aurora Sanctuary': 'Suaka Aurora',
   '{0} {0?spark|sparks} lit': '{0} percik cahaya menyala',
   'Light today\'s gentle spark': 'Nyalakan percik lembut hari ini',
-  'Today\'s spark is glowing. Come back whenever you like.': 'Percik hari ini sudah bersinar. Kembalilah kapan pun kamu mau.',
-  'Your lantern never dims or resets if you skip days. Rest is part of care.': 'Lenteramu tidak pernah meredup atau terulang jika melewatkan hari. Istirahat adalah bagian dari perawatan.',
+  'Today\'s spark is glowing. Come back whenever you like.':
+      'Percik hari ini sudah bersinar. Kembalilah kapan pun kamu mau.',
+  'Your lantern never dims or resets if you skip days. Rest is part of care.':
+      'Lenteramu tidak pernah meredup atau terulang jika melewatkan hari. Istirahat adalah bagian dari perawatan.',
   'Very Deep Voice': 'Suara Sangat Berat',
   'Deep Voice': 'Suara Berat',
   'Low Conversational': 'Rendah Santai',
@@ -986,16 +1190,19 @@ const Map<String, String> idStrings = {
   'Very low, heavy speaking tone': 'Nada bicara sangat rendah dan berat',
   'Steady, deep speaking voice': 'Nada bicara rendah yang mantap',
   'Relaxed, everyday lower voice': 'Suara rendah santai untuk obrolan harian',
-  'Middle voice leaning slightly low': 'Suara tengah yang sedikit condong rendah',
+  'Middle voice leaning slightly low':
+      'Suara tengah yang sedikit condong rendah',
   'Balanced gender-neutral middle tone': 'Nada tengah seimbang yang netral',
-  'Gentle, natural feminine speaking voice': 'Suara feminin lembut yang natural untuk bicara',
+  'Gentle, natural feminine speaking voice':
+      'Suara feminin lembut yang natural untuk bicara',
   'Light, bright everyday feminine voice': 'Suara feminin ringan dan jernih',
   'Very high, airy speaking tone': 'Nada bicara paling tinggi dan ringan',
   'Short prompt': 'Kalimat singkat',
   'Article passage': 'Wacana / Artikel',
   '~{0}s read': 'Bacaan ~{0} dtk',
   'Shuffle passage': 'Ganti wacana',
-  'Type or paste any comfortable sentence or short paragraph to read aloud...': 'Ketik atau tempel kalimat atau paragraf pendek yang nyaman dibaca...',
+  'Type or paste any comfortable sentence or short paragraph to read aloud...':
+      'Ketik atau tempel kalimat atau paragraf pendek yang nyaman dibaca...',
   'Target: {0}–{1} Hz': 'Target: {0}–{1} Hz',
   'Adjust target': 'Atur target',
   'Target zone': 'Zona target',
@@ -1011,7 +1218,8 @@ const Map<String, String> idStrings = {
   'Progress trend': 'Tren perkembangan',
   '{0} sessions': '{0} sesi',
   'Overall avg: {0} Hz': 'Rata-rata keseluruhan: {0} Hz',
-  'Target zone shaded • Solid line shows session average': 'Area target diarsir • Garis utuh menunjukkan rata-rata sesi',
+  'Target zone shaded • Solid line shows session average':
+      'Area target diarsir • Garis utuh menunjukkan rata-rata sesi',
   'Warm / Larger Space': 'Hangat / Ruang Lebih Besar',
   'Balanced Resonance': 'Resonansi Seimbang',
   'Bright / Smaller Space': 'Cerah / Ruang Lebih Kecil',
@@ -1024,9 +1232,11 @@ const Map<String, String> idStrings = {
   'Bright tone': 'Cerah',
   'Light weight': 'Ringan',
   'Heavy weight': 'Berat',
-  'Approximate visual guide from your phone mic — resonance & comfort matter most.': 'Panduan visual perkiraan dari mikrofon HP — kenyamanan tenggorokan tetap utama.',
+  'Approximate visual guide from your phone mic — resonance & comfort matter most.':
+      'Panduan visual perkiraan dari mikrofon HP — kenyamanan tenggorokan tetap utama.',
   'Reference tone': 'Nada referensi',
-  'Tap a gentle tone as a starting anchor before speaking.': 'Ketuk nada pelan sebagai patokan awal sebelum berbicara.',
+  'Tap a gentle tone as a starting anchor before speaking.':
+      'Ketuk nada pelan sebagai patokan awal sebelum berbicara.',
   'Deep tone': 'Berat',
   'Warm femme': 'Feminin Hangat',
   'Bright femme': 'Feminin Cerah',
@@ -1041,32 +1251,46 @@ const Map<String, String> idStrings = {
   'Start step': 'Mulai langkah',
   'Restart routine': 'Ulangi rutinitas',
   'Warm-up complete!': 'Pemanasan selesai!',
-  'Your voice is gently warmed up. Switch to Live Voice Test anytime you feel ready.': 'Suaramu sudah dipanaskan dengan lembut. Pindah ke Tes Suara Langsung kapan pun kamu siap.',
+  'Your voice is gently warmed up. Switch to Live Voice Test anytime you feel ready.':
+      'Suaramu sudah dipanaskan dengan lembut. Pindah ke Tes Suara Langsung kapan pun kamu siap.',
   'Neck, Jaw & Shoulder Release': 'Rilekskan Leher, Rahang & Bahu',
-  'Let your shoulders drop and gently unclench your jaw for a tension-free start.': 'Turunkan bahumu perlahan dan kendurkan rahang agar tenggorokan bebas ketegangan.',
-  'Roll shoulders back twice and take 3 slow breaths through your mouth like fogging glass.': 'Putar bahu ke belakang dua kali dan tarik 3 napas pelan seperti mengembun kaca.',
+  'Let your shoulders drop and gently unclench your jaw for a tension-free start.':
+      'Turunkan bahumu perlahan dan kendurkan rahang agar tenggorokan bebas ketegangan.',
+  'Roll shoulders back twice and take 3 slow breaths through your mouth like fogging glass.':
+      'Putar bahu ke belakang dua kali dan tarik 3 napas pelan seperti mengembun kaca.',
   'SOVTE: Straw or Lip Trill': 'SOVTE: Sedotan atau Getar Bibir',
-  'Hum softly into an imaginary straw or do gentle lip trills to lighten vocal weight.': 'Bergumam pelan lewat sedotan imajiner atau getarkan bibir ringan untuk meringankan suara.',
-  'Keep airflow steady and easy—if it tickles or feels tight, soften the volume.': 'Jaga aliran udara tetap ringan—kalau terasa mengganjal, kecilkan volume.',
+  'Hum softly into an imaginary straw or do gentle lip trills to lighten vocal weight.':
+      'Bergumam pelan lewat sedotan imajiner atau getarkan bibir ringan untuk meringankan suara.',
+  'Keep airflow steady and easy—if it tickles or feels tight, soften the volume.':
+      'Jaga aliran udara tetap ringan—kalau terasa mengganjal, kecilkan volume.',
   'Small Space Resonance Glide': 'Geser Resonansi Ruang Kecil',
-  'Whisper softly from "ahh" toward "ih/ee" without forcing pitch, feeling sound move forward.': 'Berbisik pelan dari "ahh" ke "ih/ee" tanpa memaksa nada tinggi, rasakan suara maju ke depan.',
-  'Think of sounding smaller and lighter rather than louder.': 'Bayangkan ruang mulut terasa lebih kecil dan ringan, bukan lebih keras.',
+  'Whisper softly from "ahh" toward "ih/ee" without forcing pitch, feeling sound move forward.':
+      'Berbisik pelan dari "ahh" ke "ih/ee" tanpa memaksa nada tinggi, rasakan suara maju ke depan.',
+  'Think of sounding smaller and lighter rather than louder.':
+      'Bayangkan ruang mulut terasa lebih kecil dan ringan, bukan lebih keras.',
   'Hydration & Soft Hum': 'Minum Air & Gumam Nyaman',
-  'Take a sip of room-temperature water and end with an easy conversational hum.': 'Minum seteguk air bersuhu ruang lalu akhiri dengan gumam santai di nada bicara nyaman.',
-  'Hydrated vocal folds vibrate smoothly with noticeably less effort.': 'Pita suara yang terhidrasi bergetar lebih halus dengan usaha jauh lebih ringan.',
+  'Take a sip of room-temperature water and end with an easy conversational hum.':
+      'Minum seteguk air bersuhu ruang lalu akhiri dengan gumam santai di nada bicara nyaman.',
+  'Hydrated vocal folds vibrate smoothly with noticeably less effort.':
+      'Pita suara yang terhidrasi bergetar lebih halus dengan usaha jauh lebih ringan.',
   'Low / Masculine Range': 'Rentang Rendah / Maskulin',
-  'Search guides, topics, or keywords...': 'Cari panduan, topik, atau kata kunci...',
+  'Search guides, topics, or keywords...':
+      'Cari panduan, topik, atau kata kunci...',
   'Clear search': 'Hapus pencarian',
-  'No guides match your search.': 'Tidak ada panduan yang cocok dengan pencarianmu.',
+  'No guides match your search.':
+      'Tidak ada panduan yang cocok dengan pencarianmu.',
   'Last 90 days': '90 hari terakhir',
-  'No entries in this date range.': 'Tidak ada catatan pada rentang tanggal ini.',
+  'No entries in this date range.':
+      'Tidak ada catatan pada rentang tanggal ini.',
   'Converted equivalents:': 'Setara dalam satuan lain:',
   'Vial & syringe calculator': 'Kalkulator vial & syringe',
-  'Draw volume: {0} mL ({1} U-100 units)': 'Volume tarik: {0} mL ({1} unit U-100)',
+  'Draw volume: {0} mL ({1} U-100 units)':
+      'Volume tarik: {0} mL ({1} unit U-100)',
   'Symptoms': 'Gejala',
   'Symptom check-in': 'Check-in gejala',
   'Symptoms & check-in': 'Gejala & kondisi',
-  'Fill in at least one: mood, symptoms, body changes, or a note.': 'Isi minimal satu: suasana hati, gejala, perubahan tubuh, atau catatan.',
+  'Fill in at least one: mood, symptoms, body changes, or a note.':
+      'Isi minimal satu: suasana hati, gejala, perubahan tubuh, atau catatan.',
   'Steady energy': 'Energi stabil',
   'Fatigue / Low energy': 'Lelah / Energi rendah',
   'Restful sleep': 'Tidur nyenyak',
@@ -1079,9 +1303,11 @@ const Map<String, String> idStrings = {
   'Calm focus': 'Fokus & tenang',
   'Reported symptoms & check-ins': 'Gejala & kondisi yang tercatat',
   'Health & Lab Timing ✦': 'Pengingat Kesehatan & Lab ✦',
-  'Upcoming schedule check-in reminder.': 'Pengingat jadwal pemeriksaan mendatang.',
+  'Upcoming schedule check-in reminder.':
+      'Pengingat jadwal pemeriksaan mendatang.',
   'Trough bloodwork window': 'Waktu cek lab trough',
-  'Consider bloodwork before taking {0} at {1}.': 'Pertimbangkan ambil sampel darah sebelum {0} pukul {1}.',
+  'Consider bloodwork before taking {0} at {1}.':
+      'Pertimbangkan ambil sampel darah sebelum {0} pukul {1}.',
   'Trough reminder set': 'Pengingat trough aktif',
   'Remind me 2h before trough': 'Ingatkan 2 jam sebelum trough',
   'Milestones': 'Milestone',
@@ -1090,8 +1316,10 @@ const Map<String, String> idStrings = {
   '6 Months': '6 Bulan',
   '1 Year': '1 Tahun',
   'Personal Win': 'Pencapaian Pribadi',
-  'Stored privately on this device behind your PIN / biometric lock.': 'Tersimpan privat hanya di perangkat ini di balik kunci PIN / biometrik.',
-  'No milestones saved yet. Record meaningful steps or private progress photos here.': 'Belum ada milestone tersimpan. Catat momen penting atau foto progres privatmu di sini.',
+  'Stored privately on this device behind your PIN / biometric lock.':
+      'Tersimpan privat hanya di perangkat ini di balik kunci PIN / biometrik.',
+  'No milestones saved yet. Record meaningful steps or private progress photos here.':
+      'Belum ada milestone tersimpan. Catat momen penting atau foto progres privatmu di sini.',
   'Add Milestone': 'Tambah Milestone',
   'Edit milestone': 'Ubah milestone',
   'Delete this milestone?': 'Hapus milestone ini?',
@@ -1104,25 +1332,34 @@ const Map<String, String> idStrings = {
   'Neutral / Overlap Range': 'Rentang Netral / Overlap',
   'Bright / Feminine Range': 'Rentang Cerah / Feminin',
   'Voice Resonance & Pacing Studio': 'Studio Resonansi & Ritme Suara',
-  'Tap 5 times to unlock the optional Voice Pitch Studio in Twilight Sanctuary.': 'Ketuk 5 kali untuk membuka Voice Pitch Studio opsional di Suaka Senja.',
-  'Voice Pitch Studio unlocked in Twilight Sanctuary.': 'Voice Pitch Studio terbuka di Suaka Senja.',
+  'Tap 5 times to unlock the optional Voice Pitch Studio in Twilight Sanctuary.':
+      'Ketuk 5 kali untuk membuka Voice Pitch Studio opsional di Suaka Senja.',
+  'Voice Pitch Studio unlocked in Twilight Sanctuary.':
+      'Voice Pitch Studio terbuka di Suaka Senja.',
   'Open Voice Pitch Studio': 'Buka Voice Pitch Studio',
-  'Gentle voice warm-up, reading prompts & live pitch category check': 'Pemanasan suara lembut, kalimat latihan & cek kategori pitch langsung',
+  'Gentle voice warm-up, reading prompts & live pitch category check':
+      'Pemanasan suara lembut, kalimat latihan & cek kategori pitch langsung',
   'Optional • On-device': 'Opsional • Di perangkat',
   'Voice Pitch Studio': 'Studio Pitch Suara',
-  'Voice practice can sometimes feel heavy. Live mic checks are 100% optional, run in memory without saving recordings, and you can switch to Quiet Warm-up or hide this studio anytime.': 'Latihan suara terkadang bisa terasa berat. Cek mikrofon langsung bersifat 100% opsional, diproses di memori tanpa menyimpan rekaman, dan kamu bisa beralih ke Pemanasan Tenang atau menyembunyikan studio ini kapan saja.',
+  'Voice practice can sometimes feel heavy. Live mic checks are 100% optional, run in memory without saving recordings, and you can switch to Quiet Warm-up or hide this studio anytime.':
+      'Latihan suara terkadang bisa terasa berat. Cek mikrofon langsung bersifat 100% opsional, diproses di memori tanpa menyimpan rekaman, dan kamu bisa beralih ke Pemanasan Tenang atau menyembunyikan studio ini kapan saja.',
   'Live Voice Test': 'Tes Suara Langsung',
   'Quiet Warm-up': 'Pemanasan Tenang',
   'Reading prompt': 'Kalimat latihan',
   'Shuffle prompt': 'Ganti kalimat',
   'Edit custom text': 'Ubah teks sendiri',
   'Custom reading prompt': 'Kalimat latihan sendiri',
-  'Type a comfortable sentence to read aloud...': 'Ketik kalimat yang nyaman untuk dibaca bersuara...',
-  'Speak comfortably at your own pace...': 'Berbicaralah dengan nyaman sesuai ritmemu...',
+  'Type a comfortable sentence to read aloud...':
+      'Ketik kalimat yang nyaman untuk dibaca bersuara...',
+  'Speak comfortably at your own pace...':
+      'Berbicaralah dengan nyaman sesuai ritmemu...',
   'Press Start when you feel ready': 'Tekan Mulai saat kamu sudah merasa siap',
-  'Pitch is only one piece alongside resonance & comfort.': 'Pitch hanyalah satu bagian di samping resonansi dan kenyamanan.',
-  'Microphone permission is needed for live pitch checks. You can still use Quiet Warm-up anytime.': 'Izin mikrofon diperlukan untuk cek pitch langsung. Kamu tetap bisa memakai Pemanasan Tenang kapan saja.',
-  'Microphone input could not be started on this device. Quiet Warm-up remains available.': 'Input mikrofon tidak dapat dijalankan di perangkat ini. Pemanasan Tenang tetap tersedia.',
+  'Pitch is only one piece alongside resonance & comfort.':
+      'Pitch hanyalah satu bagian di samping resonansi dan kenyamanan.',
+  'Microphone permission is needed for live pitch checks. You can still use Quiet Warm-up anytime.':
+      'Izin mikrofon diperlukan untuk cek pitch langsung. Kamu tetap bisa memakai Pemanasan Tenang kapan saja.',
+  'Microphone input could not be started on this device. Quiet Warm-up remains available.':
+      'Input mikrofon tidak dapat dijalankan di perangkat ini. Pemanasan Tenang tetap tersedia.',
   'Start live voice check': 'Mulai cek suara langsung',
   'Stop voice check': 'Hentikan cek suara',
   'Session average: {0} Hz ({1}–{2} Hz)': 'Rata-rata sesi: {0} Hz ({1}–{2} Hz)',
@@ -1130,29 +1367,41 @@ const Map<String, String> idStrings = {
   'Save result (numbers only)': 'Simpan hasil (angka saja)',
   'Saved results': 'Hasil tersimpan',
   'Clear all': 'Hapus semua',
-  'Numbers and category only — zero audio is ever stored.': 'Hanya angka dan kategori — tidak ada audio yang pernah disimpan.',
+  'Numbers and category only — zero audio is ever stored.':
+      'Hanya angka dan kategori — tidak ada audio yang pernah disimpan.',
   'No saved pitch results yet.': 'Belum ada hasil pitch yang tersimpan.',
-  'Relax your jaw and shoulders. Hum gently on a comfortable note without pushing volume.': 'Rilekskan rahang dan bahu. Bergumamlah pelan pada nada yang nyaman tanpa memaksakan volume.',
+  'Relax your jaw and shoulders. Hum gently on a comfortable note without pushing volume.':
+      'Rilekskan rahang dan bahu. Bergumamlah pelan pada nada yang nyaman tanpa memaksakan volume.',
   'Pause warm-up': 'Jeda pemanasan',
   'Start 60s warm-up': 'Mulai pemanasan 60 dtk',
   'Hide Voice Pitch Studio': 'Sembunyikan Studio Pitch Suara',
   'Get started in 3 calm steps': 'Mulai dengan 3 langkah tenang',
   'Add your first therapy': 'Tambahkan terapi pertamamu',
-  'Set up your medication, route, and schedule': 'Atur obat, cara pemakaian, dan jadwalmu',
+  'Set up your medication, route, and schedule':
+      'Atur obat, cara pemakaian, dan jadwalmu',
   'Protect your privacy': 'Lindungi privasimu',
-  'Optional PIN lock, Decoy Calculator & discreet reminders': 'Kunci PIN opsional, Kalkulator Penyamaran & pengingat tersamar',
+  'Optional PIN lock, Decoy Calculator & discreet reminders':
+      'Kunci PIN opsional, Kalkulator Penyamaran & pengingat tersamar',
   'Read the Start Here guide': 'Baca panduan Mulai di Sini',
-  'Calm safety, dosing & harm-reduction essentials': 'Ringkasan keselamatan, hitungan dosis & harm reduction',
+  'Calm safety, dosing & harm-reduction essentials':
+      'Ringkasan keselamatan, hitungan dosis & harm reduction',
   'Mark taken': 'Tandai diminum',
-  'Est. ~{0} {0?week|weeks} left (until {1})': 'Perkiraan cukup ~{0} minggu lagi (hingga {1})',
-  'Est. ~{0} {0?day|days} left (until {1})': 'Perkiraan cukup ~{0} hari lagi (hingga {1})',
+  'Est. ~{0} {0?week|weeks} left (until {1})':
+      'Perkiraan cukup ~{0} minggu lagi (hingga {1})',
+  'Est. ~{0} {0?day|days} left (until {1})':
+      'Perkiraan cukup ~{0} hari lagi (hingga {1})',
   'Trough & Bloodwork Timing': 'Waktu Trough & Cek Lab',
-  'Best trough blood-draw window: right before {0} on {1}': 'Waktu ambil darah trough terbaik: tepat sebelum {0} pada {1}',
-  'No bloodwork logged yet — aim to test at trough after 4–8 weeks on a steady routine.': 'Belum ada hasil lab tercatat — usahakan cek di titik trough setelah 4–8 minggu rutinitas stabil.',
-  'Last bloodwork was {0} {0?day|days} ago — consider a routine 3-month check-in.': 'Cek lab terakhir {0} hari yang lalu — pertimbangkan pemeriksaan rutin 3 bulan.',
-  'Last bloodwork: {0} {0?day|days} ago • Next 3-month check: {1}': 'Cek lab terakhir: {0} hari lalu • Cek 3 bulan berikutnya: {1}',
+  'Best trough blood-draw window: right before {0} on {1}':
+      'Waktu ambil darah trough terbaik: tepat sebelum {0} pada {1}',
+  'No bloodwork logged yet — aim to test at trough after 4–8 weeks on a steady routine.':
+      'Belum ada hasil lab tercatat — usahakan cek di titik trough setelah 4–8 minggu rutinitas stabil.',
+  'Last bloodwork was {0} {0?day|days} ago — consider a routine 3-month check-in.':
+      'Cek lab terakhir {0} hari yang lalu — pertimbangkan pemeriksaan rutin 3 bulan.',
+  'Last bloodwork: {0} {0?day|days} ago • Next 3-month check: {1}':
+      'Cek lab terakhir: {0} hari lalu • Cek 3 bulan berikutnya: {1}',
   'Export format': 'Format ekspor',
-  'Choose how you want to share your doctor visit summary.': 'Pilih cara membagikan ringkasan konsultasi doktermu.',
+  'Choose how you want to share your doctor visit summary.':
+      'Pilih cara membagikan ringkasan konsultasi doktermu.',
   'Text / Markdown': 'Teks / Markdown',
   'PDF Document': 'Dokumen PDF',
   'Next: {0}': 'Jadwal: {0}',
@@ -1162,4 +1411,255 @@ const Map<String, String> idStrings = {
   'Therapies': 'Terapi',
   'Doses': 'Dosis',
   'Journey': 'Perjalanan',
+  'Switch to month view': 'Beralih ke tampilan bulanan',
+  'Switch to week view': 'Beralih ke tampilan mingguan',
+  'Optimal Trough Lab Window': 'Waktu Tes Lab Trough Terbaik',
+  'Best window for routine hormone blood tests is right before taking your {0} dose to capture accurate baseline levels.':
+      'Waktu terbaik untuk tes darah hormon rutin adalah tepat sebelum dosis {0} untuk mengukur kadar dasar tubuh yang akurat.',
+  'Supply Horizon Alert': 'Peringatan Stok Habis',
+  '{0} is projected to deplete today. Check supplies tab or order assistant.':
+      '{0} diperkirakan habis hari ini. Periksa tab stok atau asisten penjemputan.',
+  'Depleted • Reorder immediately': 'Habis • Pesan ulang segera',
+  'Order now • Depletes on {0}': 'Pesan sekarang • Habis pada {0}',
+  'Reorder by {0} ({1}-day buffer)': 'Pesan sebelum {0} (jeda kirim {1} hari)',
+  '{0} {0?item needs|items need} urgent reorder':
+      '{0} barang memerlukan pemesanan ulang segera',
+  'Stock is under 7 days. Plan your reorder now to prevent gaps in therapy.':
+      'Stok tersisa di bawah 7 hari. Rencanakan pemesanan ulangmu agar terapi tidak terputus.',
+  'Refill window approaching for {0} {0?item|items}':
+      'Jendela pemesanan ulang mendekat untuk {0} barang',
+  'Recommended reorder date approaching within the next 7–14 days.':
+      'Tanggal aman pemesanan ulang disarankan dalam 7–14 hari ke depan.',
+  'A new day begins. Remember to breathe and move at your own serene pace.':
+      'Hari baru dimulai. Tarik napas dalam dan bergeraklah dengan ritme tenangmu.',
+  'Back to status': 'Kembali ke status',
+  'Be proud of showing up for yourself today.':
+      'Banggalah karena telah hadir untuk dirimu sendiri hari ini.',
+  'Evening Serenity': 'Ketenangan Senja',
+  'Every phase of your journey is entirely your own.':
+      'Setiap fase perjalananmu sepenuhnya adalah milikmu.',
+  'Gentle Horizon': 'Fajar Mendekat',
+  'Gentle Post-Care': 'Perawatan Pasca-Dosis',
+  'Gentle Thought': 'Pesan Lembut',
+  'Hide for today': 'Sembunyikan untuk hari ini',
+  'Honor where you are in this very moment.':
+      'Hargai di mana pun posisimu saat ini.',
+  'Injected recently. Take rest, stay hydrated, and be gentle with yourself.':
+      'Baru saja menyelesaikan suntikan. Beristirahatlah, penuhi cairan tubuh, dan jaga dirimu dengan lembut.',
+  'Morning Light': 'Cahaya Pagi',
+  'Nurturing Rhythm': 'Ritme yang Menenangkan',
+  'Quiet Night': 'Malam yang Sunyi',
+  'Radiant Afternoon': 'Siang yang Hangat',
+  'Recent dose logged. Take today at your own peaceful pace.':
+      'Dosis baru saja dicatat. Jalani hari ini dengan ritme damaimu sendiri.',
+  'Rest is not a detour; it is part of the path.':
+      'Istirahat bukanlah jalan memutar; itu adalah bagian dari perjalanan.',
+  'Rest your mind. The stars will keep watch until dawn.':
+      'Istirahatkan pikiranmu. Bintang-bintang akan menemani hingga fajar.',
+  'Small steady steps weave the deepest changes.':
+      'Langkah-langkah kecil yang konsisten merajut perubahan paling bermakna.',
+  'Take a deep, slow breath. You are safe here.':
+      'Tarik napas dalam dan perlahan. Kamu aman di sini.',
+  'Take a quiet moment to stretch and appreciate how far you have come.':
+      'Luangkan sejenak waktu untuk relaksasi dan hargai sejauh mana langkahmu telah berjalan.',
+  'Tap for another thought': 'Ketuk untuk pesan lainnya',
+  'Tap for gentle thought': 'Ketuk untuk pesan lembut',
+  'Twilight settles in. Unwind and let go of today\'s rush.':
+      'Senja telah tiba. Rilekskan diri dan lepaskan kepenatan hari ini.',
+  'You are honoring yourself with every gentle choice.':
+      'Kamu menghargai dirimu dalam setiap pilihan lembut yang kamu ambil.',
+  'Your upcoming dose ({0}) is approaching quietly.':
+      'Jadwal dosis berikutnya ({0}) kian mendekat dengan tenang.',
+  'Milestones & Anniversaries': 'Pencapaian & Peringatan',
+  'Physical & Body Shifts': 'Perubahan Fisik & Tubuh',
+  'Affirming Style & Self': 'Gaya & Penerimaan Diri',
+  'Soul & Reflections': 'Jiwa & Refleksi',
+  'Lunera Moments': 'Momen Lunera',
+  'A private visual scrapbook celebrating milestones and cherished memories on your path.':
+      'Album visual pribadi untuk merayakan pencapaian dan kenangan berharga dalam perjalananmu.',
+  'Private visual scrapbook of milestones & reflections':
+      'Album visual pribadi untuk pencapaian & refleksi',
+  'New Moment': 'Momen Baru',
+  'All Moments': 'Semua Momen',
+  'No visual moments yet': 'Belum ada kenangan visual',
+  'Capture transition milestones, affirming outfits, self-love reflections, or anniversary smiles. All photos remain 100% private on your device.':
+      'Abadikan tonggak transisi, busana berharga, refleksi cinta diri, atau senyuman hari peringatan. Semua foto tersimpan 100% privat di perangkatmu.',
+  'Create First Moment': 'Buat Momen Pertama',
+  'Delete Moment?': 'Hapus Momen?',
+  'Are you sure you want to remove "{0}" from your scrapbook?':
+      'Apakah kamu yakin ingin menghapus "{0}" dari album kenanganmu?',
+  'Day {0}': 'Hari ke-{0}',
+  'Edit Moment': 'Edit Momen',
+  'Add Visual Moment': 'Tambah Momen Visual',
+  'Tap to add photo (optional)': 'Ketuk untuk tambah foto (opsional)',
+  'Moment Title': 'Judul Momen',
+  'e.g. 6 Months on HRT, First New Dress, etc.':
+      'mis. 6 Bulan HRT, Gaun Baru Pertama, dll.',
+  'Category:': 'Kategori:',
+  'Reflection Note (optional)': 'Catatan Refleksi (opsional)',
+  'How did you feel in this moment?': 'Bagaimana perasaanmu pada momen ini?',
+  'Save Moment': 'Simpan Momen',
+  'Care Reminders & Alerts': 'Pengingat & Peringatan Perawatan',
+  'Care Reminders': 'Pengingat Perawatan',
+  '{0} active care items require attention':
+      '{0} hal perawatan aktif memerlukan perhatian',
+  'Everything is serene': 'Semuanya tenang dan teratur',
+  'All doses are logged, supplies are healthy, and no urgent care actions are pending.':
+      'Semua dosis telah dicatat, stok obat aman, dan tidak ada tindakan mendesak yang tertunda.',
+  'Overdue Dose: {0}': 'Dosis Terlewat: {0}',
+  'Scheduled dose from {0} was not logged. Log now or mark skipped.':
+      'Jadwal dosis jam {0} belum dicatat. Catat sekarang atau tandai dilewati.',
+  'Depleted: {0}': 'Habis: {0}',
+  'Stock is depleted. Order now to maintain uninterrupted therapy rhythm.':
+      'Stok telah habis. Pesan sekarang agar ritme terapi tidak terputus.',
+  'Reorder Urgently: {0}': 'Pesan Ulang Segera: {0}',
+  '~{0} days of stock remaining. Approaching runout date on {1}.':
+      'Sisa stok ~{0} hari. Mendekati tanggal kehabisan pada {1}.',
+  'Ideal time for blood draw before your next {0} dose to capture accurate baseline trough levels.':
+      'Waktu ideal pengambilan darah sebelum dosis {0} berikutnya untuk mengukur kadar dasar trough yang akurat.',
+  'Upcoming Appointment: {0}': 'Jadwal Kontrol Mendatang: {0}',
+  '{0} questions and {1} checklist items prepared for your consultation.':
+      '{0} pertanyaan dan {1} item daftar periksa telah disiapkan untuk konsultasimu.',
+  'Reorder Assistant': 'Asisten Pesan Ulang',
+  'Open Prep Sheet': 'Buka Lembar Persiapan',
+
+  // Care alerts actions
+  'Log Dose': 'Catat Dosis',
+  'View Supplies': 'Lihat Stok',
+  'View Calendar': 'Buka Kalender',
+  'Doctor Visit': 'Kunjungan Dokter',
+
+  // Administration routes & presets
+  'Oral': 'Oral',
+  'Sublingual': 'Sublingual',
+  'Patch': 'Koyo / Patch',
+  'Gel': 'Gel',
+  'Other': 'Lainnya',
+
+  // Hormone presets
+  'Estradiol': 'Estradiol',
+  'LH': 'LH',
+  'FSH': 'FSH',
+
+  // Consultation prep & Doctor report
+  'Recent blood work / lab results printout or digital copy':
+      'Salinan cetak atau digital hasil lab / tes darah terkini',
+  'Current HRT medication list with exact dose and schedule':
+      'Daftar obat HRT saat ini lengkap dengan dosis dan jadwal pasti',
+  'Government photo ID and insurance / clinic card':
+      'KTP / identitas resmi dan kartu asuransi / klinik',
+  'Prescription refill quantities and preferred pharmacy':
+      'Jumlah tebus resep dan apotek yang dituju',
+  'Printed or digital Lunera Doctor Summary Report':
+      'Laporan Ringkasan Dokter Lunera (cetak atau digital)',
+  'Review recent hormone blood test levels against target ranges':
+      'Tinjau kadar hormon hasil lab terkini terhadap rentang target',
+  'Discuss dosage adjustment or regimen optimization':
+      'Diskusikan penyesuaian dosis atau optimasi rejimen',
+  'Evaluate energy, mood rhythm, and physical changes':
+      'Evaluasi energi, ritme suasana hati, dan perubahan fisik',
+  'Check injection site tissue and needle supplies renewal':
+      'Periksa kondisi jaringan lokasi suntik dan pembaruan stok jarum',
+  'Request prescription renewal for the next 3–6 months':
+      'Minta pembaruan resep obat untuk 3–6 bulan ke depan',
+  'Frequently occurs within 1–2 days after dose':
+      'Sering terjadi 1–2 hari setelah dosis',
+  'Tends to occur late in dose cycle (near trough)':
+      'Cenderung muncul di akhir siklus dosis (dekat titik trough)',
+  'Frequently occurs mid-cycle':
+      'Sering terjadi di pertengahan siklus',
+  'I noticed {0} ({1}x recently, {2}). Is this expected or related to my dosage rhythm?':
+      'Saya merasakan {0} ({1}x belakangan ini, {2}). Apakah ini wajar atau terkait dengan ritme dosis saya?',
+  'I experienced {0} {1} times in recent weeks. Should we explore managing this?':
+      'Saya mengalami {0} sebanyak {1} kali dalam beberapa pekan terakhir. Apakah perlu penanganan khusus?',
+  'I experienced {0} recently. Is this common with my current regimen?':
+      'Saya merasakan {0} baru-baru ini. Apakah ini umum terjadi pada rejimen saya?',
+  'Export Doctor Report': 'Ekspor Laporan Dokter',
+  'Export clinical summary and include your prepared consultation questions.':
+      'Ekspor ringkasan klinis dan sertakan pertanyaan konsultasi yang telah disiapkan.',
+  'Lunera Consultation & Clinical Summary':
+      'Ringkasan Klinis & Konsultasi Lunera',
+  'Failed to export: {0}': 'Gagal mengekspor: {0}',
+  'No questions prepared yet.': 'Belum ada pertanyaan yang disiapkan.',
+  'Questions copied to clipboard.': 'Pertanyaan berhasil disalin ke papan klip.',
+  'Reset Consultation Prep?': 'Atur Ulang Persiapan Konsultasi?',
+  'This will clear current questions and notes for a fresh consultation appointment.':
+      'Tindakan ini akan menghapus pertanyaan dan catatan saat ini untuk jadwal konsultasi baru.',
+  'Smart Consultation Prep': 'Persiapan Konsultasi Dokter',
+  'Copy Questions': 'Salin Pertanyaan',
+  'Reset Session': 'Atur Ulang Sesi',
+  'Clinical Appointment': 'Jadwal Janji Medis',
+  'Prepare topics, check-ins, and questions':
+      'Siapkan topik bahasan, keluhan, dan pertanyaan',
+  'Upcoming': 'Mendatang',
+  'Doctor or Clinic Name': 'Nama Dokter atau Klinik',
+  'e.g. Dr. Emily Thorne (Endocrinology)': 'mis. dr. Maya Sari, Sp.And',
+  'Tap to set consultation date': 'Ketuk untuk mengatur tanggal konsultasi',
+  'Observed Symptom Patterns': 'Pola Gejala yang Teramati',
+  '{0} patterns': '{0} pola',
+  'No recurring symptoms found in recent journal logs. Continue logging symptoms in your daily journal to detect cycle correlations.':
+      'Tidak ditemukan pola gejala berulang pada jurnal terkini. Lanjutkan mencatat gejala harian untuk mendeteksi korelasi siklus.',
+  '{0} entries in last 90 days': '{0} catatan dalam 90 hari terakhir',
+  'Added': 'Sudah Ditambah',
+  'Add to Questions': 'Tambah ke Pertanyaan',
+  'Questions & Discussion Points': 'Daftar Pertanyaan & Poin Diskusi',
+  'No questions prepared yet. Use suggested topics below or write your own.':
+      'Belum ada pertanyaan yang disiapkan. Gunakan saran topik di bawah atau tulis pertanyaanmu sendiri.',
+  'Add question for clinician...': 'Tambah pertanyaan untuk dokter...',
+  'Quick Suggested Topics:': 'Saran Topik Cepat:',
+  'Documents & Visit Checklist': 'Dokumen & Ceklis Kunjungan',
+  'Add checklist item...': 'Tambah perlengkapan / ceklis...',
+  'Post-Visit Clinical Notes': 'Catatan Pasca-Konsultasi',
+  'Record doctor adjustments, lab test orders, or follow-up instructions...':
+      'Catat anjuran dokter, pengantar tes lab, atau jadwal kontrol berikutnya...',
+  'Export Doctor Summary Report (PDF / Text)':
+      'Ekspor Ringkasan Dokter (PDF / Teks)',
+  'Includes therapies, adherence, lab trends, and your prepared questions.':
+      'Mencakup terapi aktif, kepatuhan, tren lab, dan pertanyaan yang telah kamu siapkan.',
+  'Prepared Consultation Questions': 'Pertanyaan Konsultasi yang Disiapkan',
+
+  // Backup & Settings
+  'Injection Site Rotation & Health': 'Rotasi Lokasi & Kesehatan Titik Suntik',
+  'Inspect zone health, rest countdowns, and rotation history.':
+      'Pantau kesehatan area, hitung mundur istirahat, dan riwayat rotasi.',
+
+  // About sheet & App details
+  'Fast local storage with zero network dependency and complete data ownership.':
+      'Penyimpanan lokal cepat tanpa ketergantungan internet dan kepemilikan data penuh.',
+  'Instant privacy shield, decoy calculator mode, and discreet masked push alerts.':
+      'Perlindungan privasi instan, mode kalkulator samaran, dan notifikasi tersamar.',
+  'Step-by-step calming assistant with injection angle guidance and breathing pacing.':
+      'Panduan suntik tenang bertahap dengan arahan sudut jarum dan ritme napas.',
+  'Precision Reminders': 'Pengingat Presisi',
+  'Alarm-manager powered scheduled doses and automatic supply pickup alerts.':
+      'Jadwal dosis berbasis alarm-manager dan pengingat otomatis ambil paket stok.',
+  'Eternal Dusk Edition': 'Edisi Eternal Dusk',
+
+  // Calendar
+  'Previous month': 'Bulan sebelumnya',
+  'Next month': 'Bulan berikutnya',
+
+  // Moments
+  'Edit': 'Ubah',
+  'Save Changes': 'Simpan Perubahan',
+
+  // Navigation & Subtitles
+  'Symptom clusters, visit checklist & doctor report':
+      'Klaster gejala, ceklis kunjungan & laporan dokter',
+  'Version, mission, and medical disclaimer':
+      'Versi, misi aplikasi, dan disklaimer medis',
+
+  // Sheets & Levels
+  '{0} dose ({1})': 'Dosis {0} ({1})',
+  'Estimated level now': 'Perkiraan kadar saat ini',
+  'No recent data': 'Belum ada data terbaru',
+  'lab result': 'hasil lab',
+
+  // HRT Time-Lapse
+  'Feminizing (MtF)': 'Feminisme (MtF)',
+  'Masculinizing (FtM)': 'Maskulinisasi (FtM)',
+  'HRT Time-Lapse': 'Time-Lapse HRT',
+  'General educational reference only. Every body responds at its own pace depending on genetics, dosage, and lab levels.':
+      'Hanya sebagai referensi edukasi umum. Setiap tubuh merespons dengan ritmenya masing-masing bergantung pada genetika, dosis, dan hasil lab.',
+  'Stage': 'Tahap',
 };

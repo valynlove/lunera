@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n.dart';
@@ -337,9 +338,41 @@ class LanternState {
 
 /// Offline-only SharedPreferences store for Twilight Sanctuary.
 class SanctuaryStore {
-  static const _sparksKey = 'sanctuary.lantern_sparks';
-  static const _lastDayKey = 'sanctuary.last_spark_day';
-  static const _quizBestKey = 'sanctuary.quiz_best';
+  static const _baseSparksKey = 'sanctuary.lantern_sparks';
+  static const _baseLastDayKey = 'sanctuary.last_spark_day';
+  static const _baseQuizBestKey = 'sanctuary.quiz_best';
+
+  static String? _authUid() {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _key(String base, [String? uid]) {
+    final effectiveUid = uid ?? _authUid();
+    if (effectiveUid == null || effectiveUid.trim().isEmpty) return base;
+    return '${base}_$effectiveUid';
+  }
+
+  static Future<void> _migrateIfLegacy(
+    SharedPreferences prefs,
+    String base,
+    String scopedKey,
+  ) async {
+    if (base != scopedKey &&
+        prefs.containsKey(base) &&
+        !prefs.containsKey(scopedKey)) {
+      final val = prefs.get(base);
+      if (val is int) {
+        await prefs.setInt(scopedKey, val);
+      } else if (val is String) {
+        await prefs.setString(scopedKey, val);
+      }
+      await prefs.remove(base);
+    }
+  }
 
   static String dayKey(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
@@ -348,28 +381,42 @@ class SanctuaryStore {
     return '$y-$m-$d';
   }
 
-  static Future<LanternState> load() async {
+  static Future<LanternState> load([String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    final rawSparks = prefs.getInt(_sparksKey) ?? 0;
-    final rawBest = prefs.getInt(_quizBestKey) ?? 0;
+    final sparksKey = _key(_baseSparksKey, uid);
+    final lastDayKey = _key(_baseLastDayKey, uid);
+    final quizBestKey = _key(_baseQuizBestKey, uid);
+    await _migrateIfLegacy(prefs, _baseSparksKey, sparksKey);
+    await _migrateIfLegacy(prefs, _baseLastDayKey, lastDayKey);
+    await _migrateIfLegacy(prefs, _baseQuizBestKey, quizBestKey);
+
+    final rawSparks = prefs.getInt(sparksKey) ?? 0;
+    final rawBest = prefs.getInt(quizBestKey) ?? 0;
     return LanternState(
       sparks: rawSparks < 0 ? 0 : rawSparks,
-      lastSparkDay: prefs.getString(_lastDayKey),
+      lastSparkDay: prefs.getString(lastDayKey),
       quizBest: rawBest < 0 ? 0 : rawBest,
     );
   }
 
   /// Lights today's gentle spark at most once per calendar day; never deducts sparks.
-  static Future<LanternState> lightTodaySpark({DateTime? now}) async {
+  static Future<LanternState> lightTodaySpark({DateTime? now, String? uid}) async {
     final prefs = await SharedPreferences.getInstance();
+    final sparksKey = _key(_baseSparksKey, uid);
+    final lastDayKey = _key(_baseLastDayKey, uid);
+    final quizBestKey = _key(_baseQuizBestKey, uid);
+    await _migrateIfLegacy(prefs, _baseSparksKey, sparksKey);
+    await _migrateIfLegacy(prefs, _baseLastDayKey, lastDayKey);
+    await _migrateIfLegacy(prefs, _baseQuizBestKey, quizBestKey);
+
     final today = dayKey(now ?? DateTime.now());
-    final current = await load();
+    final current = await load(uid);
     if (current.lastSparkDay == today) {
       return current;
     }
     final nextSparks = current.sparks + 1;
-    await prefs.setInt(_sparksKey, nextSparks);
-    await prefs.setString(_lastDayKey, today);
+    await prefs.setInt(sparksKey, nextSparks);
+    await prefs.setString(lastDayKey, today);
     return LanternState(
       sparks: nextSparks,
       lastSparkDay: today,
@@ -378,12 +425,34 @@ class SanctuaryStore {
   }
 
   /// Records the highest quiz score achieved without ever lowering it.
-  static Future<int> recordQuizScore(int score) async {
+  static Future<int> recordQuizScore(int score, [String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    final existing = prefs.getInt(_quizBestKey) ?? 0;
+    final quizBestKey = _key(_baseQuizBestKey, uid);
+    await _migrateIfLegacy(prefs, _baseQuizBestKey, quizBestKey);
+
+    final existing = prefs.getInt(quizBestKey) ?? 0;
     final best = math.max(existing, score);
-    await prefs.setInt(_quizBestKey, best);
+    await prefs.setInt(quizBestKey, best);
     return best;
+  }
+
+  /// Clears local sanctuary data on this device upon sign out.
+  static Future<void> clearLocal([String? uid]) async {
+    final prefs = await SharedPreferences.getInstance();
+    final effectiveUid = uid ?? _authUid();
+    final keys = <String>[
+      if (effectiveUid != null && effectiveUid.isNotEmpty) ...[
+        '${_baseSparksKey}_$effectiveUid',
+        '${_baseLastDayKey}_$effectiveUid',
+        '${_baseQuizBestKey}_$effectiveUid',
+      ],
+      _baseSparksKey,
+      _baseLastDayKey,
+      _baseQuizBestKey,
+    ];
+    for (final k in keys) {
+      await prefs.remove(k);
+    }
   }
 }
 

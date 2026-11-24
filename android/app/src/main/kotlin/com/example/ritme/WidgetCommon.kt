@@ -50,3 +50,6 @@ fun whenText(atMs: Long, lang: String): String {
         else -> if (id) "$days hari lagi" else "in $days days"
     }
 }
+
+/** Cek apakah jadwal sudah terlambat (termasuk jam yang telah lewat hari ini). */
+fun isOverdue(atMs: Long): Boolean = atMs > 0 && atMs < System.currentTimeMillis()

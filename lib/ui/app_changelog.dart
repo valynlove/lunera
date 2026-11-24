@@ -42,10 +42,361 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.2.30',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Segmented PillTabs in Settings: Introduced top category filter tabs (All, General, Clinical, Privacy, Data) to segment the extensive 1,000+ line settings page, dramatically cutting scroll fatigue while keeping all settings instantly reachable.',
+          textId:
+              'PillTabs Segmentasi pada Pengaturan: Menghadirkan tab penyaring kategori atas (Semua, Umum, Klinis, Privasi, Data) untuk menyaring hierarki menu pengaturan, memangkas kelelahan scrolling dengan tetap menjaga kemudahan akses semua pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Responsive Tablet & Wide-Screen Constraints: Enforced 640–680dp max-width centering across main navigation shell, bottom sheets, body page, and settings, ensuring elegant proportional card layouts and optimal reading line length on tablets and foldables.',
+          textId:
+              'Pembatas Lebar Responsif Tablet & Layar Lebar: Menerapkan pemusatan batas lebar 640–680dp pada shell navigasi utama, modal sheet, layar tubuh, dan pengaturan, menjaga tampilan kartu tetap proporsional dan nyaman dibaca pada tablet maupun ponsel lipat.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Sticky Bottom Action Bar in Body Page: Relocated measurement and milestone action buttons from the end of the scroll list into a pinned, thumb-accessible bottom navigation bar for effortless logging.',
+          textId:
+              'Bilah Aksi Melayang pada Layar Tubuh: Memindahkan tombol catat ukuran dan milestone dari ujung bawah list ke bilah bawah yang selalu terlihat dan mudah dijangkau ibu jari.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Sticky Header CTAs in TherapySheet & LabSheet: Added top-bar quick-save buttons and TextInputAction.done keyboard submissions to prevent buttons getting obscured during virtual keyboard entry.',
+          textId:
+              'Tombol Aksi Cepat Header pada TherapySheet & LabSheet: Menambahkan tombol simpan di header atas serta aksi keyboard TextInputAction.done untuk mencegah tombol terdorong saat mengetik.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.29',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Reduced-Motion Accessibility Support: Integrated MediaQuery.maybeDisableAnimationsOf(context) and tranquil static glow fallbacks across the Eternal Dusk chibi companion, honoring user system accessibility preferences (WCAG 2.1 SC 2.3.3) while preserving gentle ambient breathing pulses during normal animation mode.',
+          textId:
+              'Dukungan Aksesibilitas Gerak Berkurang (Reduced-Motion): Mengintegrasikan MediaQuery.maybeDisableAnimationsOf(context) dan tampilan cahaya tenang statis pada chibi companion Eternal Dusk, mematuhi preferensi aksesibilitas sistem pengguna (WCAG 2.1 SC 2.3.3) serta menjaga denyut napas ambien yang halus saat animasi aktif.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Sticky Header CTA & Keyboard Submission in DoseSheet: Added a top-bar quick-save button and enabled TextInputAction.done with immediate keyboard submission on dose text fields, allowing users on compact screens to effortlessly log doses without scrolling past extended clinical forms.',
+          textId:
+              'Tombol Aksi Cepat Header & Submisi Keyboard pada DoseSheet: Menambahkan tombol simpan cepat di header dan mendukung TextInputAction.done dengan aksi langsung dari keyboard virtual pada field dosis, memungkinkan pencatatan dosis tanpa perlu scroll melewati formulir klinis lanjutan di layar ringkas.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.28',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Home Dashboard Modular Architecture: Refactored the monolithic 1,376-line home dashboard into focused, isolated sub-widgets (DoseCard, SlotTile, AlertsCard, WeekCard, OnboardingStepTile) under lib/ui/home/, slashing main file complexity by 77% while preserving seamless public exports.',
+          textId:
+              'Arsitektur Modular Home Dashboard: Merefaktor home dashboard monolitik 1.376 baris menjadi sub-widget terisolasi dan modular (DoseCard, SlotTile, AlertsCard, WeekCard, OnboardingStepTile) di dalam lib/ui/home/, memangkas kompleksitas file utama hingga 77% dengan mempertahankan kompatibilitas ekspor publik penuh.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.27',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Moments Image Memory Optimization: Implemented bounded raster decoding (cacheWidth: 600 for album grid cards and preview sheets, 1080 for fullscreen views) across local base64 photo streams, eliminating GPU bitmap bloat and ensuring butter-smooth 60/120 FPS scrolling.',
+          textId:
+              'Optimasi Memori Foto Moments: Mengimplementasikan raster decoding berbatas (cacheWidth: 600 untuk kartu album dan preview sheet, 1080 untuk fullscreen) pada stream foto lokal base64, mencegah lonjakan memori GPU bitmap dan menjaga kelancaran scroll 60/120 FPS.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.26',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Mobile Navigation Bar Ergonomics: Upgraded floating navigation bar touch targets to meet WCAG ergonomic standards (min 48dp height), refined icon containers and bounding padding, enhanced label typography legibility (10.5sp with optical letter spacing), and integrated accessibility semantics support.',
+          textId:
+              'Ergonomi Bilah Navigasi Mobile: Memperbarui target sentuh bilah navigasi bawah sesuai standar ergonomi WCAG (tinggi minimal 48dp), menyempurnakan kontainer ikon dan padding batas, meningkatkan keterbacaan tipografi label (10.5sp dengan optical letter spacing), serta mengintegrasikan dukungan semantik aksesibilitas.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.25',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Web Showcase Feature Suite: Added interactive Multi-Route Selector (Injections, Patches, Gels, Sublingual/Oral), Android Home Screen Widgets showcase, interactive 7-Day Cycle Timeline Scrubber, and Voice Pitch Studio / Twilight Sanctuary vignettes.',
+          textId:
+              'Rangkaian Fitur Web Showcase: Menambahkan Multi-Route Selector interaktif (Injeksi, Patch, Gel, Sublingual/Oral), showcase Widget Home Screen Android, Scrubber Timeline Siklus 7-Hari interaktif, serta vignetted Voice Pitch Studio & Twilight Sanctuary.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.24',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Web Showcase Triad Design Redesign: Integrated Art Direction (Linear/Figma caliber), Design System (Eternal Dusk obsidian and luminous accents), and snappy motion principles (<300ms spring easing curves) across the showcase landing page.',
+          textId:
+              'Redesain Terpadu Web Showcase: Mengintegrasikan Art Direction berkelas Linear/Figma, Design System Eternal Dusk (obsidian pekat dan aksen bercahaya), serta prinsip gerak snappy (<300ms kurva spring) pada seluruh landing page showcase.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.23',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Web Showcase Taste-Skill Visual Refresh: Overhauled docs landing page with Apple and Linear caliber typography, modular whitespace rhythm, architectural telemetry proof strip, and interactive bento grid.',
+          textId:
+              'Penyegaran Visual Showcase Berstandar Taste-Skill: Merombak landing page docs dengan tipografi sekelas Apple dan Linear, ritme spasi modular, strip telemetri arsitektural, dan bento grid interaktif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.22',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Notification Timezone Scheduling: Snoozed dose reminders initialize local timezone properly on Android to avoid negative offset scheduling.',
+          textId:
+              'Penjadwalan Zona Waktu Notifikasi: Pengingat tunda dosis menginisialisasi zona waktu lokal dengan benar di Android untuk mencegah jadwal bernilai negatif.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Lab Target Stream & Widget Chart Safety: Safely handled missing cloud target fields and guarded target bands against index errors during widget sync.',
+          textId:
+              'Keamanan Aliran Target Lab & Grafik Widget: Penanganan aman data target cloud yang tidak lengkap dan pencegahan error indeks batas target saat sinkronisasi widget.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Sanctuary Key Migration & Widget Overdue Fix: Awaited local storage key migration and added instant same-day timestamp overdue detection for Android widgets.',
+          textId:
+              'Migrasi Kunci Suaka & Deteksi Terlambat Widget: Memastikan migrasi kunci lokal selesai sepenuhnya dan menambahkan deteksi keterlambatan waktu nyata hari ini pada widget Android.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.21',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Ambient Companion Dose Priority: Imminent upcoming dose reminders take priority over past recovery states, with shorter recovery windows for oral medication.',
+          textId:
+              'Prioritas Dosis Pendamping Ambien: Pengingat jadwal dosis terdekat diprioritaskan sebelum status pemulihan, dengan jeda pemulihan lebih singkat untuk obat oral.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Smart Consultation Regimen Correlation: Symptom cycle correlations adapt dynamically to active regimen cycle length and avoid false alerts on daily therapies.',
+          textId:
+              'Korelasi Regimen Konsultasi Pintar: Analisis korelasi siklus gejala beradaptasi secara dinamis dengan panjang siklus terapi dan mencegah peringatan keliru pada terapi harian.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Moments Memory Optimization: Automatic downscaling and compression on fallback photo pickers to prevent memory bloat.',
+          textId:
+              'Optimasi Memori Momen: Penurunan skala dan kompresi otomatis pada pemilih foto alternatif untuk mencegah pemborosan memori.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.20',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Celestial Wallpaper for Home Screen Widgets: Added high-definition celestial wallpaper with layered frosted glass scrim overlay and lavender rim stroke for all Android widgets.',
+          textId:
+              'Wallpaper Langit Malam Widget Layar Utama: Menambahkan latar belakang langit malam beresolusi tinggi dengan lapisan kaca buram dan aksen lavender untuk seluruh widget Android.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.19',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Android Home Screen Widgets Visual Refresh: Added cosmic gradients, luminous lavender hairline borders, jewel badge icons, translucent row containers, and overdue dose coloring.',
+          textId:
+              'Penyegaran Visual Widget Android: Menambahkan gradien kosmik, bingkai lavender tipis bercahaya, lencana ikon permata, wadah baris transparan, dan pewarnaan dosis terlambat.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Card Atmosphere & Depth: Multi-stop diagonal cosmic gradients for in-app cards providing subtle tactile depth while preserving the Eternal Dusk backdrop.',
+          textId:
+              'Kedalaman & Atmosfer Kartu: Gradien kosmik diagonal berlapis untuk kartu aplikasi memberikan kedalaman visual yang elegan dengan latar Senja Abadi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.18',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Cross-Account Data Isolation: Scoped all local storage keys by authenticated user UID and automated complete local cache clearing on sign-out.',
+          textId:
+              'Isolasi Data Lintas Akun: Mengikat seluruh kunci penyimpanan lokal dengan UID pengguna terotentikasi dan pembersihan cache otomatis saat keluar akun.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Full Offline JSON Backup Parity: Extended JSON backup export and import to encompass Milestones, Moments, and Consultation data with full legacy backward compatibility.',
+          textId:
+              'Paritas Cadangan JSON Offline Penuh: Memperluas ekspor dan impor cadangan JSON mencakup Milestones, Moments, dan Konsultasi dengan kompatibilitas penuh versi terdahulu.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.17',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Lunera Moments: Private milestone keepsake and photo scrapbook celebrating transition milestones, affirming outfits, and reflections with offline-first local storage.',
+          textId:
+              'Momen Lunera: Album kenangan visual dan scrapbook pencapaian pribadi untuk merayakan tonggak transisi, gaya busana, dan refleksi dengan penyimpanan lokal aman.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Smart Reminder Drawer: Unified care notification center with actionable alerts for overdue doses, critical/depleted supplies, upcoming trough windows, and clinical visits.',
+          textId:
+              'Laci Pengingat Perawatan Cerdas: Pusat notifikasi terpadu dengan peringatan tindakan untuk dosis terlewat, stok menipis/habis, jendela lab trough, dan kontrol dokter.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.16',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Smart Consultation Prep & Symptom Clustering: Clinical appointment prep assistant clustering journal symptoms, correlating complaints with dose and trough rhythms, pre-visit checklist, and one-tap Doctor Report integration with prepared questions.',
+          textId:
+              'Persiapan Konsultasi Pintar & Klaster Gejala: Asisten persiapan dokter yang mengelompokkan gejala jurnal, mengkorelasikan keluhan dengan ritme dosis dan trough, daftar periksa kunjungan, dan integrasi ekspor Laporan Dokter lengkap dengan daftar pertanyaan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.15',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Pharmacokinetic-Aware Timeline: Full-month calendar grid toggle with multi-category event dots (dose, trough, journal, supply depletion), automated Trough Lab Testing Window detection prior to cyclical/injection doses, and selected-day clinical highlight cards.',
+          textId:
+              'Linimasa Kalender Berbasis Farmakokinetik: Opsi tampilan grid kalender bulanan penuh dengan indikator titik multi-kategori (dosis, trough, jurnal, stok habis), deteksi otomatis Jendela Tes Lab Trough sebelum dosis siklus/injeksi, dan kartu sorotan klinis harian.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.14',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Predictive Supply & Refill Horizon: Refill forecasting engine calculating depleted, critical (<=7 days), reorder window (8–14 days with delivery buffer), and healthy tiers; integrated smart Refill Horizon banner and actionable status chips on medication and equipment cards.',
+          textId:
+              'Cakrawala Stok & Pemesanan Ulang Prediktif: Mesin proyeksi pemesanan ulang untuk status habis, kritis (<=7 hari), jendela pesan ulang (8–14 hari dengan jeda pengiriman), dan stok aman; banner pintar Refill Horizon dan badge status interaktif pada kartu obat dan peralatan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.13',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Empathetic Ambient Companion: Contextual micro-companion on Home with 20 moods, time-of-day greetings, post-dose recovery support, gentle dose horizon prompts, interactive affirmation cycling, and daily dismissal support.',
+          textId:
+              'Pendamping Ambien Empatis: Pendamping mikro kontekstual di Home dengan 20 ekspresi avatar, sapaan waktu hari, dukungan pemulihan pasca-dosis, pengingat lembut jadwal dosis, pergantian afirmasi interaktif, dan opsi sembunyikan harian.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.12',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Twilight Sanctuary: Temporarily deactivated the HRT Time-Lapse visual explorer card pending complete illustration asset readiness.',
+          textId:
+              'Suaka Senja: Menonaktifkan kartu penjelajah visual Time-Lapse HRT untuk sementara waktu hingga kesiapan aset ilustrasi terpenuhi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.2.11',
       dateEn: 'November 23, 2026',
       dateId: '23 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

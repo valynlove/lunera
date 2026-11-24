@@ -214,48 +214,68 @@ class _BodyPageState extends ConsumerState<BodyPage> {
       },
     );
 
+    final actionButton = tab == 2
+        ? pillButton(tr('Log Measurement'), () => showSheet(context, const MeasurementSheet()), icon: LucideIcons.ruler)
+        : tab == 3
+            ? pillButton(
+                tr('Add Milestone'),
+                () async {
+                  await showSheet(context, const MilestoneSheet());
+                  await _loadMilestones();
+                },
+                icon: LucideIcons.bookmarkPlus,
+              )
+            : pillButton(tr('Log a change'), () => showSheet(context, const JournalSheet()), icon: LucideIcons.plus);
+
     return Scaffold(
       body: SafeArea(
-        child: ListView(padding: const EdgeInsets.all(20), children: [
-          Row(children: [
-            IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.arrowLeft)),
-            Expanded(child: Text(tr('Body & changes'), style: display(28))),
-          ]),
-          gap(12),
-          PillTabs<int>(
-            items: [
-              (0, tr('Overview')),
-              (1, tr('Timeline')),
-              (2, tr('Size & Measures')),
-              (3, tr('Milestones')),
-            ],
-            value: tab,
-            onChanged: (v) => setState(() => tab = v),
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+              children: [
+                Row(children: [
+                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.arrowLeft)),
+                  Expanded(child: Text(tr('Body & changes'), style: display(28))),
+                ]),
+                gap(12),
+                PillTabs<int>(
+                  items: [
+                    (0, tr('Overview')),
+                    (1, tr('Timeline')),
+                    (2, tr('Size & Measures')),
+                    (3, tr('Milestones')),
+                  ],
+                  value: tab,
+                  onChanged: (v) => setState(() => tab = v),
+                ),
+                gap(16),
+                if (tab == 0)
+                  overview
+                else if (tab == 1)
+                  detail
+                else if (tab == 2)
+                  sizeTab
+                else
+                  milestonesTab,
+              ],
+            ),
           ),
-          gap(16),
-          if (tab == 0)
-            overview
-          else if (tab == 1)
-            detail
-          else if (tab == 2)
-            sizeTab
-          else
-            milestonesTab,
-          gap(16),
-          if (tab == 2)
-            pillButton(tr('Log Measurement'), () => showSheet(context, const MeasurementSheet()), icon: LucideIcons.ruler)
-          else if (tab == 3)
-            pillButton(
-              tr('Add Milestone'),
-              () async {
-                await showSheet(context, const MilestoneSheet());
-                await _loadMilestones();
-              },
-              icon: LucideIcons.bookmarkPlus,
-            )
-          else
-            pillButton(tr('Log a change'), () => showSheet(context, const JournalSheet()), icon: LucideIcons.plus),
-        ]),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: actionButton,
+            ),
+          ),
+        ),
       ),
     );
   }

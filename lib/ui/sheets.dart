@@ -208,6 +208,17 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
                 showSheet(context, TherapySheet(supplies: widget.supplies, initial: widget.t));
               },
             ),
+          const SizedBox(width: 4),
+          FilledButton.tonalIcon(
+            onPressed: _save,
+            icon: const Icon(LucideIcons.check, size: 16),
+            label: Text(editing ? tr('Save') : tr('Log')),
+            style: FilledButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
         ],
       ),
       gap(16),
@@ -215,6 +226,8 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
         controller: amount,
         onChanged: (_) => setState(() {}),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _save(),
         decoration: InputDecoration(
           labelText: isCombination
               ? tr('{0} dose ({1})', [presetOf(t.hormoneId).name, t.doseUnit])
@@ -390,6 +403,8 @@ class _DoseSheetState extends ConsumerState<DoseSheet> {
                     child: TextField(
                       controller: secondaryAmount,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _save(),
                       decoration: InputDecoration(
                         labelText: tr('{0} dose', [presetOf(secondaryHormone).name]),
                         helperText: secondaryCompound != null && secondaryCompound != 'custom'
@@ -757,7 +772,21 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
     final editing = widget.initial != null;
     final meds = widget.supplies.where((s) => !s.generic).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? tr('Edit therapy') : tr('New therapy'), style: display(28)),
+      Row(
+        children: [
+          Expanded(child: Text(editing ? tr('Edit therapy') : tr('New therapy'), style: display(28))),
+          FilledButton.tonalIcon(
+            onPressed: _save,
+            icon: const Icon(LucideIcons.check, size: 16),
+            label: Text(editing ? tr('Save') : tr('Save')),
+            style: FilledButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
       gap(16),
       DropdownButtonFormField<String>(
         key: ValueKey('hormone-$hormone'),
@@ -931,7 +960,7 @@ class _TherapySheetState extends ConsumerState<TherapySheet> {
       ],
       gap(10),
       Row(children: [
-        Expanded(flex: 2, child: TextField(controller: dose, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: tr('Dose')))),
+        Expanded(flex: 2, child: TextField(controller: dose, keyboardType: const TextInputType.numberWithOptions(decimal: true), textInputAction: TextInputAction.done, onSubmitted: (_) => _save(), decoration: InputDecoration(labelText: tr('Dose')))),
         const SizedBox(width: 10),
         Expanded(child: TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit')))),
       ]),

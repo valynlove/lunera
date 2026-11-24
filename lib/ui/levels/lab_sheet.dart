@@ -68,8 +68,24 @@ class _LabSheetState extends ConsumerState<LabSheet> {
     final currentFactor = h.units[u] ?? 1.0;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? tr('Edit lab result') : tr('New lab result'),
-          style: display(28)),
+      Row(
+        children: [
+          Expanded(
+            child: Text(editing ? tr('Edit lab result') : tr('New lab result'),
+                style: display(28)),
+          ),
+          FilledButton.tonalIcon(
+            onPressed: _save,
+            icon: const Icon(LucideIcons.check, size: 16),
+            label: Text(editing ? tr('Save') : tr('Save')),
+            style: FilledButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
       gap(16),
       Wrap(spacing: 8, runSpacing: 4, children: [
         for (final p in presets)
@@ -114,6 +130,8 @@ class _LabSheetState extends ConsumerState<LabSheet> {
                 onChanged: (_) => setState(() {}),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _save(),
                 decoration: InputDecoration(labelText: tr('Value'))),
           ),
         ],

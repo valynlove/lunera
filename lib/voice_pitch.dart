@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/material.dart' show Color;
 import 'package:flutter/services.dart' show MethodChannel;
@@ -882,12 +883,50 @@ class VoiceTestResult {
 
 /// Offline SharedPreferences store for the hidden Voice Pitch Studio & numeric results.
 class VoiceStore {
-  static const _unlockedKey = 'sanctuary.voice_unlocked';
-  static const _resultsKey = 'sanctuary.voice_results';
-  static const _syncedIdsKey = 'sanctuary.voice_synced_ids';
-  static const _targetMinKey = 'sanctuary.voice_target_min';
-  static const _targetMaxKey = 'sanctuary.voice_target_max';
+  static const _baseUnlockedKey = 'sanctuary.voice_unlocked';
+  static const _baseResultsKey = 'sanctuary.voice_results';
+  static const _baseSyncedIdsKey = 'sanctuary.voice_synced_ids';
+  static const _baseTargetMinKey = 'sanctuary.voice_target_min';
+  static const _baseTargetMaxKey = 'sanctuary.voice_target_max';
   static const _maxSaved = 50;
+
+  static String? _authUid() {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _key(String base, [String? uid]) {
+    final effectiveUid = uid ?? _authUid();
+    if (effectiveUid == null || effectiveUid.trim().isEmpty) return base;
+    return '${base}_$effectiveUid';
+  }
+
+  static void _migrateIfLegacy(
+    SharedPreferences prefs,
+    String base,
+    String scopedKey,
+  ) {
+    if (base != scopedKey &&
+        prefs.containsKey(base) &&
+        !prefs.containsKey(scopedKey)) {
+      final val = prefs.get(base);
+      if (val is List<String>) {
+        prefs.setStringList(scopedKey, val);
+      } else if (val is bool) {
+        prefs.setBool(scopedKey, val);
+      } else if (val is double) {
+        prefs.setDouble(scopedKey, val);
+      } else if (val is int) {
+        prefs.setInt(scopedKey, val);
+      } else if (val is String) {
+        prefs.setString(scopedKey, val);
+      }
+      prefs.remove(base);
+    }
+  }
 
   static VoiceTargetRange _normalizeTarget(double minHz, double maxHz) {
     final clampedMin = minHz.clamp(80.0, 275.0).toDouble();
@@ -895,10 +934,14 @@ class VoiceStore {
     return VoiceTargetRange(minHz: clampedMin, maxHz: clampedMax);
   }
 
-  static Future<VoiceTargetRange> loadTargetRange() async {
+  static Future<VoiceTargetRange> loadTargetRange([String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    final minVal = prefs.getDouble(_targetMinKey);
-    final maxVal = prefs.getDouble(_targetMaxKey);
+    final minKey = _key(_baseTargetMinKey, uid);
+    final maxKey = _key(_baseTargetMaxKey, uid);
+    _migrateIfLegacy(prefs, _baseTargetMinKey, minKey);
+    _migrateIfLegacy(prefs, _baseTargetMaxKey, maxKey);
+    final minVal = prefs.getDouble(minKey);
+    final maxVal = prefs.getDouble(maxKey);
     if (minVal == null || maxVal == null) {
       return const VoiceTargetRange();
     }
@@ -906,11 +949,13 @@ class VoiceStore {
   }
 
   static Future<VoiceTargetRange> saveTargetRange(
-      VoiceTargetRange range) async {
+      VoiceTargetRange range, [String? uid]) async {
     final normalized = _normalizeTarget(range.minHz, range.maxHz);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_targetMinKey, normalized.minHz);
-    await prefs.setDouble(_targetMaxKey, normalized.maxHz);
+    final minKey = _key(_baseTargetMinKey, uid);
+    final maxKey = _key(_baseTargetMaxKey, uid);
+    await prefs.setDouble(minKey, normalized.minHz);
+    await prefs.setDouble(maxKey, normalized.maxHz);
     return normalized;
   }
 
@@ -923,23 +968,29 @@ class VoiceStore {
     _locallyClearedAll = false;
   }
 
-  static Future<bool> isUnlocked() async {
+  static Future<bool> isUnlocked([String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_unlockedKey) ?? false;
+    final unlockedKey = _key(_baseUnlockedKey, uid);
+    _migrateIfLegacy(prefs, _baseUnlockedKey, unlockedKey);
+    return prefs.getBool(unlockedKey) ?? false;
   }
 
-  static Future<void> setUnlocked(bool unlocked) async {
+  static Future<void> setUnlocked(bool unlocked, [String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_unlockedKey, unlocked);
+    final unlockedKey = _key(_baseUnlockedKey, uid);
+    await prefs.setBool(unlockedKey, unlocked);
   }
 
-  static Future<List<VoiceTestResult>> loadResults() async {
+  static Future<List<VoiceTestResult>> loadResults([String? uid]) async {
     final prefs = await SharedPreferences.getInstance();
-    return _loadResultsFromPrefs(prefs);
+    final resultsKey = _key(_baseResultsKey, uid);
+    _migrateIfLegacy(prefs, _baseResultsKey, resultsKey);
+    return _loadResultsFromPrefs(prefs, resultsKey);
   }
 
-  static List<VoiceTestResult> _loadResultsFromPrefs(SharedPreferences prefs) {
-    final rawList = prefs.getStringList(_resultsKey) ?? const <String>[];
+  static List<VoiceTestResult> _loadResultsFromPrefs(
+      SharedPreferences prefs, String key) {
+    final rawList = prefs.getStringList(key) ?? const <String>[];
     final out = <VoiceTestResult>[];
     for (final raw in rawList) {
       try {
@@ -957,42 +1008,75 @@ class VoiceStore {
   }
 
   static Future<List<VoiceTestResult>> saveResult(
-      VoiceTestResult result) async {
+      VoiceTestResult result, [String? uid]) async {
     _locallyDeletedIds.remove(result.id);
     _locallyClearedAll = false;
     final prefs = await SharedPreferences.getInstance();
-    final existing = _loadResultsFromPrefs(prefs);
+    final resultsKey = _key(_baseResultsKey, uid);
+    _migrateIfLegacy(prefs, _baseResultsKey, resultsKey);
+    final existing = _loadResultsFromPrefs(prefs, resultsKey);
     final updated = [result, ...existing.where((r) => r.id != result.id)]
         .take(_maxSaved)
         .toList();
-    await _writeResultsToPrefs(prefs, updated);
+    await _writeResultsToPrefs(prefs, resultsKey, updated);
     return updated;
   }
 
-  static Future<List<VoiceTestResult>> deleteResult(String id) async {
+  static Future<List<VoiceTestResult>> deleteResult(String id, [String? uid]) async {
     _locallyDeletedIds.add(id);
     final prefs = await SharedPreferences.getInstance();
-    final existing = _loadResultsFromPrefs(prefs);
+    final resultsKey = _key(_baseResultsKey, uid);
+    final syncedKey = _key(_baseSyncedIdsKey, uid);
+    _migrateIfLegacy(prefs, _baseResultsKey, resultsKey);
+    _migrateIfLegacy(prefs, _baseSyncedIdsKey, syncedKey);
+    final existing = _loadResultsFromPrefs(prefs, resultsKey);
     final updated = existing.where((r) => r.id != id).toList();
-    await _writeResultsToPrefs(prefs, updated);
+    await _writeResultsToPrefs(prefs, resultsKey, updated);
     final synced =
-        (prefs.getStringList(_syncedIdsKey) ?? const <String>[]).toSet()
+        (prefs.getStringList(syncedKey) ?? const <String>[]).toSet()
           ..remove(id);
-    await prefs.setStringList(_syncedIdsKey, synced.toList());
+    await prefs.setStringList(syncedKey, synced.toList());
     return updated;
   }
 
   static Future<void> clearResults(
-      {Iterable<String> knownIds = const []}) async {
+      {Iterable<String> knownIds = const [], String? uid}) async {
     final prefs = await SharedPreferences.getInstance();
-    final existing = _loadResultsFromPrefs(prefs);
+    final resultsKey = _key(_baseResultsKey, uid);
+    final syncedKey = _key(_baseSyncedIdsKey, uid);
+    _migrateIfLegacy(prefs, _baseResultsKey, resultsKey);
+    _migrateIfLegacy(prefs, _baseSyncedIdsKey, syncedKey);
+    final existing = _loadResultsFromPrefs(prefs, resultsKey);
     for (final r in existing) {
       _locallyDeletedIds.add(r.id);
     }
     _locallyDeletedIds.addAll(knownIds);
     _locallyClearedAll = true;
-    await prefs.remove(_resultsKey);
-    await prefs.remove(_syncedIdsKey);
+    await prefs.remove(resultsKey);
+    await prefs.remove(syncedKey);
+  }
+
+  static Future<void> clearLocal([String? uid]) async {
+    resetSessionStateForTest();
+    final prefs = await SharedPreferences.getInstance();
+    final effectiveUid = uid ?? _authUid();
+    final keys = <String>[
+      if (effectiveUid != null && effectiveUid.isNotEmpty) ...[
+        '${_baseResultsKey}_$effectiveUid',
+        '${_baseSyncedIdsKey}_$effectiveUid',
+        '${_baseUnlockedKey}_$effectiveUid',
+        '${_baseTargetMinKey}_$effectiveUid',
+        '${_baseTargetMaxKey}_$effectiveUid',
+      ],
+      _baseResultsKey,
+      _baseSyncedIdsKey,
+      _baseUnlockedKey,
+      _baseTargetMinKey,
+      _baseTargetMaxKey,
+    ];
+    for (final k in keys) {
+      await prefs.remove(k);
+    }
   }
 
   /// Merges local SharedPreferences history with Cloud Firestore snapshots.
@@ -1002,21 +1086,28 @@ class VoiceStore {
   static Future<List<VoiceTestResult>> reconcileWithRemote(
     List<VoiceTestResult> remote, {
     Future<void> Function(VoiceTestResult result)? uploadMissing,
+    String? uid,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final local = _loadResultsFromPrefs(prefs);
+    final resultsKey = _key(_baseResultsKey, uid);
+    final syncedKey = _key(_baseSyncedIdsKey, uid);
+    final unlockedKey = _key(_baseUnlockedKey, uid);
+    _migrateIfLegacy(prefs, _baseResultsKey, resultsKey);
+    _migrateIfLegacy(prefs, _baseSyncedIdsKey, syncedKey);
+    _migrateIfLegacy(prefs, _baseUnlockedKey, unlockedKey);
+    final local = _loadResultsFromPrefs(prefs, resultsKey);
 
     if (_locallyClearedAll) {
       if (remote.isEmpty) {
         _locallyClearedAll = false;
-        await prefs.remove(_syncedIdsKey);
+        await prefs.remove(syncedKey);
         return const [];
       }
       return local;
     }
 
     final previouslySynced =
-        (prefs.getStringList(_syncedIdsKey) ?? const <String>[]).toSet();
+        (prefs.getStringList(syncedKey) ?? const <String>[]).toSet();
     final byId = <String, VoiceTestResult>{};
     final remoteIds = <String>{};
 
@@ -1043,17 +1134,17 @@ class VoiceStore {
     final capped = merged.take(_maxSaved).toList();
 
     if (!_sameResults(local, capped)) {
-      await _writeResultsToPrefs(prefs, capped);
+      await _writeResultsToPrefs(prefs, resultsKey, capped);
     }
 
     final nextSynced = <String>[
       for (final r in remote)
         if (!_locallyDeletedIds.contains(r.id)) r.id,
     ];
-    await prefs.setStringList(_syncedIdsKey, nextSynced);
+    await prefs.setStringList(syncedKey, nextSynced);
 
-    if (capped.isNotEmpty && !prefs.containsKey(_unlockedKey)) {
-      await prefs.setBool(_unlockedKey, true);
+    if (capped.isNotEmpty && !prefs.containsKey(unlockedKey)) {
+      await prefs.setBool(unlockedKey, true);
     }
 
     if (uploadMissing != null && missingOnRemote.isNotEmpty) {
@@ -1086,9 +1177,9 @@ class VoiceStore {
   }
 
   static Future<void> _writeResultsToPrefs(
-      SharedPreferences prefs, List<VoiceTestResult> results) async {
+      SharedPreferences prefs, String key, List<VoiceTestResult> results) async {
     await prefs.setStringList(
-      _resultsKey,
+      key,
       [for (final r in results) jsonEncode(r.toJson())],
     );
   }

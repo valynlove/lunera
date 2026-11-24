@@ -148,19 +148,43 @@ String hrtDuration(DateTime from, DateTime to) {
   return parts.join(' ');
 }
 
+/// Urgency tier for medication and equipment reorder planning.
+enum RefillUrgency {
+  depleted,
+  critical,
+  reorderSoon,
+  healthy,
+}
+
 /// Estimated remaining supply horizon based on linked active therapy cadence.
 class SupplyForecast {
-  const SupplyForecast({required this.daysLeft, required this.runOutDate});
+  const SupplyForecast({
+    required this.daysLeft,
+    required this.runOutDate,
+    required this.reorderDate,
+    required this.urgency,
+    this.bufferDays = 7,
+  });
+
   final int daysLeft;
   final DateTime runOutDate;
+  final DateTime reorderDate;
+  final RefillUrgency urgency;
+  final int bufferDays;
+
+  bool get needsReorder =>
+      urgency == RefillUrgency.critical ||
+      urgency == RefillUrgency.reorderSoon ||
+      urgency == RefillUrgency.depleted;
 }
 
 SupplyForecast? estimateSupplyForecast(
   Supply s,
   List<Therapy> therapies, {
   DateTime? now,
+  int bufferDays = 7,
 }) {
-  if (s.qty <= 0 || s.perDose <= 0) return null;
+  if (s.perDose <= 0) return null;
 
   double cadencePerDay(Therapy t) =>
       t.daily ? math.max(1, t.times.length).toDouble() : 1.0 / math.max(1, cycleOf(t));
@@ -193,14 +217,42 @@ SupplyForecast? estimateSupplyForecast(
   }
 
   if (dosesPerDay <= 0) return null;
+  final base = now ?? DateTime.now();
+
+  if (s.qty <= 0) {
+    return SupplyForecast(
+      daysLeft: 0,
+      runOutDate: DateTime(base.year, base.month, base.day),
+      reorderDate: DateTime(base.year, base.month, base.day),
+      urgency: RefillUrgency.depleted,
+      bufferDays: bufferDays,
+    );
+  }
+
   final remainingDoses = s.qty / s.perDose;
   final daysLeft = (remainingDoses / dosesPerDay).floor();
-  if (daysLeft <= 0) return null;
+  final runOutDate = DateTime(base.year, base.month, base.day + daysLeft);
 
-  final base = now ?? DateTime.now();
+  final reorderOffset = math.max(0, daysLeft - bufferDays);
+  final reorderDate = DateTime(base.year, base.month, base.day + reorderOffset);
+
+  final RefillUrgency urgency;
+  if (daysLeft <= 0) {
+    urgency = RefillUrgency.depleted;
+  } else if (daysLeft <= bufferDays) {
+    urgency = RefillUrgency.critical;
+  } else if (daysLeft <= bufferDays + 7) {
+    urgency = RefillUrgency.reorderSoon;
+  } else {
+    urgency = RefillUrgency.healthy;
+  }
+
   return SupplyForecast(
     daysLeft: daysLeft,
-    runOutDate: DateTime(base.year, base.month, base.day + daysLeft),
+    runOutDate: runOutDate,
+    reorderDate: reorderDate,
+    urgency: urgency,
+    bufferDays: bufferDays,
   );
 }
 
@@ -261,4 +313,56 @@ TroughLabReminder? computeTroughLabReminder(
     nextRoutineLabDate: nextRoutine,
     isDue: daysSince >= 90,
   );
+}
+
+/// Represents a specific trough bloodwork window for an upcoming cyclical or injection dose.
+class TroughWindow {
+  const TroughWindow({
+    required this.slot,
+    required this.targetDate,
+    required this.therapy,
+  });
+
+  final Slot slot;
+  final DateTime targetDate;
+  final Therapy therapy;
+}
+
+/// Identifies whether a slot corresponds to a cyclical or injection therapy where
+/// a trough blood-draw (prior to taking the next dose) is clinically recommended.
+bool isTroughEligibleSlot(Slot s) {
+  if (s.t.asNeeded) return false;
+  return s.pending && (s.t.route == 'inj' || cycleOf(s.t) > 1);
+}
+
+/// Returns all trough windows within the given slots list.
+List<TroughWindow> computeTroughWindows(List<Slot> slots) {
+  final out = <TroughWindow>[];
+  for (final s in slots) {
+    if (isTroughEligibleSlot(s)) {
+      out.add(TroughWindow(
+        slot: s,
+        targetDate: DateUtils.dateOnly(s.at),
+        therapy: s.t,
+      ));
+    }
+  }
+  return out;
+}
+
+/// Returns the full list of grid days (including padded days) for a given month.
+List<DateTime> buildMonthGridDays(DateTime monthDate) {
+  final first = DateTime(monthDate.year, monthDate.month, 1);
+  final daysInMonth = DateUtils.getDaysInMonth(monthDate.year, monthDate.month);
+  final startOffset = first.weekday - 1; // 1 = Monday
+  final startDate = first.subtract(Duration(days: startOffset));
+
+  final totalDays = startOffset + daysInMonth;
+  final trailingPadding = (7 - (totalDays % 7)) % 7;
+  final cellCount = totalDays + trailingPadding;
+
+  return [
+    for (int i = 0; i < cellCount; i++)
+      DateTime(startDate.year, startDate.month, startDate.day + i),
+  ];
 }

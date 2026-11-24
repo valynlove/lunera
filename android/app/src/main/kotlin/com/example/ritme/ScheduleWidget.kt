@@ -32,6 +32,11 @@ class ScheduleWidget : HomeWidgetProvider() {
                 v.setTextViewText(rows[i][1], title)
                 v.setTextViewText(rows[i][2], widgetData.getString("sch_${i}_sub", "") ?: "")
                 v.setTextViewText(rows[i][3], whenText(atMs, lang))
+                if (isOverdue(atMs)) {
+                    v.setTextColor(rows[i][3], android.graphics.Color.parseColor("#F09ABF"))
+                } else {
+                    v.setTextColor(rows[i][3], android.graphics.Color.parseColor("#ECE8FF"))
+                }
                 shown++
             }
             v.setTextViewText(R.id.empty, if (hidden) (if (lang == "id") "Detail disembunyikan" else "Details hidden") else (if (lang == "id") "Belum ada jadwal" else "No schedule yet"))

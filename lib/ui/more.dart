@@ -17,6 +17,8 @@ import 'insights.dart';
 import 'pickup_assistant_sheet.dart';
 import 'profile_page.dart';
 import 'about_sheet.dart';
+import 'consultation_prep_page.dart';
+import 'moments_page.dart';
 import 'sanctuary/sanctuary_page.dart';
 import 'settings_page.dart';
 import 'site_map.dart';
@@ -647,6 +649,15 @@ class MorePage extends ConsumerWidget {
               ),
               const Divider(height: 1, indent: 68),
               tile(
+                icon: LucideIcons.camera,
+                color: Pastel.sky,
+                title: tr('Lunera Moments'),
+                subtitle:
+                    tr('Private visual scrapbook of milestones & reflections'),
+                onTap: () => openPage(const MomentsPage()),
+              ),
+              const Divider(height: 1, indent: 68),
+              tile(
                 icon: LucideIcons.bandage,
                 color: Pastel.mint,
                 title: tr('Site Rotation & Health'),
@@ -664,6 +675,15 @@ class MorePage extends ConsumerWidget {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
+              tile(
+                icon: LucideIcons.stethoscope,
+                color: Pastel.sky,
+                title: tr('Smart Consultation Prep'),
+                subtitle:
+                    tr('Symptom clusters, visit checklist & doctor report'),
+                onTap: () => openPage(const ConsultationPrepPage()),
+              ),
+              const Divider(height: 1, indent: 68),
               tile(
                 icon: LucideIcons.bookOpen,
                 color: C.lavender,

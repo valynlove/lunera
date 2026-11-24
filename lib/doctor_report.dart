@@ -171,6 +171,7 @@ String buildDoctorReport({
   required DateTime now,
   List<JournalEntry> journal = const [],
   int months = 3,
+  List<String> consultationQuestions = const [],
 }) {
   final d = _collectDoctorReportData(
     therapies: therapies,
@@ -224,6 +225,14 @@ String buildDoctorReport({
       ..writeln('## ${tr('Reported symptoms & check-ins')}');
     for (final line in d.symptomLines) {
       buf.writeln('- $line');
+    }
+  }
+  if (consultationQuestions.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('## ${tr('Prepared Consultation Questions')}');
+    for (final q in consultationQuestions) {
+      buf.writeln('- $q');
     }
   }
   buf
@@ -304,6 +313,7 @@ Future<Uint8List> buildDoctorReportPdf({
   required DateTime now,
   List<JournalEntry> journal = const [],
   int months = 3,
+  List<String> consultationQuestions = const [],
 }) async {
   final d = _collectDoctorReportData(
     therapies: therapies,
@@ -347,6 +357,12 @@ Future<Uint8List> buildDoctorReportPdf({
       _PdfLine(tr('Reported symptoms & check-ins'),
           bold: true, size: 12.5, gap: 4),
       for (final line in d.symptomLines) _PdfLine('- $line'),
+    ],
+    if (consultationQuestions.isNotEmpty) ...[
+      const _PdfLine('', gap: 6),
+      _PdfLine(tr('Prepared Consultation Questions'),
+          bold: true, size: 12.5, gap: 4),
+      for (final q in consultationQuestions) _PdfLine('- $q'),
     ],
     const _PdfLine('', gap: 10),
     const _PdfLine(

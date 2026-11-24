@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,7 +119,7 @@ class WidgetSync {
         if (!l.at.isBefore(from) && !l.at.isAfter(to)) Offset(l.at.difference(from).inMinutes / 1440, l.base / f),
     ];
     final t = targets[id];
-    final band = t == null ? null : [t[0] / f, t[1] / f];
+    final band = (t == null || t.length < 2) ? null : [t[0] / f, t[1] / f];
     final ys = <double>[...sim.map((s) => s.y), ...dots.map((d) => d.dy), ...?band];
     final top = (ys.isEmpty ? 10.0 : ys.reduce(math.max)) * 1.15 + 1;
 
@@ -231,13 +232,22 @@ class _ChartPainter extends CustomPainter {
         ..lineTo(pts.last.dx, base)
         ..lineTo(pts.first.dx, base)
         ..close();
-      canvas.drawPath(area, Paint()..color = line.withValues(alpha: .14));
+      final gradPaint = Paint()
+        ..shader = ui.Gradient.linear(
+          const Offset(0, padT),
+          Offset(0, base),
+          [
+            line.withValues(alpha: .36),
+            line.withValues(alpha: .03),
+          ],
+        );
+      canvas.drawPath(area, gradPaint);
       canvas.drawPath(
         path,
         Paint()
           ..color = line
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5
+          ..strokeWidth = 2.8
           ..strokeCap = StrokeCap.round
           ..strokeJoin = StrokeJoin.round,
       );
@@ -254,14 +264,15 @@ class _ChartPainter extends CustomPainter {
 
     for (final d in dots) {
       final o = p(d.dx, d.dy);
-      canvas.drawCircle(o, 5, Paint()..color = dot);
+      canvas.drawCircle(o, 7, Paint()..color = dot.withValues(alpha: .30));
+      canvas.drawCircle(o, 4.5, Paint()..color = dot);
       canvas.drawCircle(
         o,
-        5,
+        4.5,
         Paint()
           ..color = Colors.white
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
+          ..strokeWidth = 1.4,
       );
     }
     _label(canvas, fromLabel, Offset(padL, s.height - 13));

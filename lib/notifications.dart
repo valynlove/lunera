@@ -240,6 +240,10 @@ class AppNotifier {
     if (m == null || p == null) return;
     try {
       tzdata.initializeTimeZones();
+      try {
+        final info = await FlutterTimezone.getLocalTimezone();
+        tz.setLocalLocation(tz.getLocation(info.identifier));
+      } catch (_) {}
       final plugin = FlutterLocalNotificationsPlugin();
       final exact = (await plugin
               .resolvePlatformSpecificImplementation<
@@ -254,7 +258,7 @@ class AppNotifier {
         id: id,
         title: p['title'] as String,
         body: p['body'] as String,
-        scheduledDate: tz.TZDateTime.now(tz.UTC).add(Duration(minutes: m)),
+        scheduledDate: tz.TZDateTime.now(tz.local).add(Duration(minutes: m)),
         notificationDetails: _buildDoseDetails(withActions: true),
         androidScheduleMode: mode,
         payload: r.payload,

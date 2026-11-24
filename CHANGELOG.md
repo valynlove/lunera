@@ -4,6 +4,143 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.30] - 2026-11-24
+
+### Added
+- **Segmented PillTabs in Settings (`lib/ui/settings_page.dart`):** Introduced top category filter tabs (`All`, `General`, `Clinical`, `Privacy`, `Data`) to segment the extensive 1,000+ line settings hierarchy, eliminating vertical scroll fatigue while preserving complete configuration discoverability.
+- **Tablet & Wide-Screen Responsive Max-Width Constraints (`lib/ui/shell.dart`, `lib/theme.dart`, `lib/ui/body.dart`, `lib/ui/settings_page.dart`):** Enforced ergonomic 640–680dp maximum layout bounding across application shell, modal sheets, body tracking, and settings, preventing awkward stretched cards and maintaining optimal 60–75 character typographic line length on tablets and foldables.
+- **Sticky Bottom Action Bar in Body Page (`lib/ui/body.dart`):** Relocated `Log Measurement`, `Add Milestone`, and `Log a change` actions from the bottom of the scroll view into a pinned, thumb-accessible bottom navigation bar, allowing immediate entry logging regardless of history length.
+- **Sticky Header Quick-Save CTAs (`lib/ui/sheets.dart`, `lib/ui/levels/lab_sheet.dart`):** Added top header quick-save buttons and enabled `TextInputAction.done` on `TherapySheet` and `LabSheet` for seamless keyboard-friendly submissions.
+
+## [2.2.29] - 2026-11-24
+
+### Added
+- **Reduced-Motion Accessibility Support (`lib/ui/companion_avatar.dart`, `lib/ui/ambient_companion.dart`):** Integrated `MediaQuery.maybeDisableAnimationsOf(context)` and tranquil static glow fallbacks across the Eternal Dusk chibi companion, honoring user system accessibility preferences (WCAG 2.1 Success Criterion 2.3.3) while preserving gentle ambient breathing pulses during normal animation mode.
+
+### Changed
+- **Sticky Header CTA & Keyboard Submission in DoseSheet (`lib/ui/sheets.dart`):** Added a top-bar quick-save button and enabled `TextInputAction.done` with immediate keyboard submission on dose text fields, allowing users on compact screens to effortlessly log doses without scrolling past extended clinical forms.
+
+## [2.2.28] - 2026-11-24
+
+### Changed
+- **Home Dashboard Modular Architecture (`lib/ui/home.dart`, `lib/ui/home/*.dart`):** Refactored the 1,376-line monolithic dashboard into modular, maintainable widgets (`DoseCard`, `SlotTile`, `AlertsCard`, `WeekCard`, `OnboardingStepTile`), reducing the root file size by 77% and improving Riverpod rebuild boundaries without breaking existing consumers.
+
+## [2.2.27] - 2026-11-24
+
+### Changed
+- **Moments Image Memory Optimization (`lib/ui/moments_page.dart`):** Implemented bounded raster decoding (`cacheWidth: 600` for cards and editor previews, `1080` for dialogs) across base64 photo streams, dramatically slashing GPU bitmap allocations and preventing OOM issues during long album scrolling.
+
+## [2.2.26] - 2026-11-24
+
+### Changed
+- **Mobile Navigation Bar Ergonomics (`lib/ui/shell.dart`):** Upgraded the floating bottom navigation bar with WCAG-compliant touch targets (min 48dp height), enlarged icon containers, enhanced label typography legibility (`10.5sp` with optical letter spacing), and full accessibility semantics support (`Semantics` button & selection states).
+
+## [2.2.25] - 2026-11-24
+
+### Added
+- **Multi-Route Therapy Switcher (`docs/index.html`, `docs/style.css`, `docs/script.js`):** Interactive route pills (`[💉 Injections]`, `[🩹 Patches]`, `[🧴 Gels]`, `[💊 Sublingual & Oral]`) enabling visitors to explore real-time UI adaptations, dial tick states, and steady-state concentration metrics across diverse administration routes.
+- **Android Home Screen Widgets Showcase (`docs/index.html`, `docs/style.css`):** Dedicated glanceable widget exhibition on the web landing page featuring `ScheduleWidget` (dose horizon & site tracking), `HrtWidget` (cycle arc dial), and `LevelWidget` (target therapeutic curves) framed on Lunera's signature celestial wallpaper.
+- **Interactive 7-Day Cycle Timeline Scrubber (`docs/index.html`, `docs/style.css`, `docs/script.js`):** Tactile slider scrubber built directly into the Pharmacokinetic Intelligence bento card, allowing users to scrub across cycle days (Day 0 to Day 7) with dynamic mathematical concentration readouts, stage indicators, and SVG chart marker synchronization.
+- **Voice Pitch Studio & Twilight Sanctuary Showcase (`docs/index.html`, `docs/style.css`):** Highlighting private on-device acoustic frequency tracking (Hz) with gender perception target bands, 4-4-6 guided mindful breathing canvas, and instant Decoy Calculator camouflage.
+
+## [2.2.24] - 2026-11-24
+
+### Changed
+- **Web Showcase Triad Design Redesign (`docs/index.html`, `docs/style.css`, `docs/script.js`):** Fully overhauled the official web showcase incorporating three integrated design disciplines:
+  - **Art Direction (`taste-skill`):** Rebuilt page pacing and spatial layout to achieve Linear and Figma design caliber; introduced asymmetrical bento vignettes, eliminated cookie-cutter card layouts, and expanded vertical breathing room (`clamp(84px, 10vw, 136px)`).
+  - **Design System (`ui-ux-pro-max`):** Deepened Lunera's signature *Eternal Dusk* visual identity using obsidian canvas void (`#080716`), layered cosmic plum nebula (`#261D4D`), soft moonlight white text (`#ECE8FF`), and multi-stop twilight gradients (Electric Aurora, Dusk Magenta, Twilight Rose, and In-Range Mint).
+  - **Motion & Animation (`design-motion-principles`):** Added snappy, tactile micro-interactions strictly under 300ms using custom spring easing curves (`cubic-bezier(0.16, 1, 0.3, 1)`) across CTA shimmer sweeps, dynamic scroll-elevated navigation bar, interactive phone mockup tilt states, and responsive accordion glyph morphs with full `prefers-reduced-motion` compliance.
+
+## [2.2.23] - 2026-11-24
+
+### Changed
+- **Web Showcase Taste-Skill & Visual Hierarchy Overhaul (`docs/index.html`, `docs/style.css`, `docs/script.js`):** Audited and redesigned the official web landing page to match the exacting visual hierarchy, typography, and whitespace rhythm of Apple and Linear:
+  - **Editorial & Geometric Typography Stack:** Paired *Instrument Serif* display headlines with tight optical tracking (`-0.03em`), line-height calibration, and soft aurora/magenta/rose gradient illumination with high-contrast *Plus Jakarta Sans* UI, micro-eyebrow pills with live pulse indicator dots, and balanced reading widths (`46ch–54ch`).
+  - **Architectural Telemetry Proof Strip:** Replaced generic circular icon capsules with a 4-column frosted glass capability strip highlighting Pharmacokinetic Modeling, Tissue Rest Rotation, Refill Horizon Forecasting, and Zero-Knowledge Privacy.
+  - **Signature Linear-Style Bento Grid:** Replaced template-like arch cards with a high-density 4-tile bento grid showcasing real steady-state simulation curves with therapeutic target ranges (`100–200 pg/mL`), anatomical Front & Back injection rotation, on-device salted SHA-256 biometric encryption, and 90-day symptom correlation with doctor summary reports.
+  - **Hardware Phone Mockup Polish:** Elevated authentic dual-phone in-app staging with titanium chamfered borders, dynamic notch integration, and ambient backglow.
+  - **Rhythmic Whitespace & Motion:** Unified section vertical rhythm to modular clamp scales, added smooth SVG download icon preservation in `docs/script.js`, and streamlined the interactive FAQ accordion and call-to-action banner.
+
+## [2.2.22] - 2026-11-24
+
+### Fixed
+- **Notification Timezone Scheduling (`lib/notifications.dart`):** Ensured snoozed reminders use `tz.local` with system timezone initialization rather than UTC, preventing snoozed alarms from firing in the past on Android.
+- **Lab Target Stream Safety (`lib/repo.dart`):** Added safe numeric casting and validation in the Firestore `targets()` stream to prevent malformed cloud documents from crashing the listener.
+- **Widget Hormone Chart Robustness (`lib/widget_sync.dart`):** Guarded target band array bounds checking in widget sync to prevent RangeErrors when targets are incomplete.
+- **Twilight Sanctuary Migration (`lib/sanctuary_data.dart`):** Made legacy key migrations fully asynchronous and awaited to protect user sparks and best quiz scores during account transitions.
+- **Home Screen Widget Overdue Detection (`android/.../WidgetCommon.kt`):** Updated schedule widget overdue evaluation to compare against current timestamp rather than date-only boundaries, ensuring doses missed earlier in the day highlight in overdue pink.
+
+## [2.2.21] - 2026-11-24
+
+### Fixed
+- **App Update Synchronization (`lib/update_checker.dart`, `lib/ui/app_changelog.dart`):** Synchronized internal `currentVersion` and offline `AppChangelog` with release version `2.2.21` to eliminate perpetual update prompts on fresh installs.
+- **Ambient Companion Dose Priority (`lib/ui/ambient_companion.dart`):** Reordered companion card priority so imminent upcoming dose reminders (within 2 hours) take precedence over past dose recovery states, and shortened oral dose recovery window from 24h to 4h to prevent starvation of daily notifications.
+- **Smart Consultation Cycle Correlation (`lib/consultation_prep.dart`, `lib/ui/consultation_prep_page.dart`):** Dynamically calculated symptom cycle correlations based on actual therapy regimen cycle lengths (`cycleOf`), avoiding false cycle-offset flags on daily oral therapies.
+- **Moments Image Optimization (`lib/ui/moments_page.dart`):** Added automatic image downscaling and compression on fallback file pickers to prevent memory bloat and SharedPreferences crashes from large uncompressed photos.
+- **Care Alerts Overdue Formatting (`lib/care_alerts.dart`):** Added date formatting (`d MMM, HH:mm`) to older overdue doses so missed doses are clearly contextualized.
+- **Repository Cleanliness (`.gitignore`):** Added `~/` and `~` to `.gitignore` to prevent accidental commits of unexpanded user home directories.
+
+## [2.2.20] - 2026-11-24
+
+### Added
+- **Celestial Wallpaper for Android Home Screen Widgets (`android/app/src/main/res/drawable-nodpi/widget_celestial_bg.jpg`, `android/app/src/main/res/drawable/widget_scrim.xml`, `android/app/src/main/res/layout/`):** Added high-definition celestial wallpaper featuring an ethereal crescent moon, radiant stars, and twilight magenta clouds as the backdrop for all Android home screen widgets (`ScheduleWidget`, `HrtWidget`, `LevelWidget`), integrated with a layered frosted glass scrim overlay (`widget_scrim.xml`) and lavender hairline rim stroke to preserve 100% text contrast and readability.
+
+## [2.2.19] - 2026-11-24
+
+### Changed
+- **Android Home Screen Widgets Visual Refresh (`android/app/src/main/res/drawable/`, `android/app/src/main/res/layout/`, `android/app/src/main/kotlin/com/example/ritme/`):** Replaced flat solid backgrounds with diagonal cosmic gradients (`widget_bg.xml`), added luminous soft lavender hairline borders, transformed circular icons into radiant gradient jewel badges (`widget_icon_circle.xml`), introduced translucent tile containers (`widget_row_bg.xml`) and status pill badges (`widget_pill_bg.xml`), and added contextual overdue dose alert coloring.
+- **Widget Telemetry Chart Rendering (`lib/widget_sync.dart`):** Upgraded `_ChartPainter` hormone trend curve with smooth vertical gradient shaders (`ui.Gradient.linear`) and ambient glow rings around laboratory result markers.
+- **In-App Card Atmosphere & Depth (`lib/theme.dart`):** Upgraded `cardBox` and `AppCard` decorations from flat opaque fills to subtle multi-stop diagonal cosmic gradients (`C.nebula` into `C.surface` and `C.deepCard`), giving dashboard cards depth while allowing the Eternal Dusk background atmosphere to gently breathe through.
+
+## [2.2.18] - 2026-11-24
+
+### Fixed
+- **Cross-Account Data Isolation (`lib/milestones.dart`, `lib/moments.dart`, `lib/consultation_prep.dart`, `lib/voice_pitch.dart`, `lib/sanctuary_data.dart`, `lib/ui/auth.dart`):** Scoped all local SharedPreferences stores by authenticated user UID (`body.private_milestones_$uid`, `lunera_visual_moments_$uid`, `lunera_consultation_session_$uid`, `sanctuary.voice_results_$uid`, `sanctuary.lantern_sparks_$uid`), automated legacy un-scoped data migration, and added complete local storage clearing on `signOutAll()` to eliminate cross-account data leakage on shared devices.
+- **Language Consistency & Missing Translations (`lib/l10n_id.dart`, `lib/ui/about_sheet.dart`):** Added 86 previously missing Indonesian dictionary translations covering Smart Consultation Prep, Care Alerts action buttons, Administration Route presets (`Oral`, `Sublingual`, `Patch`, `Gel`, `Other`), Hormone presets (`Estradiol`, `LH`, `FSH`), Calendar navigation tooltips, and HRT Time-Lapse educational headers.
+- **Cloud Locale Synchronization (`lib/main.dart`):** Added automatic reactive sync from cloud `Prefs.locale` to active `L10n.code` on multi-device sign-in.
+- **History Export Route Matcher (`lib/history_export.dart`):** Fixed injection type extraction to recognize canonical route `'inj'` alongside `'injection'`.
+
+### Added
+- **Full Offline JSON Backup Parity (`lib/repo.dart`, `lib/milestones.dart`, `lib/moments.dart`, `lib/consultation_prep.dart`):** Extended `exportJson()`, `validate()`, and `importData()` to include offline-first stores (`milestones`, `moments`, `consultation`) with full backward compatibility for legacy `ritme` and `lunera` backups.
+
+## [2.2.17] - 2026-11-24
+
+### Added
+- **Lunera Moments (`lib/moments.dart`, `lib/ui/moments_page.dart`):** Private visual keepsake and milestone scrapbook celebrating transition milestones, affirming outfits, and personal reflections with offline-first photo storage and category filters.
+- **Smart Reminder Drawer (`lib/care_alerts.dart`, `lib/ui/care_alerts_sheet.dart`):** Unified clinical notification center aggregating overdue doses, critical/depleted supply warnings from Refill Horizon, upcoming Trough Lab Windows, and scheduled doctor appointments with one-tap action routing.
+- **Moments & Care Alerts Tests (`test/moments_test.dart`, `test/care_alerts_test.dart`):** Comprehensive unit and widget tests covering keepsake serialization, care alert evaluation, drawer opening, and category filtering.
+
+## [2.2.16] - 2026-11-24
+
+### Added
+- **Smart Consultation Prep & Symptom Clustering (`lib/consultation_prep.dart`, `lib/ui/consultation_prep_page.dart`):** Clinical consultation preparation assistant clustering journal symptoms over 90 days, correlating symptoms with dose and trough rhythms, generating actionable discussion questions, providing customizable pre-visit document checklists, and enabling one-tap clinical Doctor Report exports.
+- **Doctor Report Prepared Questions Bridge (`lib/doctor_report.dart`):** Enhanced text and PDF doctor summary report generation with optional prepared consultation questions section for clinician appointments.
+- **Calendar Appointment Integration (`lib/ui/calendar.dart`):** Added clinical appointment dot indicators on calendar days and selected-day consultation visit summary cards linking directly into consultation prep.
+- **Consultation Prep Tests (`test/consultation_prep_test.dart`):** Comprehensive unit and widget tests covering symptom clustering, cycle offset correlation detection, checklist serialization, and UI interactions.
+
+## [2.2.15] - 2026-11-24
+
+### Added
+- **Pharmacokinetic-Aware Timeline (`lib/schedule.dart`, `lib/ui/calendar.dart`):** Added full-month calendar grid toggle with multi-category event indicators (dose, trough, journal, supply depletion), automated Trough Lab Testing Window detection prior to cyclical/injection doses, and selected-day clinical highlight cards.
+- **Trough Timeline Tests (`test/trough_calendar_test.dart`):** Added comprehensive unit and widget tests covering trough eligibility, 7-column month grid generation, week/month toggle transitions, and Indonesian localization.
+
+## [2.2.14] - 2026-11-24
+
+### Added
+- **Predictive Supply & Refill Horizon (`lib/schedule.dart`, `lib/ui/supplies.dart`):** Refill forecasting engine calculating depleted, critical (<=7 days), reorder window (8–14 days with delivery buffer), and healthy tiers based on active therapy consumption; integrated smart Refill Horizon banner and actionable status chips on medication and equipment cards.
+- **Supply Forecast Tests (`test/supply_forecast_test.dart`):** Comprehensive unit tests verifying depletion, critical urgency clamping, reorder window calculations, generic injection equipment mapping, widget banner triggers, and Indonesian localization.
+
+## [2.2.13] - 2026-11-24
+
+### Added
+- **Empathetic Ambient Companion (`lib/ui/ambient_companion.dart`, `lib/ui/home.dart`):** Added a contextual ambient companion card to the home dashboard featuring 20 expressive moods (`CompanionAvatar`), time-of-day greetings, post-dose recovery support, gentle dose horizon prompts, and interactive affirmation cycling on tap with daily dismissal support.
+- **Ambient Companion Tests (`test/ambient_companion_test.dart`):** Comprehensive unit and widget tests covering status evaluation, time-of-day transitions, tap-to-cycle affirmation interactions, daily dismissal, and Indonesian localization.
+
+## [2.2.12] - 2026-11-24
+
+### Changed
+- **Twilight Sanctuary (`lib/ui/sanctuary/sanctuary_page.dart`):** Temporarily deactivated the HRT Time-Lapse visual explorer entry card pending complete illustration and sprite asset readiness.
+
 ## [2.2.11] - 2026-11-23
 
 ### Changed

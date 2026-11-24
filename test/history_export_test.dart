@@ -339,5 +339,28 @@ void main() {
         throwsFormatException,
       );
     });
+
+    test('_describeLog falls back to therapy injType when therapy route is canonical "inj"', () {
+      final t = Therapy(
+        id: 't_inj_short',
+        hormoneId: 'estradiol',
+        name: 'EV',
+        dose: 5.0,
+        doseUnit: 'mg',
+        start: DateTime.now(),
+        route: 'inj',
+        injType: 'subq',
+      );
+      final l = DoseLog(
+        id: 'l_inj_no_type',
+        therapyId: 't_inj_short',
+        at: DateTime.now(),
+      );
+      final json = exportDoseHistoryJson([l], [t]);
+      final decoded = jsonDecode(json);
+      final entry = decoded['entries'][0];
+      expect(entry['route'], equals('inj'));
+      expect(entry['injection_type'], equals('subq'));
+    });
   });
 }

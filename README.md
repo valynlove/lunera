@@ -12,7 +12,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-A58BFF?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-D76ABF?logo=firebase&logoColor=white)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-7DE2C7?labelColor=11102B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.11-F2A17C?labelColor=11102B)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.2.30-F2A17C?labelColor=11102B)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Direct Download APK](https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk) • [📋 Changelog](CHANGELOG.md)
 
@@ -30,19 +30,19 @@
 
 Lunera combines **Midnight Aurora** depth with **Vice City Sunset** warmth across both the mobile app (`lib/theme.dart`) and the web landing page (`docs/`):
 
-| Token | Hex | Role |
-| :--- | :--- | :--- |
-| **Void** | `#090817` | Deepest obsidian void canvas & cold-launch backdrop |
-| **Midnight** | `#11102B` | Primary nocturnal canvas |
-| **Deep Card** | `#171436` | Layered dark card surface |
-| **Nebula** | `#292052` | Elevated cosmic plum surface |
-| **Aurora** | `#8065E8` | Primary electric aurora violet |
-| **Violet** | `#A58BFF` | Luminous violet highlight |
-| **Lavender** | `#C7B8FF` | Soft lavender rim & active icon accent |
-| **Magenta** | `#D76ABF` | Dusk sunset magenta gradient accent |
-| **Rose** | `#F09ABF` | Warm twilight rose (Estradiol E2 series) |
-| **Coral** | `#F2A17C` | Horizon sunset coral (Progesterone P4 & stock alerts) |
-| **Mint** | `#7DE2C7` | Completed doses, adherence & in-range clinical states |
+| Token         | Hex       | Role                                                  |
+| :------------ | :-------- | :---------------------------------------------------- |
+| **Void**      | `#090817` | Deepest obsidian void canvas & cold-launch backdrop   |
+| **Midnight**  | `#11102B` | Primary nocturnal canvas                              |
+| **Deep Card** | `#171436` | Layered dark card surface                             |
+| **Nebula**    | `#292052` | Elevated cosmic plum surface                          |
+| **Aurora**    | `#8065E8` | Primary electric aurora violet                        |
+| **Violet**    | `#A58BFF` | Luminous violet highlight                             |
+| **Lavender**  | `#C7B8FF` | Soft lavender rim & active icon accent                |
+| **Magenta**   | `#D76ABF` | Dusk sunset magenta gradient accent                   |
+| **Rose**      | `#F09ABF` | Warm twilight rose (Estradiol E2 series)              |
+| **Coral**     | `#F2A17C` | Horizon sunset coral (Progesterone P4 & stock alerts) |
+| **Mint**      | `#7DE2C7` | Completed doses, adherence & in-range clinical states |
 
 ---
 
@@ -67,18 +67,18 @@ Lunera combines **Midnight Aurora** depth with **Vice City Sunset** warmth acros
 
 ## 🛠️ Technology Stack
 
-| Layer                   | Technology                                                       |
-| :---------------------- | :--------------------------------------------------------------- |
-| **Framework**           | Flutter (Stable Channel)                                         |
-| **Language**            | Dart 3                                                           |
+| Layer                   | Technology                                                          |
+| :---------------------- | :------------------------------------------------------------------ |
+| **Framework**           | Flutter (Stable Channel)                                            |
+| **Language**            | Dart 3                                                              |
 | **UI & Typography**     | Eternal Dusk Design System (`google_fonts`, `lucide_icons_flutter`) |
-| **State Management**    | Riverpod (`flutter_riverpod`)                                    |
-| **Backend & Cloud**     | Firebase Core, Firebase Auth, Cloud Firestore                    |
-| **Data Visualization**  | `fl_chart`                                                       |
-| **Local Notifications** | `flutter_local_notifications`, `timezone`, `flutter_timezone`    |
-| **Hardware & Security** | `local_auth`, `flutter_secure_storage`, `shared_preferences`     |
-| **CI / CD Automation**  | GitHub Actions (Auto APK Compilation & GitHub Release)           |
-| **Landing Page**        | HTML5, Modern CSS3, Vanilla JavaScript (GitHub Pages in `/docs`) |
+| **State Management**    | Riverpod (`flutter_riverpod`)                                       |
+| **Backend & Cloud**     | Firebase Core, Firebase Auth, Cloud Firestore                       |
+| **Data Visualization**  | `fl_chart`                                                          |
+| **Local Notifications** | `flutter_local_notifications`, `timezone`, `flutter_timezone`       |
+| **Hardware & Security** | `local_auth`, `flutter_secure_storage`, `shared_preferences`        |
+| **CI / CD Automation**  | GitHub Actions (Auto APK Compilation & GitHub Release)              |
+| **Landing Page**        | HTML5, Modern CSS3, Vanilla JavaScript (GitHub Pages in `/docs`)    |
 
 ---
 

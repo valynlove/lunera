@@ -51,7 +51,8 @@ String _unescapeFormula(String cell) {
   double? secondaryDose,
   String? secondaryDoseUnit,
 }) _describeLog(DoseLog l, Therapy? t) {
-  final rawInjType = l.injType ?? (t?.route == 'injection' ? t?.injType : null);
+  final rawInjType = l.injType ??
+      ((t?.route == 'inj' || t?.route == 'injection') ? t?.injType : null);
   final injType =
       (rawInjType == null || rawInjType.isEmpty) ? null : rawInjType;
   final hasSecondary =

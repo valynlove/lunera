@@ -42,6 +42,16 @@ class LuneraApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     applyAccent(ref.watch(prefsProvider.select((p) => p.value?.accent ?? 'lunera')));
+    final cloudLocale = ref.watch(prefsProvider.select((p) => p.value?.locale));
+    if (cloudLocale != null &&
+        (cloudLocale == 'en' || cloudLocale == 'id') &&
+        cloudLocale != L10n.code) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (cloudLocale != L10n.code) {
+          L10n.set(cloudLocale);
+        }
+      });
+    }
     return ValueListenableBuilder<String>(
       valueListenable: L10n.notifier,
       builder: (context, code, _) => MaterialApp(

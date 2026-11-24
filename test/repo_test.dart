@@ -40,6 +40,23 @@ void main() {
 
       expect(repo.validate(validLunera), equals(9));
 
+      // Test backup containing offline local stores (milestones, moments, consultation)
+      final validWithLocalStores = {
+        'metadata': {'app': 'lunera', 'version': 1},
+        'data': {
+          'milestones': [
+            {'id': 'ms1', 'at': '2026-11-01T12:00:00.000Z', 'title': 'First Dose'}
+          ],
+          'moments': [
+            {'id': 'mo1', 'at': '2026-11-01T12:00:00.000Z', 'title': 'Euphoria Moment'}
+          ],
+          'consultation': [
+            {'id': 'session_1', 'doctorOrClinic': 'Dr. Emily'}
+          ],
+        }
+      };
+      expect(repo.validate(validWithLocalStores), equals(3));
+
       // Test legacy 'ritme' metadata compatibility
       final validLegacy = {
         'metadata': {'app': 'ritme', 'version': 1},

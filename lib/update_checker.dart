@@ -41,17 +41,20 @@ class AvailableUpdateNotifier extends Notifier<AppUpdateInfo?> {
 /// Reactive provider for application updates across screens.
 final availableUpdateProvider =
     NotifierProvider<AvailableUpdateNotifier, AppUpdateInfo?>(
-      AvailableUpdateNotifier.new,
-    );
+  AvailableUpdateNotifier.new,
+);
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '2.2.11';
+  static const currentVersion = '2.2.30';
 
-  static const MethodChannel _channel = MethodChannel('com.example.ritme/app_utils');
+  static const MethodChannel _channel =
+      MethodChannel('com.example.ritme/app_utils');
 
-  static const String _primaryApi = 'https://api.github.com/repos/valynlove/lunera/releases/latest';
-  static const String _fallbackApi = 'https://api.github.com/repos/hyenavia/lunera/releases/latest';
+  static const String _primaryApi =
+      'https://api.github.com/repos/valynlove/lunera/releases/latest';
+  static const String _fallbackApi =
+      'https://api.github.com/repos/hyenavia/lunera/releases/latest';
 
   static const String _directDownloadUrl =
       'https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk';
@@ -62,7 +65,9 @@ class UpdateCheckerService {
   /// Memastikan URL eksternal menggunakan HTTPS dan berasal dari domain GitHub terpercaya.
   static bool isTrustedExternalUrl(String rawUrl) {
     final uri = Uri.tryParse(rawUrl.trim());
-    if (uri == null || uri.scheme.toLowerCase() != 'https' || !uri.hasAuthority) {
+    if (uri == null ||
+        uri.scheme.toLowerCase() != 'https' ||
+        !uri.hasAuthority) {
       return false;
     }
     final host = uri.host.toLowerCase();
@@ -116,7 +121,8 @@ class UpdateCheckerService {
   static Future<AppUpdateInfo?> checkForUpdate() async {
     if (kIsWeb) return null;
     try {
-      final data = await _fetchReleaseData(_primaryApi) ?? await _fetchReleaseData(_fallbackApi);
+      final data = await _fetchReleaseData(_primaryApi) ??
+          await _fetchReleaseData(_fallbackApi);
       if (data == null) return null;
 
       final rawTag = (data['tag_name'] as String? ?? '').trim();
@@ -130,7 +136,9 @@ class UpdateCheckerService {
       if (assets != null) {
         for (final a in assets) {
           final assetName = (a['name'] as String? ?? '').toLowerCase();
-          if (assetName == 'lunera.apk' || assetName == 'app-release.apk' || assetName.endsWith('.apk')) {
+          if (assetName == 'lunera.apk' ||
+              assetName == 'app-release.apk' ||
+              assetName.endsWith('.apk')) {
             downloadUrl = a['browser_download_url'] as String? ?? downloadUrl;
             break;
           }
@@ -215,7 +223,8 @@ class UpdateCheckerService {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            tr('You are using the latest version of Lunera (v{0}). ✨', [currentVersion]),
+            tr('You are using the latest version of Lunera (v{0}). ✨',
+                [currentVersion]),
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -233,7 +242,8 @@ class UpdateCheckerService {
         final dark = Theme.of(ctx).brightness == Brightness.dark;
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Container(
@@ -247,7 +257,8 @@ class UpdateCheckerService {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: (dark ? C.voidBg : Colors.black12).withValues(alpha: 0.50),
+                    color: (dark ? C.voidBg : Colors.black12)
+                        .withValues(alpha: 0.50),
                     blurRadius: 32,
                     offset: const Offset(0, 10),
                   ),
@@ -305,14 +316,18 @@ class UpdateCheckerService {
                           children: [
                             Text(
                               tr('Update Available!'),
-                              style: display(22, color: dark ? Colors.white : C.midnight),
+                              style: display(22,
+                                  color: dark ? Colors.white : C.midnight),
                             ),
                             const SizedBox(height: 4),
                             // Version Pill
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 3),
                               decoration: BoxDecoration(
-                                color: dark ? C.nebula.withValues(alpha: 0.8) : Colors.grey.shade100,
+                                color: dark
+                                    ? C.nebula.withValues(alpha: 0.8)
+                                    : Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: C.lavender.withValues(alpha: 0.32),
@@ -327,7 +342,9 @@ class UpdateCheckerService {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: dark ? Colors.white60 : Colors.black54,
+                                      color: dark
+                                          ? Colors.white60
+                                          : Colors.black54,
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -359,7 +376,8 @@ class UpdateCheckerService {
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.45,
-                      color: (dark ? C.mist : C.midnight).withValues(alpha: 0.88),
+                      color:
+                          (dark ? C.mist : C.midnight).withValues(alpha: 0.88),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -371,7 +389,8 @@ class UpdateCheckerService {
                         color: dark ? C.midnight : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: C.lavender.withValues(alpha: dark ? 0.22 : 0.16),
+                          color:
+                              C.lavender.withValues(alpha: dark ? 0.22 : 0.16),
                         ),
                       ),
                       child: Scrollbar(
@@ -383,7 +402,8 @@ class UpdateCheckerService {
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.5,
-                              color: (dark ? C.mist : C.midnight).withValues(alpha: 0.90),
+                              color: (dark ? C.mist : C.midnight)
+                                  .withValues(alpha: 0.90),
                             ),
                           ),
                         ),
@@ -395,7 +415,8 @@ class UpdateCheckerService {
                     style: TextStyle(
                       fontSize: 11.5,
                       fontStyle: FontStyle.italic,
-                      color: (dark ? C.mist : C.midnight).withValues(alpha: 0.58),
+                      color:
+                          (dark ? C.mist : C.midnight).withValues(alpha: 0.58),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -406,11 +427,16 @@ class UpdateCheckerService {
                       OutlinedButton(
                         onPressed: () => Navigator.of(ctx).pop(),
                         style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          backgroundColor: dark ? C.nebula.withValues(alpha: 0.42) : Colors.grey.shade50,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 12),
+                          backgroundColor: dark
+                              ? C.nebula.withValues(alpha: 0.42)
+                              : Colors.grey.shade50,
                           side: BorderSide(
-                            color: (dark ? C.lavender : C.midnight).withValues(alpha: 0.22),
+                            color: (dark ? C.lavender : C.midnight)
+                                .withValues(alpha: 0.22),
                           ),
                         ),
                         child: Text(
@@ -433,8 +459,10 @@ class UpdateCheckerService {
                           foregroundColor: Colors.white,
                           elevation: 3,
                           shadowColor: C.aurora.withValues(alpha: 0.5),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
                         ),
                         onPressed: () {
                           Navigator.of(ctx).pop();

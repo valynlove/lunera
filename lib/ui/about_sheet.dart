@@ -148,9 +148,9 @@ class AboutLuneraSheet extends StatelessWidget {
                                 color: C.lavender.withValues(alpha: 0.38),
                               ),
                             ),
-                            child: const Text(
-                              'v${UpdateCheckerService.currentVersion} • Eternal Dusk Edition',
-                              style: TextStyle(
+                            child: Text(
+                              'v${UpdateCheckerService.currentVersion} • ${tr('Eternal Dusk Edition')}',
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: C.lavender,

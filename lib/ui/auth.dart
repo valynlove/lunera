@@ -2,11 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../consultation_prep.dart';
 import '../lock.dart';
+import '../milestones.dart';
+import '../moments.dart';
 import '../notifications.dart';
 import '../profile.dart';
 import '../repo.dart';
+import '../sanctuary_data.dart';
 import '../theme.dart';
+import '../voice_pitch.dart';
 import '../widget_sync.dart';
 import '../l10n.dart';
 
@@ -50,6 +55,11 @@ Future<void> signOutAll() async {
   await WidgetSync.clear();
   await Lock.instance.clearLocal(uid);
   await ProfileController.clearLocal(uid);
+  await MilestoneStore.clearLocal(uid);
+  await MomentsController.clearLocal(uid);
+  await ConsultationController.clearLocal(uid);
+  await VoiceStore.clearLocal(uid);
+  await SanctuaryStore.clearLocal(uid);
   await FirebaseAuth.instance.signOut();
   try {
     await FirebaseFirestore.instance.clearPersistence();

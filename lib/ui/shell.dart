@@ -124,32 +124,37 @@ class _ShellState extends ConsumerState<Shell> {
         }
       },
       child: Scaffold(
-        body: Column(children: [
-          Expanded(
-            child: SafeArea(
-              bottom: false,
-              child: IndexedStack(
-                index: i,
-                children: const [
-                  LevelsPage(),
-                  CalendarPage(),
-                  HomePage(),
-                  SuppliesPage(),
-                  MorePage(),
-                ],
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Column(children: [
+              Expanded(
+                child: SafeArea(
+                  bottom: false,
+                  child: IndexedStack(
+                    index: i,
+                    children: const [
+                      LevelsPage(),
+                      CalendarPage(),
+                      HomePage(),
+                      SuppliesPage(),
+                      MorePage(),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              _NavBar(
+                currentIndex: i,
+                onTap: (k) {
+                  if (k != i) {
+                    HapticFeedback.selectionClick();
+                  }
+                  ref.read(tabProvider.notifier).state = k;
+                },
+              ),
+            ]),
           ),
-          _NavBar(
-            currentIndex: i,
-            onTap: (k) {
-              if (k != i) {
-                HapticFeedback.selectionClick();
-              }
-              ref.read(tabProvider.notifier).state = k;
-            },
-          ),
-        ]),
+        ),
       ),
     );
   }
@@ -357,118 +362,137 @@ class _NavBar extends StatelessWidget {
               for (var k = 0; k < _items.length; k++)
                 if (k == 2)
                   Expanded(
-                    child: InkResponse(
-                      onTap: () => onTap(k),
-                      radius: 36,
-                      child: Transform.translate(
-                        offset: const Offset(0, -8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AnimatedScale(
-                              scale: i == k ? 1.06 : 0.96,
-                              duration: const Duration(milliseconds: 220),
-                              curve: Curves.easeOutCubic,
-                              child: Container(
-                                width: 46,
-                                height: 46,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: i == k
-                                      ? const LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [C.aurora, C.nebula],
-                                        )
-                                      : null,
-                                  color: i == k ? null : C.deepCard,
-                                  border: Border.all(
-                                    color: i == k
-                                        ? C.iconActive.withValues(alpha: 0.65)
-                                        : C.iconDefault.withValues(alpha: 0.28),
-                                    width: 1.2,
+                    child: Semantics(
+                      button: true,
+                      selected: i == k,
+                      label: tr(_items[k].$2),
+                      child: InkResponse(
+                        onTap: () => onTap(k),
+                        radius: 36,
+                        child: Transform.translate(
+                          offset: const Offset(0, -8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedScale(
+                                scale: i == k ? 1.06 : 0.96,
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOutCubic,
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: i == k
+                                        ? const LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [C.aurora, C.nebula],
+                                          )
+                                        : null,
+                                    color: i == k ? null : C.deepCard,
+                                    border: Border.all(
+                                      color: i == k
+                                          ? C.iconActive.withValues(alpha: 0.65)
+                                          : C.iconDefault.withValues(alpha: 0.28),
+                                      width: 1.2,
+                                    ),
+                                    boxShadow: i == k
+                                        ? [
+                                            BoxShadow(
+                                              color: C.aurora.withValues(alpha: 0.42),
+                                              blurRadius: 16,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
-                                  boxShadow: i == k
-                                      ? [
-                                          BoxShadow(
-                                            color: C.aurora.withValues(alpha: 0.42),
-                                            blurRadius: 16,
-                                            spreadRadius: 1,
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    _items[k].$1,
-                                    size: 24,
-                                    color: i == k ? C.iconActive : C.iconDefault,
+                                  child: Center(
+                                    child: Icon(
+                                      _items[k].$1,
+                                      size: 24,
+                                      color: i == k ? C.iconActive : C.iconDefault,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              tr(_items[k].$2),
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: i == k ? FontWeight.w800 : FontWeight.w600,
-                                color: i == k ? C.iconActive : C.iconDefault,
+                              const SizedBox(height: 2),
+                              Text(
+                                tr(_items[k].$2),
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: i == k ? FontWeight.w800 : FontWeight.w600,
+                                  color: i == k ? C.iconActive : C.iconDefault,
+                                  letterSpacing: 0.1,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   )
                 else
                   Expanded(
-                    child: InkResponse(
-                      onTap: () => onTap(k),
-                      radius: 36,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 44,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: i == k ? C.aurora.withValues(alpha: 0.24) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(14),
-                                border: i == k
-                                    ? Border.all(color: C.violet.withValues(alpha: 0.50), width: 1.0)
-                                    : null,
-                                boxShadow: i == k
-                                    ? [
-                                        BoxShadow(
-                                          color: C.aurora.withValues(alpha: 0.22),
-                                          blurRadius: 8,
-                                          spreadRadius: 1,
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  _items[k].$1,
-                                  size: 22,
-                                  color: i == k ? C.iconActive : C.iconDefault,
+                    child: Semantics(
+                      button: true,
+                      selected: i == k,
+                      label: tr(_items[k].$2),
+                      child: InkResponse(
+                        onTap: () => onTap(k),
+                        radius: 32,
+                        highlightShape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(16),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeOutCubic,
+                                  width: 48,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: i == k ? C.aurora.withValues(alpha: 0.24) : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: i == k
+                                        ? Border.all(color: C.violet.withValues(alpha: 0.50), width: 1.0)
+                                        : null,
+                                    boxShadow: i == k
+                                        ? [
+                                            BoxShadow(
+                                              color: C.aurora.withValues(alpha: 0.22),
+                                              blurRadius: 8,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      _items[k].$1,
+                                      size: 22,
+                                      color: i == k ? C.iconActive : C.iconDefault,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  tr(_items[k].$2),
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: i == k ? FontWeight.w700 : FontWeight.w500,
+                                    color: i == k ? C.iconActive : C.iconDefault,
+                                    letterSpacing: 0.1,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 1),
-                            Text(
-                              tr(_items[k].$2),
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: i == k ? FontWeight.w700 : FontWeight.w500,
-                                color: i == k ? C.iconActive : C.iconDefault,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

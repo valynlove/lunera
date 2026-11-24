@@ -39,6 +39,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _busyCloud = false;
+  int _tab = 0;
 
   void _save(Prefs p) => ref.read(repoProvider)?.setPrefs(p);
 
@@ -308,32 +309,51 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
-          children: [
-            // Cohesive Page Header matching other pages
-            Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
               children: [
-                IconButton(
-                  onPressed: () {
+                // Cohesive Page Header matching other pages
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(LucideIcons.arrowLeft),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        tr('Settings'),
+                        style: display(32, color: Colors.white, weight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+                gap(12),
+                PillTabs<int>(
+                  items: [
+                    (0, tr('All')),
+                    (1, tr('General')),
+                    (2, tr('Clinical')),
+                    (3, tr('Privacy')),
+                    (4, tr('Data')),
+                  ],
+                  value: _tab,
+                  onChanged: (v) {
                     HapticFeedback.selectionClick();
-                    Navigator.pop(context);
+                    setState(() => _tab = v);
                   },
-                  icon: const Icon(LucideIcons.arrowLeft),
                 ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    tr('Settings'),
-                    style: display(32, color: Colors.white, weight: FontWeight.w700),
-                  ),
-                ),
-              ],
-            ),
-            gap(16),
+                gap(16),
 
-            // 1. Therapy & Clinical (Priority 1: Core Domain)
-            SectionHeader(title: tr('Therapy & Clinical')),
+                // 1. Therapy & Clinical (Priority 1: Core Domain)
+                if (_tab == 0 || _tab == 2) ...[
+                  SectionHeader(title: tr('Therapy & Clinical')),
             AppCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,8 +427,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
             ),
+          ],
 
-            // 2. Reminders & Privacy (Priority 2: Medication Adherence & Notification Protection)
+          // 2. Reminders & Privacy (Priority 2: Medication Adherence & Notification Protection)
+          if (_tab == 0 || _tab == 3) ...[
             SectionHeader(title: tr('Reminders & Privacy')),
             AppCard(
               padding: EdgeInsets.zero,
@@ -530,8 +552,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 );
               },
             ),
+          ],
 
-            // 4. Cloud Sync & Storage (Priority 4: Real-Time Synchronization)
+          // 4. Cloud Sync & Storage (Priority 4: Real-Time Synchronization)
+          if (_tab == 0 || _tab == 4) ...[
             SectionHeader(title: tr('Cloud Sync & Storage')),
             AppCard(
               padding: const EdgeInsets.all(16),
@@ -811,8 +835,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
             ),
+          ],
 
-            // 6. Preferences & Widgets (Priority 6: General Configuration)
+          // 6. Preferences & Widgets (Priority 6: General Configuration)
+          if (_tab == 0 || _tab == 1) ...[
             SectionHeader(title: tr('Preferences')),
             AppCard(
               child: Column(
@@ -1058,8 +1084,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
           ],
-        ),
+        ],
       ),
-    );
+    ),
+  ),
+),
+);
   }
 }

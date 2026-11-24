@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Lunera — Your Journey, Our Care | Hormone Therapy & Wellness Companion</title>
-  <meta name="description" content="Lunera tracks your hormone therapy injections and medications, simulates estimated levels, reminds you on time, and safeguards your health data with biometric privacy.">
+  <title>Lunera — Your Journey, Our Care | Hormone Therapy &amp; Wellness Companion</title>
+  <meta name="description" content="Lunera is a private, clinical-grade wellness companion for hormone therapy. Pharmacokinetic modeling, tissue rest rotation, and empathetic rhythm tracking—safeguarded by biometric security.">
   <meta name="keywords" content="Lunera, HRT tracker, hormone therapy, estradiol, testosterone, pharmacokinetic simulation, bra size calculator, privacy health app, offline first, eternal dusk">
   <meta name="author" content="Lunera">
+  <meta name="theme-color" content="#080716">
 
   <!-- Open Graph / Social Meta -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Lunera — Your Journey, Our Care">
-  <meta property="og:description" content="A personal health companion for your HRT journey, because every phase is a part of your story.">
+  <meta property="og:description" content="A private, clinical-grade wellness companion for your HRT journey. Pharmacokinetic modeling, tissue rest rotation, and biometric security.">
   <meta property="og:image" content="images/logo.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Lunera — Your Journey, Our Care">
@@ -30,27 +31,47 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Site Header (Solid Eternal Dusk Midnight Surface, Sticky, Aurora-Magenta-Coral Horizon Separator) -->
-  <header class="site-header">
+  <!-- Ambient Atmospheric Lighting Elements -->
+  <div class="ambient-mesh" aria-hidden="true">
+    <div class="mesh-glow glow-top-right"></div>
+    <div class="mesh-glow glow-mid-left"></div>
+    <div class="mesh-glow glow-bottom-right"></div>
+  </div>
+
+  <!-- Site Header (Floating Frosted Glass Navigation Bar) -->
+  <header class="site-header" id="site-header">
     <div class="nav-wrap">
       <a class="logo" href="#home" aria-label="Lunera home">
-        <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="logo-img">
-        Lunera
-        <span class="app-version-tag">v2.2.11</span>
+        <div class="logo-mark">
+          <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="logo-img">
+        </div>
+        <span class="logo-text">Lunera</span>
+        <span class="app-version-tag">v2.2.30</span>
       </a>
       <nav aria-label="Main Navigation">
-        <ul>
-          <li><a class="on" href="#home">Home</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#faq">FAQ</a></li>
+        <ul class="nav-list">
+          <li><a class="nav-link on" href="#home"><span>Home</span></a></li>
+          <li><a class="nav-link" href="#features"><span>Features</span></a></li>
+          <li><a class="nav-link" href="#widgets"><span>Widgets</span></a></li>
+          <li><a class="nav-link" href="#architecture"><span>Architecture</span></a></li>
+          <li><a class="nav-link" href="#faq"><span>FAQ</span></a></li>
         </ul>
       </nav>
-      <a class="btn apk-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">▸ Download APK</a>
+      <div class="header-action-group">
+        <a class="btn btn-header-cta apk-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">
+          <span class="btn-shimmer" aria-hidden="true"></span>
+          <svg class="btn-svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Download APK</span>
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Hero Section (Spacious Editorial Art Direction) -->
   <section class="hero" id="home">
     <div class="hero-backdrop" aria-hidden="true"></div>
     <div class="hero-inner">
@@ -65,66 +86,134 @@
         <ellipse cx="200" cy="200" rx="180" ry="70" transform="rotate(-30 200 200)" stroke="rgba(242,161,124,0.12)"/>
         <polygon points="200,10 204,40 234,44 204,48 200,78 196,48 166,44 196,40" fill="rgba(199,184,255,0.16)"/>
       </svg>
+
       <div class="hero-copy">
-        <div class="hero-kicker">✦ Eternal Dusk Companion ✦</div>
-        <h1>Your Journey,<br><em>Our Care.</em></h1>
-        <p>A personal health companion for your HRT journey, because every phase is a part of your story.</p>
-        <div class="row">
-          <a class="btn gold apk-download-btn" id="hero-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">⬇ Download APK</a>
-          <a class="btn" href="#features">Learn More ⌄</a>
+        <div class="hero-kicker">
+          <span class="kicker-glow-dot" aria-hidden="true"></span>
+          <span>Version 2.2.30 · 100% Offline-First Care</span>
+        </div>
+        <h1 class="hero-title">
+          Your Journey,<br>
+          <em class="hero-title-accent">Our Care.</em>
+        </h1>
+        <p class="hero-lead">
+          A personal wellness companion engineered for hormone therapy. Continuous pharmacokinetic simulation, tissue rest rotation, and empathetic rhythm tracking—safeguarded by zero-knowledge biometric security.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary apk-download-btn" id="hero-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">
+            <span class="btn-shimmer" aria-hidden="true"></span>
+            <svg class="btn-svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Download APK</span>
+          </a>
+          <a class="btn btn-secondary" href="#features">
+            <span>Explore Architecture</span>
+            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </a>
+        </div>
+        <div class="hero-proof-bar">
+          <div class="proof-item">
+            <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Zero Telemetry</span>
+          </div>
+          <span class="proof-dot" aria-hidden="true">•</span>
+          <div class="proof-item">
+            <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            <span>100% Offline-First</span>
+          </div>
+          <span class="proof-dot" aria-hidden="true">•</span>
+          <div class="proof-item">
+            <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span>Free &amp; Open Source</span>
+          </div>
         </div>
       </div>
+
       <div class="hero-card-wrap">
         <figure class="hero-showcase-card">
           <img src="images/hero_card_dusk.jpg" alt="Lunera Eternal Dusk companion showcase card" loading="eager">
+          <div class="hero-card-sheen" aria-hidden="true"></div>
+          <div class="hero-card-floating-badge" aria-hidden="true">
+            <span class="badge-dot-mint"></span>
+            <span>Steady-State Calibrated</span>
+          </div>
         </figure>
       </div>
     </div>
   </section>
 
   <div class="wrap">
-    <!-- Highlights Strip -->
-    <section class="strip" aria-label="Highlights">
-      <div>
-        <span class="ico">
-          <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-            <polyline points="16 7 22 7 22 13"/>
-          </svg>
-        </span>
-        Track Your<br>HRT Progress
-      </div>
-      <div>
-        <span class="ico">
-          <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M8 2v4"/>
-            <path d="M16 2v4"/>
-            <rect width="18" height="18" x="3" y="4" rx="2"/>
-            <path d="M3 10h18"/>
-          </svg>
-        </span>
-        Manage Your<br>Schedule
-      </div>
-      <div>
-        <span class="ico">
-          <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-          </svg>
-        </span>
-        Document Your<br>Journey
-      </div>
-      <div>
-        <span class="ico">
-          <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-            <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>
-          </svg>
-        </span>
-        Prioritize Your<br>Well-being
+    <!-- Highlights & Architectural Telemetry Strip -->
+    <section class="telemetry-strip" aria-label="Core Capabilities">
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <div class="telemetry-icon-box">
+            <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+          </div>
+          <div class="telemetry-content">
+            <h3 class="telemetry-title">Pharmacokinetic Modeling</h3>
+            <p class="telemetry-desc">Multi-compartment curves calibrated for Estradiol and Testosterone.</p>
+          </div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-icon-box">
+            <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 2v4"/>
+              <path d="M16 2v4"/>
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M3 10h18"/>
+            </svg>
+          </div>
+          <div class="telemetry-content">
+            <h3 class="telemetry-title">Tissue Rest Rotation</h3>
+            <p class="telemetry-desc">Front &amp; Back 2D anatomical map preventing localized tissue strain.</p>
+          </div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-icon-box">
+            <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+            </svg>
+          </div>
+          <div class="telemetry-content">
+            <h3 class="telemetry-title">Refill Horizon Forecast</h3>
+            <p class="telemetry-desc">Delivery buffer forecasting with depleted and critical stock warnings.</p>
+          </div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-icon-box">
+            <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="telemetry-content">
+            <h3 class="telemetry-title">Zero-Knowledge Sanctuary</h3>
+            <p class="telemetry-desc">Salted SHA-256 PIN, Decoy Calculator, and local encrypted dual backup.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Comprehensive HRT Tracking Section -->
+    <!-- Comprehensive HRT Tracking Section (Dual Interactive In-App Mockups) -->
     <section class="track" id="features">
       <!-- Constellation Map Watermark -->
       <svg class="bg-watermark wm-track" viewBox="0 0 500 500" fill="none" stroke="rgba(165,139,255,0.12)" stroke-width="1" aria-hidden="true">
@@ -140,8 +229,47 @@
         <circle cx="350" cy="220" r="3.5" fill="rgba(236,232,255,0.5)"/>
         <circle cx="420" cy="190" r="2.5" fill="rgba(199,184,255,0.4)"/>
       </svg>
+
+      <!-- Multi-Route Administration Selector Pill Bar -->
+      <div class="route-switcher-wrap" aria-label="Administration Routes">
+        <div class="route-switcher-kicker">
+          <span class="route-pulse-dot" aria-hidden="true"></span>
+          <span>Adaptive Administration Engine</span>
+        </div>
+        <div class="route-pills-bar" role="tablist" aria-label="Select therapy route">
+          <button class="route-pill active" data-route="inj" role="tab" aria-selected="true" title="Intramuscular & Subcutaneous Injections">
+            <span class="route-pill-ico">💉</span>
+            <div class="route-pill-text">
+              <strong class="route-pill-name">Injections</strong>
+              <span class="route-pill-detail">Ester multi-compartment PK</span>
+            </div>
+          </button>
+          <button class="route-pill" data-route="patch" role="tab" aria-selected="false" title="Transdermal Matrix Patches">
+            <span class="route-pill-ico">🩹</span>
+            <div class="route-pill-text">
+              <strong class="route-pill-name">Patches</strong>
+              <span class="route-pill-detail">Twice-weekly matrix</span>
+            </div>
+          </button>
+          <button class="route-pill" data-route="gel" role="tab" aria-selected="false" title="Transdermal Gel Application">
+            <span class="route-pill-ico">🧴</span>
+            <div class="route-pill-text">
+              <strong class="route-pill-name">Gels</strong>
+              <span class="route-pill-detail">Daily diurnal plateau</span>
+            </div>
+          </button>
+          <button class="route-pill" data-route="oral" role="tab" aria-selected="false" title="Sublingual & Oral Micronized">
+            <span class="route-pill-ico">💊</span>
+            <div class="route-pill-text">
+              <strong class="route-pill-name">Sublingual &amp; Oral</strong>
+              <span class="route-pill-detail">Biphasic absorption curve</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
       <div class="phones" aria-hidden="true">
-        <!-- Phone Mockup A: Home Screen (Authentic Lunera In-App UI - Foreground / Front) -->
+        <!-- Phone Mockup A: Home Screen (Foreground) -->
         <div class="phone a">
           <div class="screen phone-screen-app">
             <!-- Hardware Device Status Bar -->
@@ -151,7 +279,7 @@
               <span class="status-icons">📶 5G 🔋</span>
             </div>
 
-            <!-- Authentic In-App Home Header -->
+            <!-- In-App Home Header -->
             <div class="phone-header-row">
               <div class="phone-header-left">
                 <span class="phone-header-greet" id="phone-greet-display">Good evening,</span>
@@ -166,16 +294,14 @@
               </div>
             </div>
 
-            <!-- Authentic Lunera DoseCard (Pixel-matched to lib/ui/home.dart) -->
+            <!-- Authentic Lunera DoseCard -->
             <div class="phone-dose-main-card">
               <div class="dose-card-top">
-                <!-- Left: Precision Radial Cycle Dial (100x100 proportion) -->
+                <!-- Radial Cycle Dial -->
                 <div class="dose-dial-wrap">
-                  <svg class="phone-dial-svg" viewBox="0 0 100 100">
-                    <!-- Concentric orbit guides -->
+                  <svg class="phone-dial-svg" id="mockup-dial-svg" viewBox="0 0 100 100">
                     <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(199,184,255,0.16)" stroke-width="1" stroke-dasharray="2,3"/>
                     <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(165,139,255,0.14)" stroke-width="0.8"/>
-                    <!-- Radial Cycle Ticks (8 cycle marks) -->
                     <line x1="50" y1="8" x2="50" y2="18" stroke="#7DE2C7" stroke-width="4.5" stroke-linecap="round"/>
                     <line x1="79.7" y1="20.3" x2="72.6" y2="27.4" stroke="#7DE2C7" stroke-width="4.5" stroke-linecap="round"/>
                     <line x1="92" y1="50" x2="82" y2="50" stroke="#7DE2C7" stroke-width="4.5" stroke-linecap="round"/>
@@ -184,36 +310,35 @@
                     <line x1="20.3" y1="79.7" x2="27.4" y2="72.6" stroke="#A58BFF" stroke-width="5" stroke-linecap="round"/>
                     <line x1="8" y1="50" x2="18" y2="50" stroke="rgba(199,184,255,0.20)" stroke-width="4.5" stroke-linecap="round"/>
                     <line x1="20.3" y1="20.3" x2="27.4" y2="27.4" stroke="rgba(199,184,255,0.20)" stroke-width="4.5" stroke-linecap="round"/>
-                    <!-- Center readout: 1 / 1 day left -->
-                    <text x="50" y="49" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="26" font-weight="600" fill="#ECE8FF">1</text>
-                    <text x="50" y="61" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" font-weight="600" fill="#F2A17C" letter-spacing="0.4">1 day left</text>
+                    <text x="50" y="49" id="mockup-dial-num" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="26" font-weight="600" fill="#ECE8FF">1</text>
+                    <text x="50" y="61" id="mockup-dial-sub" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" font-weight="600" fill="#F2A17C" letter-spacing="0.4">1 day left</text>
                   </svg>
                 </div>
 
-                <!-- Right: Therapy Details & Presets -->
+                <!-- Therapy Details & Presets -->
                 <div class="dose-info-wrap">
                   <div class="dose-title-row">
-                    <span class="dose-therapy-name">Estradiol Valerate</span>
+                    <span class="dose-therapy-name" id="mockup-therapy-name">Estradiol Valerate</span>
                     <span class="dose-edit-ico">✎</span>
                   </div>
                   <div class="dose-pills-row">
-                    <span class="dose-pill-peony">
-                      <span class="dose-pill-ico">💉</span>
-                      <span>4 mg</span>
+                    <span class="dose-pill-peony" id="mockup-dose-pill-main">
+                      <span class="dose-pill-ico" id="mockup-dose-ico">💉</span>
+                      <span id="mockup-dose-amount">4 mg</span>
                     </span>
-                    <span class="dose-pill-subtle">
+                    <span class="dose-pill-subtle" id="mockup-dose-pill-interval">
                       <span class="dose-pill-ico">🔁</span>
-                      <span>Every 7 days</span>
+                      <span id="mockup-dose-schedule">Every 7 days</span>
                     </span>
                   </div>
                   <div class="dose-site-row">
                     <span class="dose-site-ico">📍</span>
-                    <span class="dose-site-text">next: Right thigh</span>
+                    <span class="dose-site-text" id="mockup-dose-site">next: Right thigh</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Bottom Row: Primary Log Injection + Guided Calm Injection Button -->
+              <!-- Primary Log Injection + Guided Calm Injection Button -->
               <div class="dose-actions-row">
                 <div class="dose-log-btn">
                   <span class="dose-btn-ico">✓</span>
@@ -225,7 +350,7 @@
               </div>
             </div>
 
-            <!-- Secondary Daily Oral Therapy (Spironolactone - lib/repo.dart sample data) -->
+            <!-- Secondary Daily Oral Therapy (Spironolactone) -->
             <div class="phone-secondary-dose-card">
               <div class="sec-dose-left">
                 <span class="sec-dose-check">✓</span>
@@ -237,7 +362,7 @@
               <span class="sec-dose-badge">Taken today</span>
             </div>
 
-            <!-- In-App Low Supply Alert (Alcohol Wipes - lib/repo.dart sample data) -->
+            <!-- In-App Low Supply Alert -->
             <div class="phone-supply-alert">
               <span class="supply-alert-ico">⚠️</span>
               <div class="supply-alert-info">
@@ -247,7 +372,7 @@
               <span class="supply-alert-badge">Refill</span>
             </div>
 
-            <!-- In-App Weekly Schedule Overview -->
+            <!-- Weekly Schedule Overview -->
             <div class="home-week-card">
               <div class="home-week-hdr">
                 <span class="home-week-title">Weekly Schedule</span>
@@ -292,7 +417,7 @@
               </div>
             </div>
 
-            <!-- Authentic 5-Tab Floating Dock (Home Active, Lucide Outline Icons) -->
+            <!-- 5-Tab Floating Dock -->
             <div class="phone-dock">
               <svg class="dock-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Levels">
                 <path d="M3 3v16a2 2 0 0 0 2 2h16"/>
@@ -322,7 +447,7 @@
           </div>
         </div>
 
-        <!-- Phone Mockup B: Levels Screen (Hormone Levels & Pharmacokinetics - Background / Back) -->
+        <!-- Phone Mockup B: Levels Screen (Background) -->
         <div class="phone b">
           <div class="screen phone-screen-app">
             <!-- Hardware Device Status Bar -->
@@ -332,7 +457,7 @@
               <span class="status-icons">📶 5G 🔋</span>
             </div>
 
-            <!-- Authentic Levels Header Row (lib/ui/levels.dart) -->
+            <!-- Levels Header Row -->
             <div class="levels-header-row">
               <h4 class="levels-title">Levels</h4>
               <div class="levels-action-btns">
@@ -346,14 +471,14 @@
               <div class="level-card-top">
                 <div class="level-card-title-group">
                   <span class="level-indicator-dot"></span>
-                  <span class="level-hormone-name">Estimated Estradiol</span>
+                  <span class="level-hormone-name" id="mockup-level-title">Estimated Estradiol</span>
                 </div>
-                <span class="level-badge-mint">In Range</span>
+                <span class="level-badge-mint" id="mockup-level-badge">In Range</span>
               </div>
               <div class="level-value-row">
-                <span class="level-value-num">185</span>
-                <span class="level-value-unit">pg/mL</span>
-                <span class="level-value-sub">steady-state</span>
+                <span class="level-value-num" id="mockup-level-num">185</span>
+                <span class="level-value-unit" id="mockup-level-unit">pg/mL</span>
+                <span class="level-value-sub" id="mockup-level-sub">steady-state</span>
               </div>
               <div class="level-time-pills">
                 <span class="pill">30D</span>
@@ -378,18 +503,18 @@
                 <line x1="0" y1="48" x2="200" y2="48" stroke="#7DE2C7" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.65"/>
                 <!-- Shaded area under the pharmacokinetic curve -->
                 <path d="M0,50 C30,46 50,22 80,24 C110,26 130,42 160,30 C180,24 195,28 200,29 L200,68 L0,68 Z" fill="url(#curveRoseGlow)"/>
-                <!-- Pharmacokinetic simulation curve (Twilight Rose #F09ABF) -->
-                <path d="M0,50 C30,46 50,22 80,24 C110,26 130,42 160,30 C180,24 195,28 200,29" fill="none" stroke="#F09ABF" stroke-width="2.2"/>
+                <!-- Pharmacokinetic simulation curve -->
+                <path d="M0,50 C30,46 50,22 80,24 C110,26 130,42 160,30 C180,24 195,28 200,29" fill="none" stroke="#F09ABF" stroke-width="2.2" id="mockup-chart-curve"/>
                 <!-- Dashed Now Timeline Marker -->
-                <line x1="155" y1="6" x2="155" y2="64" stroke="#C7B8FF" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.75"/>
+                <line x1="155" y1="6" x2="155" y2="64" stroke="#C7B8FF" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.75" id="mockup-chart-timeline"/>
                 <!-- Current steady-state level marker -->
-                <circle cx="155" cy="30" r="3.5" fill="#F09ABF" stroke="#090817" stroke-width="1.5"/>
+                <circle cx="155" cy="30" r="3.5" fill="#F09ABF" stroke="#090817" stroke-width="1.5" id="mockup-chart-dot"/>
                 <!-- Verified Lab Dot -->
                 <circle cx="125" cy="27" r="3.5" fill="#7DE2C7" stroke="#090817" stroke-width="1.5"/>
               </svg>
             </div>
 
-            <!-- Blood Tests & Lab Markers Card (lib/repo.dart sample data) -->
+            <!-- Blood Tests & Lab Markers Card -->
             <div class="pcard level-lab-card">
               <div class="level-lab-hdr">
                 <span class="level-lab-title">Blood Tests &amp; Lab Markers</span>
@@ -415,7 +540,7 @@
               </div>
             </div>
 
-            <!-- Authentic 5-Tab Floating Dock (Levels Active, Lucide Outline Icons) -->
+            <!-- 5-Tab Floating Dock -->
             <div class="phone-dock">
               <div class="dock-ico-active-wrap">
                 <svg class="dock-ico dock-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Levels">
@@ -446,23 +571,31 @@
         </div>
       </div>
 
-      <!-- Features Narrative List -->
-      <div>
-        <span class="eyebrow">Monitor · Reflect · Thrive</span>
-        <h2>Comprehensive<br><em>HRT Tracking</em></h2>
-        <p>Keep track of your hormone levels, injections, and health trends with an intuitive and elegant interface.</p>
-        <ul class="list">
-          <li>
-            <span class="ico">
+      <!-- Features Narrative Column -->
+      <div class="track-narrative">
+        <span class="eyebrow-pill">✦ Precision Therapy Tracking ✦</span>
+        <h2 class="section-title">
+          Engineered for Clarity,<br>
+          <em>Designed for Peace</em>
+        </h2>
+        <p class="section-lead">
+          Track your regimen with clinical accuracy. Calibrated pharmacokinetic estimates, tissue rest site mapping, and timely dosage alarms in an interface that never overwhelms.
+        </p>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <div class="feature-ico-box">
               <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/>
                 <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>
               </svg>
-            </span>
-            Track hormone levels &amp; pharmacokinetic curves
+            </div>
+            <div class="feature-text">
+              <strong>Pharmacokinetic Simulation Curves</strong>
+              <span>Multi-compartment mathematical modeling calibrated for Estradiol and Testosterone.</span>
+            </div>
           </li>
-          <li>
-            <span class="ico">
+          <li class="feature-item">
+            <div class="feature-ico-box">
               <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="m18 2 4 4"/>
                 <path d="m17 7 3-3"/>
@@ -471,11 +604,14 @@
                 <path d="m5 19-3 3"/>
                 <path d="m14 4 6 6"/>
               </svg>
-            </span>
-            Manage injection schedules &amp; tissue rest rotation
+            </div>
+            <div class="feature-text">
+              <strong>Tissue Rest &amp; Site Rotation</strong>
+              <span>Front &amp; Back 2D anatomical map tracking injection rest days to prevent lipohypertrophy.</span>
+            </div>
           </li>
-          <li>
-            <span class="ico">
+          <li class="feature-item">
+            <div class="feature-ico-box">
               <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/>
                 <path d="m14.5 12.5 2-2"/>
@@ -483,64 +619,393 @@
                 <path d="m8.5 6.5 2-2"/>
                 <path d="m17.5 15.5 2-2"/>
               </svg>
-            </span>
-            Visualize your physical progress &amp; body metrics
+            </div>
+            <div class="feature-text">
+              <strong>Physical Progression &amp; Measurements</strong>
+              <span>Multi-zone body measurements, waist-to-hip ratio, and built-in bra size calculator.</span>
+            </div>
           </li>
-          <li>
-            <span class="ico">
+          <li class="feature-item">
+            <div class="feature-ico-box">
               <svg class="lucide-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 7v14"/>
                 <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>
               </svg>
-            </span>
-            Write and reflect in your mood &amp; transition journal
+            </div>
+            <div class="feature-text">
+              <strong>Mood, Symptom &amp; Transition Journal</strong>
+              <span>Private reflection scrapbook with 90-day symptom correlation and doctor consultation prep.</span>
+            </div>
           </li>
         </ul>
       </div>
     </section>
 
-    <!-- Why Choose Lunera Section -->
-    <section class="why" id="about">
-      <!-- Dusk Horizon Watermark -->
+    <!-- Android Home Screen Widgets Showcase Section -->
+    <section class="widgets-showcase" id="widgets" aria-label="Android Home Screen Widgets">
+      <!-- Ambient Constellation Watermark -->
+      <svg class="bg-watermark wm-widgets" viewBox="0 0 460 460" fill="none" stroke="rgba(199,184,255,0.10)" stroke-width="1" aria-hidden="true">
+        <circle cx="230" cy="230" r="200" stroke-dasharray="4 6"/>
+        <circle cx="230" cy="230" r="140"/>
+        <line x1="50" y1="230" x2="410" y2="230" stroke="rgba(128,101,232,0.12)"/>
+        <line x1="230" y1="50" x2="230" y2="410" stroke="rgba(128,101,232,0.12)"/>
+        <ellipse cx="230" cy="230" rx="190" ry="85" transform="rotate(-35 230 230)" stroke="rgba(215,106,191,0.12)"/>
+      </svg>
+
+      <div class="section-header-center">
+        <span class="eyebrow-pill">✦ Glanceable Offline Care ✦</span>
+        <h2 class="section-title">Glanceable Care, <em>Right on Your Screen</em></h2>
+        <p class="section-lead">
+          Stay anchored in your hormonal rhythm without unlocking the full app. Privacy-first, zero-telemetry Android Home Screen widgets powered by Lunera's offline database engine.
+        </p>
+      </div>
+
+      <div class="widgets-canvas-frame">
+        <!-- Celestial Wallpaper Backing -->
+        <div class="widgets-wallpaper-bg">
+          <img src="images/celestial_bg.jpg" alt="Lunera Celestial Wallpaper" class="widgets-wallpaper-img" loading="lazy">
+          <div class="widgets-wallpaper-scrim" aria-hidden="true"></div>
+        </div>
+
+        <div class="widgets-grid">
+          <!-- Widget 1: ScheduleWidget (Dose Horizon & Injection Site) -->
+          <div class="widget-card widget-schedule">
+            <div class="widget-hdr">
+              <div class="widget-brand">
+                <img src="images/icon.png" alt="Lunera icon" class="widget-brand-ico">
+                <span class="widget-brand-name">LUNERA SCHEDULE</span>
+              </div>
+              <span class="widget-pill-active">Next Dose</span>
+            </div>
+            <div class="widget-dose-item current">
+              <div class="widget-dose-left">
+                <div class="widget-dose-route-badge">💉</div>
+                <div class="widget-dose-meta">
+                  <div class="widget-dose-title">Estradiol Valerate</div>
+                  <div class="widget-dose-sub">4 mg · Due today at 20:00</div>
+                </div>
+              </div>
+              <div class="widget-dose-action">
+                <span class="widget-check-btn" title="Quick Log">✓</span>
+              </div>
+            </div>
+            <div class="widget-site-strip">
+              <span class="widget-site-pin">📍</span>
+              <span class="widget-site-label">Recommended Site:</span>
+              <strong class="widget-site-zone">Right Thigh (Vastus Lateralis)</strong>
+              <span class="widget-site-rest">14 days rest</span>
+            </div>
+            <div class="widget-dose-item secondary">
+              <div class="widget-dose-left">
+                <div class="widget-dose-route-badge oral">💊</div>
+                <div class="widget-dose-meta">
+                  <div class="widget-dose-title">Spironolactone</div>
+                  <div class="widget-dose-sub">50 mg · Daily at 09:00</div>
+                </div>
+              </div>
+              <span class="widget-status-tag taken">Taken ✓</span>
+            </div>
+          </div>
+
+          <!-- Widget 2: HrtWidget (Cycle Arc & Remaining Days) -->
+          <div class="widget-card widget-hrt">
+            <div class="widget-hdr">
+              <div class="widget-brand">
+                <span class="widget-brand-dot"></span>
+                <span class="widget-brand-name">CYCLE DIAL</span>
+              </div>
+              <span class="widget-status-mini">Day 6 / 7</span>
+            </div>
+            <div class="widget-hrt-dial-wrap">
+              <svg class="widget-dial-svg" viewBox="0 0 100 100" aria-label="Cycle Dial Indicator">
+                <defs>
+                  <linearGradient id="widgetDialGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#8065E8"/>
+                    <stop offset="50%" stop-color="#D76ABF"/>
+                    <stop offset="100%" stop-color="#7DE2C7"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(199,184,255,0.14)" stroke-width="6"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="url(#widgetDialGrad)" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="36" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                <text x="50" y="47" text-anchor="middle" font-family="'Instrument Serif', serif" font-size="28" font-weight="600" fill="#ECE8FF">1</text>
+                <text x="50" y="60" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="7.5" font-weight="600" fill="#F2A17C">DAY LEFT</text>
+              </svg>
+            </div>
+            <div class="widget-hrt-footer">
+              <span class="widget-hrt-badge">EV 4mg · Inj</span>
+              <span class="widget-hrt-site">📍 Right Thigh</span>
+            </div>
+          </div>
+
+          <!-- Widget 3: LevelWidget (Hormone Concentration Curve & Target Range) -->
+          <div class="widget-card widget-level">
+            <div class="widget-hdr">
+              <div class="widget-brand">
+                <span class="widget-brand-dot mint"></span>
+                <span class="widget-brand-name">ESTIMATED LEVEL</span>
+              </div>
+              <span class="widget-badge-mint">Target 100–200</span>
+            </div>
+            <div class="widget-level-stat">
+              <div class="widget-level-num">185 <small>pg/mL</small></div>
+              <div class="widget-level-sub">steady-state estradiol</div>
+            </div>
+            <div class="widget-level-chart">
+              <svg viewBox="0 0 220 54" class="widget-chart-svg" aria-hidden="true">
+                <rect x="0" y="10" width="220" height="28" fill="rgba(125,226,199,0.12)" rx="3"/>
+                <line x1="0" y1="10" x2="220" y2="10" stroke="#7DE2C7" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.6"/>
+                <line x1="0" y1="38" x2="220" y2="38" stroke="#7DE2C7" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.6"/>
+                <path d="M0,40 C35,38 65,14 100,16 C140,18 165,34 200,24 C210,21 216,23 220,24" fill="none" stroke="#F09ABF" stroke-width="2.2"/>
+                <circle cx="175" cy="25" r="3.5" fill="#F09ABF" stroke="#11102B" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <div class="widget-level-footer">
+              <span>Trough Lab Window: Nov 15</span>
+              <span class="widget-footer-pill">90D Calibrated</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture & Bento Grid (Linear/Figma-Style Asymmetric Visual Grid) -->
+    <section class="bento-section" id="architecture">
+      <!-- Watermark Horizon Geometry -->
       <svg class="bg-watermark wm-why" viewBox="0 0 360 360" fill="none" stroke="rgba(199,184,255,0.12)" stroke-width="1" aria-hidden="true">
         <circle cx="180" cy="180" r="160" stroke-dasharray="3 5"/>
         <circle cx="180" cy="180" r="110" stroke="rgba(215,106,191,0.12)"/>
         <polygon points="180,30 190,130 290,140 190,150 180,250 170,150 70,140 170,130" stroke="rgba(242,161,124,0.12)"/>
         <circle cx="180" cy="180" r="4" fill="rgba(165,139,255,0.28)"/>
       </svg>
-      <div>
-        <span class="eyebrow">Why choose Lunera?</span>
-        <h2>A Safe Space<br>for Your <em>Journey</em></h2>
-        <p>More than just a tracker, Lunera is a companion that understands, supports, and grows with you.</p>
-        <a class="btn sm apk-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">Discover More →</a>
+
+      <div class="section-header-center">
+        <span class="eyebrow-pill">✦ Architecture &amp; Privacy ✦</span>
+        <h2 class="section-title">A Safe Space for Your <em>Journey</em></h2>
+        <p class="section-lead">
+          Built from the ground up for absolute patient autonomy, clinical rigor, and zero third-party compromise.
+        </p>
       </div>
-      <div class="cards">
-        <div class="card">
-          <svg class="card-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-            <path d="m9 12 2 2 4-4"/>
-          </svg>
-          <h3>Private &amp; Secure</h3>
-          <p>Zero tracking, zero ads. Your data stays yours, protected by PIN and biometrics.</p>
+
+      <div class="bento-grid">
+        <!-- Bento 1: Pharmacokinetic Intelligence + Interactive 7-Day Cycle Scrubber (Wide Hero Tile) -->
+        <div class="bento-card bento-wide">
+          <div class="bento-card-aura" aria-hidden="true"></div>
+          <div class="bento-header">
+            <span class="bento-pill-tag">Pharmacokinetics</span>
+            <span class="bento-status-pill" id="scrubber-status-pill">Continuous Simulation</span>
+          </div>
+          <div class="bento-copy">
+            <h3 class="bento-title">Steady-State Mathematical Simulation</h3>
+            <p class="bento-desc">
+              Mathematical compartmental models calculated continuously for Estradiol and Testosterone esters. Pinpoint peak absorptions and schedule bloodwork exactly within your Trough Testing Window.
+            </p>
+          </div>
+
+          <div class="bento-visual-preview">
+            <div class="preview-metric-box">
+              <span class="preview-metric-label">Estimated Concentration</span>
+              <div class="preview-metric-val" id="scrubber-metric-num">185 <small>pg/mL</small></div>
+              <span class="preview-metric-tag in-range" id="scrubber-metric-badge">In Therapeutic Target (100–200)</span>
+            </div>
+            <div class="preview-chart-sim">
+              <svg viewBox="0 0 280 64" class="bento-svg-chart" id="bento-svg-chart" aria-hidden="true">
+                <rect x="0" y="14" width="280" height="32" fill="rgba(125,226,199,0.12)" rx="4"/>
+                <line x1="0" y1="14" x2="280" y2="14" stroke="#7DE2C7" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.6"/>
+                <line x1="0" y1="46" x2="280" y2="46" stroke="#7DE2C7" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.6"/>
+                <!-- Target band label -->
+                <text x="6" y="24" font-size="7.5" fill="#7DE2C7" opacity="0.75" font-family="'Plus Jakarta Sans', sans-serif">Target Window (100–200)</text>
+                <path d="M0,48 C40,44 70,18 110,20 C150,22 180,38 220,28 C250,22 270,25 280,26" fill="none" stroke="#F09ABF" stroke-width="2.4" id="bento-chart-curve"/>
+                <!-- Interactive Scrubber Indicator Circle -->
+                <circle cx="220" cy="28" r="4.5" fill="#F09ABF" stroke="#11102B" stroke-width="2.2" id="bento-scrubber-dot"/>
+                <!-- Verified Bloodwork Lab Dot -->
+                <circle cx="160" cy="24" r="3.5" fill="#7DE2C7" stroke="#11102B" stroke-width="1.5" title="Verified Lab Test Result"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Interactive 7-Day Cycle Timeline Scrubber Bar -->
+          <div class="cycle-scrubber-wrap">
+            <div class="cycle-scrubber-top">
+              <div class="scrubber-label-group">
+                <span class="scrubber-title">Cycle Scrubber:</span>
+                <strong class="scrubber-day-text" id="scrubber-day-readout">Day 6 of 7 · 1 Day Left</strong>
+              </div>
+              <span class="scrubber-stage-badge" id="scrubber-stage-badge">🎯 Ideal Lab Window</span>
+            </div>
+            <div class="scrubber-slider-container">
+              <input type="range" min="0" max="7" value="6" step="1" id="cycle-scrubber-range" class="cycle-slider" aria-label="Simulate cycle day (0 to 7)">
+              <div class="scrubber-ticks-row" aria-hidden="true">
+                <span class="tick" data-step="0">D0 Dose</span>
+                <span class="tick" data-step="1">D1 Peak</span>
+                <span class="tick" data-step="2">D2</span>
+                <span class="tick" data-step="3">D3</span>
+                <span class="tick" data-step="4">D4</span>
+                <span class="tick" data-step="5">D5</span>
+                <span class="tick active" data-step="6">D6 Lab</span>
+                <span class="tick" data-step="7">D7 Due</span>
+              </div>
+            </div>
+            <p class="scrubber-hint-text" id="scrubber-hint-text">
+              Drag the scrubber to inspect simulated ester release, steady-state concentration, and your ideal trough lab testing window.
+            </p>
+          </div>
         </div>
-        <div class="card">
-          <svg class="card-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-            <path d="M20 3v4"/>
-            <path d="M22 5h-4"/>
-            <path d="M4 17v2"/>
-            <path d="M5 18H3"/>
-          </svg>
-          <h3>Beautifully Designed</h3>
-          <p>Eternal Dusk twilight sanctuary aesthetics with gentle pacing, calming guidance, and clarity.</p>
+
+        <!-- Bento 2: Zero-Knowledge Privacy (Compact Vault Tile) -->
+        <div class="bento-card">
+          <div class="bento-card-aura" aria-hidden="true"></div>
+          <div class="bento-header">
+            <span class="bento-pill-tag">Data Sovereignty</span>
+          </div>
+          <div class="bento-icon-hero">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <h3 class="bento-title">Zero-Knowledge Vault</h3>
+          <p class="bento-desc">
+            Protected by salted SHA-256 PIN, biometric authentication, and Decoy Calculator camouflage. Zero trackers, zero ads, zero data brokering.
+          </p>
+          <div class="bento-meta-tags">
+            <span class="mini-tag">100% Offline-First</span>
+            <span class="mini-tag">Encrypted JSON</span>
+          </div>
         </div>
-        <div class="card">
-          <svg class="card-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>
-            <circle cx="12" cy="12" r="10"/>
-          </svg>
-          <h3>Built for You</h3>
-          <p>Offline-first dual backup, bilingual support, and precision reminders for every phase.</p>
+
+        <!-- Bento 3: Anatomical Site Rotation (Compact Anatomy Tile) -->
+        <div class="bento-card">
+          <div class="bento-card-aura" aria-hidden="true"></div>
+          <div class="bento-header">
+            <span class="bento-pill-tag">Clinical Care</span>
+          </div>
+          <div class="bento-icon-hero">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+              <path d="M20 3v4"/>
+              <path d="M22 5h-4"/>
+              <path d="M4 17v2"/>
+              <path d="M5 18H3"/>
+            </svg>
+          </div>
+          <h3 class="bento-title">Tissue Rest Rotation</h3>
+          <p class="bento-desc">
+            Interactive 2D anatomical map tracking days since last injection across thigh, deltoid, and gluteal zones to prevent lipohypertrophy.
+          </p>
+          <div class="bento-meta-tags">
+            <span class="mini-tag">Front &amp; Back 2D</span>
+            <span class="mini-tag">Harm Reduction</span>
+          </div>
+        </div>
+
+        <!-- Bento 4: Voice Pitch Studio & Biofeedback (Compact Studio Tile) -->
+        <div class="bento-card">
+          <div class="bento-card-aura" aria-hidden="true"></div>
+          <div class="bento-header">
+            <span class="bento-pill-tag">Voice &amp; Resonance</span>
+            <span class="bento-status-pill">On-Device DSP</span>
+          </div>
+          <div class="bento-icon-hero voice-hero">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <h3 class="bento-title">Voice Pitch Studio</h3>
+          <p class="bento-desc">
+            Analyze your fundamental speech frequency in Hz in real time. Compare against gender perception target bands with zero audio ever recorded or uploaded.
+          </p>
+          <div class="voice-spectrum-preview" aria-hidden="true">
+            <div class="voice-freq-display">
+              <span class="voice-freq-num">212</span>
+              <span class="voice-freq-unit">Hz</span>
+              <span class="voice-freq-band">Feminine Target (165–255 Hz)</span>
+            </div>
+            <div class="voice-spectrum-bars">
+              <span class="vbar" style="height: 38%;"></span>
+              <span class="vbar" style="height: 52%;"></span>
+              <span class="vbar" style="height: 75%;"></span>
+              <span class="vbar active" style="height: 94%;"></span>
+              <span class="vbar active" style="height: 82%;"></span>
+              <span class="vbar" style="height: 60%;"></span>
+              <span class="vbar" style="height: 44%;"></span>
+              <span class="vbar" style="height: 30%;"></span>
+            </div>
+          </div>
+          <div class="bento-meta-tags">
+            <span class="mini-tag">100% Private Hz</span>
+            <span class="mini-tag">Pitch Progression</span>
+          </div>
+        </div>
+
+        <!-- Bento 5: Twilight Sanctuary & Stealth Camouflage (Compact Mindfulness Tile) -->
+        <div class="bento-card">
+          <div class="bento-card-aura" aria-hidden="true"></div>
+          <div class="bento-header">
+            <span class="bento-pill-tag">Mindfulness &amp; Stealth</span>
+          </div>
+          <div class="bento-icon-hero sanctuary-hero">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+          </div>
+          <h3 class="bento-title">Twilight Sanctuary &amp; Decoy</h3>
+          <p class="bento-desc">
+            4-4-6 guided mindful breathwork to soothe pre-injection anxiety. In unsupportive environments, transform Lunera into a fully functioning scientific calculator.
+          </p>
+          <div class="sanctuary-preview-wrap" aria-hidden="true">
+            <!-- Mindful Breathing Canvas Indicator -->
+            <div class="breath-ring-container">
+              <div class="breath-ring">
+                <span class="breath-phase-text">Breathe (4-4-6)</span>
+              </div>
+            </div>
+            <!-- Decoy Calculator Stealth Keypad Mock -->
+            <div class="decoy-calc-strip">
+              <span class="decoy-key">7</span>
+              <span class="decoy-key">8</span>
+              <span class="decoy-key">9</span>
+              <span class="decoy-key op">÷</span>
+              <span class="decoy-key">4</span>
+              <span class="decoy-key">5</span>
+              <span class="decoy-key">6</span>
+              <span class="decoy-key op">×</span>
+            </div>
+          </div>
+          <div class="bento-meta-tags">
+            <span class="mini-tag">Calm Injections</span>
+            <span class="mini-tag">Decoy Calculator</span>
+          </div>
+        </div>
+
+        <!-- Bento 6: Smart Consultation Prep & Refill Horizon (Wide Clinical Tile) -->
+        <div class="bento-card bento-wide">
+          <div class="bento-card-aura" aria-hidden="true"></div>
+          <div class="bento-header">
+            <span class="bento-pill-tag">Clinical Prep &amp; Inventory</span>
+            <span class="bento-status-pill coral">Refill Horizon Guard</span>
+          </div>
+          <div class="bento-copy">
+            <h3 class="bento-title">Smart Consultation Prep &amp; Refill Horizon</h3>
+            <p class="bento-desc">
+              Cluster 90 days of transition symptoms with dose cycle correlations, generate doctor-ready summary reports, and forecast supply depletion with delivery buffer windows.
+            </p>
+          </div>
+          <div class="bento-pill-preview-row">
+            <div class="bento-preview-chip">
+              <span class="chip-status-dot green"></span>
+              <span>Doctor Summary PDF Ready</span>
+            </div>
+            <div class="bento-preview-chip">
+              <span class="chip-status-dot coral"></span>
+              <span>Refill Horizon: 12 days buffer</span>
+            </div>
+            <div class="bento-preview-chip">
+              <span class="chip-status-dot violet"></span>
+              <span>Trough Lab Window: Nov 15</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -548,28 +1013,56 @@
     <!-- FAQ Section -->
     <section class="faq" id="faq">
       <div class="faq-companion">
-        <span class="eyebrow">✦ Gentle Answers ✦</span>
-        <h2>Questions,<br><em>answered</em></h2>
+        <span class="eyebrow-pill">✦ Gentle Guidance ✦</span>
+        <h2 class="section-title">Questions,<br><em>answered</em></h2>
+        <p class="faq-companion-text">
+          Everything you need to know about privacy, offline reliability, and how Lunera keeps your personal health journey safe.
+        </p>
         <div class="chibi-stage chibi-stage-faq">
           <img class="chibi-img" src="images/companion/explain.png" alt="Lunera companion explaining answers" loading="lazy">
         </div>
       </div>
+
       <div class="faq-list">
         <details>
-          <summary>Is my health data private?</summary>
-          <p>Yes. Your entries stay strictly on your device or in your personal private encrypted backup. Zero third-party trackers, zero advertising, zero data brokering.</p>
+          <summary>
+            <span>Is my personal health data completely private?</span>
+          </summary>
+          <p>
+            Yes. Your health data stays strictly on your device or in your personal private backup. There is zero telemetry, zero advertising SDKs, and zero third-party data broker integration. You can use Lunera with 100% features without creating an external cloud account.
+          </p>
         </details>
         <details>
-          <summary>What can I track in Lunera?</summary>
-          <p>Hormone levels and pharmacokinetic simulations, injection sites with tissue rest rotation, schedules &amp; dosage alarms, physical body measurements, supply inventory, and mood journal entries.</p>
+          <summary>
+            <span>What clinical parameters can I track in Lunera?</span>
+          </summary>
+          <p>
+            Lunera tracks hormone levels and multi-compartment pharmacokinetic simulations, injection sites with tissue rest rotation, oral/sublingual/patch/gel administration, laboratory blood markers, physical body measurements, supply inventory, and mood &amp; symptom journals.
+          </p>
         </details>
         <details>
-          <summary>Is Lunera free to download?</summary>
-          <p>Yes. Lunera is 100% free and open-source under the MIT License. You can download the standalone APK directly from GitHub Releases and begin right away.</p>
+          <summary>
+            <span>Is Lunera completely free to download and use?</span>
+          </summary>
+          <p>
+            Yes. Lunera is 100% free and open-source under the MIT License. There are no paywalls, subscriptions, or hidden charges. You can download the standalone APK directly from GitHub Releases and begin tracking immediately.
+          </p>
         </details>
         <details>
-          <summary>Does it work offline without an internet connection?</summary>
-          <p>Absolutely. Lunera is built offline-first. All alarms, schedules, pharmacokinetic level simulations, body measurements, and local JSON backups function without an internet connection.</p>
+          <summary>
+            <span>Does the app function offline without internet access?</span>
+          </summary>
+          <p>
+            Absolutely. Lunera is built offline-first. All alarms, schedules, pharmacokinetic level simulations, body measurements, and local JSON backups function without an internet connection. Cloud synchronization via Cloud Firestore is completely optional.
+          </p>
+        </details>
+        <details>
+          <summary>
+            <span>How does Lunera calculate estimated hormone levels?</span>
+          </summary>
+          <p>
+            Lunera utilizes peer-reviewed pharmacokinetic models from scientific literature for common estradiol and testosterone formulations. The simulation estimates steady-state concentrations based on dose, interval, and administration route, calibrated against your verified blood test laboratory results.
+          </p>
         </details>
       </div>
     </section>
@@ -577,10 +1070,34 @@
     <!-- Call to Action Banner -->
     <section class="cta" id="download">
       <div class="cta-copy">
-        <h3>Ready to begin your journey with Lunera?</h3>
-        <p>Download the official Android APK and take the first step towards a peaceful, mindful rhythm.</p>
+        <span class="eyebrow-pill">✦ Get Started Today ✦</span>
+        <h3 class="cta-title">Ready to begin your journey with Lunera?</h3>
+        <p class="cta-desc">
+          Download the official standalone Android APK. Step into a peaceful, mindful rhythm with complete privacy and zero advertisements.
+        </p>
         <div class="cta-actions">
-          <a class="btn gold apk-download-btn" id="cta-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">⬇ Download APK</a>
+          <a class="btn btn-primary apk-download-btn" id="cta-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">
+            <span class="btn-shimmer" aria-hidden="true"></span>
+            <svg class="btn-svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Download APK (v2.2.30)</span>
+          </a>
+          <a class="btn btn-secondary" href="https://github.com/valynlove/lunera" target="_blank" rel="noopener noreferrer">
+            <svg class="btn-svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+            <span>View on GitHub</span>
+          </a>
+        </div>
+        <div class="cta-specs">
+          <span>Requires Android 8.0+</span>
+          <span>•</span>
+          <span>No Account Required</span>
+          <span>•</span>
+          <span>MIT License</span>
         </div>
       </div>
       <div class="chibi-stage chibi-stage-cta">
@@ -589,22 +1106,24 @@
     </section>
   </div> <!-- /.wrap -->
 
-  <!-- Site Footer (Full-width Solid Eternal Dusk Void Surface & Luminous Horizon Separator) -->
+  <!-- Site Footer (Minimalist Apple/Linear-Grade Structure) -->
   <footer class="site-footer">
     <div class="footer-wrap">
       <div class="footer-brand-row">
         <div class="footer-logo">
           <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="footer-logo-img">
           <span class="footer-brand-name">Lunera</span>
-          <span class="app-version-tag">v2.2.11</span>
+          <span class="app-version-tag">v2.2.30</span>
         </div>
-        <p class="footer-tagline">A personal wellness companion for hormone therapy, health rhythms, and transition tracking.</p>
+        <p class="footer-tagline">
+          A personal wellness companion for hormone therapy, health rhythms, and transition tracking.
+        </p>
       </div>
 
       <div class="footer-divider-subtle"></div>
 
       <p class="footer-disclaimer">
-        Lunera is a personal wellness companion and dosage reminder, not a substitute for clinical medical advice. Pharmacokinetic curves are statistical estimations based on scientific literature. Always consult your healthcare provider or endocrinologist for treatment decisions.
+        Lunera is an independent wellness tracking companion and harm-reduction utility, not a licensed medical device or clinical diagnostic tool. Pharmacokinetic curves and steady-state levels are statistical mathematical estimations derived from peer-reviewed scientific literature. Always consult your endocrinologist or licensed medical professional for clinical treatment and dosage decisions.
       </p>
 
       <div class="footer-bottom-row">
