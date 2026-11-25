@@ -4,8 +4,6 @@
 
 <img src="docs/images/readme_banner.jpg" alt="Lunera — A Little Moment Banner" width="100%" />
 
-<br /><br />
-
 ### _Every Phase, Your Own._
 
 **A Gentle, Elegant & Privacy-Focused Personal Health & Therapy Tracker**
