@@ -4,6 +4,15 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.34] - 2026-11-25
+
+### Added
+- **HRT-Aware Movement Coach (`lib/workout_catalog.dart`, `lib/workout_coach.dart`, `lib/ui/sanctuary/workout_page.dart`, `lib/ui/sanctuary/workout_session_page.dart`):** Introduced an offline-first, guilt-free Personal Trainer inside Twilight Sanctuary featuring 4 HRT-aware preset programs (*Feminizing Focus*, *Masculinizing Focus*, *Bone & Heart Care*, *Low-Energy / Trough Recovery*), a Custom Routine Builder, optional baseline calibration, and an active workout mode with rest/hold timers and post-session effort feedback.
+- **Sporty Lunera Coach Mascot & 2-Pose Animated Diagrams (`lib/ui/sanctuary/coach_avatar.dart`, `lib/ui/sanctuary/workout_pose_painter.dart`, `assets/images/companion/coach/`):** Added 8 sporty Lunera Coach expressions for emotional guidance alongside lightweight `CustomPainter` 2-pose animated exercise diagrams with Reduce Motion / manual Start-End pose support, grounded in WHO, NHS, and ACE guidelines.
+- **Injection-Site, Trough-Window & Gentle Restart Intelligence (`lib/workout_coach.dart`, `lib/notifications.dart`):** Automatically adapts daily workout suggestions around recent or same-day injection sites, pre-selects Light Mode during trough windows, offers a 10-minute *Ease Back In* flow after 5+ days away with zero streak penalties, and supports optional workout reminders on a separate `'workout_coach'` notification channel.
+- **Home Shortcut & Backup Compatibility (`lib/models.dart`, `lib/repo.dart`, `lib/ui/home.dart`, `lib/ui/settings_page.dart`):** Added an optional toggleable Movement Coach shortcut card on Home and full backward-compatible JSON export/import and `validate()` support for workout profiles, custom routines, and session logs.
+- **2×2 Android Movement Coach Widget (`WorkoutWidget.kt`, `widget_workout.xml`, `lib/widget_sync.dart`, `lib/ui/shell.dart`):** Added a 2×2 Android Home Screen widget displaying the sporty Lunera Coach mascot, daily HRT-aware plan, quick **Start** / **Rest** actions, and automatic `widgetHide` privacy masking.
+
 ## [2.2.33] - 2026-11-25
 
 ### Added

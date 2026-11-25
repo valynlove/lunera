@@ -1,6 +1,9 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n.dart';
 import '../lock.dart';
@@ -15,6 +18,7 @@ import 'calendar.dart';
 import 'home.dart';
 import 'levels.dart';
 import 'more.dart';
+import 'sanctuary/workout_page.dart';
 import 'sheets.dart';
 import 'supplies.dart';
 
@@ -27,11 +31,20 @@ class Shell extends ConsumerStatefulWidget {
 
 class _ShellState extends ConsumerState<Shell> {
   bool _openingQuickDose = false;
+  bool _openingWorkoutWidget = false;
+  StreamSubscription<Uri?>? _widgetClickSub;
 
   @override
   void initState() {
     super.initState();
     AppNotifier.pendingQuickDose.addListener(_onQuickDosePending);
+    WidgetSync.pendingWorkoutAction.addListener(_onWorkoutActionPending);
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetUri);
+        _widgetClickSub = HomeWidget.widgetClicked.listen(_handleWidgetUri);
+      } catch (_) {}
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (AppNotifier.instance.supported) {
         final prefs = ref.read(prefsProvider).value;
@@ -40,6 +53,7 @@ class _ShellState extends ConsumerState<Shell> {
         }
       }
       _tryOpenQuickDose();
+      _tryOpenWorkoutWidget();
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted && (!Lock.instance.state.value.enabled || Lock.instance.sessionUnlocked)) {
           UpdateCheckerService.checkAndNotify(ref, context: context);
@@ -51,7 +65,36 @@ class _ShellState extends ConsumerState<Shell> {
   @override
   void dispose() {
     AppNotifier.pendingQuickDose.removeListener(_onQuickDosePending);
+    WidgetSync.pendingWorkoutAction.removeListener(_onWorkoutActionPending);
+    _widgetClickSub?.cancel();
     super.dispose();
+  }
+
+  void _handleWidgetUri(Uri? uri) {
+    if (uri == null || uri.host != 'workout') return;
+    final action = uri.path == '/start' ? 'start' : 'coach';
+    WidgetSync.pendingWorkoutAction.value = action;
+  }
+
+  void _onWorkoutActionPending() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryOpenWorkoutWidget());
+  }
+
+  Future<void> _tryOpenWorkoutWidget() async {
+    if (!mounted || _openingWorkoutWidget) return;
+    final action = WidgetSync.pendingWorkoutAction.value;
+    if (action == null) return;
+    WidgetSync.pendingWorkoutAction.value = null;
+    _openingWorkoutWidget = true;
+    try {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => WorkoutCoachPage(autoStartToday: action == 'start'),
+        ),
+      );
+    } finally {
+      _openingWorkoutWidget = false;
+    }
   }
 
   void _onQuickDosePending() {

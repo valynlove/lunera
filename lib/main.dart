@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
@@ -12,6 +14,7 @@ import 'notifications.dart';
 import 'profile.dart';
 import 'repo.dart';
 import 'theme.dart';
+import 'widget_sync.dart';
 import 'ui/auth.dart';
 import 'ui/lock_screen.dart';
 import 'ui/shell.dart';
@@ -25,6 +28,13 @@ Future<void> main() async {
     await AppNotifier.instance.init();
   } catch (e) {
     debugPrint(tr('Notifications are off: {0}', [e]));
+  }
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    try {
+      await HomeWidget.registerInteractivityCallback(
+        workoutWidgetBackgroundCallback,
+      );
+    } catch (_) {}
   }
   await Lock.instance.load();
   await L10n.load();

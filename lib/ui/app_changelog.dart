@@ -42,10 +42,24 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.33',
+      version: '2.2.34',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'HRT-Aware Movement Coach in Twilight Sanctuary: Added an offline-first, guilt-free Personal Coach with 4 HRT programs, custom routines, optional baseline calibration, sporty Coach mascot expressions, animated 2-pose exercise diagrams, injection-site/trough adaptation, and separate gentle workout reminders.',
+          textId:
+              'Pelatih Gerak Ramah HRT di Suaka Senja: Menambahkan pelatih pribadi offline-first tanpa rasa bersalah dengan 4 program HRT, rutinitas kustom, tes kemampuan awal opsional, 8 ekspresi maskot Coach sporty, diagram gerakan 2-pose animasi, penyesuaian lokasi suntik/trough, serta pengingat gerak terpisah.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.33',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

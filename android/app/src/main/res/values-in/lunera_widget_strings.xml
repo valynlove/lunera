@@ -8,4 +8,6 @@
     <string name="widget_schedule_empty">Belum ada jadwal</string>
     <string name="widget_level_label">Lunera: level</string>
     <string name="widget_level_desc">Grafik perkiraan level hormon</string>
+    <string name="widget_workout_label">Lunera: Pelatih Gerak</string>
+    <string name="widget_workout_desc">Rencana gerak ramah HRT harian dengan tombol cepat Mulai &amp; Istirahat</string>
 </resources>

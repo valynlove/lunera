@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
@@ -6,12 +7,67 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 import 'repo.dart';
 import 'schedule.dart';
 import 'sim.dart';
 import 'theme.dart';
 import 'l10n.dart';
+import 'workout_coach.dart';
+
+/// Background callback triggered by tapping "Rest / Resume" on the 2x2 WorkoutWidget.
+@pragma('vm:entry-point')
+Future<void> workoutWidgetBackgroundCallback(Uri? uri) async {
+  if (uri == null || uri.host != 'workout' || uri.path != '/rest') return;
+  try {
+    await L10n.load();
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString('lunera_workout_v1');
+    final current = raw != null && raw.isNotEmpty
+        ? WorkoutState.fromMap(
+            (jsonDecode(raw) as Map).cast<String, dynamic>())
+        : const WorkoutState();
+    final now = DateTime.now();
+    final todayIso = isoDateOf(now);
+    final isResting = current.profile.skippedDateIso == todayIso;
+    final nextProfile = isResting
+        ? current.profile.copyWith(clearSkippedDate: true)
+        : current.profile.copyWith(skippedDateIso: todayIso);
+    final next = current.copyWith(profile: nextProfile);
+    await sp.setString('lunera_workout_v1', jsonEncode(next.toMap()));
+
+    final rec = evaluateCoachContext(
+      now: now,
+      profile: next.profile,
+      workoutLogs: next.logs,
+      therapies: const [],
+      doseLogs: const [],
+      prefs: const Prefs(),
+      customRoutines: next.customRoutines,
+    );
+    await HomeWidget.saveWidgetData<String>('wrk_badge', rec.contextBadge ?? '');
+    await HomeWidget.saveWidgetData<String>(
+      'wrk_title',
+      rec.kind == CoachContextKind.restedToday
+          ? rec.headline
+          : rec.recommendedRoutine.title,
+    );
+    await HomeWidget.saveWidgetData<String>(
+      'wrk_sub',
+      rec.kind == CoachContextKind.restedToday
+          ? tr('Recovery counts too')
+          : '~${rec.recommendedRoutine.estimatedMinutes} min · ${tr('{0} active days', [rec.activeDaysThisMonth])}',
+    );
+    await HomeWidget.saveWidgetData<String>('wrk_mood', rec.coachMood.name);
+    await HomeWidget.saveWidgetData<String>(
+        'wrk_resting', rec.kind == CoachContextKind.restedToday ? '1' : '0');
+    await HomeWidget.updateWidget(
+        qualifiedAndroidName: 'com.example.ritme.WorkoutWidget');
+  } catch (e) {
+    debugPrint('Workout widget background rest failed: $e');
+  }
+}
 
 /// Mengirim data ke widget layar utama Android: lama terapi, jadwal, dan grafik level.
 /// Data ditulis ke penyimpanan bersama (SharedPreferences) yang dibaca kode Kotlin widget.
@@ -19,20 +75,22 @@ class WidgetSync {
   WidgetSync._();
 
   static bool get supported => !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-  static const _widgets = ['HrtWidget', 'ScheduleWidget', 'LevelWidget'];
+  static final pendingWorkoutAction = ValueNotifier<String?>(null);
+  static const _widgets = ['HrtWidget', 'ScheduleWidget', 'LevelWidget', 'WorkoutWidget'];
   static const _keys = [
     'hrt_first_date', 'hrt_count',
     'sch_0_title', 'sch_0_at', 'sch_0_sub', 'sch_1_title', 'sch_1_at', 'sch_1_sub', 'sch_2_title', 'sch_2_at', 'sch_2_sub',
     'lvl_title', 'lvl_value', 'lvl_note', 'lvl_image',
+    'wrk_badge', 'wrk_title', 'wrk_sub', 'wrk_mood', 'wrk_resting',
   ];
   static Timer? _timer;
 
   /// Dijadwalkan dengan jeda 2 detik supaya perubahan beruntun hanya memicu satu pembaruan.
-  static void sync(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs) {
+  static void sync(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs, {WorkoutState? workout}) {
     if (!supported) return;
     _timer?.cancel();
     _timer = Timer(const Duration(seconds: 2), () {
-      _run(ths, logs, labs, targets, prefs).catchError((Object e) => debugPrint(tr('Widget update failed: {0}', [e])));
+      _run(ths, logs, labs, targets, prefs, workout: workout).catchError((Object e) => debugPrint(tr('Widget update failed: {0}', [e])));
     });
   }
 
@@ -56,7 +114,7 @@ class WidgetSync {
     }
   }
 
-  static Future<void> _run(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs) async {
+  static Future<void> _run(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs, {WorkoutState? workout}) async {
     await HomeWidget.saveWidgetData<String>('lang', L10n.code); // dibaca kode Kotlin widget
     await HomeWidget.saveWidgetData<String>('widget_hidden', prefs.widgetHide ? '1' : '0');
     if (prefs.widgetHide) {
@@ -83,6 +141,35 @@ class WidgetSync {
 
     // 3. Grafik level
     await _chart(ths, logs, labs, targets, prefs);
+
+    // 4. Movement Coach 2x2 widget
+    final ws = workout ?? await WorkoutController.loadDirect();
+    final rec = evaluateCoachContext(
+      now: DateTime.now(),
+      profile: ws.profile,
+      workoutLogs: ws.logs,
+      therapies: ths,
+      doseLogs: logs,
+      prefs: prefs,
+      customRoutines: ws.customRoutines,
+    );
+    await HomeWidget.saveWidgetData<String>('wrk_badge', rec.contextBadge ?? '');
+    await HomeWidget.saveWidgetData<String>(
+      'wrk_title',
+      rec.kind == CoachContextKind.restedToday
+          ? rec.headline
+          : rec.recommendedRoutine.title,
+    );
+    await HomeWidget.saveWidgetData<String>(
+      'wrk_sub',
+      rec.kind == CoachContextKind.restedToday
+          ? tr('Recovery counts too')
+          : '~${rec.recommendedRoutine.estimatedMinutes} min · ${tr('{0} active days', [rec.activeDaysThisMonth])}',
+    );
+    await HomeWidget.saveWidgetData<String>('wrk_mood', rec.coachMood.name);
+    await HomeWidget.saveWidgetData<String>(
+        'wrk_resting', rec.kind == CoachContextKind.restedToday ? '1' : '0');
+
     await _refresh();
   }
 
@@ -291,6 +378,7 @@ final widgetSyncProvider = Provider<void>((ref) {
   final labs = ref.watch(labsProvider).value;
   final targets = ref.watch(targetsProvider).value;
   final prefs = ref.watch(prefsProvider).value;
+  final workout = ref.watch(workoutProvider);
   if (ths == null || logs == null || labs == null || targets == null || prefs == null) return;
-  WidgetSync.sync(ths, logs, labs, targets, prefs);
+  WidgetSync.sync(ths, logs, labs, targets, prefs, workout: workout);
 });

@@ -8,4 +8,6 @@
     <string name="widget_schedule_empty">No schedule yet</string>
     <string name="widget_level_label">Lunera: levels</string>
     <string name="widget_level_desc">Estimated hormone level chart</string>
+    <string name="widget_workout_label">Lunera: Movement Coach</string>
+    <string name="widget_workout_desc">Daily HRT-aware movement plan with quick Start &amp; Rest actions</string>
 </resources>

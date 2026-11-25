@@ -12,6 +12,7 @@ import 'models.dart';
 import 'moments.dart';
 import 'l10n.dart';
 import 'voice_pitch.dart';
+import 'workout_coach.dart';
 
 /// Status sinkronisasi real-time otomatis latar belakang.
 enum SyncStatus { idle, syncing, queuedOffline, synced, error }
@@ -736,6 +737,22 @@ class Repo {
         data['consultation'] = [consult.toMap()];
       }
     } catch (_) {}
+    try {
+      final ws = await WorkoutController.loadDirect(uid);
+      if (ws.profile.onboarded ||
+          ws.customRoutines.isNotEmpty ||
+          ws.logs.isNotEmpty) {
+        data['workoutProfile'] = [ws.profile.toMap()];
+        if (ws.customRoutines.isNotEmpty) {
+          data['workoutRoutines'] = [
+            for (final r in ws.customRoutines) r.toMap(),
+          ];
+        }
+        if (ws.logs.isNotEmpty) {
+          data['workoutLogs'] = [for (final l in ws.logs) l.toMap()];
+        }
+      }
+    } catch (_) {}
     return const JsonEncoder.withIndent('  ', _enc).convert({
       // Kompatibilitas cadangan: mendukung tanda pengenal Lunera dan 'ritme' untuk backup lama.
       'metadata': {
@@ -824,6 +841,15 @@ class Repo {
         return r['title'] is String && _isValidDate(r['at']);
       case 'consultation':
         return r['id'] is String;
+      case 'workoutProfile':
+        return r['id'] is String && (r['focus'] == null || r['focus'] is String);
+      case 'workoutRoutines':
+        return r['title'] is String && _isValidDate(r['updatedAt']);
+      case 'workoutLogs':
+        final dur = _finiteNum(r['durationSec']);
+        return r['routineTitle'] is String &&
+            _isValidDate(r['at']) &&
+            (dur == null || dur >= 0);
       default:
         return true;
     }
@@ -853,7 +879,14 @@ class Repo {
       }
       n += rows.length;
     }
-    for (final k in const ['milestones', 'moments', 'consultation']) {
+    for (final k in const [
+      'milestones',
+      'moments',
+      'consultation',
+      'workoutProfile',
+      'workoutRoutines',
+      'workoutLogs',
+    ]) {
       final rows = raw['data'][k];
       if (rows == null) continue;
       if (rows is! List) {
@@ -926,6 +959,20 @@ class Repo {
           uid: uid,
         );
       }
+    }
+    final rawWorkoutProfile = dataMap['workoutProfile'] as List?;
+    final rawWorkoutRoutines = dataMap['workoutRoutines'] as List?;
+    final rawWorkoutLogs = dataMap['workoutLogs'] as List?;
+    if (rawWorkoutProfile != null ||
+        rawWorkoutRoutines != null ||
+        rawWorkoutLogs != null) {
+      await WorkoutController.importDirect(
+        rawProfiles: rawWorkoutProfile,
+        rawRoutines: rawWorkoutRoutines,
+        rawLogs: rawWorkoutLogs,
+        replace: replace,
+        uid: uid,
+      );
     }
   }
 

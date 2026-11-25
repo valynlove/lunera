@@ -18,6 +18,7 @@ import '../profile.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
+import '../workout_coach.dart';
 import 'ambient_companion.dart';
 import 'article_page.dart';
 import 'care_alerts_sheet.dart';
@@ -28,6 +29,8 @@ import 'home/onboarding_step_tile.dart';
 import 'home/week_card.dart';
 import 'journal.dart';
 import 'profile_page.dart';
+import 'sanctuary/coach_avatar.dart';
+import 'sanctuary/workout_page.dart';
 import 'security_page.dart';
 import 'sheets.dart';
 
@@ -282,6 +285,15 @@ class HomePage extends ConsumerWidget {
           // Quick Mood Check-in
           const MoodQuickCard(),
 
+          if (prefs.showWorkoutHomeCard) ...[
+            const SizedBox(height: 12),
+            _HomeMovementCoachCard(
+              therapies: ths,
+              doseLogs: logs,
+              prefs: prefs,
+            ),
+          ],
+
           // Seamless bridge to Calendar tab
           const SizedBox(height: 6),
           Center(
@@ -318,6 +330,79 @@ class HomePage extends ConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _HomeMovementCoachCard extends ConsumerWidget {
+  const _HomeMovementCoachCard({
+    required this.therapies,
+    required this.doseLogs,
+    required this.prefs,
+  });
+
+  final List<Therapy> therapies;
+  final List<DoseLog> doseLogs;
+  final Prefs prefs;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ws = ref.watch(workoutProvider);
+    final rec = evaluateCoachContext(
+      now: DateTime.now(),
+      profile: ws.profile,
+      workoutLogs: ws.logs,
+      therapies: therapies,
+      doseLogs: doseLogs,
+      prefs: prefs,
+      customRoutines: ws.customRoutines,
+    );
+    return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const WorkoutCoachPage()),
+        );
+      },
+      child: Row(
+        children: [
+          CoachAvatar(
+            mood: rec.coachMood,
+            size: 50,
+            glowColor: Pastel.mint,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('Movement Coach'),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${rec.headline} · ${rec.recommendedRoutine.title}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Pastel.mist.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(LucideIcons.chevronRight,
+              size: 18, color: C.iconDefault),
+        ],
+      ),
     );
   }
 }

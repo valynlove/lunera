@@ -9,11 +9,13 @@ import '../../repo.dart';
 import '../../sanctuary_data.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
+import '../../workout_coach.dart';
 import '../companion_avatar.dart';
 import 'moonlight_lantern_page.dart';
 import 'safety_quiz_page.dart';
 import 'starlight_breath_page.dart';
 import 'voice_pitch_page.dart';
+import 'workout_page.dart';
 
 /// Calm hub for Lunera's gentle mini-experiences:
 /// Starlight Ripples & Breath, Safety & Dosing Sense, Moonlight Lantern,
@@ -28,6 +30,7 @@ class SanctuaryPage extends StatefulWidget {
 class _SanctuaryPageState extends State<SanctuaryPage> {
   LanternState _state = const LanternState();
   bool _voiceUnlocked = false;
+  int _workoutSessionsThisMonth = 0;
   Repo? _repo;
   StreamSubscription<List<VoiceTestResult>>? _voiceSub;
 
@@ -74,10 +77,16 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
     try {
       final loaded = await SanctuaryStore.load();
       final voiceUnlocked = await VoiceStore.isUnlocked();
+      final workoutState = await WorkoutController.loadDirect(_repo?.uid);
+      final now = DateTime.now();
+      final monthCount = workoutState.logs
+          .where((l) => l.at.year == now.year && l.at.month == now.month)
+          .length;
       if (!mounted) return;
       setState(() {
         _state = loaded;
         _voiceUnlocked = voiceUnlocked;
+        _workoutSessionsThisMonth = monthCount;
       });
     } catch (_) {
       // Non-critical visual summary; keep default state on storage errors.
@@ -176,6 +185,19 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
               badgeText: tr('{0} {0?spark|sparks}', [_state.sparks]),
               showMintDot: canLight,
               onTap: () => _open(const MoonlightLanternPage()),
+            ),
+            gap(14),
+            _SanctuaryCard(
+              icon: LucideIcons.dumbbell,
+              accent: Pastel.mint,
+              title: tr('Movement Coach'),
+              subtitle: tr(
+                  'HRT-aware personal trainer with 2-pose guides & guilt-free pacing'),
+              badgeText: _workoutSessionsThisMonth > 0
+                  ? tr('{0} {0?session|sessions} this month',
+                      [_workoutSessionsThisMonth])
+                  : tr('No streaks • Adaptive'),
+              onTap: () => _open(const WorkoutCoachPage()),
             ),
             if (_voiceUnlocked) ...[
               gap(14),

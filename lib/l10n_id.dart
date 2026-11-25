@@ -1662,4 +1662,208 @@ const Map<String, String> idStrings = {
   'General educational reference only. Every body responds at its own pace depending on genetics, dosage, and lab levels.':
       'Hanya sebagai referensi edukasi umum. Setiap tubuh merespons dengan ritmenya masing-masing bergantung pada genetika, dosis, dan hasil lab.',
   'Stage': 'Tahap',
+
+  // Movement Coach (HRT-Aware Personal Trainer)
+  'Movement Coach': 'Pelatih Gerak',
+  'Lunera Movement Coach': 'Pelatih Gerak Lunera',
+  'HRT-aware personal trainer with 2-pose guides & guilt-free pacing':
+      'Pelatih pribadi ramah HRT dengan panduan 2-pose & ritme tanpa rasa bersalah',
+  '{0} {0?session|sessions} this month': '{0} sesi bulan ini',
+  'No streaks • Adaptive': 'Tanpa streak • Adaptif',
+  'Configure HRT workout focus, baseline pace & gentle reminders.':
+      'Atur fokus latihan HRT, ritme awal & pengingat lembut.',
+  'Show shortcut card on Home': 'Tampilkan kartu pintasan di Beranda',
+  'Adds a calm Movement Coach card to your Home tab.':
+      'Menambahkan kartu Pelatih Gerak yang tenang di tab Beranda.',
+  'Movement Window ✦': 'Waktu Gerak ✦',
+  'Got 15 minutes? Your gentle session is ready whenever you are.':
+      'Ada waktu 15 menit? Sesi ringanmu siap kapan pun kamu mau.',
+  'Lunera Personal Coach ✦': 'Pelatih Pribadi Lunera ✦',
+  'Got 15 minutes around {0}? Your gentle HRT-friendly session is ready.':
+      'Ada waktu 15 menit sekitar pukul {0}? Sesi ramah HRT siap menemanimu.',
+  'Movement Coach reminders': 'Pengingat Pelatih Gerak',
+  'Gentle optional movement reminders in your comfort window':
+      'Pengingat gerak opsional yang lembut di jam nyamanmu',
+  'Feminizing Focus': 'Fokus Feminisasi',
+  'Masculinizing Focus': 'Fokus Maskulinisasi',
+  'Bone & Heart Care': 'Kesehatan Tulang & Jantung',
+  'Low-Energy Recovery': 'Pemulihan Energi Rendah',
+  'Custom Routine': 'Rutinitas Kustom',
+  'Glutes, lower body, core & posture':
+      'Glutes, tubuh bagian bawah, inti & postur',
+  'Upper body, shoulders, back & strength':
+      'Tubuh bagian atas, bahu, punggung & kekuatan',
+  'Low-impact cardio & bone-supporting resistance':
+      'Kardio ramah sendi & latihan ketahanan pendukung tulang',
+  'Gentle mobility & calm breathing for rest or trough days':
+      'Mobilitas lembut & napas tenang untuk hari istirahat atau trough',
+  'Your personalized routine': 'Rutinitas personalmu',
+  'Steady': 'Stabil',
+  'Gentle': 'Lembut',
+  'Feminizing Focus: Lower Body & Posture':
+      'Fokus Feminisasi: Tubuh Bawah & Postur',
+  'Masculinizing Focus: Upper Body & Core':
+      'Fokus Maskulinisasi: Tubuh Atas & Inti',
+  'Bone & Heart Care: Steady Strength':
+      'Kesehatan Tulang & Jantung: Kekuatan Stabil',
+  'Low-Energy / Trough Recovery Flow':
+      'Pemulihan Energi Rendah / Trough',
+  'Ease Back In — 10 Min Gentle Start':
+      'Mulai Pelan Kembali — Sesi Lembut 10 Menit',
+  'Pacing gently tuned up to {0} based on your steady progress.':
+      'Ritme disesuaikan pelan ke {0} mengikuti progres stabilmu.',
+  'Noted! One more easy session will gently nudge your pace up.':
+      'Dicatat! Satu sesi ringan lagi akan menaikkan ritmemu secara bertahap.',
+  'Great effort. We will keep your current pace steady and comfortable.':
+      'Usaha yang hebat. Kita jaga ritmemu tetap stabil dan nyaman.',
+  'Right in the sweet spot—your current target pace fits well.':
+      'Pas sekali—target ritmemu saat ini sudah sangat cocok.',
+  'Rest day honored': 'Hari istirahat dihargai',
+  'Recovery is part of building strength. Whenever you feel like stretching, I am right here.':
+      'Pemulihan adalah bagian dari membangun kekuatan. Kapan pun kamu ingin peregangan ringan, aku di sini.',
+  'Resting today': 'Istirahat hari ini',
+  'injection site': 'area suntik',
+  'You have an injection around {0}. Let us protect that tissue—choose gentle mobility, upper body, or take a full rest day.':
+      'Ada jadwal/riwayat suntik di {0}. Yuk lindungi jaringan tersebut—pilih mobilitas lembut, tubuh atas, atau istirahat penuh.',
+  'You have an injection around {0}. Let us stick to lower body or gentle mobility today, or rest comfortably.':
+      'Ada jadwal/riwayat suntik di {0}. Hari ini fokus tubuh bawah atau mobilitas lembut saja, atau istirahat dengan nyaman.',
+  'It is an injection day. Gentle recovery movement is plenty, and resting today is completely fine.':
+      'Hari ini hari suntik. Gerakan pemulihan ringan sudah cukup, dan beristirahat penuh juga sangat wajar.',
+  'Injection-day care': 'Perawatan hari suntik',
+  'Injection care': 'Jaga area suntik',
+  'Pre-dose low-energy window': 'Jendela energi rendah pra-dosis',
+  'Energy can dip right before your next dose. Light Mode is pre-selected so every gentle set still counts.':
+      'Energi sering turun menjelang dosis berikutnya. Mode Ringan dipilih agar setiap set lembut tetap berarti.',
+  'Trough window': 'Jendela trough',
+  'Welcome back — ease back in': 'Selamat datang kembali — mulai pelan',
+  'No streaks lost and zero pressure. Let us warm up with a calm 10-minute session at your own pace.':
+      'Tidak ada streak yang hangus dan nol tekanan. Yuk pemanasan dengan sesi tenang 10 menit sesuai ritmemu.',
+  'Gentle restart': 'Mulai ulang lembut',
+  'Your comfort window is open': 'Waktu nyamanmu terbuka',
+  'Whenever you have a quiet pocket of time today, your {0} plan is ready.':
+      'Kapan pun ada waktu senggang hari ini, rencana {0} milikmu sudah siap.',
+  'Preferred day': 'Hari pilihan',
+  'Ready whenever you are': 'Siap kapan pun kamu mau',
+  'Short, steady sessions support bone strength, heart health, and mood—always at your own pace.':
+      'Sesi singkat yang konsisten mendukung kekuatan tulang, kesehatan jantung, dan suasana hati—selalu sesuai ritmemu.',
+  'Start pose': 'Pose awal',
+  'End pose': 'Pose akhir',
+  'Pause diagram': 'Jeda diagram',
+  'Play diagram': 'Putar diagram',
+  'Leave session?': 'Keluar dari sesi?',
+  'You have completed {0} {0?set|sets}. Leaving now discards this unfinished session.':
+      'Kamu sudah menyelesaikan {0} set. Keluar sekarang akan membatalkan sesi yang belum selesai.',
+  'Keep going': 'Lanjutkan',
+  'Leave': 'Keluar',
+  'Session saved. Nice work today!': 'Sesi tersimpan. Kerja bagus hari ini!',
+  'This routine has no exercises yet.': 'Rutinitas ini belum memiliki gerakan.',
+  '{0} sec hold / pace': 'Tahan / ritme {0} dtk',
+  '{0} reps': '{0} repetisi',
+  'Close session': 'Tutup sesi',
+  'Exercise {0} of {1}': 'Gerakan {0} dari {1}',
+  'Light Mode': 'Mode Ringan',
+  'sets': 'set',
+  'Make it easier': 'Buat lebih mudah',
+  'Easier variation': 'Variasi lebih ringan',
+  'Catch your breath · {0}s': 'Atur napas · {0}d',
+  'Sip water whenever you need.': 'Minum air kapan pun kamu butuh.',
+  'Start timer': 'Mulai timer',
+  'Pause': 'Jeda',
+  'Sets checklist': 'Ceklis set',
+  'Set {0}': 'Set {0}',
+  'Form & Breathing Guide': 'Panduan Posisi & Napas',
+  'Reference': 'Referensi',
+  'Previous exercise': 'Gerakan sebelumnya',
+  'Finish session': 'Selesaikan sesi',
+  'Next exercise': 'Gerakan berikutnya',
+  'Complete set': 'Selesaikan set',
+  'You showed up today': 'Kamu hadir untuk dirimu hari ini',
+  '{0} {0?set|sets} completed · ~{1} min': '{0} set selesai · ~{1} mnt',
+  "How did today's session feel?": 'Bagaimana rasanya sesi hari ini?',
+  'This helps me adjust your future pace gently—never as a test.':
+      'Ini membantuku menyesuaikan ritme berikutnya secara lembut—bukan penilaian.',
+  'Too easy': 'Terlalu ringan',
+  'I felt I had plenty of energy left.': 'Tenagaku masih terasa sangat longgar.',
+  'Just right': 'Pas sekali',
+  'Challenging enough, steady and comfortable.':
+      'Cukup menantang, stabil, dan tetap nyaman.',
+  'A bit tough': 'Agak berat',
+  'Felt demanding today—keep future targets gentle.':
+      'Terasa cukup berat hari ini—jaga target berikutnya tetap lembut.',
+  'Rest day honored. Take care of yourself today.':
+      'Hari istirahat dicatat. Jaga dirimu baik-baik hari ini.',
+  'Start session': 'Mulai sesi',
+  'Delete "{0}"?': 'Hapus "{0}"?',
+  'Coach preferences & baseline': 'Preferensi & tes dasar pelatih',
+  '{0} exercises · ~{1} min': '{0} gerakan · ~{1} mnt',
+  'Preview routine': 'Pratinjau rutinitas',
+  'Start {0}-min session': 'Mulai sesi {0} menit',
+  'Light mode': 'Mode ringan',
+  'Resume today': 'Lanjut hari ini',
+  'Rest today': 'Istirahat hari ini',
+  'Total sessions': 'Total sesi',
+  'Active days (mo)': 'Hari aktif (bln)',
+  'Current pace': 'Ritme saat ini',
+  'HRT Programs': 'Program HRT',
+  'Custom Routines': 'Rutinitas Kustom',
+  'No custom routines yet': 'Belum ada rutinitas kustom',
+  'Mix exercises from the catalog or add your own movements at your preferred sets and reps.':
+      'Gabungkan gerakan dari katalog atau atur set dan repetisi sesuai seleramu.',
+  'Create custom routine': 'Buat rutinitas kustom',
+  'Recent sessions': 'Sesi terakhir',
+  'Based on WHO Physical Activity Guidelines, NHS Strength & Flexibility Guides, and ACE Exercise Library principles. General fitness guidance only—not medical advice.':
+      'Merujuk pada pedoman WHO Physical Activity Guidelines, NHS Strength & Flexibility, dan ACE Exercise Library. Hanya panduan kebugaran umum—bukan nasihat medis.',
+  'Near recent injection zone—consider skipping or switching to recovery today.':
+      'Dekat area suntik terbaru—pertimbangkan untuk melewati atau beralih ke pemulihan hari ini.',
+  'Personal Coach Setup': 'Pengaturan Pelatih Pribadi',
+  'Tell me your main focus and what equipment you have—no gym needed.':
+      'Beri tahu fokus utamamu dan alat yang tersedia—tanpa perlu ke gym.',
+  'Let us gauge your comfortable starting pace so sets and reps fit you right.':
+      'Mari ukur ritme awal yang nyaman agar set dan repetisi pas untukmu.',
+  'Pick days and times that feel relaxed. You can skip or rest anytime with zero penalties.':
+      'Pilih hari dan waktu yang terasa santai. Kamu bisa istirahat kapan saja tanpa penalti.',
+  'Choose your HRT movement focus': 'Pilih fokus gerak HRT-mu',
+  'Available equipment': 'Alat yang tersedia',
+  'Bodyweight only': 'Tanpa alat (Bodyweight)',
+  'Light dumbbells': 'Dumbbell ringan',
+  'Resistance bands': 'Resistance band',
+  'Next: Baseline check': 'Lanjut: Cek kemampuan awal',
+  '1. Comfortable squats': '1. Squat yang terasa nyaman',
+  'Chair / up to 8': 'Kursi / hingga 8 kali',
+  '10–15 steady': '10–15 stabil',
+  '16+ comfortably': '16+ dengan nyaman',
+  '2. Comfortable push-up variation': '2. Variasi push-up yang nyaman',
+  'Wall push-up': 'Push-up dinding',
+  'Counter / knees': 'Meja / lutut',
+  'Floor push-up': 'Push-up lantai',
+  '3. Comfortable plank hold': '3. Tahan plank yang nyaman',
+  'Under 20s / knees': 'Di bawah 20d / lutut',
+  '20–40 seconds': '20–40 detik',
+  '45+ seconds': '45+ detik',
+  'Suggested starting pace: {0}': 'Ritme awal yang disarankan: {0}',
+  'Sets and reps will match this comfort tier.':
+      'Jumlah set dan repetisi akan mengikuti tingkat nyaman ini.',
+  'Next: Comfort schedule': 'Lanjut: Jadwal nyaman',
+  'Skip test — start Gentle': 'Lewati tes — mulai Lembut',
+  'Preferred days': 'Hari pilihan',
+  'Preferred time window': 'Rentang waktu nyaman',
+  'Gentle movement reminders': 'Pengingat gerak lembut',
+  'Optional & separate from dose alarms. Zero nagging.':
+      'Opsional & terpisah dari alarm dosis. Tanpa desakan.',
+  'Notification permission was declined. You can still use Movement Coach anytime.':
+      'Izin notifikasi ditolak. Kamu tetap bisa membuka Pelatih Gerak kapan saja.',
+  'Save & open Movement Coach': 'Simpan & buka Pelatih Gerak',
+  'My Custom Routine': 'Rutinitas Kustomku',
+  'Edit routine': 'Ubah rutinitas',
+  'Routine name': 'Nama rutinitas',
+  'e.g. Evening Posture & Core': 'mis. Postur & Inti Sore Hari',
+  'Exercises ({0})': 'Gerakan ({0})',
+  'Add movement from official catalog': 'Tambah gerakan dari katalog resmi',
+  'Sets': 'Set',
+  'Sec': 'Detik',
+  'Reps': 'Rep',
+  'Decrease': 'Kurangi',
+  'Increase': 'Tambah',
+  'Recovery counts too': 'Pemulihan juga dihitung',
+  '{0} active days': '{0} hari aktif',
 };

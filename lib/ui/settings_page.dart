@@ -24,6 +24,7 @@ import 'about_sheet.dart';
 import 'auth.dart';
 import 'backup_dialogs.dart';
 import 'data_page.dart';
+import 'sanctuary/workout_page.dart';
 import 'security_page.dart';
 import 'site_map.dart';
 
@@ -871,6 +872,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onChanged: (v) {
                       HapticFeedback.selectionClick();
                       _save(p.copy(widgetHide: v));
+                    },
+                  ),
+                  const Divider(height: 16),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(tr('Show shortcut card on Home')),
+                    subtitle: Text(tr('Adds a calm Movement Coach card to your Home tab.')),
+                    value: p.showWorkoutHomeCard,
+                    onChanged: (v) {
+                      HapticFeedback.selectionClick();
+                      _save(p.copy(showWorkoutHomeCard: v));
+                    },
+                  ),
+                  const Divider(height: 8),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: iconBadge(LucideIcons.dumbbell, Pastel.mint),
+                    title: Text(tr('Movement Coach')),
+                    subtitle: Text(tr('Configure HRT workout focus, baseline pace & gentle reminders.')),
+                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(builder: (_) => const WorkoutCoachPage()),
+                      );
                     },
                   ),
                 ],

@@ -538,6 +538,7 @@ class Prefs {
     this.widgetHide = true,
     this.locale = 'en',
     this.discreetNotify = 'wellness',
+    this.showWorkoutHomeCard = false,
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
@@ -549,6 +550,7 @@ class Prefs {
   final bool hrtCounter;
   final int dayStart; // menit sejak 00:00; hari "logis" mulai di jam ini
   final String discreetNotify; // 'off' | 'wellness' | 'minimal'
+  final bool showWorkoutHomeCard; // tampilkan kartu pintasan Movement Coach di Home
 
   String unitOf(String hormoneId) {
     final p = presetOf(hormoneId), u = units[hormoneId];
@@ -566,6 +568,7 @@ class Prefs {
     bool? widgetHide,
     String? locale,
     String? discreetNotify,
+    bool? showWorkoutHomeCard,
   }) =>
       Prefs(
         theme: theme ?? this.theme,
@@ -578,6 +581,7 @@ class Prefs {
         widgetHide: widgetHide ?? this.widgetHide,
         locale: locale ?? this.locale,
         discreetNotify: discreetNotify ?? this.discreetNotify,
+        showWorkoutHomeCard: showWorkoutHomeCard ?? this.showWorkoutHomeCard,
       );
 
   Map<String, dynamic> toMap() => {
@@ -591,6 +595,7 @@ class Prefs {
         'widgetHide': widgetHide,
         'locale': locale,
         'discreetNotify': discreetNotify,
+        'showWorkoutHomeCard': showWorkoutHomeCard,
       };
 
   factory Prefs.from(Map<String, dynamic> m) => Prefs(
@@ -608,6 +613,7 @@ class Prefs {
         widgetHide: m['widgetHide'] ?? true,
         locale: m['locale'] ?? 'en',
         discreetNotify: m['discreetNotify'] ?? 'wellness',
+        showWorkoutHomeCard: m['showWorkoutHomeCard'] == true,
       );
 }
 
@@ -1046,5 +1052,330 @@ class BodyMeasurement {
         weight: (m['weight'] as num?)?.toDouble(),
         height: (m['height'] as num?)?.toDouble(),
         note: m['note'],
+      );
+}
+
+DateTime? _optDate(dynamic v) {
+  if (v == null) return null;
+  if (v is Timestamp) return v.toDate();
+  if (v is DateTime) return v;
+  if (v is String) return DateTime.tryParse(v);
+  if (v is Map && v.containsKey(r'$ts')) {
+    final ts = v[r'$ts'];
+    return ts is String ? DateTime.tryParse(ts) : null;
+  }
+  return null;
+}
+
+/// User configuration and baseline calibration for the HRT-aware Movement Coach.
+class WorkoutProfile {
+  const WorkoutProfile({
+    this.id = 'main',
+    this.onboarded = false,
+    this.focus = 'bone_heart',
+    this.level = 'gentle',
+    this.equipment = const ['bodyweight'],
+    this.weekdays = const [2, 4, 6],
+    this.reminderTime = '18:00',
+    this.notifyWorkout = false,
+    this.consecutiveEasyCount = 0,
+    this.baselineAt,
+    this.skippedDateIso,
+  });
+
+  final String id;
+  final bool onboarded;
+  final String focus; // feminizing | masculinizing | bone_heart | recovery
+  final String level; // gentle | steady | active
+  final List<String> equipment; // bodyweight | dumbbells | bands
+  final List<int> weekdays; // 1 (Mon) .. 7 (Sun)
+  final String reminderTime; // HH:mm
+  final bool notifyWorkout; // always OFF by default
+  final int consecutiveEasyCount;
+  final DateTime? baselineAt;
+  final String? skippedDateIso; // YYYY-MM-DD when user chose "Rest today"
+
+  WorkoutProfile copyWith({
+    String? id,
+    bool? onboarded,
+    String? focus,
+    String? level,
+    List<String>? equipment,
+    List<int>? weekdays,
+    String? reminderTime,
+    bool? notifyWorkout,
+    int? consecutiveEasyCount,
+    DateTime? baselineAt,
+    bool clearBaselineAt = false,
+    String? skippedDateIso,
+    bool clearSkippedDate = false,
+  }) =>
+      WorkoutProfile(
+        id: id ?? this.id,
+        onboarded: onboarded ?? this.onboarded,
+        focus: focus ?? this.focus,
+        level: level ?? this.level,
+        equipment: equipment ?? this.equipment,
+        weekdays: weekdays ?? this.weekdays,
+        reminderTime: reminderTime ?? this.reminderTime,
+        notifyWorkout: notifyWorkout ?? this.notifyWorkout,
+        consecutiveEasyCount: consecutiveEasyCount ?? this.consecutiveEasyCount,
+        baselineAt: clearBaselineAt ? null : (baselineAt ?? this.baselineAt),
+        skippedDateIso: clearSkippedDate
+            ? null
+            : (skippedDateIso ?? this.skippedDateIso),
+      );
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'onboarded': onboarded,
+        'focus': focus,
+        'level': level,
+        'equipment': equipment,
+        'weekdays': weekdays,
+        'reminderTime': reminderTime,
+        'notifyWorkout': notifyWorkout,
+        'consecutiveEasyCount': consecutiveEasyCount,
+        if (baselineAt != null) 'baselineAt': baselineAt!.toIso8601String(),
+        if (skippedDateIso != null) 'skippedDateIso': skippedDateIso,
+      };
+
+  factory WorkoutProfile.from(String id, Map<String, dynamic> m) {
+    final rawEq = m['equipment'] is List
+        ? [
+            for (final e in m['equipment'] as List)
+              if (e is String && e.trim().isNotEmpty) e.trim(),
+          ]
+        : const <String>['bodyweight'];
+    final rawDays = m['weekdays'] is List
+        ? [
+            for (final d in m['weekdays'] as List)
+              if (d is num && d.toInt() >= 1 && d.toInt() <= 7) d.toInt(),
+          ]
+        : const <int>[2, 4, 6];
+    const validFocus = {'feminizing', 'masculinizing', 'bone_heart', 'recovery'};
+    const validLevel = {'gentle', 'steady', 'active'};
+    final focus = validFocus.contains(m['focus']) ? m['focus'] as String : 'bone_heart';
+    final level = validLevel.contains(m['level']) ? m['level'] as String : 'gentle';
+    return WorkoutProfile(
+      id: (m['id'] is String && (m['id'] as String).trim().isNotEmpty)
+          ? m['id'] as String
+          : id,
+      onboarded: m['onboarded'] == true,
+      focus: focus,
+      level: level,
+      equipment: rawEq.isEmpty ? const ['bodyweight'] : rawEq,
+      weekdays: rawDays,
+      reminderTime: m['reminderTime'] is String && (m['reminderTime'] as String).contains(':')
+          ? m['reminderTime'] as String
+          : '18:00',
+      notifyWorkout: m['notifyWorkout'] == true,
+      consecutiveEasyCount: (m['consecutiveEasyCount'] as num?)?.toInt().clamp(0, 10) ?? 0,
+      baselineAt: _optDate(m['baselineAt']),
+      skippedDateIso: m['skippedDateIso'] is String ? m['skippedDateIso'] as String : null,
+    );
+  }
+}
+
+/// A single exercise entry inside a workout routine.
+class WorkoutExerciseItem {
+  const WorkoutExerciseItem({
+    required this.exerciseId,
+    this.customName,
+    this.sets = 2,
+    this.reps,
+    this.seconds,
+    this.restSeconds = 45,
+    this.useEasierVariant = false,
+  });
+
+  final String exerciseId;
+  final String? customName;
+  final int sets;
+  final int? reps;
+  final int? seconds;
+  final int restSeconds;
+  final bool useEasierVariant;
+
+  bool get isTimed => seconds != null && seconds! > 0;
+
+  WorkoutExerciseItem copyWith({
+    String? exerciseId,
+    String? customName,
+    int? sets,
+    int? reps,
+    bool clearReps = false,
+    int? seconds,
+    bool clearSeconds = false,
+    int? restSeconds,
+    bool? useEasierVariant,
+  }) =>
+      WorkoutExerciseItem(
+        exerciseId: exerciseId ?? this.exerciseId,
+        customName: customName ?? this.customName,
+        sets: (sets ?? this.sets).clamp(1, 8),
+        reps: clearReps ? null : (reps ?? this.reps),
+        seconds: clearSeconds ? null : (seconds ?? this.seconds),
+        restSeconds: (restSeconds ?? this.restSeconds).clamp(10, 180),
+        useEasierVariant: useEasierVariant ?? this.useEasierVariant,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'exerciseId': exerciseId,
+        if (customName != null && customName!.trim().isNotEmpty)
+          'customName': customName!.trim(),
+        'sets': sets,
+        if (reps != null) 'reps': reps,
+        if (seconds != null) 'seconds': seconds,
+        'restSeconds': restSeconds,
+        if (useEasierVariant) 'useEasierVariant': useEasierVariant,
+      };
+
+  factory WorkoutExerciseItem.fromMap(Map<String, dynamic> m) {
+    final sets = ((m['sets'] as num?)?.toInt() ?? 2).clamp(1, 8);
+    final reps = (m['reps'] as num?)?.toInt();
+    final seconds = (m['seconds'] as num?)?.toInt();
+    return WorkoutExerciseItem(
+      exerciseId: m['exerciseId'] as String? ?? 'glute_bridge',
+      customName: m['customName'] as String?,
+      sets: sets,
+      reps: reps != null && reps > 0 ? reps.clamp(1, 100) : null,
+      seconds: seconds != null && seconds > 0 ? seconds.clamp(5, 600) : null,
+      restSeconds: ((m['restSeconds'] as num?)?.toInt() ?? 45).clamp(10, 180),
+      useEasierVariant: m['useEasierVariant'] == true,
+    );
+  }
+}
+
+/// A structured preset or user-created workout routine.
+class WorkoutRoutine {
+  const WorkoutRoutine({
+    required this.id,
+    required this.title,
+    this.category = 'custom',
+    this.isCustom = true,
+    this.estimatedMinutes = 15,
+    this.items = const [],
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String title;
+  final String category; // feminizing | masculinizing | bone_heart | recovery | custom
+  final bool isCustom;
+  final int estimatedMinutes;
+  final List<WorkoutExerciseItem> items;
+  final DateTime updatedAt;
+
+  WorkoutRoutine copyWith({
+    String? id,
+    String? title,
+    String? category,
+    bool? isCustom,
+    int? estimatedMinutes,
+    List<WorkoutExerciseItem>? items,
+    DateTime? updatedAt,
+  }) =>
+      WorkoutRoutine(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        category: category ?? this.category,
+        isCustom: isCustom ?? this.isCustom,
+        estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
+        items: items ?? this.items,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'category': category,
+        'isCustom': isCustom,
+        'estimatedMinutes': estimatedMinutes,
+        'items': [for (final item in items) item.toMap()],
+        'updatedAt': updatedAt.toIso8601String(),
+      };
+
+  factory WorkoutRoutine.from(String id, Map<String, dynamic> m) =>
+      WorkoutRoutine(
+        id: (m['id'] is String && (m['id'] as String).trim().isNotEmpty)
+            ? m['id'] as String
+            : id,
+        title: m['title'] as String? ?? 'Custom Routine',
+        category: m['category'] as String? ?? 'custom',
+        isCustom: m['isCustom'] != false,
+        estimatedMinutes:
+            ((m['estimatedMinutes'] as num?)?.toInt() ?? 15).clamp(3, 120),
+        items: m['items'] is List
+            ? [
+                for (final x in m['items'] as List)
+                  if (x is Map)
+                    WorkoutExerciseItem.fromMap(x.cast<String, dynamic>()),
+              ]
+            : const [],
+        updatedAt: _optDate(m['updatedAt']) ?? DateTime.now(),
+      );
+}
+
+/// Completed workout session entry for guilt-free progress & pacing calibration.
+class WorkoutSessionLog {
+  const WorkoutSessionLog({
+    required this.id,
+    required this.at,
+    required this.routineId,
+    required this.routineTitle,
+    this.category = 'bone_heart',
+    this.durationSec = 600,
+    this.completedSets = 1,
+    this.totalSets = 1,
+    this.effort = 'right',
+    this.wasLightMode = false,
+    this.note,
+  });
+
+  final String id;
+  final DateTime at;
+  final String routineId;
+  final String routineTitle;
+  final String category;
+  final int durationSec;
+  final int completedSets;
+  final int totalSets;
+  final String effort; // easy | right | tough
+  final bool wasLightMode;
+  final String? note;
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'at': at.toIso8601String(),
+        'routineId': routineId,
+        'routineTitle': routineTitle,
+        'category': category,
+        'durationSec': durationSec,
+        'completedSets': completedSets,
+        'totalSets': totalSets,
+        'effort': effort,
+        'wasLightMode': wasLightMode,
+        if (note != null && note!.trim().isNotEmpty) 'note': note!.trim(),
+      };
+
+  factory WorkoutSessionLog.from(String id, Map<String, dynamic> m) =>
+      WorkoutSessionLog(
+        id: (m['id'] is String && (m['id'] as String).trim().isNotEmpty)
+            ? m['id'] as String
+            : id,
+        at: _optDate(m['at']) ?? DateTime.now(),
+        routineId: m['routineId'] as String? ?? '',
+        routineTitle: m['routineTitle'] as String? ?? 'Movement Session',
+        category: m['category'] as String? ?? 'bone_heart',
+        durationSec: ((m['durationSec'] as num?)?.toInt() ?? 0).clamp(0, 86400),
+        completedSets:
+            ((m['completedSets'] as num?)?.toInt() ?? 0).clamp(0, 200),
+        totalSets: ((m['totalSets'] as num?)?.toInt() ?? 1).clamp(1, 200),
+        effort: const {'easy', 'right', 'tough'}.contains(m['effort'])
+            ? m['effort'] as String
+            : 'right',
+        wasLightMode: m['wasLightMode'] == true,
+        note: m['note'] as String?,
       );
 }

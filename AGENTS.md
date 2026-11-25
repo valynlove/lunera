@@ -75,7 +75,7 @@ Karena aplikasi ini menyimpan data kesehatan pribadi pengguna (dosis, jurnal, st
 
 - Jika tugas menyentuh area sensitif di atas, **berhenti dan beri tahu pengguna terlebih dahulu**
   bahwa tugas ini sebaiknya dikerjakan dengan model yang lebih kuat yang tersedia di akun
-  (misalnya Gemini 4 Argon atau Claude Opus 4.6/5.5), dengan effort High, sebelum dilanjutkan.
+  (misalnya Gemini 4 Carbon atau Claude Opus 4.6/5.5), sebelum dilanjutkan.
 - Jangan pernah melakukan _hardcode_ secret atau API key di kode, dan jangan commit file kredensial (keystore, `.env`, dsb.) ke repositori.
 - Setiap perubahan skema data atau format backup wajib menyertakan migrasi yang aman agar data pengguna yang sudah ada tidak hilang, tetap bisa direstore dari backup lama, dan tetap mematuhi prinsip Offline-First.
 - Validasi input pengguna sebelum disimpan secara lokal maupun dikirim ke Cloud Firestore.

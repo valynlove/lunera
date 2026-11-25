@@ -97,6 +97,26 @@ String _verb(Therapy t) => switch (t.route) {
   );
 }
 
+/// Format gentle, guilt-free workout reminder copy respecting lockscreen privacy mode.
+(String, String) workoutNotificationText(WorkoutProfile profile, Prefs prefs) {
+  if (prefs.discreetNotify == 'minimal') {
+    return ('Lunera ✦', tr('Gentle reminder.'));
+  }
+  if (prefs.discreetNotify == 'wellness') {
+    return (
+      tr('Movement Window ✦'),
+      tr('Got 15 minutes? Your gentle session is ready whenever you are.'),
+    );
+  }
+  return (
+    tr('Lunera Personal Coach ✦'),
+    tr(
+      'Got 15 minutes around {0}? Your gentle HRT-friendly session is ready.',
+      [profile.reminderTime],
+    ),
+  );
+}
+
 const _snoozeTag = 'snz';
 const markTakenActionId = 'mark_taken';
 const _snooze15Action = 'snooze_15';
@@ -349,8 +369,73 @@ class AppNotifier {
 
   static const _troughReminderPrefKey = 'labs.trough_reminder_at';
   static const _troughPayload = 'trough_lab';
+  static const _workoutPayload = 'workout_reminder';
   static int get _troughReminderId =>
       'trough_lab_reminder'.hashCode & 0x7fffffff;
+
+  NotificationDetails get _workoutDetails => NotificationDetails(
+        android: AndroidNotificationDetails(
+          'workout_coach',
+          tr('Movement Coach reminders'),
+          channelDescription:
+              tr('Gentle optional movement reminders in your comfort window'),
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: const DarwinNotificationDetails(
+          interruptionLevel: InterruptionLevel.active,
+          presentAlert: true,
+          presentBadge: false,
+          presentSound: true,
+        ),
+      );
+
+  /// Schedules or cancels optional guilt-free workout reminders independently
+  /// from the critical medication `doses` channel.
+  Future<void> syncWorkoutReminders(
+    WorkoutProfile profile,
+    Prefs prefs, {
+    DateTime? now,
+  }) async {
+    if (!supported) return;
+    await init();
+    for (final req in await _plugin.pendingNotificationRequests()) {
+      if (req.payload == _workoutPayload) {
+        await _plugin.cancel(id: req.id);
+      }
+    }
+    if (!profile.notifyWorkout || profile.weekdays.isEmpty) return;
+
+    final refNow = now ?? DateTime.now();
+    final parts = profile.reminderTime.split(':');
+    final hour = parts.length == 2 ? (int.tryParse(parts[0]) ?? 18).clamp(0, 23) : 18;
+    final minute = parts.length == 2 ? (int.tryParse(parts[1]) ?? 0).clamp(0, 59) : 0;
+    final mode = await _canExact()
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+    final (title, body) = workoutNotificationText(profile, prefs);
+
+    for (var d = 0; d < 14; d++) {
+      final candidate =
+          DateTime(refNow.year, refNow.month, refNow.day + d, hour, minute);
+      if (!candidate.isAfter(refNow)) continue;
+      if (!profile.weekdays.contains(candidate.weekday)) continue;
+      final candidateIso =
+          '${candidate.year.toString().padLeft(4, '0')}-${candidate.month.toString().padLeft(2, '0')}-${candidate.day.toString().padLeft(2, '0')}';
+      if (profile.skippedDateIso == candidateIso) continue;
+      final id = 'workout|$candidateIso'.hashCode & 0x7fffffff;
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: tz.TZDateTime(tz.local, candidate.year, candidate.month,
+            candidate.day, candidate.hour, candidate.minute),
+        notificationDetails: _workoutDetails,
+        androidScheduleMode: mode,
+        payload: _workoutPayload,
+      );
+    }
+  }
 
   /// Returns the currently scheduled future trough bloodwork reminder time, if any.
   Future<DateTime?> getScheduledTroughReminder({DateTime? now}) async {
@@ -439,7 +524,11 @@ class AppNotifier {
     if (!supported) return;
     await init();
     if (!prefs.notify) {
-      await _plugin.cancelAll();
+      for (final req in await _plugin.pendingNotificationRequests()) {
+        if (req.payload != _troughPayload && req.payload != _workoutPayload) {
+          await _plugin.cancel(id: req.id);
+        }
+      }
       return;
     }
     final pendingKeys = {
@@ -454,7 +543,8 @@ class AppNotifier {
     } catch (_) {}
     for (final req in await _plugin.pendingNotificationRequests()) {
       if (!keepSnooze(req.payload, pendingKeys) &&
-          req.payload != _troughPayload) {
+          req.payload != _troughPayload &&
+          req.payload != _workoutPayload) {
         await _plugin.cancel(id: req.id);
       }
     }
