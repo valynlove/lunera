@@ -490,7 +490,7 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                     children: [
                       const CoachAvatar(
                         mood: CoachMood.hydrate,
-                        size: 54,
+                        size: 72,
                         glowColor: Pastel.mint,
                       ),
                       const SizedBox(width: 12),
@@ -668,7 +668,7 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                             children: [
                               const CoachAvatar(
                                 mood: CoachMood.explain,
-                                size: 42,
+                                size: 56,
                                 showGlow: false,
                               ),
                               const SizedBox(width: 10),

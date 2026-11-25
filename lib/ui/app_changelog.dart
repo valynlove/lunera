@@ -42,10 +42,24 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.34',
+      version: '2.2.35',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Companion & Coach Mascot Sizing: Scaled up CompanionAvatar and CoachAvatar display sizes across all cards, headers, empty states, guided injection, voice warm-up, workout coach screens, and the 2×2 Android widget so mascots remain crisp and expressive.',
+          textId:
+              'Ukuran Maskot Companion & Coach: Memperbesar ukuran tampilan CompanionAvatar dan CoachAvatar di seluruh kartu, header, status kosong, injeksi terpandu, pemanasan suara, layar pelatih gerak, serta widget Android 2×2 agar maskot tampil lebih jelas dan ekspresif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.34',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,

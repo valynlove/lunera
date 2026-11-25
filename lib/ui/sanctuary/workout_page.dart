@@ -304,7 +304,7 @@ class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
                 children: [
                   CoachAvatar(
                     mood: rec.coachMood,
-                    size: 76,
+                    size: 94,
                     glowColor: rec.kind == CoachContextKind.injectionCare
                         ? C.coral
                         : C.aurora,
@@ -548,7 +548,7 @@ class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
                 children: [
                   const CoachAvatar(
                     mood: CoachMood.think,
-                    size: 76,
+                    size: 96,
                   ),
                   gap(10),
                   Text(
@@ -1044,7 +1044,7 @@ class _OnboardingFlowState extends State<_OnboardingFlow> {
                   children: [
                     const CoachAvatar(
                       mood: CoachMood.explain,
-                      size: 64,
+                      size: 80,
                     ),
                     const SizedBox(width: 12),
                     Expanded(

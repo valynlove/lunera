@@ -189,7 +189,7 @@ class HomePage extends ConsumerWidget {
                         children: [
                           const CompanionAvatar(
                             mood: CompanionMood.wave,
-                            size: 54,
+                            size: 70,
                             glowColor: C.aurora,
                           ),
                           const SizedBox(width: 12),
@@ -369,7 +369,7 @@ class _HomeMovementCoachCard extends ConsumerWidget {
         children: [
           CoachAvatar(
             mood: rec.coachMood,
-            size: 50,
+            size: 68,
             glowColor: Pastel.mint,
           ),
           const SizedBox(width: 12),

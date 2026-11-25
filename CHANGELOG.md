@@ -4,6 +4,11 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.35] - 2026-11-25
+
+### Changed
+- **Companion & Coach Mascot Sizing (`lib/ui/companion_avatar.dart`, `lib/ui/sanctuary/coach_avatar.dart`, `lib/ui/ambient_companion.dart`, `lib/ui/home.dart`, `lib/ui/guides_page.dart`, `lib/ui/body.dart`, `lib/ui/guided_injection.dart`, `lib/ui/sanctuary/*.dart`, `widget_workout.xml`):** Scaled up `CompanionAvatar` and `CoachAvatar` display sizes across all cards, headers, empty states, guided injection, voice warm-up, workout coach screens, and the 2×2 Android Movement Coach widget (`50dp × 58dp`) so mascots are clearly legible and expressive while staying balanced within compact layouts.
+
 ## [2.2.34] - 2026-11-25
 
 ### Added

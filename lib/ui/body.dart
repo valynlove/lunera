@@ -1621,7 +1621,7 @@ class _MilestonesTab extends StatelessWidget {
               children: [
                 const CompanionAvatar(
                   mood: CompanionMood.love,
-                  size: 78,
+                  size: 96,
                   glowColor: C.lavender,
                 ),
                 gap(12),

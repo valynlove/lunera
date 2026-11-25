@@ -119,7 +119,7 @@ class _GuidesPageState extends State<GuidesPage> {
                 children: [
                   const CompanionAvatar(
                     mood: CompanionMood.explain,
-                    size: 58,
+                    size: 74,
                     glowColor: C.lavender,
                   ),
                   const SizedBox(width: 12),
@@ -194,7 +194,7 @@ class _GuidesPageState extends State<GuidesPage> {
                   children: [
                     const CompanionAvatar(
                       mood: CompanionMood.confused,
-                      size: 58,
+                      size: 76,
                       glowColor: C.lavender,
                     ),
                     const SizedBox(width: 14),

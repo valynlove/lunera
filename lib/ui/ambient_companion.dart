@@ -275,7 +275,7 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
                   // Companion Avatar with ambient halo
                   CompanionAvatar(
                     mood: currentMood,
-                    size: 58,
+                    size: 76,
                     glowColor: glowColor,
                     showGlow: true,
                     enablePulse: true,

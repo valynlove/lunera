@@ -1112,7 +1112,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
                       if (_warmupCompleted) ...[
                         const CompanionAvatar(
                           mood: CompanionMood.laugh,
-                          size: 78,
+                          size: 96,
                           glowColor: Pastel.mint,
                         ),
                         gap(12),

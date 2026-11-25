@@ -34,7 +34,7 @@ class CompanionAvatar extends StatelessWidget {
   const CompanionAvatar({
     super.key,
     required this.mood,
-    this.size = 64,
+    this.size = 74,
     this.glowColor = C.aurora,
     this.showGlow = true,
     this.enablePulse = false,

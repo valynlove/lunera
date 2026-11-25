@@ -317,8 +317,8 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
           child: ScaleTransition(
             scale: _breatheAnimation,
             child: Container(
-              width: 118,
-              height: 118,
+              width: 126,
+              height: 126,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -331,7 +331,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
               child: const Center(
                 child: CompanionAvatar(
                   mood: CompanionMood.calm,
-                  size: 92,
+                  size: 102,
                   glowColor: C.aurora,
                   showGlow: false,
                 ),
@@ -517,8 +517,8 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
       key: const ValueKey(3),
       children: [
         Container(
-          width: 108,
-          height: 108,
+          width: 122,
+          height: 122,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: C.peony.withValues(alpha: 0.16),
@@ -526,7 +526,7 @@ class _CalmInjectionSheetState extends ConsumerState<CalmInjectionSheet>
           child: const Center(
             child: CompanionAvatar(
               mood: CompanionMood.happy,
-              size: 88,
+              size: 98,
               glowColor: C.rose,
               showGlow: false,
             ),

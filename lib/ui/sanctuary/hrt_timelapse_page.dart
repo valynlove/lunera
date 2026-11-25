@@ -284,7 +284,7 @@ class _HrtTimelapsePageState extends State<HrtTimelapsePage> {
                 children: [
                   CompanionAvatar(
                     mood: stage.companionMood,
-                    size: 54,
+                    size: 72,
                     glowColor: accent,
                   ),
                   const SizedBox(width: 12),

@@ -138,7 +138,7 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
                 children: [
                   const CompanionAvatar(
                     mood: CompanionMood.care,
-                    size: 58,
+                    size: 74,
                     glowColor: C.magenta,
                   ),
                   const SizedBox(width: 12),

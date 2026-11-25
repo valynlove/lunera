@@ -24,7 +24,7 @@ class CoachAvatar extends StatelessWidget {
   const CoachAvatar({
     super.key,
     required this.mood,
-    this.size = 72,
+    this.size = 84,
     this.glowColor = C.aurora,
     this.showGlow = true,
     this.enablePulse = false,
