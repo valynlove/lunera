@@ -46,7 +46,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '2.2.30';
+  static const currentVersion = '2.2.32';
 
   static const MethodChannel _channel =
       MethodChannel('com.example.ritme/app_utils');
@@ -134,15 +134,24 @@ class UpdateCheckerService {
       var downloadUrl = _directDownloadUrl;
       final assets = data['assets'] as List<dynamic>?;
       if (assets != null) {
+        String? arm64Url;
+        String? fallbackUrl;
         for (final a in assets) {
           final assetName = (a['name'] as String? ?? '').toLowerCase();
-          if (assetName == 'lunera.apk' ||
-              assetName == 'app-release.apk' ||
-              assetName.endsWith('.apk')) {
-            downloadUrl = a['browser_download_url'] as String? ?? downloadUrl;
+          final url = a['browser_download_url'] as String?;
+          if (url == null) continue;
+          if (assetName == 'lunera.apk' || assetName == 'app-release.apk') {
+            downloadUrl = url;
+            arm64Url = null;
+            fallbackUrl = null;
             break;
+          } else if (arm64Url == null && assetName.endsWith('_arm64-v8a.apk')) {
+            arm64Url = url;
+          } else if (fallbackUrl == null && assetName.endsWith('.apk')) {
+            fallbackUrl = url;
           }
         }
+        downloadUrl = arm64Url ?? fallbackUrl ?? downloadUrl;
       }
 
       final hasUpdate = _isVersionGreater(cleanTag, currentVersion);

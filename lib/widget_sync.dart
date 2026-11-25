@@ -52,7 +52,7 @@ class WidgetSync {
 
   static Future<void> _refresh() async {
     for (final n in _widgets) {
-      await HomeWidget.updateWidget(androidName: n);
+      await HomeWidget.updateWidget(qualifiedAndroidName: 'com.example.ritme.$n');
     }
   }
 
@@ -147,7 +147,7 @@ class WidgetSync {
       ),
       key: 'lvl_image',
       logicalSize: const Size(360, 150),
-      pixelRatio: 2,
+      pixelRatio: 1.5,
     );
   }
 }

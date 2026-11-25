@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "2.2.30";
+const APP_VERSION = "2.2.32";
 
 // Helper to update button label text without stripping SVG icon or shimmer span
 function setButtonLabel(button, text) {
@@ -41,8 +41,11 @@ function fetchLatestReleaseVersion() {
           setButtonLabel(ctaDownloadBtn, `Download APK (${tag})`);
         }
 
-        // Point to direct APK asset link if explicitly found
-        const apkAsset = data.assets?.find(a => a.name.endsWith('.apk'));
+        // Point to direct arm64-v8a APK asset link if explicitly found
+        const apkAsset =
+          data.assets?.find(a => a.name === "Lunera.apk") ||
+          data.assets?.find(a => a.name.endsWith("_arm64-v8a.apk")) ||
+          data.assets?.find(a => a.name.endsWith(".apk"));
         const downloadUrl = apkAsset ? apkAsset.browser_download_url : directApkUrl;
         document.querySelectorAll(".apk-download-btn").forEach(link => {
           link.href = downloadUrl;

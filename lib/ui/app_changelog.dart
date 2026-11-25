@@ -42,10 +42,38 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.2.32',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Per-ABI Release APKs & Obfuscation: Split release APK builds by ABI (arm64-v8a, armeabi-v7a, x86_64) with code obfuscation and updated the in-app updater and landing page to prioritize arm64-v8a.',
+          textId:
+              'Optimasi Ukuran APK Rilis Per-ABI: Memecah build APK rilis per arsitektur ABI (arm64-v8a, armeabi-v7a, x86_64) dengan obfuskasi kode, serta memperbarui pembaruan dalam aplikasi dan landing page agar memprioritaskan arm64-v8a.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.31',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Android Home Screen Widgets Fix: Replaced unsupported <View> scrims with <FrameLayout> in RemoteViews layouts, used qualifiedAndroidName for debug/release widget updates, and tuned chart pixelRatio to 1.5.',
+          textId:
+              'Perbaikan Widget Layar Utama Android: Mengganti elemen <View> yang tidak didukung RemoteViews dengan <FrameLayout>, memakai qualifiedAndroidName agar widget ter-refresh di build debug/release, dan menyesuaikan pixelRatio grafik ke 1.5.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.2.30',
       dateEn: 'November 24, 2026',
       dateId: '24 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,

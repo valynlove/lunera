@@ -4,6 +4,18 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.32] - 2026-11-25
+
+### Changed
+- **Release APK Size Optimization (`.github/workflows/release.yml`):** Updated the GitHub Actions release build to use `--split-per-abi --obfuscate --split-debug-info=build/symbols`, publishing per-ABI APKs (`arm64-v8a`, `armeabi-v7a`, `x86_64`) alongside `Lunera.apk` (`arm64-v8a` default) instead of a single fat universal APK.
+- **Per-ABI Download Resolution (`lib/update_checker.dart`, `docs/script.js`, `docs/index.html`):** Prioritized `Lunera.apk` / `_arm64-v8a.apk` when resolving GitHub Release assets in both the in-app updater and landing page, and added an ABI selection note for 32-bit/emulator users.
+
+## [2.2.31] - 2026-11-25
+
+### Fixed
+- **Android Home Screen Widgets (`widget_hrt.xml`, `widget_level.xml`, `widget_schedule.xml`):** Replaced unsupported `<View>` scrim elements with `<FrameLayout>` in `RemoteViews` layouts, resolving the "Can't load widget" inflation error on Android launchers.
+- **Widget Sync & Bitmap Size (`lib/widget_sync.dart`):** Used `qualifiedAndroidName` for `HomeWidget.updateWidget` so widget refreshes work in both debug (`.debug` suffix) and release builds, and reduced chart render `pixelRatio` to `1.5` to stay safely within Android's Binder transaction limit.
+
 ## [2.2.30] - 2026-11-24
 
 ### Added

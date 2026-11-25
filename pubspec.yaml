@@ -1,7 +1,7 @@
 name: lunera
 description: Personal health & therapy tracking application
 publish_to: none
-version: 2.2.30+135
+version: 2.2.32+137
 environment:
   sdk: ">=3.3.0 <4.0.0"
 dependencies:
