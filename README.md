@@ -6,8 +6,6 @@
 
 <br /><br />
 
-<img src="docs/images/logo.png" alt="Lunera Logo" width="110" />
-
 ### _Every Phase, Your Own._
 
 **A Gentle, Elegant & Privacy-Focused Personal Health & Therapy Tracker**
