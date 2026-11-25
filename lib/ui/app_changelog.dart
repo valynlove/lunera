@@ -42,10 +42,24 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.43',
+      version: '2.2.44',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Android App Launcher Artwork: Restored the original Lunera wordmark launcher artwork across all Android mipmap densities (keeping it distinct from the in-app crescent emblem) while removing black corner artifacts with transparent legacy corners and seamless full-bleed adaptive foreground/background layers.',
+          textId:
+              'Ikon App Launcher Android: Mengembalikan artwork App Launcher asli bertuliskan Lunera di seluruh resolusi mipmap Android (terpisah dari App Icon emblem bulan sabit) sekaligus menghilangkan sudut hitam dengan sudut transparan pada ikon legacy dan latar adaptive foreground/background yang menyatu penuh.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.43',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "2.2.43";
+const APP_VERSION = "2.2.44";
 
 // Helper to update button label text without stripping SVG icon or shimmer span
 function setButtonLabel(button, text) {

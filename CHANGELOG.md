@@ -4,6 +4,11 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.44] - 2026-11-25
+
+### Fixed
+- **Android App Launcher Wordmark Icon (`android/app/src/main/res/mipmap-*/ic_launcher*.png`, `android/app/src/main/res/drawable/ic_launcher_background.xml`):** Restored the dedicated **Lunera** wordmark launcher artwork (distinct from the in-app `eternal_dusk_emblem.png` icon) with clean transparent corners on legacy `ic_launcher.png` and seamless full-bleed adaptive foreground/background layers so no black corners appear under Android icon masks.
+
 ## [2.2.43] - 2026-11-25
 
 ### Changed
