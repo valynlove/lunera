@@ -4,6 +4,25 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.43] - 2026-11-25
+
+### Changed
+- **Celestial Reverie Color Palette (`lib/theme.dart`, `DESIGN.md`):** Updated core design tokens to the **Celestial Reverie** palette (`#170B3D` Midnight Purple, `#351078` Royal Violet, `#7737D9` Cosmic Purple, `#C16AFF` Lavender, `#F3A8F4` Celestial Pink, `#FFE2C8` Starlight Cream) while preserving all existing layouts and WCAG AA contrast ratios.
+- **Atmospheric & Profile Artwork Refresh (`assets/images/`):** Replaced `eternal_dusk_bg.jpg`, `eternal_dusk_splash_bg.jpg`, `eternal_dusk_overlay.png`, `eternal_dusk_avatar_frame.png`, and `profile_banner_dusk.jpg` with optimized assets from `new_images` and removed the `assets/images/new_images/` staging directory.
+
+## [2.2.42] - 2026-11-25
+
+### Changed
+- **Sidebar & Lock Screen Branding (`lib/theme.dart`, `lib/ui/shell.dart`, `lib/ui/lock_screen.dart`):** Updated `BrandLogo` (desktop sidebar) and the PIN/Biometric `LockScreen` to render `assets/images/lunera_text.png`, and removed the circular border container around `MoonLogo` on `LockScreen` with balanced spacing.
+- **Android App Launcher Icons (`android/app/src/main/res/mipmap-*/ic_launcher*.png`, `android/app/src/main/res/drawable/ic_launcher_background.xml`):** Regenerated full-bleed opaque launcher and adaptive foreground icons with a rich twilight violet backdrop so no black corners appear under any device icon mask.
+
+### Fixed
+- **Injection Site Rotation Intervals (`lib/ui/site_map.dart`):** Sorted dose logs newest-first inside `getSiteStatuses` and `SiteRotationSheet` so days-since counts and next suggested injection sites reflect the most recent injection rather than Firestore document order.
+- **Body & Changes Page Layout (`lib/ui/responsive.dart`):** Set `heightFactor: 1.0` on `AdaptivePageFrame`'s `Align` so `BodyPage`'s bottom action bar no longer expands to fill the screen and collapse the page body.
+
+### Removed
+- **HRT Time-Lapse & Unused Legacy Assets (`lib/ui/sanctuary/hrt_timelapse_page.dart`, `test/hrt_timelapse_test.dart`, `assets/images/timelapse/`, `assets/icons/`, `pubspec.yaml`, `lib/l10n_id.dart`):** Removed the deprecated HRT Time-Lapse mini-game and 62 unused legacy icon and image assets to reduce app bundle size.
+
 ## [2.2.41] - 2026-11-25
 
 ### Changed

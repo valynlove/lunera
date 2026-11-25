@@ -374,6 +374,50 @@ void main() {
       expect(statuses['Left buttock']!.daysSince, isNull);
     });
 
+    test('getSiteStatuses uses most recent log even when logs are unsorted', () {
+      const prefs = Prefs(places: ['Right thigh', 'Left thigh']);
+      final now = DateTime.now();
+
+      final unsortedLogs = [
+        DoseLog(
+          id: 'old-right',
+          therapyId: 't1',
+          at: now.subtract(const Duration(days: 156)),
+          places: ['Right thigh'],
+        ),
+        DoseLog(
+          id: 'old-left',
+          therapyId: 't1',
+          at: now.subtract(const Duration(days: 66)),
+          places: ['Left thigh'],
+        ),
+        DoseLog(
+          id: 'recent-right',
+          therapyId: 't1',
+          at: now.subtract(const Duration(days: 14)),
+          places: ['Right thigh'],
+        ),
+        DoseLog(
+          id: 'recent-left',
+          therapyId: 't1',
+          at: now.subtract(const Duration(days: 7)),
+          places: ['Left thigh'],
+        ),
+      ];
+
+      final statuses = getSiteStatuses(
+        sites: prefs.places,
+        logsDesc: unsortedLogs,
+        prefs: prefs,
+        therapyId: 't1',
+      );
+
+      expect(statuses['Left thigh']!.daysSince, equals(7));
+      expect(statuses['Right thigh']!.daysSince, equals(14));
+      expect(statuses['Right thigh']!.isSuggested, isTrue);
+      expect(statuses['Left thigh']!.isSuggested, isFalse);
+    });
+
     test('Body overview silhouette proportions are bounded on tablets and mobile', () {
       const h = 420.0;
 

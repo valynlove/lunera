@@ -1655,14 +1655,6 @@ const Map<String, String> idStrings = {
   'No recent data': 'Belum ada data terbaru',
   'lab result': 'hasil lab',
 
-  // HRT Time-Lapse
-  'Feminizing (MtF)': 'Feminisme (MtF)',
-  'Masculinizing (FtM)': 'Maskulinisasi (FtM)',
-  'HRT Time-Lapse': 'Time-Lapse HRT',
-  'General educational reference only. Every body responds at its own pace depending on genetics, dosage, and lab levels.':
-      'Hanya sebagai referensi edukasi umum. Setiap tubuh merespons dengan ritmenya masing-masing bergantung pada genetika, dosis, dan hasil lab.',
-  'Stage': 'Tahap',
-
   // Movement Coach (HRT-Aware Personal Trainer)
   'Movement Coach': 'Pelatih Gerak',
   'Lunera Movement Coach': 'Pelatih Gerak Lunera',

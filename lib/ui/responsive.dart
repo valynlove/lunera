@@ -82,6 +82,7 @@ class AdaptivePageFrame extends StatelessWidget {
     }
     return Align(
       alignment: Alignment.topCenter,
+      heightFactor: 1.0,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: resolvedMax),
         child: content,

@@ -774,7 +774,7 @@ class _DesktopSidebarChrome extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const BrandLogo(height: 30),
+                  const BrandLogo(height: 36),
                   const SizedBox(height: 6),
                   Text(
                     tr(tagline),

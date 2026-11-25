@@ -8,34 +8,34 @@ import 'l10n.dart';
 const appName = 'Lunera';
 const tagline = 'Every Phase, Your Own.';
 
-/// Eternal Dusk color tokens combining Midnight Aurora with Vice City Sunset warmth.
+/// Celestial Reverie color tokens pairing Midnight Purple & Royal Violet with Lavender, Celestial Pink, and Starlight Cream.
 class C {
-  static const voidBg = Color(0xFF090817); // Deepest obsidian void
+  static const voidBg = Color(0xFF0D0624); // Deepest cosmic indigo-void
   static const midnight =
-      Color(0xFF11102B); // Primary nocturnal midnight canvas
-  static const nebula = Color(0xFF292052); // Elevated cosmic plum surface
-  static const aurora = Color(0xFF8065E8); // Primary electric aurora violet
-  static const violet = Color(0xFFA58BFF); // Luminous violet highlight
-  static const lavender = Color(0xFFC7B8FF); // Soft lavender rim & accent
-  static const magenta = Color(0xFFD76ABF); // Dusk sunset magenta
-  static const rose = Color(0xFFF09ABF); // Warm twilight rose
-  static const coral = Color(0xFFF2A17C); // Horizon sunset coral
+      Color(0xFF170B3D); // Midnight Purple — primary nocturnal canvas
+  static const nebula = Color(0xFF351078); // Royal Violet — elevated cosmic surface
+  static const aurora = Color(0xFF7737D9); // Cosmic Purple — primary brand action
+  static const violet = Color(0xFFC16AFF); // Lavender — luminous highlight
+  static const lavender = Color(0xFFE2B8FF); // Soft lavender rim & active icon
+  static const magenta = Color(0xFFD966E8); // Celestial orchid secondary accent
+  static const rose = Color(0xFFF3A8F4); // Celestial Pink — warm twilight rose
+  static const coral = Color(0xFFFFE2C8); // Starlight Cream — horizon warmth
 
-  // Semantic & legacy design token aliases mapped cleanly to Eternal Dusk
-  static const deepCard = Color(0xFF171436); // Layered dark card surface
+  // Semantic & legacy design token aliases mapped cleanly to Celestial Reverie
+  static const deepCard = Color(0xFF1F104F); // Layered dark card surface
   static const surface = deepCard;
   static const ink = voidBg;
   static const deep = midnight;
   static const indigo = nebula;
-  static const mist = Color(0xFFECE8FF); // High-contrast lavender-tinted white
+  static const mist = Color(0xFFFAF4FF); // Starlight-tinted white
   static const amber = coral;
   static const gold = coral;
   static const moonlight = lavender;
 
   // Functional UI icon tokens (Lucide outline system)
-  static const iconDefault = Color(0xFFA29BBE);
-  static const iconActive = lavender; // #C7B8FF
-  static const iconHighlight = aurora; // #8065E8
+  static const iconDefault = Color(0xFFB8A4D6);
+  static const iconActive = lavender; // #E2B8FF
+  static const iconHighlight = aurora; // #7737D9
 
   static Color lagoon = magenta; // Secondary dusk accent
   static Color peony = aurora; // Primary aurora accent
@@ -50,7 +50,7 @@ class Pastel {
   static const butter = C.coral; // Alerts, stock reminders, progesterone
   static const cream = C.lavender; // Subtle editorial trim & luminous captions
   static const mist = C.mist; // High-contrast foreground text
-  static const glow = Color(0x338065E8); // Soft aurora ambient glow
+  static const glow = Color(0x337737D9); // Soft cosmic purple ambient glow
 }
 
 /// Accent preset metadata (retained for preferences compatibility).
@@ -488,7 +488,7 @@ class MoonLogoSmall extends StatelessWidget {
       );
 }
 
-/// Primary horizontal Eternal Dusk wordmark + crescent emblem lockup.
+/// Primary horizontal Eternal Dusk wordmark lockup.
 class BrandLogo extends StatelessWidget {
   const BrandLogo({super.key, this.height = 44});
   final double height;
@@ -497,8 +497,9 @@ class BrandLogo extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
         height: height,
         child: Image.asset(
-          'assets/images/eternal_dusk_logo.png',
+          'assets/images/lunera_text.png',
           fit: BoxFit.contain,
+          semanticLabel: appName,
           errorBuilder: (_, __, ___) => Row(
             mainAxisSize: MainAxisSize.min,
             children: [

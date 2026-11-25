@@ -12,7 +12,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-A58BFF?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-D76ABF?logo=firebase&logoColor=white)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-7DE2C7?labelColor=11102B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.41-F2A17C?labelColor=11102B)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.2.43-F2A17C?labelColor=11102B)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Direct Download APK](https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk) • [📋 Changelog](CHANGELOG.md)
 
@@ -27,8 +27,10 @@
 ---
 
 
-## 🆕 Recent Highlights (`v2.2.41`)
+## 🆕 Recent Highlights (`v2.2.43`)
 
+- **Celestial Reverie Theme & Artwork Refresh (`v2.2.43`):** Adopted the Celestial Reverie color tokens (`#170B3D`–`#FFE2C8`) with verified WCAG AA contrast alongside refreshed cosmic backdrop, splash, overlay, avatar frame, and profile banner artwork.
+- **Audit Polish, Bug Fixes & Asset Cleanup (`v2.2.42`):** Switched desktop sidebar & PIN/Biometric lock screen to `lunera_text.png` (removing the lock-screen emblem circle), fixed injection site rotation date sorting and `BodyPage` layout collapse, removed the HRT Time-Lapse mini-game plus unused legacy assets, and regenerated full-bleed Android launcher icons without black corners.
 - **Wordmark Branding (`v2.2.41`):** Updated the landing page header/footer branding, Flutter splash screen wordmark, and About Lunera showcase wordmark to use `lunera_text.png`.
 
 - **Adaptive Multi-Device Layout & Visual System (`v2.2.40`):** Added window-first responsive navigation (Bottom Bar on phones, Navigation Rail on tablets, Persistent Sidebar with `Alt+1–5` shortcuts on desktop), split views, responsive grids, adaptive modal dialogs, tabular numerals, `Reduce Motion` support, and `48×48dp` accessible touch targets across screens.

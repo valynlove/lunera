@@ -496,28 +496,19 @@ class _LockScreenState extends State<LockScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.06),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Pastel.lilac.withValues(alpha: 0.25),
-                                width: 1.2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Pastel.lilac.withValues(alpha: 0.20),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: const MoonLogo(size: 64),
-                          ),
-                          gap(12),
-                          Text(appName, style: wordmark(32, color: Colors.white)),
+                          const MoonLogo(size: 64),
                           gap(8),
+                          Image.asset(
+                            'assets/images/lunera_text.png',
+                            height: 44,
+                            fit: BoxFit.contain,
+                            semanticLabel: appName,
+                            errorBuilder: (_, __, ___) => Text(
+                              appName,
+                              style: wordmark(32, color: Colors.white),
+                            ),
+                          ),
+                          gap(10),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                             decoration: BoxDecoration(
@@ -544,7 +535,7 @@ class _LockScreenState extends State<LockScreen> {
                               ],
                             ),
                           ),
-                          gap(28),
+                          gap(24),
                           PinPad(
                             value: pin,
                             onChanged: _changed,

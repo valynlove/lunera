@@ -48,11 +48,12 @@ Map<String, SiteStatus> getSiteStatuses({
   int restingThresholdDays = 4,
 }) {
   final out = <String, SiteStatus>{};
-  final suggested = therapyId != null ? suggestPlace(prefs, logsDesc, therapyId) : '';
+  final sorted = [...logsDesc]..sort((a, b) => b.at.compareTo(a.at));
+  final suggested = therapyId != null ? suggestPlace(prefs, sorted, therapyId) : '';
 
   for (final site in sites) {
     // Cari log terakhir yang menggunakan lokasi ini
-    final log = logsDesc.where((l) => !l.skipped && l.places.contains(site)).firstOrNull;
+    final log = sorted.where((l) => !l.skipped && l.places.contains(site)).firstOrNull;
     final days = log == null ? null : daysBetween(log.at, DateTime.now());
     final isResting = days != null && days < restingThresholdDays;
 
@@ -470,7 +471,8 @@ class SiteRotationSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(prefsProvider).valueOrNull ?? const Prefs();
-    final logs = ref.watch(logsProvider).valueOrNull ?? <DoseLog>[];
+    final logs = [...(ref.watch(logsProvider).valueOrNull ?? <DoseLog>[])]
+      ..sort((a, b) => b.at.compareTo(a.at));
 
     return SingleChildScrollView(
       child: Column(

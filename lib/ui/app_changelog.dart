@@ -42,10 +42,73 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.41',
+      version: '2.2.43',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Celestial Reverie Palette: Updated core design tokens in Theme and DESIGN.md to the Celestial Reverie palette (Midnight Purple #170B3D, Royal Violet #351078, Cosmic Purple #7737D9, Lavender #C16AFF, Celestial Pink #F3A8F4, Starlight Cream #FFE2C8) with WCAG AA contrast verified across all surfaces.',
+          textId:
+              'Palet Celestial Reverie: Memperbarui token warna utama di Theme dan DESIGN.md ke palet Celestial Reverie (Midnight Purple #170B3D, Royal Violet #351078, Cosmic Purple #7737D9, Lavender #C16AFF, Celestial Pink #F3A8F4, Starlight Cream #FFE2C8) dengan kontras WCAG AA terjaga.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Refreshed Visual Assets: Replaced atmospheric background, splash backdrop, overlay, avatar frame, and profile banner artwork with the new high-resolution Celestial Reverie assets and removed the temporary staging folder.',
+          textId:
+              'Pembaruan Aset Visual: Mengganti latar belakang utama, splash screen, overlay, bingkai avatar, dan banner profil dengan aset Celestial Reverie terbaru serta menghapus folder staging sementara.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.42',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Sidebar & Lock Screen Wordmark: Replaced the desktop sidebar BrandLogo and PIN/Biometric LockScreen branding with the lunera_text.png calligraphic wordmark, and removed the circular frame around MoonLogo on LockScreen with balanced spacing.',
+          textId:
+              'Wordmark Sidebar & Layar Kunci: Mengganti logo sidebar desktop dan teks Lunera di halaman PIN & Biometrik dengan wordmark kaligrafi lunera_text.png, serta menghapus bingkai lingkaran pada MoonLogo di halaman PIN & Biometrik dengan tata letak yang rapi.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Injection Site Rotation Intervals: Sorted dose logs newest-first inside getSiteStatuses and SiteRotationSheet so "days ago" and next-site suggestions always reflect the latest injection.',
+          textId:
+              'Rentang Waktu Rotasi Lokasi Injeksi: Mengurutkan log dosis dari yang terbaru di getSiteStatuses dan SiteRotationSheet sehingga jumlah hari sejak suntikan terakhir dan saran lokasi berikutnya selalu akurat.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Body & Changes Layout: Constrained AdaptivePageFrame vertical alignment (heightFactor: 1.0) so the BodyPage bottom action button stays anchored at the bottom instead of collapsing the body viewport.',
+          textId:
+              'Tata Letak Halaman Tubuh & Perubahan: Memperbaiki AdaptivePageFrame (heightFactor: 1.0) agar tombol aksi bawah di BodyPage tetap berada di bawah dan tidak menutupi konten halaman.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Android Launcher Icon: Regenerated full-bleed opaque mipmap launcher and adaptive foreground icons with twilight violet background to eliminate black corners.',
+          textId:
+              'Ikon Peluncur Android: Memperbarui seluruh ikon peluncur dan adaptive foreground agar penuh tanpa sudut hitam atau transparan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Asset Cleanup & Lighter Bundle: Removed the deprecated HRT Time-Lapse mini-game and 62 unused legacy icon/image assets.',
+          textId:
+              'Pembersihan Aset & Aplikasi Lebih Ringan: Menghapus mini-game Time-Lapse HRT serta 62 aset ikon dan gambar lama yang tidak lagi digunakan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.41',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

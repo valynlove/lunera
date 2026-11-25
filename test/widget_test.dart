@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lunera/ui/about_sheet.dart';
 import 'package:lunera/ui/app_changelog.dart';
 import 'package:lunera/ui/auth.dart';
+import 'package:lunera/ui/body.dart';
 import 'package:lunera/ui/calendar.dart';
 import 'package:lunera/ui/companion_avatar.dart';
 import 'package:lunera/ui/data_page.dart';
@@ -56,12 +57,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.2.41'));
+      expect(UpdateCheckerService.currentVersion, equals('2.2.43'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.2.41'));
+      expect(AppChangelog.releases.first.version, equals('2.2.43'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -1540,6 +1541,41 @@ void main() {
       await tester.pump();
       expect(find.text(tr('Sync error')), findsOneWidget);
       expect(find.text('Write rejected'), findsOneWidget);
+    });
+
+    testWidgets(
+        'BodyPage renders body content and anchors bottom action bar at bottom on phone and tablet',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      for (final size in [const Size(390, 844), const Size(1280, 800)]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              journalProvider.overrideWith((ref) => Stream.value(const [])),
+              measurementsProvider
+                  .overrideWith((ref) => Stream.value(const [])),
+            ],
+            child: const MaterialApp(home: BodyPage()),
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        final headerFinder = find.text(tr('Body & changes'));
+        final buttonFinder = find.text(tr('Log a change'));
+        expect(headerFinder, findsOneWidget);
+        expect(buttonFinder, findsOneWidget);
+
+        final headerRect = tester.getRect(headerFinder);
+        final buttonRect = tester.getRect(buttonFinder);
+        expect(headerRect.top, lessThan(size.height * 0.25));
+        expect(buttonRect.top, greaterThan(size.height * 0.75));
+      }
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
     });
   });
 }
