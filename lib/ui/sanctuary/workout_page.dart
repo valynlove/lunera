@@ -12,6 +12,7 @@ import '../../theme.dart';
 import '../../workout_catalog.dart';
 import '../../workout_coach.dart';
 import 'coach_avatar.dart';
+import '../responsive.dart';
 import 'workout_session_page.dart';
 
 const _weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -29,6 +30,8 @@ class WorkoutCoachPage extends ConsumerStatefulWidget {
 class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
   int _programTab = 0; // 0 = HRT Programs, 1 = Custom Routines
   bool? _lightModeOverride;
+  String? _bodyCheckIn; // 'low_energy' | 'sore' | 'ready'
+  bool _showBodyCheckInBar = false;
   bool _showOnboardingOverride = false;
   bool _autoStarted = false;
 
@@ -109,6 +112,11 @@ class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
 
   void _openRoutinePreview(WorkoutRoutine routine, {required bool lightMode}) {
     final effective = lightMode ? applyLightMode(routine) : routine;
+    final previewMood = lightMode
+        ? CoachMood.gentle
+        : (effective.category == 'recovery'
+            ? CoachMood.stretch
+            : CoachMood.ready);
     showSheet(
       context,
       Column(
@@ -116,29 +124,33 @@ class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  effective.title,
-                  style: display(24, color: Colors.white, weight: FontWeight.w600),
-                ),
+              CoachAvatar(
+                mood: previewMood,
+                size: 58,
+                glowColor: lightMode ? Pastel.mint : C.lavender,
               ),
-              Text(
-                '~${effective.estimatedMinutes} min',
-                style: const TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: C.lavender,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      effective.title,
+                      style: display(24,
+                          color: Colors.white, weight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '~${effective.estimatedMinutes} min · ${categorySubtitle(effective.category)}',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: Pastel.mist.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          gap(4),
-          Text(
-            categorySubtitle(effective.category),
-            style: TextStyle(
-              fontSize: 12.5,
-              color: Pastel.mist.withValues(alpha: 0.8),
-            ),
           ),
           gap(14),
           for (var i = 0; i < effective.items.length; i++) ...[
@@ -195,39 +207,37 @@ class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: showOnboarding
-                ? _OnboardingFlow(
-                    initialProfile: state.profile,
-                    initialShowHomeCard: prefs.showWorkoutHomeCard,
-                    onCancel: state.profile.onboarded
-                        ? () => setState(() => _showOnboardingOverride = false)
-                        : null,
-                    onFinish: (updatedProfile, showOnHome) async {
-                      await ref
-                          .read(workoutProvider.notifier)
-                          .updateProfile(updatedProfile);
-                      final repo = ref.read(repoProvider);
-                      if (repo != null &&
-                          showOnHome != prefs.showWorkoutHomeCard) {
-                        await repo.setPrefs(
-                            prefs.copy(showWorkoutHomeCard: showOnHome));
-                      }
-                      if (mounted) {
-                        setState(() => _showOnboardingOverride = false);
-                      }
-                    },
-                  )
-                : _buildDashboard(
-                    context,
-                    state: state,
-                    therapies: therapies,
-                    doseLogs: doseLogs,
-                    prefs: prefs,
-                  ),
-          ),
+        child: AdaptivePageFrame(
+          maxWidth: 960,
+          child: showOnboarding
+              ? _OnboardingFlow(
+                  initialProfile: state.profile,
+                  initialShowHomeCard: prefs.showWorkoutHomeCard,
+                  onCancel: state.profile.onboarded
+                      ? () => setState(() => _showOnboardingOverride = false)
+                      : null,
+                  onFinish: (updatedProfile, showOnHome) async {
+                    await ref
+                        .read(workoutProvider.notifier)
+                        .updateProfile(updatedProfile);
+                    final repo = ref.read(repoProvider);
+                    if (repo != null &&
+                        showOnHome != prefs.showWorkoutHomeCard) {
+                      await repo.setPrefs(
+                          prefs.copy(showWorkoutHomeCard: showOnHome));
+                    }
+                    if (mounted) {
+                      setState(() => _showOnboardingOverride = false);
+                    }
+                  },
+                )
+              : _buildDashboard(
+                  context,
+                  state: state,
+                  therapies: therapies,
+                  doseLogs: doseLogs,
+                  prefs: prefs,
+                ),
         ),
       ),
     );
@@ -293,180 +303,281 @@ class _WorkoutCoachPageState extends ConsumerState<WorkoutCoachPage> {
         gap(10),
 
         // Signature Hero Card (Personal Coach Plan for Today)
-        AppCard(
-          highlight: true,
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CoachAvatar(
-                    mood: rec.coachMood,
-                    size: 94,
-                    glowColor: rec.kind == CoachContextKind.injectionCare
-                        ? C.coral
-                        : C.aurora,
-                    enablePulse: true,
-                    semanticLabel: tr('Lunera Movement Coach'),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (rec.contextBadge != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: (rec.kind == CoachContextKind.injectionCare
-                                      ? C.coral
-                                      : Pastel.mint)
-                                  .withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: (rec.kind ==
-                                            CoachContextKind.injectionCare
-                                        ? C.coral
-                                        : Pastel.mint)
-                                    .withValues(alpha: 0.4),
-                              ),
-                            ),
-                            child: Text(
-                              rec.contextBadge!,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: rec.kind ==
-                                        CoachContextKind.injectionCare
-                                    ? C.coral
-                                    : Pastel.mint,
-                              ),
-                            ),
-                          ),
-                        gap(6),
-                        Text(
-                          rec.headline,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        gap(4),
-                        Text(
-                          rec.message,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Pastel.mist.withValues(alpha: 0.86),
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+        Builder(builder: (context) {
+          final (heroMood, heroHeadline, heroMessage) = switch (_bodyCheckIn) {
+            'low_energy' => (
+                CoachMood.gentle,
+                tr('Lighter pace selected'),
+                tr('Got it—Light Mode is on so you can move gently without draining your tank.'),
               ),
-              gap(14),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: C.midnight.withValues(alpha: 0.68),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: C.lavender.withValues(alpha: 0.18)),
-                ),
-                child: Row(
+            'sore' => (
+                CoachMood.stretch,
+                tr('Take joints & muscles easy'),
+                tr('Easy mobility and gentle stretches are your friend today—skip anything tender.'),
+              ),
+            'ready' => (
+                CoachMood.ready,
+                tr('Warmed up & ready'),
+                tr('Steady rhythm today. Start whenever you feel like moving.'),
+              ),
+            _ => (
+                useLight &&
+                        (rec.coachMood == CoachMood.cheer ||
+                            rec.coachMood == CoachMood.ready ||
+                            rec.coachMood == CoachMood.greet)
+                    ? CoachMood.gentle
+                    : rec.coachMood,
+                rec.headline,
+                rec.message,
+              ),
+          };
+          return AppCard(
+            highlight: true,
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    iconBadge(LucideIcons.sparkles, C.lavender,
-                        size: 40, iconSize: 20),
-                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _showBodyCheckInBar = !_showBodyCheckInBar;
+                        });
+                      },
+                      child: CoachAvatar(
+                        mood: heroMood,
+                        size: 94,
+                        glowColor: rec.kind == CoachContextKind.injectionCare
+                            ? C.coral
+                            : C.aurora,
+                        enablePulse: true,
+                        semanticLabel: tr('Lunera Movement Coach'),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (rec.contextBadge != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    (rec.kind == CoachContextKind.injectionCare
+                                            ? C.coral
+                                            : Pastel.mint)
+                                        .withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: (rec.kind ==
+                                              CoachContextKind.injectionCare
+                                          ? C.coral
+                                          : Pastel.mint)
+                                      .withValues(alpha: 0.4),
+                                ),
+                              ),
+                              child: Text(
+                                rec.contextBadge!,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: rec.kind ==
+                                          CoachContextKind.injectionCare
+                                      ? C.coral
+                                      : Pastel.mint,
+                                ),
+                              ),
+                            ),
+                          gap(6),
                           Text(
-                            effectiveRec.title,
+                            heroHeadline,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 17,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
                           ),
+                          gap(4),
                           Text(
-                            tr('{0} exercises · ~{1} min', [
-                              effectiveRec.items.length,
-                              effectiveRec.estimatedMinutes,
-                            ]),
+                            heroMessage,
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Pastel.mist.withValues(alpha: 0.78),
-                              fontFeatures: const [FontFeature.tabularFigures()],
+                              fontSize: 13,
+                              color: Pastel.mist.withValues(alpha: 0.86),
+                              height: 1.4,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    IconButton(
-                      tooltip: tr('Preview routine'),
-                      onPressed: () => _openRoutinePreview(
-                        rec.recommendedRoutine,
-                        lightMode: useLight,
+                  ],
+                ),
+                if (_showBodyCheckInBar) ...[
+                  gap(12),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      ChoiceChip(
+                        label: Text(tr('Low energy'),
+                            style: const TextStyle(fontSize: 11.5)),
+                        selected: _bodyCheckIn == 'low_energy',
+                        onSelected: (sel) {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _bodyCheckIn = sel ? 'low_energy' : null;
+                            _lightModeOverride = sel ? true : null;
+                          });
+                        },
                       ),
-                      icon: const Icon(LucideIcons.eye, size: 19),
+                      ChoiceChip(
+                        label: Text(tr('Feeling sore'),
+                            style: const TextStyle(fontSize: 11.5)),
+                        selected: _bodyCheckIn == 'sore',
+                        onSelected: (sel) {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _bodyCheckIn = sel ? 'sore' : null;
+                            _lightModeOverride = sel ? true : null;
+                          });
+                        },
+                      ),
+                      ChoiceChip(
+                        label: Text(tr('Ready to go'),
+                            style: const TextStyle(fontSize: 11.5)),
+                        selected: _bodyCheckIn == 'ready',
+                        onSelected: (sel) {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _bodyCheckIn = sel ? 'ready' : null;
+                            if (sel) _lightModeOverride = false;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+                gap(14),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: C.midnight.withValues(alpha: 0.68),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: C.lavender.withValues(alpha: 0.18)),
+                  ),
+                  child: Row(
+                    children: [
+                      iconBadge(LucideIcons.sparkles, C.lavender,
+                          size: 40, iconSize: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              effectiveRec.title,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              tr('{0} exercises · ~{1} min', [
+                                effectiveRec.items.length,
+                                effectiveRec.estimatedMinutes,
+                              ]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Pastel.mist.withValues(alpha: 0.78),
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures()
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: tr('Preview routine'),
+                        onPressed: () => _openRoutinePreview(
+                          rec.recommendedRoutine,
+                          lightMode: useLight,
+                        ),
+                        icon: const Icon(LucideIcons.eye, size: 19),
+                      ),
+                    ],
+                  ),
+                ),
+                gap(14),
+                SizedBox(
+                  width: double.infinity,
+                  child: pillButton(
+                    tr('Start {0}-min session', [effectiveRec.estimatedMinutes]),
+                    () => _startRoutine(
+                      rec.recommendedRoutine,
+                      lightMode: useLight,
+                    ),
+                    icon: LucideIcons.play,
+                  ),
+                ),
+                gap(10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilterChip(
+                      label: Text(
+                        tr('Light mode'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      selected: useLight,
+                      onSelected: (v) {
+                        HapticFeedback.selectionClick();
+                        setState(() => _lightModeOverride = v);
+                      },
+                    ),
+                    FilterChip(
+                      label: Text(
+                        tr('Body check-in'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      selected: _showBodyCheckInBar || _bodyCheckIn != null,
+                      onSelected: (v) {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _showBodyCheckInBar = v;
+                          if (!v) {
+                            _bodyCheckIn = null;
+                          }
+                        });
+                      },
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => _toggleRestToday(
+                          rec.kind == CoachContextKind.restedToday),
+                      icon: Icon(
+                        rec.kind == CoachContextKind.restedToday
+                            ? LucideIcons.rotateCcw
+                            : LucideIcons.moon,
+                        size: 16,
+                      ),
+                      label: Text(
+                        rec.kind == CoachContextKind.restedToday
+                            ? tr('Resume today')
+                            : tr('Rest today'),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              gap(14),
-              SizedBox(
-                width: double.infinity,
-                child: pillButton(
-                  tr('Start {0}-min session', [effectiveRec.estimatedMinutes]),
-                  () => _startRoutine(
-                    rec.recommendedRoutine,
-                    lightMode: useLight,
-                  ),
-                  icon: LucideIcons.play,
-                ),
-              ),
-              gap(10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilterChip(
-                    label: Text(
-                      tr('Light mode'),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    selected: useLight,
-                    onSelected: (v) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _lightModeOverride = v);
-                    },
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: () => _toggleRestToday(
-                        rec.kind == CoachContextKind.restedToday),
-                    icon: Icon(
-                      rec.kind == CoachContextKind.restedToday
-                          ? LucideIcons.rotateCcw
-                          : LucideIcons.moon,
-                      size: 16,
-                    ),
-                    label: Text(
-                      rec.kind == CoachContextKind.restedToday
-                          ? tr('Resume today')
-                          : tr('Rest today'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        }),
         gap(14),
 
         // Guilt-Free Progress Strip (No streaks!)
@@ -1042,8 +1153,12 @@ class _OnboardingFlowState extends State<_OnboardingFlow> {
                 padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    const CoachAvatar(
-                      mood: CoachMood.explain,
+                    CoachAvatar(
+                      mood: switch (_step) {
+                        0 => CoachMood.explain,
+                        1 => CoachMood.listen,
+                        _ => CoachMood.think,
+                      },
                       size: 80,
                     ),
                     const SizedBox(width: 12),

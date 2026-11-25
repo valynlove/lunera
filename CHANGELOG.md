@@ -4,6 +4,44 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.41] - 2026-11-25
+
+### Changed
+- **Wordmark Branding (`assets/images/lunera_text.png`, `docs/images/lunera_text.png`, `lib/ui/splash.dart`, `lib/ui/about_sheet.dart`, `docs/index.html`, `docs/style.css`):** Replaced the landing page header/footer logo + text, the Flutter splash screen wordmark, and the About Lunera showcase wordmark with the `lunera_text.png` calligraphic wordmark image.
+
+## [2.2.40] - 2026-11-25
+
+### Added
+- **Design System & Adaptive Layout Primitives (`DESIGN.md`, `lib/ui/responsive.dart`, `test/responsive_layout_test.dart`):** Added `DESIGN.md` and window-first responsive helpers (`WindowSizeClass`, `AdaptivePageFrame`, `AdaptiveGrid`, `AdaptiveSplitView`, `AdaptivePageHeader`) for compact (`< 600dp`), medium (`600–839dp`), and expanded (`>= 840dp`) windows, plus a responsive widget test suite covering phone, tablet, desktop, and `1.6x` text scaling.
+
+### Changed
+- **Adaptive Shell & Multi-Device Layouts (`lib/ui/shell.dart`, `lib/theme.dart`, `lib/ui/*.dart`):**
+  - Replaced the fixed `680dp` shell wrapper with adaptive navigation chrome: floating bottom bar on phones, collapsed `88dp` navigation rail on tablets/foldables, and a `244dp` persistent sidebar with `Alt+1–5` keyboard shortcuts on desktop/wide windows while preserving active tab state across resizes.
+  - Upgraded `showSheet()` and `showOverdueSheet()` to present bottom sheets on compact windows and centered modal dialogs (`maxWidth: 560`) with close buttons on medium/expanded windows.
+  - Redesigned `HomePage`, `LevelsPage`, `HormonePage`, `CalendarPage`, `HistoryPage`, `JournalView`, `SuppliesPage`, `MorePage`, `SettingsPage`, `InsightsPage`, `BodyPage`, `GuidesPage`, `ArticlePage`, `ProfilePage`, `MomentsPage`, `ConsultationPrepPage`, and Twilight Sanctuary pages with multi-pane split views, responsive grids, reading width caps, tabular numerals, `48×48dp` interactive targets, hover/focus ergonomics, and `Reduce Motion` support.
+
+## [2.2.39] - 2026-11-25
+
+### Changed
+- **Companion Asset Folder Organization (`assets/images/companion/regular/`, `lib/ui/companion_avatar.dart`, `pubspec.yaml`):** Organized the 20 regular companion mascot PNGs into `assets/images/companion/regular/` alongside `assets/images/companion/coach/` and updated `CompanionMood.assetPath` and `pubspec.yaml` asset entries accordingly.
+
+## [2.2.38] - 2026-11-25
+
+### Added
+- **16 Sporty Coach Expressions & Interactive Workout Guidance (`lib/workout_coach.dart`, `lib/ui/sanctuary/coach_avatar.dart`, `lib/ui/sanctuary/workout_page.dart`, `lib/ui/sanctuary/workout_session_page.dart`, `WorkoutWidget.kt`):** Added 8 new `CoachMood` expressions (`ready`, `focus`, `breathe`, `stretch`, `gentle`, `effort`, `rest`, `listen`) alongside interactive Body check-in chips (`Low energy`, `Feeling sore`, `Ready to go`) on the Coach hub, live session Coach cues (including hold-timer focus, easier-pace switch, and tappable rest-break cues), and dedicated `rest`/`stretch`/`ready` context mapping.
+
+## [2.2.37] - 2026-11-25
+
+### Added
+- **Interactive Ambient Companion Card (`lib/ui/ambient_companion.dart`, `lib/l10n_id.dart`, `test/ambient_companion_test.dart`):** Upgraded the Home companion card to actively use Lunera's 20 `CompanionMood` expressions with long-press *Quiet Hug* (`love`), rapid-tap *Playful Moment* day/night reactions (`shocked`, `shy`, `facepalm`, `sleepy`, `annoyed`, `laugh`), and offline interactive topic chips (*Calm me*, *Care tip*, *Smile*) with direct shortcuts to Starlight Breathing and Care Guides.
+
+## [2.2.36] - 2026-11-25
+
+### Changed
+- **App Launcher & In-App Emblem Redesign (`android/app/src/main/res/`, `ios/`, `macos/`, `windows/`, `web/`, `assets/images/eternal_dusk_emblem.png`, `docs/images/`, `lib/ui/about_sheet.dart`):**
+  - Updated Android launcher icons (`mipmap-mdpi` through `mipmap-xxxhdpi`), Android 8+ adaptive icons (`mipmap-anydpi-v26/ic_launcher.xml`, `ic_launcher_round.xml`, `ic_launcher_foreground.png`, `ic_launcher_background.xml`), legacy splash icon (`drawable-nodpi/splash_icon.png`, `launch_background.xml`), iOS, macOS, and Windows app icons to the new Eternal Dusk *Lunera* script & crescent icon with transparent rounded-square corners.
+  - Updated the in-app `MoonLogo` emblem (`assets/images/eternal_dusk_emblem.png`), Web/PWA icons (`web/favicon.png`, `web/icons/*`), and landing page / GitHub README logo (`docs/images/logo.png`, `docs/images/icon.png`) to the new Eternal Dusk orbital crescent crest, and aligned `AboutLuneraSheet`'s emblem frame to a rounded-square glow.
+
 ## [2.2.35] - 2026-11-25
 
 ### Changed

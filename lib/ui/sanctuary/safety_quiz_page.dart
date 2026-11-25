@@ -7,6 +7,7 @@ import '../../l10n.dart';
 import '../../sanctuary_data.dart';
 import '../../theme.dart';
 import '../article_page.dart';
+import '../responsive.dart';
 
 /// Supportive 5-question practice round covering dosing math, labs, and safe care.
 class SafetyQuizPage extends StatefulWidget {
@@ -84,7 +85,10 @@ class _SafetyQuizPageState extends State<SafetyQuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: _finished ? _buildSummary(context) : _buildQuestion(context),
+        child: AdaptivePageFrame(
+          reading: true,
+          child: _finished ? _buildSummary(context) : _buildQuestion(context),
+        ),
       ),
     );
   }
@@ -96,96 +100,99 @@ class _SafetyQuizPageState extends State<SafetyQuizPage> {
     final relatedGuide =
         q.relatedGuideId == null ? null : guideById(q.relatedGuideId!);
 
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
-      children: [
-        Row(
-          children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(LucideIcons.arrowLeft),
-              tooltip: tr('Back'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(LucideIcons.arrowLeft),
+                tooltip: tr('Back'),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  tr('Safety & Dosing Sense'),
+                  style: display(26),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                tr('Question {0} of {1}', [_index + 1, total]),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Pastel.mist.withValues(alpha: 0.78),
+                ),
+              ),
+            ],
+          ),
+          gap(10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: (_index + 1) / total,
+              minHeight: 6,
+              color: C.aurora,
+              backgroundColor: C.lavender.withValues(alpha: 0.14),
             ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                tr('Safety & Dosing Sense'),
-                style: display(26),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          ),
+          gap(18),
+          AppCard(
+            highlight: true,
+            padding: const EdgeInsets.all(18),
+            child: Text(
+              q.question,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.4,
               ),
             ),
-            Text(
-              tr('Question {0} of {1}', [_index + 1, total]),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Pastel.mist.withValues(alpha: 0.78),
-              ),
+          ),
+          gap(14),
+          for (var i = 0; i < q.options.length; i++) ...[
+            _OptionTile(
+              label: q.options[i],
+              answered: answered,
+              isSelected: _selectedOption == i,
+              isCorrect: i == q.correctIndex,
+              onTap: () => _chooseOption(i),
+            ),
+            if (i < q.options.length - 1) gap(10),
+          ],
+          if (answered) ...[
+            gap(16),
+            _ExplanationBox(
+              isRight: _selectedOption == q.correctIndex,
+              explanation: q.explanation,
+              guide: relatedGuide,
+              onOpenGuide: relatedGuide == null
+                  ? null
+                  : () {
+                      HapticFeedback.selectionClick();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => ArticlePage(article: relatedGuide),
+                        ),
+                      );
+                    },
+            ),
+            gap(16),
+            pillButton(
+              _index + 1 < total ? tr('Next question') : tr('See summary'),
+              _next,
+              icon: LucideIcons.chevronRight,
+              color: C.aurora,
             ),
           ],
-        ),
-        gap(10),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: LinearProgressIndicator(
-            value: (_index + 1) / total,
-            minHeight: 6,
-            color: C.aurora,
-            backgroundColor: C.lavender.withValues(alpha: 0.14),
-          ),
-        ),
-        gap(18),
-        AppCard(
-          highlight: true,
-          padding: const EdgeInsets.all(18),
-          child: Text(
-            q.question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              height: 1.4,
-            ),
-          ),
-        ),
-        gap(14),
-        for (var i = 0; i < q.options.length; i++) ...[
-          _OptionTile(
-            label: q.options[i],
-            answered: answered,
-            isSelected: _selectedOption == i,
-            isCorrect: i == q.correctIndex,
-            onTap: () => _chooseOption(i),
-          ),
-          if (i < q.options.length - 1) gap(10),
         ],
-        if (answered) ...[
-          gap(16),
-          _ExplanationBox(
-            isRight: _selectedOption == q.correctIndex,
-            explanation: q.explanation,
-            guide: relatedGuide,
-            onOpenGuide: relatedGuide == null
-                ? null
-                : () {
-                    HapticFeedback.selectionClick();
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => ArticlePage(article: relatedGuide),
-                      ),
-                    );
-                  },
-          ),
-          gap(16),
-          pillButton(
-            _index + 1 < total ? tr('Next question') : tr('See summary'),
-            _next,
-            icon: LucideIcons.chevronRight,
-            color: C.aurora,
-          ),
-        ],
-      ],
+      ),
     );
   }
 
@@ -207,93 +214,96 @@ class _SafetyQuizPageState extends State<SafetyQuizPage> {
           'No pressure at all—these calculations and timing rules take a little practice. The guides are always right here offline.');
     }
 
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
-      children: [
-        Row(
-          children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(LucideIcons.arrowLeft),
-              tooltip: tr('Back'),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                tr('Round Complete'),
-                style: display(30),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        gap(20),
-        AppCard(
-          highlight: true,
-          padding: const EdgeInsets.all(22),
-          child: Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              iconBadge(LucideIcons.shieldCheck, Pastel.mint,
-                  size: 56, iconSize: 28),
-              gap(14),
-              Text(
-                '$_score / $total',
-                style: display(44, color: Colors.white),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(LucideIcons.arrowLeft),
+                tooltip: tr('Back'),
               ),
-              if (_bestScore != null) ...[
-                gap(4),
-                Text(
-                  tr('Personal best: {0}/5', [_bestScore!]),
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: C.lavender,
-                  ),
-                ),
-              ],
-              gap(14),
-              Text(
-                heading,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-              gap(8),
-              Text(
-                note,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  color: Pastel.mist.withValues(alpha: 0.88),
-                  height: 1.5,
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  tr('Round Complete'),
+                  style: display(30),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-        ),
-        gap(20),
-        pillButton(
-          tr('Play another round'),
-          _restartRound,
-          icon: LucideIcons.rotateCcw,
-          color: C.aurora,
-        ),
-        gap(10),
-        OutlinedButton(
-          onPressed: () => Navigator.pop(context),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: C.lavender,
-            side: BorderSide(color: C.lavender.withValues(alpha: 0.30)),
-            shape: const StadiumBorder(),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+          gap(20),
+          AppCard(
+            highlight: true,
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              children: [
+                iconBadge(LucideIcons.shieldCheck, Pastel.mint,
+                    size: 56, iconSize: 28),
+                gap(14),
+                Text(
+                  '$_score / $total',
+                  style: display(44, color: Colors.white),
+                ),
+                if (_bestScore != null) ...[
+                  gap(4),
+                  Text(
+                    tr('Personal best: {0}/5', [_bestScore!]),
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: C.lavender,
+                    ),
+                  ),
+                ],
+                gap(14),
+                Text(
+                  heading,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                gap(8),
+                Text(
+                  note,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: Pastel.mist.withValues(alpha: 0.88),
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Text(tr('Back to Sanctuary')),
-        ),
-      ],
+          gap(20),
+          pillButton(
+            tr('Play another round'),
+            _restartRound,
+            icon: LucideIcons.rotateCcw,
+            color: C.aurora,
+          ),
+          gap(10),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(context),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: C.lavender,
+              side: BorderSide(color: C.lavender.withValues(alpha: 0.30)),
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: Text(tr('Back to Sanctuary')),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -336,7 +346,9 @@ class _OptionTile extends StatelessWidget {
 
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(18),
-      side: BorderSide(color: border, width: answered && (isCorrect || isSelected) ? 1.3 : 1.0),
+      side: BorderSide(
+          color: border,
+          width: answered && (isCorrect || isSelected) ? 1.3 : 1.0),
     );
 
     return Material(

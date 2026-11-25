@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../l10n.dart';
 import '../../theme.dart';
 import '../companion_avatar.dart';
+import '../responsive.dart';
 
 /// Therapy pathway options for the HRT Time-Lapse Visual explorer.
 enum TimelapsePath {
@@ -233,9 +234,11 @@ class _HrtTimelapsePageState extends State<HrtTimelapsePage> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
-          children: [
+        child: AdaptivePageFrame(
+          reading: true,
+          child: ListView(
+            padding: context.pagePadding(top: 12, bottom: 36),
+            children: [
             Row(
               children: [
                 IconButton(
@@ -327,6 +330,7 @@ class _HrtTimelapsePageState extends State<HrtTimelapsePage> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

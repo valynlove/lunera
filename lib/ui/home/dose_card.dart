@@ -45,12 +45,12 @@ class DoseCard extends ConsumerWidget {
       painter = DialPainter(14, since.clamp(0, 14), idle);
       center = [
         Text(last == null ? '-' : '$since',
-            style: display(32, color: Colors.white)),
+            style: tabular(display(32, color: Colors.white))),
         Text(last == null ? tr('no entries') : tr('{0?day|days} ago', [since]),
-            style: TextStyle(
+            style: tabular(TextStyle(
                 fontSize: 10,
                 color: Pastel.cream.withValues(alpha: 0.85),
-                fontWeight: FontWeight.w600)),
+                fontWeight: FontWeight.w600))),
       ];
     } else if (t.daily) {
       final td = [
@@ -69,23 +69,23 @@ class DoseCard extends ConsumerWidget {
                       color: Pastel.mint, size: 26),
                   const SizedBox(height: 2),
                   Text(tr('{0}/{1}', [done, td.length]),
-                      style: const TextStyle(
+                      style: tabular(const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white)),
+                          color: Colors.white))),
                 ]
               : [
                   Text(hhmm.format(nextToday.at),
-                      style: display(20,
+                      style: tabular(display(20,
                           color: nextToday.status == 'late'
                               ? C.peony
-                              : Colors.white)),
+                              : Colors.white))),
                   const SizedBox(height: 2),
                   Text(tr('{0}/{1}', [done, td.length]),
-                      style: TextStyle(
+                      style: tabular(TextStyle(
                           fontSize: 10,
                           color: Pastel.cream.withValues(alpha: 0.85),
-                          fontWeight: FontWeight.w600)),
+                          fontWeight: FontWeight.w600))),
                 ];
     } else {
       final cycle = cycleOf(t), n = cycle.clamp(4, 60);
@@ -98,23 +98,24 @@ class DoseCard extends ConsumerWidget {
               Text(tr('Today'), style: display(20, color: C.amber)),
               if (next != null)
                 Text(hhmm.format(next.at),
-                    style: const TextStyle(
+                    style: tabular(const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white)),
+                        color: Colors.white))),
             ]
           : [
               Text('${left.abs()}',
-                  style: display(32, color: late ? C.peony : Colors.white)),
+                  style: tabular(
+                      display(32, color: late ? C.peony : Colors.white))),
               Text(
                 late
                     ? tr('{0?day|days} late', [left.abs()])
                     : tr('{0?day|days} left', [left.abs()]),
-                style: TextStyle(
+                style: tabular(TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: late ? C.peony : Pastel.cream.withValues(alpha: 0.85),
-                ),
+                )),
               ),
             ];
     }
@@ -122,7 +123,7 @@ class DoseCard extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
-      decoration: cardBox(context, radius: 24),
+      decoration: cardBox(context, radius: R.card),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -130,32 +131,43 @@ class DoseCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Dial miniatur presisi (100x100) dengan interaksi haptic
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(50),
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    showSheet(
-                        context,
-                        DoseSheet(
-                            t: t,
-                            slot: next,
-                            supplies: supplies,
-                            prefs: prefs,
-                            suggested: place));
-                  },
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CustomPaint(
-                            size: const Size(100, 100), painter: painter),
-                        Column(
-                            mainAxisSize: MainAxisSize.min, children: center),
-                      ],
+              Semantics(
+                button: true,
+                label: '${t.name}, ${tr('Log dose')}',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(50),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      showSheet(
+                          context,
+                          DoseSheet(
+                              t: t,
+                              slot: next,
+                              supplies: supplies,
+                              prefs: prefs,
+                              suggested: place));
+                    },
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CustomPaint(
+                              size: const Size(100, 100), painter: painter),
+                          Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: center),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -182,19 +194,17 @@ class DoseCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        InkWell(
-                          onTap: () {
+                        IconButton(
+                          tooltip: tr('Edit therapy'),
+                          onPressed: () {
                             HapticFeedback.selectionClick();
                             showSheet(context,
                                 TherapySheet(supplies: supplies, initial: t));
                           },
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Icon(LucideIcons.pencil,
-                                size: 16,
-                                color: Pastel.mist.withValues(alpha: 0.8)),
-                          ),
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(LucideIcons.pencil,
+                              size: 16,
+                              color: Pastel.mist.withValues(alpha: 0.8)),
                         ),
                       ],
                     ),
@@ -208,7 +218,7 @@ class DoseCard extends ConsumerWidget {
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: C.peony.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(R.chip),
                             border: Border.all(
                                 color: C.peony.withValues(alpha: 0.45)),
                           ),
@@ -217,12 +227,16 @@ class DoseCard extends ConsumerWidget {
                             children: [
                               Icon(t.adm.icon, size: 12, color: Pastel.lilac),
                               const SizedBox(width: 4),
-                              Text(
-                                '${fmt(t.dose)} ${t.doseUnit}',
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white),
+                              Flexible(
+                                child: Text(
+                                  '${fmt(t.dose)} ${t.doseUnit}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: tabular(const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white)),
+                                ),
                               ),
                             ],
                           ),
@@ -232,7 +246,7 @@ class DoseCard extends ConsumerWidget {
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(R.chip),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -241,12 +255,17 @@ class DoseCard extends ConsumerWidget {
                                   size: 12,
                                   color: Pastel.cream.withValues(alpha: 0.85)),
                               const SizedBox(width: 4),
-                              Text(
-                                scheduleText(t),
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Pastel.mist.withValues(alpha: 0.9)),
+                              Flexible(
+                                child: Text(
+                                  scheduleText(t),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color:
+                                          Pastel.mist.withValues(alpha: 0.9)),
+                                ),
                               ),
                             ],
                           ),
@@ -266,11 +285,11 @@ class DoseCard extends ConsumerWidget {
                                 DateFormat('EEEE, d MMM • HH:mm', L10n.code)
                                     .format(next.at),
                               ]),
-                              style: const TextStyle(
+                              style: tabular(const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
                                 color: Pastel.lilac,
-                              ),
+                              )),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -303,90 +322,115 @@ class DoseCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    showSheet(
-                        context,
-                        DoseSheet(
+          // Action Buttons (reflows cleanly on narrow 320dp screens or large text scale)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final primaryBtn = FilledButton.icon(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  showSheet(
+                      context,
+                      DoseSheet(
+                          t: t,
+                          slot: next,
+                          supplies: supplies,
+                          prefs: prefs,
+                          suggested: place));
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: C.peony,
+                  foregroundColor: Colors.white,
+                  shape: const StadiumBorder(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 13),
+                  elevation: 2,
+                  shadowColor: C.peony.withValues(alpha: 0.4),
+                ),
+                icon: const Icon(LucideIcons.check, size: 18),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    t.route == 'inj' ? tr('Log injection') : tr('Log dose'),
+                    maxLines: 1,
+                  ),
+                ),
+              );
+              final calmBtn = t.route == 'inj'
+                  ? IconButton.outlined(
+                      tooltip: tr('Guided Calm Injection'),
+                      style: IconButton.styleFrom(
+                        side: BorderSide(color: C.peony.withValues(alpha: 0.5)),
+                        backgroundColor: C.peony.withValues(alpha: 0.12),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => CalmInjectionSheet(
                             t: t,
                             slot: next,
                             supplies: supplies,
                             prefs: prefs,
-                            suggested: place));
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: C.peony,
-                    foregroundColor: Colors.white,
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 11),
-                    textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 13),
-                    elevation: 2,
-                    shadowColor: C.peony.withValues(alpha: 0.4),
-                  ),
-                  icon: const Icon(LucideIcons.check, size: 18),
-                  label: Text(
-                    t.route == 'inj' ? tr('Log injection') : tr('Log dose'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              if (t.route == 'inj') ...[
-                const SizedBox(width: 8),
-                IconButton.outlined(
-                  tooltip: tr('Guided Calm Injection'),
-                  style: IconButton.styleFrom(
-                    side: BorderSide(color: C.peony.withValues(alpha: 0.5)),
-                    backgroundColor: C.peony.withValues(alpha: 0.12),
-                    padding: const EdgeInsets.all(10),
-                  ),
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => CalmInjectionSheet(
-                        t: t,
-                        slot: next,
-                        supplies: supplies,
-                        prefs: prefs,
-                        suggestedPlace: place,
+                            suggestedPlace: place,
+                          ),
+                        );
+                      },
+                      icon: const Icon(LucideIcons.heartPulse,
+                          size: 20, color: Pastel.lilac),
+                    )
+                  : null;
+              final skipBtn = (next != null && !t.asNeeded)
+                  ? TextButton(
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        skipSlot(context, ref, next);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
                       ),
-                    );
-                  },
-                  icon: const Icon(LucideIcons.heartPulse,
-                      size: 20, color: Pastel.lilac),
-                ),
-              ],
-              if (next != null && !t.asNeeded) ...[
-                const SizedBox(width: 6),
-                TextButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    skipSlot(context, ref, next);
-                  },
-                  style: TextButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                  child: Text(
-                    tr('Skip'),
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: Pastel.mist.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ],
+                      child: Text(
+                        tr('Skip'),
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Pastel.mist.withValues(alpha: 0.8),
+                            fontWeight: FontWeight.w600),
+                      ),
+                    )
+                  : null;
+
+              if (constraints.maxWidth < 290) {
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    primaryBtn,
+                    if (calmBtn != null) calmBtn,
+                    if (skipBtn != null) skipBtn,
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: primaryBtn),
+                  if (calmBtn != null) ...[
+                    const SizedBox(width: 8),
+                    calmBtn,
+                  ],
+                  if (skipBtn != null) ...[
+                    const SizedBox(width: 6),
+                    skipBtn,
+                  ],
+                ],
+              );
+            },
           ),
         ],
       ),

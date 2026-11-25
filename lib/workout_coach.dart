@@ -24,6 +24,14 @@ enum CoachMood {
   celebrate,
   think,
   proud,
+  ready,
+  focus,
+  breathe,
+  stretch,
+  gentle,
+  effort,
+  rest,
+  listen,
 }
 
 /// Classification of the Coach's daily contextual recommendation.
@@ -202,7 +210,7 @@ CoachRecommendation evaluateCoachContext({
   if (profile.skippedDateIso == todayIso) {
     return CoachRecommendation(
       kind: CoachContextKind.restedToday,
-      coachMood: CoachMood.care,
+      coachMood: CoachMood.rest,
       headline: tr('Rest day honored'),
       message: tr(
         'Recovery is part of building strength. Whenever you feel like stretching, I am right here.',
@@ -352,7 +360,8 @@ CoachRecommendation evaluateCoachContext({
   if (isPreferredDay) {
     return CoachRecommendation(
       kind: CoachContextKind.scheduledToday,
-      coachMood: CoachMood.cheer,
+      coachMood:
+          chosen.category == 'recovery' ? CoachMood.stretch : CoachMood.cheer,
       headline: tr('Your comfort window is open'),
       message: tr(
         'Whenever you have a quiet pocket of time today, your {0} plan is ready.',
@@ -370,7 +379,7 @@ CoachRecommendation evaluateCoachContext({
 
   return CoachRecommendation(
     kind: CoachContextKind.readyAnytime,
-    coachMood: CoachMood.greet,
+    coachMood: sortedLogs.isNotEmpty ? CoachMood.ready : CoachMood.greet,
     headline: tr('Ready whenever you are'),
     message: tr(
       'Short, steady sessions support bone strength, heart health, and mood—always at your own pace.',

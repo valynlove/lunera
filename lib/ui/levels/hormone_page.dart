@@ -14,78 +14,95 @@ class HormonePage extends ConsumerWidget {
     final band = ref.watch(targetsProvider).value?[hormoneId];
     final u =
         (ref.watch(prefsProvider).value ?? const Prefs()).unitOf(hormoneId);
+    final historyCard = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(tr('Lab Results History'),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
+        gap(10),
+        Container(
+          decoration: cardBox(context, radius: R.card),
+          clipBehavior: Clip.antiAlias,
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: labs.length,
+            separatorBuilder: (_, __) =>
+                Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+            itemBuilder: (context, i) {
+              final l = labs[i];
+              return ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  showSheet(context, LabSheet(initial: l));
+                },
+                title: Text('${l.prefix}${fmt(l.value)} ${l.unit}',
+                    style: tabular(const TextStyle(
+                        fontWeight: FontWeight.w700, color: Colors.white))),
+                subtitle: Text(
+                  _date(l.at) +
+                      (l.note == null || l.note!.isEmpty ? '' : '\n${l.note}'),
+                  style: tabular(TextStyle(
+                      color: Pastel.mist.withValues(alpha: 0.85),
+                      fontSize: 12)),
+                ),
+                trailing: const Icon(LucideIcons.pencil,
+                    size: 18, color: Pastel.lilac),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       body: SafeArea(
-        child: ListView(padding: const EdgeInsets.all(20), children: [
-          Row(children: [
-            IconButton(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                Navigator.pop(context);
-              },
-              icon: const Icon(LucideIcons.arrowLeft),
-            ),
-            Expanded(child: Text(p.name, style: display(32))),
-            IconButton.filledTonal(
-              tooltip: tr('Set target'),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                _target(context, ref, p, u, band);
-              },
-              icon: const Icon(LucideIcons.flag),
-            ),
-          ]),
-          gap(8),
-          Text(
-              tr('Chart in {0} (change in Settings). The green area is the target you set with your doctor.',
-                  [u]),
-              style: Theme.of(context).textTheme.bodySmall),
-          gap(16),
-          LevelPanel(hormoneId),
-          gap(20),
-          if (labs.isNotEmpty) ...[
-            Text(tr('Lab Results History'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700, color: Colors.white)),
-            gap(10),
-            Container(
-              decoration: cardBox(context, radius: 20),
-              clipBehavior: Clip.antiAlias,
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: labs.length,
-                separatorBuilder: (_, __) => Divider(
-                    height: 1, color: Colors.white.withValues(alpha: 0.08)),
-                itemBuilder: (context, i) {
-                  final l = labs[i];
-                  return ListTile(
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      showSheet(context, LabSheet(initial: l));
-                    },
-                    title: Text('${l.prefix}${fmt(l.value)} ${l.unit}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, color: Colors.white)),
+        child: ListView(
+          padding: context.pagePadding(top: 12, bottom: 32),
+          children: [
+            AdaptivePageFrame(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AdaptivePageHeader(
+                    title: p.name,
+                    onBack: () => Navigator.pop(context),
+                    actions: [
+                      IconButton.filledTonal(
+                        tooltip: tr('Set target'),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _target(context, ref, p, u, band);
+                        },
+                        icon: const Icon(LucideIcons.flag),
+                      ),
+                    ],
                     subtitle: Text(
-                      _date(l.at) +
-                          (l.note == null || l.note!.isEmpty
-                              ? ''
-                              : '\n${l.note}'),
-                      style: TextStyle(
-                          color: Pastel.mist.withValues(alpha: 0.85),
-                          fontSize: 12),
+                      tr('Chart in {0} (change in Settings). The green area is the target you set with your doctor.',
+                          [u]),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    trailing: const Icon(LucideIcons.pencil,
-                        size: 18, color: Pastel.lilac),
-                  );
-                },
+                  ),
+                  gap(16),
+                  if (labs.isEmpty)
+                    LevelPanel(hormoneId)
+                  else
+                    AdaptiveSplitView(
+                      primaryFlex: 7,
+                      secondaryFlex: 5,
+                      primary: LevelPanel(hormoneId),
+                      secondary: historyCard,
+                    ),
+                ],
               ),
             ),
           ],
-        ]),
+        ),
       ),
     );
   }

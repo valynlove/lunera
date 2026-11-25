@@ -29,6 +29,7 @@ import 'home/onboarding_step_tile.dart';
 import 'home/week_card.dart';
 import 'journal.dart';
 import 'profile_page.dart';
+import 'responsive.dart';
 import 'sanctuary/coach_avatar.dart';
 import 'sanctuary/workout_page.dart';
 import 'security_page.dart';
@@ -53,88 +54,97 @@ class HomePage extends ConsumerWidget {
     final greet = greeting();
 
     final fg = Theme.of(context).colorScheme.onSurface;
+    final hasWorkoutCard = prefs.showWorkoutHomeCard;
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+    final header = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Header (Airy, welcoming, high contrast)
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$greet,',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: fg.withValues(alpha: 0.90),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Row(
                 children: [
-                  Text(
-                    '$greet,',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: fg.withValues(alpha: 0.90),
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        displayName ?? appName,
+                        style: display(
+                          context.isCompact ? 24 : 28,
+                          weight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          displayName ?? appName,
-                          style: display(24, weight: FontWeight.w700),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  if (kDebugMode) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: C.peony.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                            color: C.peony.withValues(alpha: 0.4), width: 1),
+                      ),
+                      child: Text(
+                        'DEV',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: C.peony,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      if (kDebugMode) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: C.peony.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                                color: C.peony.withValues(alpha: 0.4),
-                                width: 1),
-                          ),
-                          child: Text(
-                            'DEV',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: C.peony,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    DateFormat('EEEE, d MMMM y', L10n.code)
-                        .format(DateTime.now()),
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: Pastel.cream.withValues(alpha: 0.85),
-                      fontWeight: FontWeight.w500,
                     ),
-                  ),
+                  ],
                 ],
               ),
-            ),
-            const SizedBox(width: 12),
-            const CareAlertsBell(),
-            const SizedBox(width: 4),
-            IconButton.filledTonal(
-              tooltip: tr('Add therapy'),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                showSheet(context, TherapySheet(supplies: supplies));
-              },
-              icon: const Icon(LucideIcons.plus),
-            ),
-            const SizedBox(width: 10),
-            UserAvatar(
+              const SizedBox(height: 3),
+              Text(
+                DateFormat('EEEE, d MMMM y', L10n.code)
+                    .format(DateTime.now()),
+                style: tabular(
+                  TextStyle(
+                    fontSize: 11.5,
+                    color: Pastel.cream.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        const CareAlertsBell(),
+        const SizedBox(width: 4),
+        IconButton.filledTonal(
+          tooltip: tr('Add therapy'),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            showSheet(context, TherapySheet(supplies: supplies));
+          },
+          icon: const Icon(LucideIcons.plus),
+        ),
+        const SizedBox(width: 8),
+        Semantics(
+          button: true,
+          label: tr('Profile'),
+          child: Padding(
+            padding: const EdgeInsets.all(2),
+            child: UserAvatar(
               size: 44,
               heroTag: 'profile_photo_hero',
               onTap: () {
@@ -144,22 +154,58 @@ class HomePage extends ConsumerWidget {
                 );
               },
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // 2. High-priority Banners (Overdue doses & Low supply alerts)
-        if (overdue.isNotEmpty)
-          OverdueAlertBanner(
-            overdue: overdue,
-            onReview: () =>
-                showOverdueSheet(context, overdue, logs, supplies, prefs),
           ),
-        AlertsCard(supplies: supplies),
+        ),
+      ],
+    );
 
-        // 3. Main content
-        if (ths.isEmpty)
-          Padding(
+    final calendarBridge = Center(
+      child: Semantics(
+        button: true,
+        label: tr('View full schedule in Calendar'),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            ref.read(tabProvider.notifier).state = 1;
+          },
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 44),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(LucideIcons.calendarDays,
+                      size: 16, color: Pastel.lilac),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      tr('View full schedule in Calendar'),
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: Pastel.lilac,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(LucideIcons.chevronRight,
+                      size: 16, color: Pastel.lilac),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Widget buildEmptyState() {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Padding(
             padding: const EdgeInsets.only(top: 28),
             child: Column(
               children: [
@@ -259,76 +305,165 @@ class HomePage extends ConsumerWidget {
                 ),
               ],
             ),
-          )
-        else ...[
-          // Ambient Companion Card
-          AmbientCompanionCard(
-            now: DateTime.now(),
-            logs: logs,
+          ),
+        ),
+      );
+    }
+
+    Widget buildPopulatedContent() {
+      final banners = <Widget>[
+        if (overdue.isNotEmpty)
+          OverdueAlertBanner(
+            overdue: overdue,
+            onReview: () =>
+                showOverdueSheet(context, overdue, logs, supplies, prefs),
+          ),
+        AlertsCard(supplies: supplies),
+      ];
+
+      final doseCards = [
+        for (final t in ths)
+          DoseCard(
+            t: t,
             slots: slots,
+            logs: logs,
+            supplies: supplies,
+            prefs: prefs,
+          ),
+      ];
+
+      final companion = AmbientCompanionCard(
+        now: DateTime.now(),
+        logs: logs,
+        slots: slots,
+        therapies: ths,
+      );
+
+      final week = WeekCard(ths: ths, logs: logs);
+
+      final secondaryTools = <Widget>[
+        const MoodQuickCard(),
+        if (hasWorkoutCard)
+          _HomeMovementCoachCard(
             therapies: ths,
+            doseLogs: logs,
+            prefs: prefs,
           ),
-          const SizedBox(height: 14),
+      ];
 
-          // Hero Dose Cards
-          for (final t in ths)
-            DoseCard(
-                t: t,
-                slots: slots,
-                logs: logs,
-                supplies: supplies,
-                prefs: prefs),
-
-          // 7-day Hormone Trend Curve
-          WeekCard(ths: ths, logs: logs),
-
-          // Quick Mood Check-in
-          const MoodQuickCard(),
-
-          if (prefs.showWorkoutHomeCard) ...[
-            const SizedBox(height: 12),
-            _HomeMovementCoachCard(
-              therapies: ths,
-              doseLogs: logs,
-              prefs: prefs,
-            ),
-          ],
-
-          // Seamless bridge to Calendar tab
-          const SizedBox(height: 6),
-          Center(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                HapticFeedback.selectionClick();
-                ref.read(tabProvider.notifier).state = 1;
-              },
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(LucideIcons.calendarDays,
-                        size: 16, color: Pastel.lilac),
-                    const SizedBox(width: 8),
-                    Text(
-                      tr('View full schedule in Calendar'),
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                        color: Pastel.lilac,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(LucideIcons.chevronRight,
-                        size: 16, color: Pastel.lilac),
-                  ],
-                ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          if (w >= kSplitMinWidth) {
+            return AdaptiveSplitView(
+              primaryFlex: 7,
+              secondaryFlex: 5,
+              primary: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ...banners,
+                  ...doseCards,
+                  week,
+                ],
               ),
-            ),
+              secondary: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  companion,
+                  const SizedBox(height: 14),
+                  const MoodQuickCard(),
+                  if (hasWorkoutCard) ...[
+                    const SizedBox(height: 12),
+                    _HomeMovementCoachCard(
+                      therapies: ths,
+                      doseLogs: logs,
+                      prefs: prefs,
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  calendarBridge,
+                ],
+              ),
+            );
+          }
+
+          if (w >= kCompactMaxWidth) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ...banners,
+                companion,
+                const SizedBox(height: 14),
+                AdaptiveGrid(
+                  compactColumns: 1,
+                  mediumColumns: doseCards.length >= 2 ? 2 : 1,
+                  expandedColumns: doseCards.length >= 2 ? 2 : 1,
+                  minColumnWidth: 280,
+                  children: doseCards,
+                ),
+                const SizedBox(height: 14),
+                week,
+                AdaptiveGrid(
+                  compactColumns: 1,
+                  mediumColumns: secondaryTools.length >= 2 ? 2 : 1,
+                  expandedColumns: secondaryTools.length >= 2 ? 2 : 1,
+                  minColumnWidth: 260,
+                  children: secondaryTools,
+                ),
+                const SizedBox(height: 10),
+                calendarBridge,
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ...banners,
+              companion,
+              const SizedBox(height: 14),
+              ...doseCards,
+              week,
+              const MoodQuickCard(),
+              if (hasWorkoutCard) ...[
+                const SizedBox(height: 12),
+                _HomeMovementCoachCard(
+                  therapies: ths,
+                  doseLogs: logs,
+                  prefs: prefs,
+                ),
+              ],
+              const SizedBox(height: 6),
+              calendarBridge,
+            ],
+          );
+        },
+      );
+    }
+
+    return ListView(
+      padding: context.pagePadding(top: 12, bottom: 32),
+      children: [
+        AdaptivePageFrame(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              header,
+              const SizedBox(height: 16),
+              if (ths.isEmpty) ...[
+                if (overdue.isNotEmpty)
+                  OverdueAlertBanner(
+                    overdue: overdue,
+                    onReview: () =>
+                        showOverdueSheet(context, overdue, logs, supplies, prefs),
+                  ),
+                AlertsCard(supplies: supplies),
+                buildEmptyState(),
+              ] else
+                buildPopulatedContent(),
+            ],
           ),
-        ],
+        ),
       ],
     );
   }

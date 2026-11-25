@@ -324,6 +324,88 @@ void main() {
 
       expect(find.text('Malam yang Sunyi'), findsOneWidget);
       expect(find.text('Ketuk untuk pesan lembut'), findsOneWidget);
+      expect(find.text('Tenangkan'), findsOneWidget);
+      expect(find.text('Tips rawat'), findsOneWidget);
+      expect(find.text('Senyum'), findsOneWidget);
+    });
+
+    testWidgets('interactive topic chips update companion content and show shortcuts',
+        (tester) async {
+      final now = DateTime(2026, 11, 24, 9, 0);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: buildTheme(Brightness.dark),
+            home: Scaffold(
+              body: AmbientCompanionCard(
+                now: now,
+                logs: const [],
+                slots: const [],
+                therapies: [oralTherapy],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Calm me'));
+      await tester.pumpAndSettle();
+      expect(find.text('Steady Breath'), findsOneWidget);
+      expect(find.text('Open Breathing'), findsOneWidget);
+      expect(find.text(companionCalmLines.first.$2), findsOneWidget);
+
+      await tester.tap(find.text('Care tip'));
+      await tester.pumpAndSettle();
+      expect(find.text('Gentle Care Tip'), findsOneWidget);
+      expect(find.text('Read Guides'), findsOneWidget);
+      expect(find.text(companionCareTips.first.$2), findsOneWidget);
+
+      await tester.tap(find.text('Smile'));
+      await tester.pumpAndSettle();
+      expect(find.text('Light Moment'), findsOneWidget);
+      expect(find.text(companionSmileLines.first.$2), findsOneWidget);
+
+      await tester.tap(find.byIcon(LucideIcons.rotateCcw));
+      await tester.pumpAndSettle();
+      expect(find.text('Morning Light'), findsOneWidget);
+    });
+
+    testWidgets('long-press triggers Quiet Hug and rapid taps trigger Playful Moment',
+        (tester) async {
+      final now = DateTime(2026, 11, 24, 14, 0);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: buildTheme(Brightness.dark),
+            home: Scaffold(
+              body: AmbientCompanionCard(
+                now: now,
+                logs: const [],
+                slots: const [],
+                therapies: [oralTherapy],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(find.byType(CompanionAvatar));
+      await tester.pumpAndSettle();
+      expect(find.text('Quiet Hug'), findsOneWidget);
+      expect(find.text(companionQuietHugLines.first), findsOneWidget);
+
+      // 4 rapid taps trigger Playful Moment poke reaction
+      for (var i = 0; i < 4; i++) {
+        await tester.tap(find.byType(AmbientCompanionCard));
+        await tester.pump(const Duration(milliseconds: 80));
+      }
+      await tester.pumpAndSettle();
+      expect(find.text('Playful Moment'), findsOneWidget);
+      expect(find.text('Whoa, easy there! You startled my stardust.'), findsOneWidget);
     });
   });
 }

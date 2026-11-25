@@ -8,6 +8,7 @@ import '../l10n.dart';
 import '../theme.dart';
 import 'article_page.dart';
 import 'companion_avatar.dart';
+import 'responsive.dart';
 
 const _kGuidesReadKey = 'guides.read_ids';
 
@@ -92,160 +93,133 @@ class _GuidesPageState extends State<GuidesPage> {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
+          padding: context.pagePadding(top: 12, bottom: 36),
           children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(LucideIcons.arrowLeft),
-                  tooltip: tr('Back'),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    tr('Care & HRT Guides'),
-                    style: display(34),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            gap(8),
-            AppCard(
-              padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
-              child: Row(
+            AdaptivePageFrame(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const CompanionAvatar(
-                    mood: CompanionMood.explain,
-                    size: 74,
-                    glowColor: C.lavender,
+                  AdaptivePageHeader(
+                    title: tr('Care & HRT Guides'),
+                    onBack: () => Navigator.pop(context),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      tr('Calm, evidence-informed guides for every path — whether doctor-guided or independent.'),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Pastel.mist.withValues(alpha: 0.84),
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            gap(14),
-            TextField(
-              controller: _searchCtrl,
-              onChanged: (v) => setState(() => _query = v),
-              decoration: InputDecoration(
-                hintText: tr('Search guides, topics, or keywords...'),
-                prefixIcon: const Icon(LucideIcons.search, size: 18),
-                suffixIcon: hasQuery
-                    ? IconButton(
-                        tooltip: tr('Clear search'),
-                        icon: const Icon(LucideIcons.x, size: 16),
-                        onPressed: () {
-                          _searchCtrl.clear();
-                          setState(() => _query = '');
-                        },
-                      )
-                    : null,
-              ),
-            ),
-            gap(12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _FilterPill(
-                    label: tr('All'),
-                    selected: _filter == null,
-                    color: C.lavender,
-                    onTap: () => setState(() => _filter = null),
-                  ),
-                  for (final cat in GuideCategory.values) ...[
-                    const SizedBox(width: 8),
-                    _FilterPill(
-                      label: cat.shortLabel,
-                      selected: _filter == cat,
-                      color: cat.color,
-                      onTap: () => setState(() => _filter = cat),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (showPinnedStart) ...[
-              gap(16),
-              _StartHereCard(
-                article: startArticle,
-                isRead: _readIds.contains(startArticle.id),
-                onTap: () => _openArticle(startArticle),
-              ),
-            ],
-            gap(16),
-            if (filtered.isEmpty)
-              AppCard(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    const CompanionAvatar(
-                      mood: CompanionMood.confused,
-                      size: 76,
-                      glowColor: C.lavender,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        tr('No guides match your search.'),
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          color: Pastel.mist.withValues(alpha: 0.8),
+                  gap(8),
+                  AppCard(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
+                    child: Row(
+                      children: [
+                        const CompanionAvatar(
+                          mood: CompanionMood.explain,
+                          size: 74,
+                          glowColor: C.lavender,
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              LayoutBuilder(
-              builder: (context, constraints) {
-                final twoCols = constraints.maxWidth >= 720;
-                if (!twoCols) {
-                  return Column(
-                    children: [
-                      for (var i = 0; i < filtered.length; i++) ...[
-                        _GuideShortcutCard(
-                          article: filtered[i],
-                          isRead: _readIds.contains(filtered[i].id),
-                          onTap: () => _openArticle(filtered[i]),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            tr('Calm, evidence-informed guides for every path — whether doctor-guided or independent.'),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Pastel.mist.withValues(alpha: 0.84),
+                              height: 1.4,
+                            ),
+                          ),
                         ),
-                        if (i < filtered.length - 1) gap(12),
                       ],
-                    ],
-                  );
-                }
-                const spacing = 12.0;
-                final cardWidth = (constraints.maxWidth - spacing) / 2;
-                return Wrap(
-                  spacing: spacing,
-                  runSpacing: spacing,
-                  children: [
-                    for (final article in filtered)
-                      SizedBox(
-                        width: cardWidth,
-                        child: _GuideShortcutCard(
-                          article: article,
-                          isRead: _readIds.contains(article.id),
-                          onTap: () => _openArticle(article),
+                    ),
+                  ),
+                  gap(14),
+                  TextField(
+                    controller: _searchCtrl,
+                    onChanged: (v) => setState(() => _query = v),
+                    decoration: InputDecoration(
+                      hintText: tr('Search guides, topics, or keywords...'),
+                      prefixIcon: const Icon(LucideIcons.search, size: 18),
+                      suffixIcon: hasQuery
+                          ? IconButton(
+                              tooltip: tr('Clear search'),
+                              icon: const Icon(LucideIcons.x, size: 16),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _query = '');
+                              },
+                            )
+                          : null,
+                    ),
+                  ),
+                  gap(12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _FilterPill(
+                          label: tr('All'),
+                          selected: _filter == null,
+                          color: C.lavender,
+                          onTap: () => setState(() => _filter = null),
                         ),
-                      ),
+                        for (final cat in GuideCategory.values) ...[
+                          const SizedBox(width: 8),
+                          _FilterPill(
+                            label: cat.shortLabel,
+                            selected: _filter == cat,
+                            color: cat.color,
+                            onTap: () => setState(() => _filter = cat),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (showPinnedStart) ...[
+                    gap(16),
+                    _StartHereCard(
+                      article: startArticle,
+                      isRead: _readIds.contains(startArticle.id),
+                      onTap: () => _openArticle(startArticle),
+                    ),
                   ],
-                );
-              },
+                  gap(16),
+                  if (filtered.isEmpty)
+                    AppCard(
+                      padding: const EdgeInsets.all(18),
+                      child: Row(
+                        children: [
+                          const CompanionAvatar(
+                            mood: CompanionMood.confused,
+                            size: 76,
+                            glowColor: C.lavender,
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Text(
+                              tr('No guides match your search.'),
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                color: Pastel.mist.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    AdaptiveGrid(
+                      compactColumns: 1,
+                      mediumColumns: 2,
+                      expandedColumns: 2,
+                      minColumnWidth: 320,
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        for (final article in filtered)
+                          _GuideShortcutCard(
+                            article: article,
+                            isRead: _readIds.contains(article.id),
+                            onTap: () => _openArticle(article),
+                          ),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ],
         ),

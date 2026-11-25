@@ -107,10 +107,11 @@ class AboutLuneraSheet extends StatelessWidget {
                       child: Column(
                         children: [
                           Container(
-                            width: 96,
-                            height: 96,
+                            width: 98,
+                            height: 98,
+                            padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(24),
                               gradient: RadialGradient(
                                 colors: [
                                   C.aurora.withValues(alpha: 0.36),
@@ -130,13 +131,19 @@ class AboutLuneraSheet extends StatelessWidget {
                               ],
                             ),
                             child: const Center(
-                              child: MoonLogo(size: 80),
+                              child: MoonLogo(size: 82),
                             ),
                           ),
                           const SizedBox(height: 14),
-                          Text(
-                            appName,
-                            style: wordmark(28, color: C.lavender),
+                          Image.asset(
+                            'assets/images/lunera_text.png',
+                            height: 46,
+                            fit: BoxFit.contain,
+                            semanticLabel: appName,
+                            errorBuilder: (_, __, ___) => Text(
+                              appName,
+                              style: wordmark(28, color: C.lavender),
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Container(

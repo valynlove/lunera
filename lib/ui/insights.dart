@@ -1,12 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
 import 'journal.dart';
+import 'responsive.dart';
 import '../l10n.dart';
 
 /// Rata-rata skor suasana hati menurut hari sejak dosis terakhir: (hari, jumlah entri, rata-rata).
@@ -43,11 +43,14 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
   String? therapyId;
 
   Widget _card(String title, List<Widget> kids) => Container(
-        margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(20),
-        decoration: cardBox(context),
+        decoration: cardBox(context, radius: R.card),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+          Text(title,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700)),
           gap(12),
           ...kids,
         ]),
@@ -144,83 +147,138 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
       );
     }
 
+    final last30Card = _card(tr('Last 30 days'), [
+      if (total == 0)
+        Text(tr(
+            'Not enough data yet. Log your doses and journal for a few days to see a summary.'))
+      else ...[
+        Text.rich(TextSpan(
+            text: '${(taken / total * 100).round()}%',
+            style: tabular(display(44)),
+            children: [
+              TextSpan(
+                  text: tr(' of doses logged'),
+                  style: theme.textTheme.bodyMedium),
+            ])),
+        gap(10),
+        Wrap(spacing: 8, runSpacing: 4, children: [
+          Chip(
+              label: Text(tr('{0} taken', [taken]), style: tabular(const TextStyle())),
+              side: BorderSide.none,
+              backgroundColor: Pastel.mint.withValues(alpha: .18)),
+          Chip(
+              label: Text(tr('{0} skipped', [skipped]), style: tabular(const TextStyle())),
+              side: BorderSide.none,
+              backgroundColor: fg.withValues(alpha: .07)),
+          Chip(
+              label: Text(tr('{0} missed', [missed]), style: tabular(const TextStyle())),
+              side: BorderSide.none,
+              backgroundColor: C.amber.withValues(alpha: .18)),
+        ]),
+        gap(4),
+        Text(
+            tr('Estimated from fixed schedules. "As needed" doses aren\'t counted.'),
+            style: theme.textTheme.bodySmall),
+      ],
+    ]);
+
+    final mood30Card = _card(tr('Mood, last 30 days'), [
+      if (moods30.isEmpty)
+        Text(tr(
+            'No mood entries yet. Log one from the card on the home screen.'))
+      else
+        for (final m in moods.entries)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(children: [
+              Icon(m.value.$2, size: 20, color: moodColor(m.key)),
+              const SizedBox(width: 10),
+              SizedBox(
+                  width: 56,
+                  child: Text(tr(m.value.$1), style: theme.textTheme.bodySmall)),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: moods30.where((x) => x == m.key).length / maxMood,
+                    minHeight: 10,
+                    color: moodColor(m.key),
+                    backgroundColor: fg.withValues(alpha: .07),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text('${moods30.where((x) => x == m.key).length}',
+                  style: tabular(const TextStyle())),
+            ]),
+          ),
+    ]);
+
+    final cycleCard = _card(tr('Mood across your cycle'), [
+      if (sel == null)
+        Text(tr(
+            'Needs a therapy with a repeating schedule (every 2 days or more).'))
+      else ...[
+        if (cyclic.length > 1)
+          Wrap(spacing: 8, runSpacing: 4, children: [
+            for (final t in cyclic)
+              ChoiceChip(
+                  label: Text(t.name),
+                  selected: t.id == sel.id,
+                  onSelected: (_) => setState(() => therapyId = t.id)),
+          ]),
+        if (cyclic.length > 1) gap(10),
+        Text(tr('Average by days since your last dose (day 0 = dose day).'),
+            style: theme.textTheme.bodySmall),
+        gap(8),
+        if (buckets.isEmpty)
+          Text(tr('No doses logged for this therapy yet.'))
+        else ...[
+          chart(buckets),
+          gap(6),
+          Text(
+              tr('Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.'),
+              style: theme.textTheme.bodySmall),
+          gap(10),
+          Text(insight ??
+              tr('Needs at least 6 mood entries after logged doses, and 2 entries on each day being compared. Currently {0} {0?entry|entries}.',
+                  [used])),
+          gap(8),
+          Text(
+              tr('This is a pattern from your own notes, not cause and effect. Many other things affect mood.'),
+              style: theme.textTheme.bodySmall),
+        ],
+      ],
+    ]);
+
     return Scaffold(
       body: SafeArea(
-        child: ListView(padding: const EdgeInsets.all(20), children: [
-          Row(children: [
-            IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.arrowLeft)),
-            Expanded(child: Text(tr('Insights'), style: display(32))),
-          ]),
-          gap(16),
-          _card(tr('Last 30 days'), [
-            if (total == 0)
-              Text(tr('Not enough data yet. Log your doses and journal for a few days to see a summary.'))
-            else ...[
-              Text.rich(TextSpan(text: '${(taken / total * 100).round()}%', style: display(44), children: [
-                TextSpan(text: tr(' of doses logged'), style: theme.textTheme.bodyMedium),
-              ])),
-              gap(10),
-              Wrap(spacing: 8, runSpacing: 4, children: [
-                Chip(label: Text(tr('{0} taken', [taken])), side: BorderSide.none, backgroundColor: Pastel.mint.withValues(alpha: .18)),
-                Chip(label: Text(tr('{0} skipped', [skipped])), side: BorderSide.none, backgroundColor: fg.withValues(alpha: .07)),
-                Chip(label: Text(tr('{0} missed', [missed])), side: BorderSide.none, backgroundColor: C.amber.withValues(alpha: .18)),
-              ]),
-              gap(4),
-              Text(tr('Estimated from fixed schedules. "As needed" doses aren\'t counted.'), style: theme.textTheme.bodySmall),
-            ],
-          ]),
-          _card(tr('Mood, last 30 days'), [
-            if (moods30.isEmpty)
-              Text(tr('No mood entries yet. Log one from the card on the home screen.'))
-            else
-              for (final m in moods.entries)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(children: [
-                    Icon(m.value.$2, size: 20, color: moodColor(m.key)),
-                    const SizedBox(width: 10),
-                    SizedBox(width: 56, child: Text(tr(m.value.$1), style: theme.textTheme.bodySmall)),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: moods30.where((x) => x == m.key).length / maxMood,
-                          minHeight: 10,
-                          color: moodColor(m.key),
-                          backgroundColor: fg.withValues(alpha: .07),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text('${moods30.where((x) => x == m.key).length}'),
-                  ]),
-                ),
-          ]),
-          _card(tr('Mood across your cycle'), [
-            if (sel == null)
-              Text(tr('Needs a therapy with a repeating schedule (every 2 days or more).'))
-            else ...[
-              if (cyclic.length > 1)
-                Wrap(spacing: 8, runSpacing: 4, children: [
-                  for (final t in cyclic) ChoiceChip(label: Text(t.name), selected: t.id == sel.id, onSelected: (_) => setState(() => therapyId = t.id)),
-                ]),
-              if (cyclic.length > 1) gap(10),
-              Text(tr('Average by days since your last dose (day 0 = dose day).'), style: theme.textTheme.bodySmall),
-              gap(8),
-              if (buckets.isEmpty)
-                Text(tr('No doses logged for this therapy yet.'))
-              else ...[
-                chart(buckets),
-                gap(6),
-                Text(tr('Scale: 1 anxious, 2 low, 3 neutral, 4 calm, 5 happy.'), style: theme.textTheme.bodySmall),
-                gap(10),
-                Text(insight ?? tr('Needs at least 6 mood entries after logged doses, and 2 entries on each day being compared. Currently {0} {0?entry|entries}.', [used])),
-                gap(8),
-                Text(tr('This is a pattern from your own notes, not cause and effect. Many other things affect mood.'), style: theme.textTheme.bodySmall),
-              ],
-            ],
-          ]),
-        ]),
+        child: ListView(
+          padding: context.pagePadding(top: 12, bottom: 32),
+          children: [
+            AdaptivePageFrame(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AdaptivePageHeader(
+                    title: tr('Insights'),
+                    onBack: () => Navigator.pop(context),
+                  ),
+                  gap(16),
+                  AdaptiveGrid(
+                    compactColumns: 1,
+                    mediumColumns: 2,
+                    expandedColumns: 2,
+                    minColumnWidth: 320,
+                    children: [last30Card, mood30Card],
+                  ),
+                  gap(14),
+                  cycleCard,
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

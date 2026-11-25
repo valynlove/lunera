@@ -42,10 +42,95 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.35',
+      version: '2.2.41',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Wordmark Branding: Replaced the landing page header/footer wordmark, Flutter splash screen wordmark, and About Lunera showcase wordmark with the calligraphic lunera_text.png wordmark.',
+          textId:
+              'Branding Wordmark: Mengganti wordmark header/footer landing page, layar splash Flutter, dan halaman About Lunera dengan wordmark kaligrafi lunera_text.png.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.40',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Adaptive Multi-Device Layout & Visual System Refinement: Introduced window-first responsive navigation (Bottom Bar on phones, Navigation Rail on tablets, Persistent Sidebar with Alt+1–5 shortcuts on desktop), two-pane split layouts and responsive grids across primary tabs and sub-pages, adaptive modal dialogs on wider screens, tabular numerals, Reduce Motion compliance, and 48×48dp accessible touch targets.',
+          textId:
+              'Desain Ulang Layout Adaptif Multi-Perangkat: Menambahkan navigasi responsif berbasis ukuran jendela (Bottom Bar di ponsel, Navigation Rail di tablet, Sidebar permanen dengan pintasan Alt+1–5 di desktop), tata letak dua panel dan grid adaptif di tab utama maupun sub-halaman, dialog modal adaptif di layar lebar, angka tabular, dukungan Reduce Motion, serta target sentuh aksesibel 48×48dp.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.39',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Companion Asset Organization: Moved the 20 regular companion mascot sprites into assets/images/companion/regular/ alongside assets/images/companion/coach/ for a cleaner asset structure.',
+          textId:
+              'Perapihan Folder Aset Maskot: Memindahkan 20 aset gambar maskot companion biasa ke folder assets/images/companion/regular/ sejajar dengan assets/images/companion/coach/.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.38',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              '16 Coach Expressions & Interactive Workout Guidance: Expanded CoachMood with ready, focus, breathe, stretch, gentle, effort, rest, and listen expressions, plus interactive Body check-in chips on Movement Coach and live session cues during holds, rests, and easier variations.',
+          textId:
+              '16 Ekspresi Coach & Panduan Latihan Interaktif: Menambah ekspresi ready, focus, breathe, stretch, gentle, effort, rest, dan listen pada CoachMood, dilengkapi chip Cek Kondisi Tubuh di Pelatih Gerak serta arahan langsung selama hold timer, istirahat, dan variasi ringan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.37',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Interactive Ambient Companion: Added long-press Quiet Hugs, rapid-tap Playful Moment reactions, and offline Calm Me, Care Tip, and Smile topic chips on Home with direct shortcuts to breathing exercises and Care Guides.',
+          textId:
+              'Companion Interaktif di Beranda: Menambahkan Pelukan Tenang lewat tekan lama, reaksi Momen Ceria saat ketukan beruntun, serta chip topik offline Tenangkan, Tips Rawat, dan Senyum lengkap dengan pintasan ke latihan napas dan Panduan Perawatan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.36',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'App Launcher & Orbital Emblem Refresh: Updated Android/iOS/macOS/Windows launcher icons, in-app MoonLogo, and showcase crests to the Eternal Dusk crescent emblem.',
+          textId:
+              'Pembaruan Ikon & Emblem Orbital: Memperbarui ikon launcher Android/iOS/macOS/Windows, MoonLogo dalam aplikasi, dan emblem showcase ke desain bulan sabit Eternal Dusk terbaru.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.35',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

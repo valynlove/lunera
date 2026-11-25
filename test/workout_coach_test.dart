@@ -51,8 +51,8 @@ void main() {
           equals({'feminizing', 'masculinizing', 'bone_heart', 'recovery'}));
     });
 
-    test('all 8 sporty CoachMood PNG assets exist on disk', () {
-      expect(CoachMood.values.length, equals(8));
+    test('all 16 sporty CoachMood PNG assets exist on disk', () {
+      expect(CoachMood.values.length, equals(16));
       for (final mood in CoachMood.values) {
         expect(
           File(mood.assetPath).existsSync(),
@@ -204,7 +204,7 @@ void main() {
         prefs: const Prefs(),
       );
       expect(rec.kind, equals(CoachContextKind.restedToday));
-      expect(rec.coachMood, equals(CoachMood.care));
+      expect(rec.coachMood, equals(CoachMood.rest));
 
       const startProfile = WorkoutProfile(onboarded: true, level: 'gentle');
       final (afterFirstEasy, _) = applyEffortFeedback(startProfile, 'easy');
@@ -334,6 +334,15 @@ void main() {
 
       expect(find.text('Movement Coach'), findsOneWidget);
       expect(find.text('Total sessions'), findsOneWidget);
+
+      // Interactive Body check-in updates coach headline
+      await tester.tap(find.text('Body check-in'));
+      await tester.pumpAndSettle();
+      expect(find.text('Low energy'), findsOneWidget);
+
+      await tester.tap(find.text('Low energy'));
+      await tester.pumpAndSettle();
+      expect(find.text('Lighter pace selected'), findsOneWidget);
     });
 
     testWidgets('WorkoutSessionPage guides 2-pose diagram, completes set, and saves Effort Check', (tester) async {

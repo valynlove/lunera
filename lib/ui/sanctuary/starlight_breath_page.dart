@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../l10n.dart';
 import '../../theme.dart';
+import '../responsive.dart';
 
 class _TouchRipple {
   _TouchRipple({
@@ -104,8 +105,10 @@ class _StarlightBreathPageState extends State<StarlightBreathPage>
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
+        child: AdaptivePageFrame(
+          reading: true,
+          child: Column(
+            children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
               child: Row(
@@ -226,6 +229,7 @@ class _StarlightBreathPageState extends State<StarlightBreathPage>
               ),
             ),
           ],
+          ),
         ),
       ),
     );

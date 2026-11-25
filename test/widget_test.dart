@@ -56,12 +56,12 @@ void main() {
   });
   group('Lunera App Metadata & Smoke Tests', () {
     test('UpdateCheckerService version check configuration', () {
-      expect(UpdateCheckerService.currentVersion, equals('2.2.35'));
+      expect(UpdateCheckerService.currentVersion, equals('2.2.41'));
     });
 
     test('AppChangelog releases metadata is populated and ordered', () {
       expect(AppChangelog.releases, isNotEmpty);
-      expect(AppChangelog.releases.first.version, equals('2.2.35'));
+      expect(AppChangelog.releases.first.version, equals('2.2.41'));
       expect(AppChangelog.releases.first.isCurrent, isTrue);
       expect(AppChangelog.releases.first.changes, isNotEmpty);
     });
@@ -603,7 +603,7 @@ void main() {
 
       expect(find.byType(SplashPage), findsOneWidget);
       expect(find.byType(MoonLogo), findsOneWidget);
-      expect(find.text(appName.toUpperCase()), findsOneWidget);
+      expect(find.bySemanticsLabel(appName), findsOneWidget);
       expect(find.text(tr('Your Journey, In Every Phase.')), findsOneWidget);
       expect(find.byIcon(LucideIcons.sparkles), findsOneWidget);
       expect(find.byType(Image), findsWidgets);
@@ -633,7 +633,7 @@ void main() {
           ),
         );
         await tester.pump();
-        expect(find.text(appName.toUpperCase()), findsOneWidget);
+        expect(find.bySemanticsLabel(appName), findsOneWidget);
         expect(find.text(tr('Your Journey, In Every Phase.')), findsOneWidget);
         expect(finished, isTrue);
       }
@@ -668,7 +668,7 @@ void main() {
 
       expect(find.byType(AboutLuneraSheet), findsOneWidget);
       expect(find.text(tr('About {0}', [appName])), findsOneWidget);
-      expect(find.text(appName), findsWidgets);
+      expect(find.bySemanticsLabel(appName), findsOneWidget);
       expect(find.text(tr('Brand Lore & Philosophy')), findsOneWidget);
       expect(find.text(tr('The Moon Phase Rhythms')), findsOneWidget);
       expect(find.text(tr('The Celestial Sanctuary')), findsOneWidget);

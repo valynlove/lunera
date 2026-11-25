@@ -13,6 +13,7 @@ import '../lock.dart';
 import '../profile.dart';
 import '../repo.dart';
 import '../theme.dart';
+import 'responsive.dart';
 
 /// Halaman manajemen profil: Foto profil, nama panggilan (nickname), serta info akun.
 class ProfilePage extends ConsumerStatefulWidget {
@@ -228,9 +229,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
-        children: [
+      body: AdaptivePageFrame(
+        reading: true,
+        child: ListView(
+          padding: context.pagePadding(top: 18, bottom: 32),
+          children: [
           Center(
             child: Stack(
               clipBehavior: Clip.none,
@@ -337,6 +340,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             icon: LucideIcons.circleCheck,
           ),
         ],
+        ),
       ),
     );
   }

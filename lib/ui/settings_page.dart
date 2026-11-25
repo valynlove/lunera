@@ -24,6 +24,7 @@ import 'about_sheet.dart';
 import 'auth.dart';
 import 'backup_dialogs.dart';
 import 'data_page.dart';
+import 'responsive.dart';
 import 'sanctuary/workout_page.dart';
 import 'security_page.dart';
 import 'site_map.dart';
@@ -52,9 +53,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       final mode = await askExportMode(context);
       if (mode == null) return;
-      final out = mode.encrypt
-          ? await encryptBackup(text, mode.passphrase)
-          : text;
+      final out =
+          mode.encrypt ? await encryptBackup(text, mode.passphrase) : text;
       final stamp = DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
       final name = 'lunera_$stamp${mode.encrypt ? '.enc' : ''}.json';
       final f = XFile.fromData(Uint8List.fromList(utf8.encode(out)),
@@ -81,11 +81,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context: context,
       builder: (d) => AlertDialog(
         title: Text(tr('Doctor visit summary')),
-        content: Text(tr('This summary contains personal health information. Only share it with people you trust.')),
+        content: Text(tr(
+            'This summary contains personal health information. Only share it with people you trust.')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
-          TextButton(onPressed: () => Navigator.pop(d, 3), child: Text(tr('3 months'))),
-          FilledButton(onPressed: () => Navigator.pop(d, 6), child: Text(tr('6 months'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d, 3),
+              child: Text(tr('3 months'))),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, 6),
+              child: Text(tr('6 months'))),
         ],
       ),
     );
@@ -94,9 +100,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context: context,
       builder: (d) => AlertDialog(
         title: Text(tr('Export format')),
-        content: Text(tr('Choose how you want to share your doctor visit summary.')),
+        content:
+            Text(tr('Choose how you want to share your doctor visit summary.')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
           TextButton(
               onPressed: () => Navigator.pop(d, 'md'),
               child: Text(tr('Text / Markdown'))),
@@ -130,7 +138,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         );
         final stamp = DateFormat('yyyy-MM-dd_HH-mm').format(now);
         final name = 'lunera_doctor_summary_$stamp.pdf';
-        final f = XFile.fromData(bytes, mimeType: 'application/pdf', name: name);
+        final f =
+            XFile.fromData(bytes, mimeType: 'application/pdf', name: name);
         if (kIsWeb) {
           await f.saveTo(name);
           if (mounted) {
@@ -178,8 +187,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _importFile() async {
     const group = XTypeGroup(label: 'JSON', extensions: ['json']);
-    final onAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    final f = await Lock.instance.suppressLockDuring(() => openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
+    final onAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final f = await Lock.instance.suppressLockDuring(() =>
+        openFile(acceptedTypeGroups: onAndroid ? const [] : const [group]));
     if (f == null) return;
     try {
       var raw = jsonDecode(utf8.decode(await f.readAsBytes()));
@@ -202,20 +213,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 tr('Replace all: your current data is deleted first, then filled from the file.'),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
-            TextButton(onPressed: () => Navigator.pop(d, 'merge'), child: Text(tr('Merge'))),
-            FilledButton(onPressed: () => Navigator.pop(d, 'replace'), child: Text(tr('Replace all'))),
+            TextButton(
+                onPressed: () => Navigator.pop(d), child: Text(tr('Cancel'))),
+            TextButton(
+                onPressed: () => Navigator.pop(d, 'merge'),
+                child: Text(tr('Merge'))),
+            FilledButton(
+                onPressed: () => Navigator.pop(d, 'replace'),
+                child: Text(tr('Replace all'))),
           ],
         ),
       );
       if (mode == null) return;
       await repo.importData(raw as Map, replace: mode == 'replace');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Restored {0} {0?record|records}.', [n]))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(tr('Restored {0} {0?record|records}.', [n]))));
       }
     } catch (e) {
       final msg = e is FormatException ? e.message : tr('Failed: {0}', [e]);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
     }
   }
 
@@ -227,11 +246,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     try {
       await repo.saveBackup();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Backup saved to cloud.'))));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(tr('Backup saved to cloud.'))));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(tr('Failed: {0}', [e]))));
       }
     } finally {
       if (mounted) setState(() => _busyCloud = false);
@@ -256,7 +277,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           '${tr('Estimated levels use an average model and can differ from lab results. Dosing decisions always stay with your doctor.')}',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: Text(tr('Close'))),
+          TextButton(
+              onPressed: () => Navigator.pop(d), child: Text(tr('Close'))),
         ],
       ),
     );
@@ -265,7 +287,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Color _syncStatusColor(SyncStatus s) => switch (s) {
         SyncStatus.queuedOffline => C.amber,
         SyncStatus.error => Pastel.rose,
-        SyncStatus.idle || SyncStatus.syncing || SyncStatus.synced => Pastel.mint,
+        SyncStatus.idle ||
+        SyncStatus.syncing ||
+        SyncStatus.synced =>
+          Pastel.mint,
       };
 
   IconData _syncStatusIcon(SyncStatus s) => switch (s) {
@@ -283,9 +308,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       };
 
   String _syncStatusSubtitle(SyncState s) => switch (s.status) {
-        SyncStatus.queuedOffline => tr('{0} pending changes will sync automatically when online.', [s.pendingCount]),
-        SyncStatus.error =>
-          s.errorMessage?.isNotEmpty == true ? s.errorMessage! : tr('Some changes could not be synced.'),
+        SyncStatus.queuedOffline => tr(
+            '{0} pending changes will sync automatically when online.',
+            [s.pendingCount]),
+        SyncStatus.error => s.errorMessage?.isNotEmpty == true
+            ? s.errorMessage!
+            : tr('Some changes could not be synced.'),
         SyncStatus.idle ||
         SyncStatus.syncing ||
         SyncStatus.synced =>
@@ -297,7 +325,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final p = ref.watch(prefsProvider).value ?? const Prefs();
     User? user;
     try {
-      user = ref.watch(userProvider).valueOrNull ?? FirebaseAuth.instance.currentUser;
+      user = ref.watch(userProvider).valueOrNull ??
+          FirebaseAuth.instance.currentUser;
     } catch (_) {
       user = null;
     }
@@ -308,69 +337,42 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final theme = Theme.of(context);
     final muted = Pastel.mist.withValues(alpha: 0.85);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
-              children: [
-                // Cohesive Page Header matching other pages
+    final therapySection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: tr('Therapy & Clinical')),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr('Hormone Level Units'),
+                  style: theme.textTheme.labelLarge),
+              gap(10),
+              for (final h in presets) ...[
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(LucideIcons.arrowLeft),
-                    ),
-                    const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        tr('Settings'),
-                        style: display(32, color: Colors.white, weight: FontWeight.w700),
+                        h.name,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                gap(12),
-                PillTabs<int>(
-                  items: [
-                    (0, tr('All')),
-                    (1, tr('General')),
-                    (2, tr('Clinical')),
-                    (3, tr('Privacy')),
-                    (4, tr('Data')),
-                  ],
-                  value: _tab,
-                  onChanged: (v) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _tab = v);
-                  },
-                ),
-                gap(16),
-
-                // 1. Therapy & Clinical (Priority 1: Core Domain)
-                if (_tab == 0 || _tab == 2) ...[
-                  SectionHeader(title: tr('Therapy & Clinical')),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr('Hormone Level Units'), style: theme.textTheme.labelLarge),
-                  gap(10),
-                  for (final h in presets) ...[
-                    Row(
-                      children: [
-                        Text(h.name, style: theme.textTheme.bodySmall?.copyWith(color: muted, fontWeight: FontWeight.w600)),
-                        const Spacer(),
-                        for (final u in h.units.keys)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: ChoiceChip(
-                              label: Text(u, style: const TextStyle(fontSize: 12)),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      flex: 2,
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (final u in h.units.keys)
+                            ChoiceChip(
+                              label:
+                                  Text(u, style: const TextStyle(fontSize: 12)),
                               selected: p.unitOf(h.id) == u,
                               visualDensity: VisualDensity.compact,
                               onSelected: (_) {
@@ -378,744 +380,887 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 _save(p.copy(units: {...p.units, h.id: u}));
                               },
                             ),
-                          ),
-                      ],
-                    ),
-                    gap(8),
-                  ],
-                  const Divider(height: 20),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Pastel.lilac.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
+                        ],
                       ),
-                      child: const Icon(LucideIcons.accessibility, size: 20, color: Pastel.lilac),
                     ),
-                    title: Text(tr('Injection Site Rotation & Health'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    subtitle: Text(tr('Inspect zone health, rest countdowns, and rotation history.'), style: TextStyle(fontSize: 12, color: muted)),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      showSheet(context, const SiteRotationSheet());
-                    },
+                  ],
+                ),
+                gap(8),
+              ],
+              const Divider(height: 20),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Pastel.lilac.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const Divider(height: 20),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Day starts at')),
-                    subtitle: Text(tr('Doses past midnight are counted toward yesterday.')),
-                    trailing: Text(ds.format(context), style: const TextStyle(fontWeight: FontWeight.w700)),
-                    onTap: () async {
-                      HapticFeedback.selectionClick();
-                      final t = await showTimePicker(context: context, initialTime: ds);
-                      if (t != null) _save(p.copy(dayStart: t.hour * 60 + t.minute));
-                    },
-                  ),
-                  const Divider(height: 16),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Count HRT therapy duration')),
-                    subtitle: Text(tr('Show on History tab.')),
-                    value: p.hrtCounter,
-                    onChanged: (v) {
-                      HapticFeedback.selectionClick();
-                      _save(p.copy(hrtCounter: v));
-                    },
-                  ),
-                ],
+                  child: const Icon(LucideIcons.accessibility,
+                      size: 20, color: Pastel.lilac),
+                ),
+                title: Text(tr('Injection Site Rotation & Health'),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14)),
+                subtitle: Text(
+                    tr('Inspect zone health, rest countdowns, and rotation history.'),
+                    style: TextStyle(fontSize: 12, color: muted)),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  showSheet(context, const SiteRotationSheet());
+                },
               ),
-            ),
-          ],
+              const Divider(height: 20),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(tr('Day starts at')),
+                subtitle: Text(
+                    tr('Doses past midnight are counted toward yesterday.')),
+                trailing: Text(ds.format(context),
+                    style:
+                        tabular(const TextStyle(fontWeight: FontWeight.w700))),
+                onTap: () async {
+                  HapticFeedback.selectionClick();
+                  final t =
+                      await showTimePicker(context: context, initialTime: ds);
+                  if (t != null)
+                    _save(p.copy(dayStart: t.hour * 60 + t.minute));
+                },
+              ),
+              const Divider(height: 16),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(tr('Count HRT therapy duration')),
+                subtitle: Text(tr('Show on History tab.')),
+                value: p.hrtCounter,
+                onChanged: (v) {
+                  HapticFeedback.selectionClick();
+                  _save(p.copy(hrtCounter: v));
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
 
-          // 2. Reminders & Privacy (Priority 2: Medication Adherence & Notification Protection)
-          if (_tab == 0 || _tab == 3) ...[
-            SectionHeader(title: tr('Reminders & Privacy')),
-            AppCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  SwitchListTile(
-                    secondary: iconBadge(LucideIcons.alarmClock, Pastel.butter),
-                    title: Text(
-                      tr('Dose reminders'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      AppNotifier.instance.supported
-                          ? tr('Notifications appear at scheduled times, even offline.')
-                          : tr('Only available on Android and iOS apps.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    value: p.notify,
-                    onChanged: !AppNotifier.instance.supported
-                        ? null
-                        : (v) async {
-                            HapticFeedback.selectionClick();
-                            if (v && !await AppNotifier.instance.requestPermission()) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(tr('Notification permission was denied. Enable it in system settings.'))),
-                                );
-                              }
-                              return;
-                            }
-                            _save(p.copy(notify: v));
-                          },
+    final privacySection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: tr('Reminders & Privacy')),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: iconBadge(LucideIcons.alarmClock, Pastel.butter),
+                title: Text(
+                  tr('Dose reminders'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  AppNotifier.instance.supported
+                      ? tr(
+                          'Notifications appear at scheduled times, even offline.')
+                      : tr('Only available on Android and iOS apps.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                value: p.notify,
+                onChanged: !AppNotifier.instance.supported
+                    ? null
+                    : (v) async {
+                        HapticFeedback.selectionClick();
+                        if (v &&
+                            !await AppNotifier.instance.requestPermission()) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(tr(
+                                      'Notification permission was denied. Enable it in system settings.'))),
+                            );
+                          }
+                          return;
+                        }
+                        _save(p.copy(notify: v));
+                      },
+              ),
+              if (AppNotifier.instance.supported && p.notify) ...[
+                const Divider(height: 1, indent: 68),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tr('Notification Privacy (Lockscreen Masking)'),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 13),
+                      ),
+                      gap(4),
+                      Text(
+                        tr('Disguise notification text to protect your privacy when received in public or around family.'),
+                        style: TextStyle(fontSize: 12, color: muted),
+                      ),
+                      gap(10),
+                      PillTabs<String>(
+                        items: [
+                          ('off', tr('Standard')),
+                          ('wellness', tr('Wellness & Routine')),
+                          ('minimal', tr('Minimal')),
+                        ],
+                        value: p.discreetNotify,
+                        onChanged: (mode) {
+                          HapticFeedback.selectionClick();
+                          _save(p.copy(discreetNotify: mode));
+                        },
+                      ),
+                      gap(12),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          AppNotifier.instance.test(p);
+                        },
+                        icon: const Icon(LucideIcons.bellRing, size: 18),
+                        label: Text(tr('Send test notification')),
+                      ),
+                    ],
                   ),
-                  if (AppNotifier.instance.supported && p.notify) ...[
-                    const Divider(height: 1, indent: 68),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
+                ),
+              ],
+            ],
+          ),
+        ),
+        SectionHeader(title: tr('Security & Privacy')),
+        ValueListenableBuilder<AppLockState>(
+          valueListenable: Lock.instance.state,
+          builder: (context, lockState, _) {
+            final timeoutLabel = switch (lockState.delayMin) {
+              0 => tr('Immediately'),
+              5 => tr('5 minutes'),
+              _ => tr('1 minute'),
+            };
+            return AppCard(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(
+                  LucideIcons.lock,
+                  lockState.enabled ? Pastel.mint : Pastel.lilac,
+                ),
+                title: Text(
+                  tr('App PIN & Biometrics'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  lockState.enabled
+                      ? (lockState.bio
+                          ? tr('Active (PIN + Biometrics) • Timeout: {0}',
+                              [timeoutLabel])
+                          : tr('Active (PIN) • Timeout: {0}', [timeoutLabel]))
+                      : tr(
+                          'Protect your therapy logs with a 6-digit PIN and biometrics.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                        builder: (_) => const SecurityPage()),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+
+    final dataSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: tr('Cloud Sync & Storage')),
+        AppCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (user == null) ...[
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Pastel.lilac.withValues(alpha: 0.16),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        LucideIcons.cloudOff,
+                        color: Pastel.lilac,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            tr('Notification Privacy (Lockscreen Masking)'),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                            tr('Guest Mode (Offline)'),
+                            style: theme.textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          gap(4),
+                          const SizedBox(height: 2),
                           Text(
-                            tr('Disguise notification text to protect your privacy when received in public or around family.'),
-                            style: TextStyle(fontSize: 12, color: muted),
-                          ),
-                          gap(10),
-                          PillTabs<String>(
-                            items: [
-                              ('off', tr('Standard')),
-                              ('wellness', tr('Wellness & Routine')),
-                              ('minimal', tr('Minimal')),
-                            ],
-                            value: p.discreetNotify,
-                            onChanged: (mode) {
-                              HapticFeedback.selectionClick();
-                              _save(p.copy(discreetNotify: mode));
-                            },
-                          ),
-                          gap(12),
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              AppNotifier.instance.test(p);
-                            },
-                            icon: const Icon(LucideIcons.bellRing, size: 18),
-                            label: Text(tr('Send test notification')),
+                            tr('Your records are stored locally on this device. Sign in to back up and sync across devices.'),
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: muted),
                           ),
                         ],
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
-
-            // 3. Security & Privacy (Priority 3: Access Control & Biometrics)
-            SectionHeader(title: tr('Security & Privacy')),
-            ValueListenableBuilder<AppLockState>(
-              valueListenable: Lock.instance.state,
-              builder: (context, lockState, _) {
-                final timeoutLabel = switch (lockState.delayMin) {
-                  0 => tr('Immediately'),
-                  5 => tr('5 minutes'),
-                  _ => tr('1 minute'),
-                };
-                return AppCard(
-                  padding: EdgeInsets.zero,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(
-                      LucideIcons.lock,
-                      lockState.enabled ? Pastel.mint : Pastel.lilac,
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-                    title: Text(
-                      tr('App PIN & Biometrics'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    icon: const Icon(LucideIcons.logIn, size: 18),
+                    label: Text(tr('Sign In / Create Account')),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                          builder: (_) => const WelcomePage()),
                     ),
-                    subtitle: Text(
-                      lockState.enabled
-                          ? (lockState.bio
-                              ? tr('Active (PIN + Biometrics) • Timeout: {0}', [timeoutLabel])
-                              : tr('Active (PIN) • Timeout: {0}', [timeoutLabel]))
-                          : tr('Protect your therapy logs with a 6-digit PIN and biometrics.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(builder: (_) => const SecurityPage()),
-                      );
-                    },
                   ),
-                );
-              },
-            ),
-          ],
-
-          // 4. Cloud Sync & Storage (Priority 4: Real-Time Synchronization)
-          if (_tab == 0 || _tab == 4) ...[
-            SectionHeader(title: tr('Cloud Sync & Storage')),
-            AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (user == null) ...[
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Pastel.lilac.withValues(alpha: 0.16),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            LucideIcons.cloudOff,
-                            color: Pastel.lilac,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                tr('Guest Mode (Offline)'),
-                                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                tr('Your records are stored locally on this device. Sign in to back up and sync across devices.'),
-                                style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        icon: const Icon(LucideIcons.logIn, size: 18),
-                        label: Text(tr('Sign In / Create Account')),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(builder: (_) => const WelcomePage()),
-                        ),
+                ),
+              ] else ...[
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _syncStatusColor(syncState.status)
+                            .withValues(alpha: 0.16),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _syncStatusIcon(syncState.status),
+                        color: _syncStatusColor(syncState.status),
+                        size: 24,
                       ),
                     ),
-                  ] else ...[
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: _syncStatusColor(syncState.status).withValues(alpha: 0.16),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _syncStatusIcon(syncState.status),
-                            color: _syncStatusColor(syncState.status),
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      tr('Real-Time Cloud Sync'),
-                                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: _syncStatusColor(syncState.status).withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      _syncStatusBadge(syncState.status),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: _syncStatusColor(syncState.status),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              Flexible(
+                                child: Text(
+                                  tr('Real-Time Cloud Sync'),
+                                  style: theme.textTheme.titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _syncStatusSubtitle(syncState),
-                                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: _syncStatusColor(syncState.status)
+                                      .withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  _syncStatusBadge(syncState.status),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: _syncStatusColor(syncState.status),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            icon: _busyCloud
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Icon(LucideIcons.cloudUpload, size: 16),
-                            label: Text(tr('Save Cloud Backup Now')),
-                            onPressed: _busyCloud ? null : _saveCloudBackup,
+                          const SizedBox(height: 2),
+                          Text(
+                            _syncStatusSubtitle(syncState),
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: muted),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            icon: const Icon(LucideIcons.clock, size: 16),
-                            label: Text(tr('Manage Cloud Backups')),
-                            onPressed: () {
-                              HapticFeedback.selectionClick();
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(builder: (_) => const DataPage()),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
-                ],
-              ),
-            ),
-
-            // 5. Manual Backup & Export (Priority 5: Offline Sovereign Exports)
-            SectionHeader(title: tr('Manual Backup & Export')),
-            AppCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.upload, Pastel.mint),
-                    title: Text(
-                      tr('Export backup file (JSON)'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Save or share a copy of all your therapy data.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _exportFile();
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.stethoscope, Pastel.lilac),
-                    title: Text(
-                      tr('Doctor visit summary'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Share a text summary of therapies, adherence and lab results'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _shareDoctorReport();
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.history, Pastel.butter),
-                    title: Text(
-                      tr('Export dose history (CSV / JSON)'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Export your injection and dose log history only.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      showHistoryExportSheet(
-                        context,
-                        ref.read(logsProvider).value ?? const [],
-                        ref.read(therapiesProvider).value ?? const [],
-                      );
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.download, Pastel.lilac),
-                    title: Text(
-                      tr('Import dose history (CSV / JSON)'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Merge injection and dose logs from a CSV or JSON history file.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      importDoseHistoryFile(context, ref);
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.download, Pastel.sky),
-                    title: Text(
-                      tr('Import backup file (JSON)'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Merges or restores a backup file into this device.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _importFile();
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.clock, Pastel.lilac),
-                    title: Text(
-                      tr('Manage cloud backups & history'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('View and restore past cloud snapshots'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(builder: (_) => const DataPage()),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // 6. Preferences & Widgets (Priority 6: General Configuration)
-          if (_tab == 0 || _tab == 1) ...[
-            SectionHeader(title: tr('Preferences')),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr('Language'), style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 10),
-                  PillTabs<String>(
-                    items: const [('en', 'English'), ('id', 'Bahasa Indonesia')],
-                    value: L10n.code,
-                    onChanged: (c) {
-                      HapticFeedback.selectionClick();
-                      L10n.set(c);
-                      _save(p.copy(locale: c));
-                    },
-                  ),
-                  const Divider(height: 24),
-                  Text(tr('Home Screen Widgets'), style: theme.textTheme.labelLarge),
-                  gap(4),
-                  Text(
-                    tr('Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                  ),
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Hide details on widgets')),
-                    subtitle: Text(tr('Widgets only display the app name. Useful if your home screen is seen by others.')),
-                    value: p.widgetHide,
-                    onChanged: (v) {
-                      HapticFeedback.selectionClick();
-                      _save(p.copy(widgetHide: v));
-                    },
-                  ),
-                  const Divider(height: 16),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(tr('Show shortcut card on Home')),
-                    subtitle: Text(tr('Adds a calm Movement Coach card to your Home tab.')),
-                    value: p.showWorkoutHomeCard,
-                    onChanged: (v) {
-                      HapticFeedback.selectionClick();
-                      _save(p.copy(showWorkoutHomeCard: v));
-                    },
-                  ),
-                  const Divider(height: 8),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: iconBadge(LucideIcons.dumbbell, Pastel.mint),
-                    title: Text(tr('Movement Coach')),
-                    subtitle: Text(tr('Configure HRT workout focus, baseline pace & gentle reminders.')),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(builder: (_) => const WorkoutCoachPage()),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // 7. Account (Priority 7: User Profile & Session)
-            SectionHeader(title: tr('Account')),
-            AppCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.logOut, C.amber),
-                    title: Text(
-                      tr('Sign out'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      user?.email ?? user?.displayName ?? tr('Guest'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    onTap: () async {
-                      HapticFeedback.selectionClick();
-                      final signedOut = await confirmAndSignOut(context);
-                      if (signedOut && context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // 8. Sample Data (Priority 8: Development & Testing Utility)
-            SectionHeader(title: tr('Sample Data')),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr('Populate your account with sample therapies, logs, lab results, and stock to test the app. All marked as "(sample)" and can be safely deleted.'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                  ),
-                  gap(10),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      OutlinedButton(
-                        onPressed: () async {
-                          HapticFeedback.selectionClick();
-                          if (!await confirm(context, tr('Add sample data to your account?'), ok: tr('Add'))) return;
-                          HapticFeedback.lightImpact();
-                          ref.read(repoProvider)?.addDemo();
-                        },
-                        child: Text(tr('Add')),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: _busyCloud
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(LucideIcons.cloudUpload, size: 16),
+                        label: Text(tr('Save Cloud Backup Now')),
+                        onPressed: _busyCloud ? null : _saveCloudBackup,
                       ),
-                      OutlinedButton(
-                        onPressed: () async {
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(LucideIcons.clock, size: 16),
+                        label: Text(tr('Manage Cloud Backups')),
+                        onPressed: () {
                           HapticFeedback.selectionClick();
-                          if (!await confirm(context, tr('Delete all sample data?'), ok: tr('Delete'))) return;
-                          HapticFeedback.mediumImpact();
-                          ref.read(repoProvider)?.clearDemo();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                                builder: (_) => const DataPage()),
+                          );
                         },
-                        child: Text(tr('Delete')),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        SectionHeader(title: tr('Manual Backup & Export')),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.upload, Pastel.mint),
+                title: Text(
+                  tr('Export backup file (JSON)'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Save or share a copy of all your therapy data.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _exportFile();
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.stethoscope, Pastel.lilac),
+                title: Text(
+                  tr('Doctor visit summary'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Share a text summary of therapies, adherence and lab results'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _shareDoctorReport();
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.history, Pastel.butter),
+                title: Text(
+                  tr('Export dose history (CSV / JSON)'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Export your injection and dose log history only.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  showHistoryExportSheet(
+                    context,
+                    ref.read(logsProvider).value ?? const [],
+                    ref.read(therapiesProvider).value ?? const [],
+                  );
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.download, Pastel.lilac),
+                title: Text(
+                  tr('Import dose history (CSV / JSON)'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Merge injection and dose logs from a CSV or JSON history file.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  importDoseHistoryFile(context, ref);
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.download, Pastel.sky),
+                title: Text(
+                  tr('Import backup file (JSON)'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Merges or restores a backup file into this device.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _importFile();
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.clock, Pastel.lilac),
+                title: Text(
+                  tr('Manage cloud backups & history'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('View and restore past cloud snapshots'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const DataPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    final generalSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: tr('Preferences')),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr('Language'), style: theme.textTheme.labelLarge),
+              const SizedBox(height: 10),
+              PillTabs<String>(
+                items: const [('en', 'English'), ('id', 'Bahasa Indonesia')],
+                value: L10n.code,
+                onChanged: (c) {
+                  HapticFeedback.selectionClick();
+                  L10n.set(c);
+                  _save(p.copy(locale: c));
+                },
+              ),
+              const Divider(height: 24),
+              Text(tr('Home Screen Widgets'),
+                  style: theme.textTheme.labelLarge),
+              gap(4),
+              Text(
+                tr('Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.'),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(tr('Hide details on widgets')),
+                subtitle: Text(tr(
+                    'Widgets only display the app name. Useful if your home screen is seen by others.')),
+                value: p.widgetHide,
+                onChanged: (v) {
+                  HapticFeedback.selectionClick();
+                  _save(p.copy(widgetHide: v));
+                },
+              ),
+              const Divider(height: 16),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(tr('Show shortcut card on Home')),
+                subtitle: Text(
+                    tr('Adds a calm Movement Coach card to your Home tab.')),
+                value: p.showWorkoutHomeCard,
+                onChanged: (v) {
+                  HapticFeedback.selectionClick();
+                  _save(p.copy(showWorkoutHomeCard: v));
+                },
+              ),
+              const Divider(height: 8),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: iconBadge(LucideIcons.dumbbell, Pastel.mint),
+                title: Text(tr('Movement Coach')),
+                subtitle: Text(tr(
+                    'Configure HRT workout focus, baseline pace & gentle reminders.')),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                        builder: (_) => const WorkoutCoachPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        SectionHeader(title: tr('Account')),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.logOut, C.amber),
+                title: Text(
+                  tr('Sign out'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  user?.email ?? user?.displayName ?? tr('Guest'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                onTap: () async {
+                  HapticFeedback.selectionClick();
+                  final signedOut = await confirmAndSignOut(context);
+                  if (signedOut && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        SectionHeader(title: tr('Sample Data')),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tr('Populate your account with sample therapies, logs, lab results, and stock to test the app. All marked as "(sample)" and can be safely deleted.'),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+              ),
+              gap(10),
+              Wrap(
+                spacing: 8,
+                children: [
+                  OutlinedButton(
+                    onPressed: () async {
+                      HapticFeedback.selectionClick();
+                      if (!await confirm(
+                          context, tr('Add sample data to your account?'),
+                          ok: tr('Add'))) return;
+                      HapticFeedback.lightImpact();
+                      ref.read(repoProvider)?.addDemo();
+                    },
+                    child: Text(tr('Add')),
+                  ),
+                  OutlinedButton(
+                    onPressed: () async {
+                      HapticFeedback.selectionClick();
+                      if (!await confirm(context, tr('Delete all sample data?'),
+                          ok: tr('Delete'))) return;
+                      HapticFeedback.mediumImpact();
+                      ref.read(repoProvider)?.clearDemo();
+                    },
+                    child: Text(tr('Delete')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SectionHeader(title: tr('About & Support')),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.info, Pastel.lilac),
+                title: Text(
+                  tr('About {0}', [appName]),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Personal health & therapy tracking application'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  _showAboutDialog(context);
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(
+                  LucideIcons.download,
+                  updateInfo != null ? C.coral : Pastel.sky,
+                ),
+                title: Row(
+                  children: [
+                    Flexible(child: Text(tr('Check for Updates'))),
+                    if (updateInfo != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: C.coral,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          tr('NEW'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ],
+                  ],
+                ),
+                subtitle: Text(
+                  updateInfo != null
+                      ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${tr('Update Available!')})'
+                      : 'Lunera v${UpdateCheckerService.currentVersion}${kDebugMode ? ' (Dev)' : ''} • ${kDebugMode ? 'Debug Build' : 'Latest Release'}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: updateInfo != null ? C.coral : muted,
+                    fontWeight: updateInfo != null ? FontWeight.w700 : null,
                   ),
-                ],
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  if (updateInfo != null) {
+                    UpdateCheckerService.showUpdateDialog(context, updateInfo);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(tr('Checking for updates...')),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                    UpdateCheckerService.checkAndPromptUpdate(context,
+                        ref: ref, silentIfUpToDate: false);
+                  }
+                },
               ),
-            ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.bookOpen, Pastel.rose),
+                title: Text(
+                  tr('Version Changelog'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr(
+                    "See what's new in v{version} and past releases",
+                    {'version': UpdateCheckerService.currentVersion},
+                  ),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  showAppChangelogSheet(context);
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.code, Pastel.mint),
+                title: Text(
+                  tr('GitHub Repository'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('View source code, release notes, and issue tracker.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.externalLink, size: 18),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  UpdateCheckerService.openUrl(
+                      'https://github.com/valynlove/lunera');
+                },
+              ),
+              const Divider(height: 1, indent: 68),
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: iconBadge(LucideIcons.shieldCheck, C.amber),
+                title: Text(
+                  tr('Medical Disclaimer'),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  tr('Lunera is a personal tracking tool and not a substitute for professional medical advice.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                trailing: const Icon(LucideIcons.info, size: 18),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  _showDisclaimerDialog(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
 
-            // 9. About & Support (Priority 9: Documentation, Updates & Transparency)
-            SectionHeader(title: tr('About & Support')),
-            AppCard(
-              padding: EdgeInsets.zero,
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: context.pagePadding(top: 16, bottom: 48),
+          children: [
+            AdaptivePageFrame(
+              maxWidth: _tab == 0 ? 1080 : 760,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.info, Pastel.lilac),
-                    title: Text(
-                      tr('About {0}', [appName]),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Personal health & therapy tracking application'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      _showAboutDialog(context);
-                    },
+                  AdaptivePageHeader(
+                    title: tr('Settings'),
+                    onBack: () => Navigator.pop(context),
                   ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(
-                      LucideIcons.download,
-                      updateInfo != null ? C.coral : Pastel.sky,
-                    ),
-                    title: Row(
-                      children: [
-                        Text(tr('Check for Updates')),
-                        if (updateInfo != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: C.coral,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              tr('NEW'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
+                  gap(12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: PillTabs<int>(
+                        items: [
+                          (0, tr('All')),
+                          (1, tr('General')),
+                          (2, tr('Clinical')),
+                          (3, tr('Privacy')),
+                          (4, tr('Data')),
                         ],
-                      ],
-                    ),
-                    subtitle: Text(
-                      updateInfo != null
-                          ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${tr('Update Available!')})'
-                          : 'Lunera v${UpdateCheckerService.currentVersion}${kDebugMode ? ' (Dev)' : ''} • ${kDebugMode ? 'Debug Build' : 'Latest Release'}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: updateInfo != null ? C.coral : muted,
-                        fontWeight: updateInfo != null ? FontWeight.w700 : null,
+                        value: _tab,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _tab = v);
+                        },
                       ),
                     ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      if (updateInfo != null) {
-                        UpdateCheckerService.showUpdateDialog(context, updateInfo);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(tr('Checking for updates...')),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                        UpdateCheckerService.checkAndPromptUpdate(context, ref: ref, silentIfUpToDate: false);
-                      }
-                    },
                   ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.bookOpen, Pastel.rose),
-                    title: Text(
-                      tr('Version Changelog'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr(
-                        "See what's new in v{version} and past releases",
-                        {'version': UpdateCheckerService.currentVersion},
+                  gap(16),
+                  if (_tab == 0)
+                    AdaptiveSplitView(
+                      primaryFlex: 1,
+                      secondaryFlex: 1,
+                      primary: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [therapySection, privacySection],
                       ),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      showAppChangelogSheet(context);
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.code, Pastel.mint),
-                    title: Text(
-                      tr('GitHub Repository'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('View source code, release notes, and issue tracker.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.externalLink, size: 18),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      UpdateCheckerService.openUrl('https://github.com/valynlove/lunera');
-                    },
-                  ),
-                  const Divider(height: 1, indent: 68),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(LucideIcons.shieldCheck, C.amber),
-                    title: Text(
-                      tr('Medical Disclaimer'),
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      tr('Lunera is a personal tracking tool and not a substitute for professional medical advice.'),
-                      style: TextStyle(fontSize: 12, color: muted),
-                    ),
-                    trailing: const Icon(LucideIcons.info, size: 18),
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      _showDisclaimerDialog(context);
-                    },
-                  ),
+                      secondary: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [dataSection, generalSection],
+                      ),
+                    )
+                  else if (_tab == 1)
+                    generalSection
+                  else if (_tab == 2)
+                    therapySection
+                  else if (_tab == 3)
+                    privacySection
+                  else
+                    dataSection,
                 ],
               ),
             ),
           ],
-        ],
+        ),
       ),
-    ),
-  ),
-),
-);
+    );
   }
 }

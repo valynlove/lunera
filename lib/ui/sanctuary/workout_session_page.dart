@@ -11,6 +11,7 @@ import '../../theme.dart';
 import '../../workout_catalog.dart';
 import '../../workout_coach.dart';
 import 'coach_avatar.dart';
+import '../responsive.dart';
 import 'workout_pose_painter.dart';
 
 /// Distraction-free active workout mode with 2-pose diagram, step-by-step form
@@ -38,6 +39,8 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
   bool _guideExpanded = true;
   bool _showEffortCheck = false;
   bool _saving = false;
+  int _restCueIndex = 0;
+  int _effortMoodIndex = 0;
 
   Timer? _restTimer;
   int? _restSecondsLeft;
@@ -280,13 +283,11 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 680),
-              child: _showEffortCheck
-                  ? _buildEffortCheckView(context)
-                  : _buildActiveWorkoutView(context),
-            ),
+          child: AdaptivePageFrame(
+            reading: true,
+            child: _showEffortCheck
+                ? _buildEffortCheckView(context)
+                : _buildActiveWorkoutView(context),
           ),
         ),
       ),
@@ -406,6 +407,95 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                 ),
               gap(14),
 
+              // Live Coach Session Strip (active when not resting)
+              if (_restSecondsLeft == null) ...[
+                Builder(builder: (context) {
+                  final (cueMood, cueText, cueColor) = _holdRunning
+                      ? (
+                          CoachMood.focus,
+                          tr('Hold steady—smooth breath, strong form.'),
+                          C.aurora,
+                        )
+                      : (_easierVariant[_index] || widget.isLightMode)
+                          ? (
+                              CoachMood.gentle,
+                              tr('Lighter pace active—smooth form beats intensity.'),
+                              Pastel.mint,
+                            )
+                          : (allExerciseDone && isLast)
+                              ? (
+                                  CoachMood.effort,
+                                  tr('Final set done! Catch your breath and finish strong.'),
+                                  C.coral,
+                                )
+                              : widget.routine.category == 'recovery'
+                                  ? (
+                                      CoachMood.stretch,
+                                      tr('Move smoothly through comfortable range—no forcing.'),
+                                      Pastel.mint,
+                                    )
+                                  : _totalCompletedSets == 0
+                                      ? (
+                                          CoachMood.ready,
+                                          tr('Warmed up and ready—start at your own pace.'),
+                                          C.lavender,
+                                        )
+                                      : (
+                                          CoachMood.cheer,
+                                          tr('Steady rhythm—you are doing great.'),
+                                          C.aurora,
+                                        );
+                  return AppCard(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    onTap: spec != null && !_easierVariant[_index]
+                        ? () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _easierVariant[_index] = true);
+                          }
+                        : null,
+                    child: Row(
+                      children: [
+                        CoachAvatar(
+                          mood: cueMood,
+                          size: 56,
+                          glowColor: cueColor,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cueText,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Pastel.mist.withValues(alpha: 0.92),
+                                ),
+                              ),
+                              if (spec != null && !_easierVariant[_index])
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    tr('Tap to switch to easier pace'),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: cueColor.withValues(alpha: 0.9),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                gap(12),
+              ],
+
               // Title & easier variant switch
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,52 +572,74 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
               // Inline Rest Timer Banner (when active)
               if (_restSecondsLeft != null) ...[
                 gap(12),
-                AppCard(
-                  highlight: true,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
-                  child: Row(
-                    children: [
-                      const CoachAvatar(
-                        mood: CoachMood.hydrate,
-                        size: 72,
-                        glowColor: Pastel.mint,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tr('Catch your breath · {0}s', [_restSecondsLeft!]),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                              ),
-                            ),
-                            Text(
-                              tr('Sip water whenever you need.'),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Pastel.mist.withValues(alpha: 0.8),
-                              ),
-                            ),
-                          ],
+                Builder(builder: (context) {
+                  final restCues = <(CoachMood, String)>[
+                    (CoachMood.hydrate, tr('Sip water whenever you need.')),
+                    (
+                      CoachMood.breathe,
+                      tr('Slow inhale, drop your shoulders.')
+                    ),
+                    (
+                      CoachMood.cheer,
+                      tr('Next set is yours whenever you are ready.')
+                    ),
+                  ];
+                  final (restMood, restCueText) =
+                      restCues[_restCueIndex % restCues.length];
+                  return AppCard(
+                    highlight: true,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _restCueIndex++);
+                          },
+                          child: CoachAvatar(
+                            mood: restMood,
+                            size: 72,
+                            glowColor: Pastel.mint,
+                          ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: _addRestTime,
-                        child: const Text('+15s'),
-                      ),
-                      TextButton(
-                        onPressed: _skipRest,
-                        child: Text(tr('Skip')),
-                      ),
-                    ],
-                  ),
-                ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tr('Catch your breath · {0}s',
+                                    [_restSecondsLeft!]),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                ),
+                              ),
+                              Text(
+                                restCueText,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Pastel.mist.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _addRestTime,
+                          child: const Text('+15s'),
+                        ),
+                        TextButton(
+                          onPressed: _skipRest,
+                          child: Text(tr('Skip')),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ],
 
               // Timed exercise countdown (for Plank, Step March, Stretches)
@@ -666,8 +778,10 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
-                              const CoachAvatar(
-                                mood: CoachMood.explain,
+                              CoachAvatar(
+                                mood: _guideExpanded
+                                    ? CoachMood.breathe
+                                    : CoachMood.explain,
                                 size: 56,
                                 showGlow: false,
                               ),
@@ -816,15 +930,37 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
     final isMilestone =
         totalDoneSoFar == 1 || totalDoneSoFar % 5 == 0;
 
+    final effortMoods = isMilestone
+        ? const [
+            CoachMood.proud,
+            CoachMood.celebrate,
+            CoachMood.effort,
+            CoachMood.listen,
+          ]
+        : const [
+            CoachMood.listen,
+            CoachMood.celebrate,
+            CoachMood.effort,
+            CoachMood.proud,
+          ];
+    final currentEffortMood =
+        effortMoods[_effortMoodIndex % effortMoods.length];
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: [
         Center(
-          child: CoachAvatar(
-            mood: isMilestone ? CoachMood.proud : CoachMood.celebrate,
-            size: 130,
-            glowColor: Pastel.mint,
-            enablePulse: true,
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              setState(() => _effortMoodIndex++);
+            },
+            child: CoachAvatar(
+              mood: currentEffortMood,
+              size: 130,
+              glowColor: Pastel.mint,
+              enablePulse: true,
+            ),
           ),
         ),
         gap(14),

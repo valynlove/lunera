@@ -15,6 +15,7 @@ import '../theme.dart';
 import 'article_page.dart';
 import 'insights.dart';
 import 'journal.dart' show moodColor;
+import 'responsive.dart';
 import '../l10n.dart';
 
 part 'levels/levels_page.dart';

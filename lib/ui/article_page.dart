@@ -9,6 +9,7 @@ import '../theme.dart';
 import '../voice_pitch.dart';
 import 'insights.dart';
 import 'levels.dart';
+import 'responsive.dart';
 import 'sanctuary/voice_pitch_page.dart';
 import 'security_page.dart';
 import 'site_map.dart';
@@ -68,7 +69,8 @@ class _ArticlePageState extends State<ArticlePage> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(tr('Voice Pitch Studio unlocked in Twilight Sanctuary.')),
+          content:
+              Text(tr('Voice Pitch Studio unlocked in Twilight Sanctuary.')),
         ),
       );
     } else {
@@ -81,8 +83,8 @@ class _ArticlePageState extends State<ArticlePage> {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_kGuidesReadKey) ?? const <String>[];
       if (!list.contains(widget.article.id)) {
-        await prefs.setStringList(
-            _kGuidesReadKey, [...list, widget.article.id]);
+        await prefs
+            .setStringList(_kGuidesReadKey, [...list, widget.article.id]);
       }
     } catch (_) {
       // Non-critical read badge persistence; ignore storage errors.
@@ -136,215 +138,218 @@ class _ArticlePageState extends State<ArticlePage> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(LucideIcons.arrowLeft),
-                  tooltip: tr('Back'),
-                ),
-                const SizedBox(width: 4),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: accent.withValues(alpha: 0.35)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(article.category.icon, size: 13, color: accent),
-                      const SizedBox(width: 6),
-                      Text(
-                        article.category.label,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: accent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  tr('{0} min read', [article.readMinutes]),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Pastel.mist.withValues(alpha: 0.78),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            gap(14),
-            Text(article.title, style: display(30, color: Colors.white)),
-            gap(8),
-            Text(
-              article.subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Pastel.mist.withValues(alpha: 0.88),
-                height: 1.45,
-              ),
-            ),
-            gap(18),
-
-            // Key Takeaways Card
-            AppCard(
-              highlight: true,
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: AdaptivePageFrame(
+          reading: true,
+          child: ListView(
+            padding: context.pagePadding(top: 12, bottom: 40),
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      const Icon(LucideIcons.sparkles,
-                          size: 17, color: C.lavender),
-                      const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(LucideIcons.arrowLeft),
+                    tooltip: tr('Back'),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: accent.withValues(alpha: 0.35)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(article.category.icon, size: 13, color: accent),
+                        const SizedBox(width: 6),
+                        Text(
+                          article.category.label,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: accent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    tr('{0} min read', [article.readMinutes]),
+                    style: tabular(TextStyle(
+                      fontSize: 12,
+                      color: Pastel.mist.withValues(alpha: 0.78),
+                      fontWeight: FontWeight.w500,
+                    )),
+                  ),
+                ],
+              ),
+              gap(14),
+              Text(article.title, style: display(30, color: Colors.white)),
+              gap(8),
+              Text(
+                article.subtitle,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Pastel.mist.withValues(alpha: 0.88),
+                  height: 1.45,
+                ),
+              ),
+              gap(18),
+
+              // Key Takeaways Card
+              AppCard(
+                highlight: true,
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(LucideIcons.sparkles,
+                            size: 17, color: C.lavender),
+                        const SizedBox(width: 8),
+                        Text(
+                          tr('Key takeaways'),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: C.lavender,
+                          ),
+                        ),
+                      ],
+                    ),
+                    gap(10),
+                    for (var i = 0; i < article.takeaways.length; i++) ...[
+                      _BulletRow(
+                        text: article.takeaways[i],
+                        dotColor: accent,
+                      ),
+                      if (i < article.takeaways.length - 1) gap(8),
+                    ],
+                  ],
+                ),
+              ),
+              gap(20),
+
+              // Article Sections
+              for (final section in article.sections) ...[
+                Text(
+                  section.heading,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.3,
+                  ),
+                ),
+                gap(8),
+                for (final p in section.paragraphs) ...[
+                  Text(
+                    p,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Pastel.mist.withValues(alpha: 0.92),
+                      height: 1.55,
+                    ),
+                  ),
+                  gap(10),
+                ],
+                if (section.bullets.isNotEmpty) ...[
+                  for (final b in section.bullets) ...[
+                    _BulletRow(text: b, dotColor: accent),
+                    gap(8),
+                  ],
+                ],
+                if (section.callout != null) ...[
+                  gap(4),
+                  _CalloutBox(callout: section.callout!),
+                  gap(12),
+                ],
+                gap(14),
+              ],
+
+              // Contextual Shortcut Button
+              if (actionMeta != null) ...[
+                pillButton(
+                  actionMeta.$1,
+                  () => _runAction(context, article.action),
+                  icon: actionMeta.$2,
+                  color: C.aurora,
+                ),
+                gap(20),
+              ],
+
+              if (article.id == 'voice_training') ...[
+                _VoiceEasterEggCard(
+                  unlocked: _voiceUnlocked,
+                  onTap: _handleVoiceEasterEggTap,
+                ),
+                gap(20),
+              ],
+
+              // Medical Disclaimer & References
+              AppCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(LucideIcons.info,
+                            size: 16, color: C.iconDefault),
+                        const SizedBox(width: 8),
+                        Text(
+                          tr('Medical Disclaimer'),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    gap(6),
+                    Text(
+                      tr('This guide provides general educational and harm-reduction information only. It is not a prescription or substitute for individualized medical care.'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Pastel.mist.withValues(alpha: 0.80),
+                        height: 1.45,
+                      ),
+                    ),
+                    if (article.references.isNotEmpty) ...[
+                      gap(12),
+                      const Divider(height: 1),
+                      gap(12),
                       Text(
-                        tr('Key takeaways'),
+                        tr('Trusted references'),
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: C.lavender,
                         ),
                       ),
-                    ],
-                  ),
-                  gap(10),
-                  for (var i = 0; i < article.takeaways.length; i++) ...[
-                    _BulletRow(
-                      text: article.takeaways[i],
-                      dotColor: accent,
-                    ),
-                    if (i < article.takeaways.length - 1) gap(8),
-                  ],
-                ],
-              ),
-            ),
-            gap(20),
-
-            // Article Sections
-            for (final section in article.sections) ...[
-              Text(
-                section.heading,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.3,
-                ),
-              ),
-              gap(8),
-              for (final p in section.paragraphs) ...[
-                Text(
-                  p,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Pastel.mist.withValues(alpha: 0.92),
-                    height: 1.55,
-                  ),
-                ),
-                gap(10),
-              ],
-              if (section.bullets.isNotEmpty) ...[
-                for (final b in section.bullets) ...[
-                  _BulletRow(text: b, dotColor: accent),
-                  gap(8),
-                ],
-              ],
-              if (section.callout != null) ...[
-                gap(4),
-                _CalloutBox(callout: section.callout!),
-                gap(12),
-              ],
-              gap(14),
-            ],
-
-            // Contextual Shortcut Button
-            if (actionMeta != null) ...[
-              pillButton(
-                actionMeta.$1,
-                () => _runAction(context, article.action),
-                icon: actionMeta.$2,
-                color: C.aurora,
-              ),
-              gap(20),
-            ],
-
-            if (article.id == 'voice_training') ...[
-              _VoiceEasterEggCard(
-                unlocked: _voiceUnlocked,
-                onTap: _handleVoiceEasterEggTap,
-              ),
-              gap(20),
-            ],
-
-            // Medical Disclaimer & References
-            AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(LucideIcons.info,
-                          size: 16, color: C.iconDefault),
-                      const SizedBox(width: 8),
-                      Text(
-                        tr('Medical Disclaimer'),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      gap(6),
+                      for (final refItem in article.references) ...[
+                        Text(
+                          '• $refItem',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: Pastel.mist.withValues(alpha: 0.74),
+                            height: 1.4,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  gap(6),
-                  Text(
-                    tr('This guide provides general educational and harm-reduction information only. It is not a prescription or substitute for individualized medical care.'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Pastel.mist.withValues(alpha: 0.80),
-                      height: 1.45,
-                    ),
-                  ),
-                  if (article.references.isNotEmpty) ...[
-                    gap(12),
-                    const Divider(height: 1),
-                    gap(12),
-                    Text(
-                      tr('Trusted references'),
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: C.lavender,
-                      ),
-                    ),
-                    gap(6),
-                    for (final refItem in article.references) ...[
-                      Text(
-                        '• $refItem',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: Pastel.mist.withValues(alpha: 0.74),
-                          height: 1.4,
-                        ),
-                      ),
-                      gap(3),
+                        gap(3),
+                      ],
                     ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -484,7 +489,8 @@ class _VoiceEasterEggCard extends StatelessWidget {
                 Text(
                   unlocked
                       ? tr('Voice Pitch Studio unlocked in Twilight Sanctuary.')
-                      : tr('Tap 5 times to unlock the optional Voice Pitch Studio in Twilight Sanctuary.'),
+                      : tr(
+                          'Tap 5 times to unlock the optional Voice Pitch Studio in Twilight Sanctuary.'),
                   style: TextStyle(
                     fontSize: 12,
                     color: Pastel.mist.withValues(alpha: 0.80),

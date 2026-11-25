@@ -8,6 +8,7 @@ import '../schedule.dart';
 import '../theme.dart';
 import '../l10n.dart';
 import 'pickup_assistant_sheet.dart';
+import 'responsive.dart';
 
 class SuppliesPage extends ConsumerWidget {
   const SuppliesPage({super.key});
@@ -55,131 +56,165 @@ class SuppliesPage extends ConsumerWidget {
                 .textTheme
                 .titleMedium
                 ?.copyWith(fontWeight: FontWeight.w700)));
+    final isWide = context.isWide;
+    final addSupplyBtn = FilledButton.icon(
+      onPressed: () => showSheet(context, const SupplySheet()),
+      icon: const Icon(LucideIcons.plus, size: 20),
+      label: Text(tr('Add Supply'),
+          maxLines: 1, overflow: TextOverflow.ellipsis),
+      style: FilledButton.styleFrom(
+        backgroundColor: C.peony,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+        elevation: 2,
+        shadowColor: C.peony.withValues(alpha: 0.35),
+      ),
+    );
+    final pickupBtn = OutlinedButton.icon(
+      onPressed: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const PickupAssistantSheet(),
+      ),
+      icon: const Icon(LucideIcons.truck, size: 20),
+      label: Text(tr('Pickup Assistant'),
+          maxLines: 1, overflow: TextOverflow.ellipsis),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: C.lavender,
+        backgroundColor: C.midnight.withValues(alpha: 0.55),
+        side: BorderSide(
+          color: C.lavender.withValues(alpha: 0.28),
+          width: 1.1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+      ),
+    );
+
     return ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        children: [
-          Text(tr('Supplies'), style: display(40)),
-          const SizedBox(height: 14),
-          Row(
+      padding: context.pagePadding(top: 12, bottom: 32),
+      children: [
+        AdaptivePageFrame(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => showSheet(context, const SupplySheet()),
-                  icon: const Icon(LucideIcons.plus, size: 20),
-                  label: Text(tr('Add Supply'),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: C.peony,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 13.5),
-                    elevation: 2,
-                    shadowColor: C.peony.withValues(alpha: 0.35),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => const PickupAssistantSheet(),
-                  ),
-                  icon: const Icon(LucideIcons.truck, size: 20),
-                  label: Text(tr('Pickup Assistant'),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: C.lavender,
-                    backgroundColor: C.midnight.withValues(alpha: 0.55),
-                    side: BorderSide(
-                      color: C.lavender.withValues(alpha: 0.28),
-                      width: 1.1,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    textStyle: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 13.5),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          gap(18),
-          if (items.isEmpty)
-            Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Text(tr(
-                    'No supplies yet. Track medication, syringes, needles, and other supplies here.')))
-          else
-            Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: bannerColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                    color: bannerColor.withValues(alpha: 0.25)),
-              ),
-              child: Row(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    bannerIcon,
-                    color: bannerColor,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          bannerTitle,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 13),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          bannerSubtitle,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
+                    child: Semantics(
+                      header: true,
+                      child: Text(tr('Supplies'),
+                          style: display(isWide ? 36 : 40)),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () => showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => const PickupAssistantSheet(),
-                    ),
-                    child: Text(tr('Open')),
-                  ),
+                  if (isWide) ...[
+                    pickupBtn,
+                    const SizedBox(width: 10),
+                    addSupplyBtn,
+                  ],
                 ],
               ),
-            ),
-          if (meds.isNotEmpty) ...[
-            head(tr('Medication')),
-            for (final s in meds) _MedCard(s)
-          ],
-          if (gens.isNotEmpty) ...[
-            gap(8),
-            head(tr('Equipment')),
-            for (final s in gens) _GenericCard(s)
-          ],
-        ]);
+              if (!isWide) ...[
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(child: addSupplyBtn),
+                    const SizedBox(width: 10),
+                    Expanded(child: pickupBtn),
+                  ],
+                ),
+              ],
+              gap(18),
+              if (items.isEmpty)
+                Padding(
+                    padding: const EdgeInsets.only(top: 40),
+                    child: Text(tr(
+                        'No supplies yet. Track medication, syringes, needles, and other supplies here.')))
+              else
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: bannerColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(20),
+                    border:
+                        Border.all(color: bannerColor.withValues(alpha: 0.25)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        bannerIcon,
+                        color: bannerColor,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              bannerTitle,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              bannerSubtitle,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.78),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => const PickupAssistantSheet(),
+                        ),
+                        child: Text(tr('Open')),
+                      ),
+                    ],
+                  ),
+                ),
+              if (meds.isNotEmpty) ...[
+                head(tr('Medication')),
+                AdaptiveGrid(
+                  compactColumns: 1,
+                  mediumColumns: 2,
+                  expandedColumns: 2,
+                  minColumnWidth: 320,
+                  children: [for (final s in meds) _MedCard(s)],
+                ),
+              ],
+              if (gens.isNotEmpty) ...[
+                gap(14),
+                head(tr('Equipment')),
+                AdaptiveGrid(
+                  compactColumns: 1,
+                  mediumColumns: 2,
+                  expandedColumns: 2,
+                  minColumnWidth: 320,
+                  children: [for (final s in gens) _GenericCard(s)],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -260,12 +295,12 @@ class _MedCard extends ConsumerWidget {
     final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
     final forecast = estimateSupplyForecast(s, ths);
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      decoration: cardBox(context, radius: R.card),
       child: Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(28),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(R.card),
         child: InkWell(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(R.card),
           onTap: () => showSheet(context, SupplySheet(initial: s)),
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -279,13 +314,15 @@ class _MedCard extends ConsumerWidget {
                             .titleMedium
                             ?.copyWith(fontWeight: FontWeight.w700))),
                 IconButton.filledTonal(
+                    tooltip: tr('Decrease quantity'),
                     onPressed: () => repo?.adjustSupply(s.id, -1),
                     icon: const Icon(LucideIcons.minus)),
                 Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Text('${fmt(s.qty)} ${s.unitLabel}',
-                        style: display(20))),
+                        style: tabular(display(20)))),
                 IconButton.filledTonal(
+                    tooltip: tr('Increase quantity'),
                     onPressed: () => repo?.adjustSupply(s.id, 1),
                     icon: const Icon(LucideIcons.plus)),
               ]),
@@ -301,9 +338,12 @@ class _MedCard extends ConsumerWidget {
                 ),
               ),
               gap(10),
-              Text(low
-                  ? tr('{0} {0?dose|doses} left, restock soon', [s.doses])
-                  : tr('{0} {0?dose|doses} left', [s.doses])),
+              Text(
+                low
+                    ? tr('{0} {0?dose|doses} left, restock soon', [s.doses])
+                    : tr('{0} {0?dose|doses} left', [s.doses]),
+                style: tabular(const TextStyle()),
+              ),
               if (forecast != null) ...[
                 gap(6),
                 _forecastChip(context, forecast),
@@ -314,10 +354,11 @@ class _MedCard extends ConsumerWidget {
                   child: Text(
                       tr(expired ? 'Expired since {0}' : 'Expires {0}',
                           [DateFormat('d MMM y', L10n.code).format(s.expiry!)]),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: expired ? C.peony : null)),
+                      style: tabular(Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: expired ? C.peony : null) ??
+                          const TextStyle())),
                 ),
             ]),
           ),
@@ -337,15 +378,15 @@ class _GenericCard extends ConsumerWidget {
     final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
     final forecast = estimateSupplyForecast(s, ths);
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      decoration: cardBox(context, radius: R.card),
       child: Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(22),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(R.card),
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(R.card),
           onTap: () => showSheet(context, SupplySheet(initial: s)),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 10, 10, 10),
+            padding: const EdgeInsets.fromLTRB(18, 12, 12, 12),
             child: Row(children: [
               Icon(genericTypes[s.gtype]?.$2 ?? LucideIcons.package,
                   color: low ? C.amber : C.lagoon),
@@ -364,13 +405,15 @@ class _GenericCard extends ConsumerWidget {
                 ),
               ),
               IconButton.filledTonal(
+                  tooltip: tr('Decrease quantity'),
                   onPressed: () => repo?.adjustSupply(s.id, -1),
                   icon: const Icon(LucideIcons.minus)),
               Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(fmt(s.qty),
-                      style: display(20, color: low ? C.amber : null))),
+                      style: tabular(display(20, color: low ? C.amber : null)))),
               IconButton.filledTonal(
+                  tooltip: tr('Increase quantity'),
                   onPressed: () => repo?.adjustSupply(s.id, 1),
                   icon: const Icon(LucideIcons.plus)),
             ]),

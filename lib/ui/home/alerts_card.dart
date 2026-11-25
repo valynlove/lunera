@@ -188,7 +188,7 @@ class OverdueAlertBanner extends StatelessWidget {
   }
 }
 
-/// Menampilkan modal bottom sheet untuk meninjau dan menyelesaikan seluruh dosis terlewat.
+/// Menampilkan modal bottom sheet (atau dialog di layar lebar) untuk meninjau dosis terlewat.
 void showOverdueSheet(
   BuildContext context,
   List<Slot> overdue,
@@ -197,6 +197,85 @@ void showOverdueSheet(
   Prefs prefs,
 ) {
   HapticFeedback.mediumImpact();
+  final isWide = MediaQuery.sizeOf(context).width >= 600;
+  Widget headerRow(BuildContext ctx, {bool showClose = false}) => Row(
+        children: [
+          iconBadge(LucideIcons.triangleAlert, C.coral,
+              size: 36, iconSize: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('Missed Doses'),
+                  style: display(22, weight: FontWeight.w700),
+                ),
+                Text(
+                  tr('Review and catch up on pending doses'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Pastel.mist.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (showClose)
+            IconButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              icon: const Icon(LucideIcons.x, size: 20),
+              tooltip: tr('Close'),
+            ),
+        ],
+      );
+
+  if (isWide) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 560,
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: C.deepCard,
+              borderRadius: BorderRadius.circular(R.modal),
+              border: Border.all(
+                color: C.lavender.withValues(alpha: 0.22),
+                width: 1.0,
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                headerRow(ctx, showClose: true),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final s in overdue)
+                        SlotTile(
+                            s: s, logs: logs, supplies: supplies, prefs: prefs),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
+
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -229,31 +308,7 @@ void showOverdueSheet(
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                iconBadge(LucideIcons.triangleAlert, C.coral,
-                    size: 36, iconSize: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        tr('Missed Doses'),
-                        style: display(22, weight: FontWeight.w700),
-                      ),
-                      Text(
-                        tr('Review and catch up on pending doses'),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Pastel.mist.withValues(alpha: 0.85),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            headerRow(ctx),
             const SizedBox(height: 18),
             for (final s in overdue)
               SlotTile(s: s, logs: logs, supplies: supplies, prefs: prefs),

@@ -402,6 +402,19 @@ h1, h2, h3, h4 {
   filter: drop-shadow(0 0 18px rgba(215, 106, 191, 0.7));
 }
 
+.logo-wordmark-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(165, 139, 255, 0.45));
+  transition: transform var(--duration-snappy) var(--ease-spring), filter var(--duration-snappy) ease;
+}
+
+.logo:hover .logo-wordmark-img {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 16px rgba(215, 106, 191, 0.65));
+}
+
 .logo-text {
   font-weight: 400;
 }
@@ -2494,6 +2507,19 @@ details[open] p {
   transform: rotate(-6deg) scale(1.08);
 }
 
+.footer-wordmark-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(165, 139, 255, 0.45));
+  transition: transform var(--duration-snappy) var(--ease-spring), filter var(--duration-snappy) ease;
+}
+
+.footer-logo:hover .footer-wordmark-img {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 16px rgba(215, 106, 191, 0.65));
+}
+
 .footer-tagline {
   font-size: 0.9rem;
   color: var(--mute);
@@ -3588,6 +3614,10 @@ details[open] p {
 
   .logo-mark {
     width: 30px;
+    height: 30px;
+  }
+
+  .logo-wordmark-img {
     height: 30px;
   }
 

@@ -8,6 +8,7 @@ import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
 import '../history_export.dart';
+import 'responsive.dart';
 import 'sheets.dart';
 import '../l10n.dart';
 
@@ -179,86 +180,108 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [importBtn, exportBtn, add],
     );
-    return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
-      if (widget.embedded)
-        Align(alignment: Alignment.centerRight, child: actions)
-      else
-        Row(children: [
-          Expanded(child: Text(tr('History'), style: display(40))),
-          actions
-        ]),
-      gap(14),
-      if (prefs.hrtCounter && starts.isNotEmpty)
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: cardBox(context),
-          child: Row(children: [
-            Icon(LucideIcons.hourglass, color: C.peony, size: 36),
-            const SizedBox(width: 16),
-            Expanded(
-              child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(hrtDuration(starts.first, DateTime.now()),
-                    style: display(24)),
-                gap(6),
-                Text(tr('{0} {0?dose|doses} logged', [taken.length])),
-              ]),
-            ),
-          ]),
-        ),
-      if (logs.isNotEmpty) ...[
-        gap(12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 6,
-          children: [
-            for (final (days, label) in [
-              (0, tr('All')),
-              (30, tr('Last 30 days')),
-              (90, tr('Last 90 days')),
-            ])
-              ChoiceChip(
-                label: Text(label),
-                selected: _rangeDays == days,
-                onSelected: (_) {
-                  HapticFeedback.selectionClick();
-                  setState(() => _rangeDays = days);
-                },
-              ),
-          ],
-        ),
-      ],
-      if (logs.isEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 40),
+    return ListView(
+      padding: context.pagePadding(top: 8, bottom: 32),
+      children: [
+        AdaptivePageFrame(
+          maxWidth: 860,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              iconBadge(LucideIcons.history, Pastel.lilac,
-                  size: 56, iconSize: 28),
-              const SizedBox(height: 16),
-              Text(tr('No history entries yet'), style: display(24)),
-              const SizedBox(height: 6),
-              Text(
-                tr('Doses you log will show up here with full administration history.'),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Pastel.mist.withValues(alpha: 0.8), fontSize: 13),
-              ),
+              if (widget.embedded)
+                Align(alignment: Alignment.centerRight, child: actions)
+              else
+                Row(children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(tr('History'), style: display(40)),
+                    ),
+                  ),
+                  actions
+                ]),
+              gap(14),
+              if (prefs.hrtCounter && starts.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: cardBox(context, radius: R.card),
+                  child: Row(children: [
+                    Icon(LucideIcons.hourglass, color: C.peony, size: 36),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(hrtDuration(starts.first, DateTime.now()),
+                                style: tabular(display(24))),
+                            gap(6),
+                            Text(
+                              tr('{0} {0?dose|doses} logged', [taken.length]),
+                              style: tabular(const TextStyle()),
+                            ),
+                          ]),
+                    ),
+                  ]),
+                ),
+              if (logs.isNotEmpty) ...[
+                gap(12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    for (final (days, label) in [
+                      (0, tr('All')),
+                      (30, tr('Last 30 days')),
+                      (90, tr('Last 90 days')),
+                    ])
+                      ChoiceChip(
+                        label: Text(label),
+                        selected: _rangeDays == days,
+                        onSelected: (_) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _rangeDays = days);
+                        },
+                      ),
+                  ],
+                ),
+              ],
+              if (logs.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Column(
+                    children: [
+                      iconBadge(LucideIcons.history, Pastel.lilac,
+                          size: 56, iconSize: 28),
+                      const SizedBox(height: 16),
+                      Text(tr('No history entries yet'), style: display(24)),
+                      const SizedBox(height: 6),
+                      Text(
+                        tr('Doses you log will show up here with full administration history.'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Pastel.mist.withValues(alpha: 0.8),
+                            fontSize: 13),
+                      ),
+                    ],
+                  ),
+                )
+              else if (visibleLogs.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 28),
+                  child: Text(
+                    tr('No entries in this date range.'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Pastel.mist.withValues(alpha: 0.8),
+                        fontSize: 13),
+                  ),
+                ),
+              ...rows,
             ],
           ),
-        )
-      else if (visibleLogs.isEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 28),
-          child: Text(
-            tr('No entries in this date range.'),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Pastel.mist.withValues(alpha: 0.8), fontSize: 13),
-          ),
         ),
-      ...rows,
-    ]);
+      ],
+    );
   }
 }
 

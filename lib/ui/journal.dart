@@ -8,6 +8,7 @@ import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
 import 'body.dart';
+import 'responsive.dart';
 import '../l10n.dart';
 
 Color moodColor(String? k) => switch (k) {
@@ -30,7 +31,9 @@ class _JournalViewState extends ConsumerState<JournalView> {
 
   @override
   Widget build(BuildContext context) {
-    final all = <JournalEntry>[...(ref.watch(journalProvider).value ?? <JournalEntry>[])]..sort((a, b) => b.at.compareTo(a.at));
+    final all = <JournalEntry>[
+      ...(ref.watch(journalProvider).value ?? <JournalEntry>[])
+    ]..sort((a, b) => b.at.compareTo(a.at));
     final shown = all
         .where((e) => switch (filter) {
               'mood' => e.hasMood,
@@ -48,45 +51,78 @@ class _JournalViewState extends ConsumerState<JournalView> {
         day = e.at;
         rows.add(Padding(
           padding: const EdgeInsets.fromLTRB(4, 14, 0, 8),
-          child: Text(DateFormat('EEEE, d MMMM y', L10n.code).format(e.at), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+          child: Text(DateFormat('EEEE, d MMMM y', L10n.code).format(e.at),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700)),
         ));
       }
       rows.add(JournalTile(e: e));
     }
 
-    return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
-      Align(alignment: Alignment.centerRight, child: pillButton(tr('Write'), () => showSheet(context, const JournalSheet()), icon: LucideIcons.pencil)),
-      gap(12),
-      Container(
-        decoration: cardBox(context, radius: 22),
-        child: ListTile(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BodyPage())),
-          leading: Icon(LucideIcons.accessibility, color: C.peony),
-          title: Text(tr('Body & changes'), style: const TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(tr('Timeline by body area')),
-          trailing: const Icon(LucideIcons.chevronRight, size: 18, color: C.iconDefault),
+    return ListView(
+      padding: context.pagePadding(top: 8, bottom: 32),
+      children: [
+        AdaptivePageFrame(
+          maxWidth: 860,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: pillButton(
+                  tr('Write'),
+                  () => showSheet(context, const JournalSheet()),
+                  icon: LucideIcons.pencil,
+                ),
+              ),
+              gap(12),
+              Container(
+                decoration: cardBox(context, radius: R.card),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(R.card)),
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const BodyPage())),
+                  leading: Icon(LucideIcons.accessibility, color: C.peony),
+                  title: Text(tr('Body & changes'),
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(tr('Timeline by body area')),
+                  trailing: const Icon(LucideIcons.chevronRight,
+                      size: 18, color: C.iconDefault),
+                ),
+              ),
+              gap(12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 540),
+                  child: PillTabs<String>(
+                    items: [
+                      ('all', tr('All')),
+                      ('mood', tr('Mood')),
+                      ('body', tr('Body')),
+                      ('symptoms', tr('Symptoms')),
+                      ('text', tr('Notes')),
+                    ],
+                    value: filter,
+                    onChanged: (v) => setState(() => filter = v),
+                  ),
+                ),
+              ),
+              if (shown.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Text(tr(
+                      'No entries yet. Log your mood, body changes, or anything you want to remember.')),
+                ),
+              ...rows,
+            ],
+          ),
         ),
-      ),
-      gap(12),
-      PillTabs<String>(
-        items: [
-          ('all', tr('All')),
-          ('mood', tr('Mood')),
-          ('body', tr('Body')),
-          ('symptoms', tr('Symptoms')),
-          ('text', tr('Notes')),
-        ],
-        value: filter,
-        onChanged: (v) => setState(() => filter = v),
-      ),
-      if (shown.isEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 40),
-          child: Text(tr('No entries yet. Log your mood, body changes, or anything you want to remember.')),
-        ),
-      ...rows,
-    ]);
+      ],
+    );
   }
 }
 
@@ -130,7 +166,8 @@ class JournalTile extends StatelessWidget {
           ),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Text(lines.join('\n'), maxLines: 6, overflow: TextOverflow.ellipsis),
+        subtitle: Text(lines.join('\n'),
+            maxLines: 6, overflow: TextOverflow.ellipsis),
         isThreeLine: lines.length > 1,
       ),
     );
@@ -151,14 +188,22 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
   late DateTime at = widget.initial?.at ?? DateTime.now();
   late final text = TextEditingController(text: widget.initial?.text ?? '');
   late final Map<String, TextEditingController> ctrls = {
-    for (final b in (widget.initial?.body ?? const <String, String>{}).entries) b.key: TextEditingController(text: b.value),
+    for (final b in (widget.initial?.body ?? const <String, String>{}).entries)
+      b.key: TextEditingController(text: b.value),
   };
-  late final Set<String> symptoms = {...(widget.initial?.symptoms ?? const <String>[])};
+  late final Set<String> symptoms = {
+    ...(widget.initial?.symptoms ?? const <String>[])
+  };
 
   Future<void> _pick() async {
-    final d = await showDatePicker(context: context, initialDate: at, firstDate: DateTime(2000), lastDate: DateTime.now());
+    final d = await showDatePicker(
+        context: context,
+        initialDate: at,
+        firstDate: DateTime(2000),
+        lastDate: DateTime.now());
     if (d == null || !mounted) return;
-    final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(at));
+    final t = await showTimePicker(
+        context: context, initialTime: TimeOfDay.fromDateTime(at));
     if (t == null) return;
     setState(() => at = DateTime(d.year, d.month, d.day, t.hour, t.minute));
   }
@@ -170,7 +215,9 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
     };
     final note = text.text.trim();
     if (mood == null && body.isEmpty && symptoms.isEmpty && note.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Fill in at least one: mood, symptoms, body changes, or a note.'))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(tr(
+              'Fill in at least one: mood, symptoms, body changes, or a note.'))));
       return;
     }
     final entry = JournalEntry(
@@ -191,7 +238,8 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
   }
 
   Future<void> _delete() async {
-    if (!await confirm(context, tr('Delete this journal entry?')) || !mounted) return;
+    if (!await confirm(context, tr('Delete this journal entry?')) || !mounted)
+      return;
     ref.read(repoProvider)?.deleteJournal(widget.initial!.id);
     Navigator.pop(context);
   }
@@ -200,7 +248,8 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
   Widget build(BuildContext context) {
     final editing = widget.initial != null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(editing ? tr('Edit journal entry') : tr('New journal entry'), style: display(28)),
+      Text(editing ? tr('Edit journal entry') : tr('New journal entry'),
+          style: display(28)),
       gap(16),
       Text(tr('Mood')),
       gap(4),
@@ -256,14 +305,28 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
       ]),
       for (final c in ctrls.entries) ...[
         gap(10),
-        TextField(controller: c.value, decoration: InputDecoration(labelText: tr(c.key), hintText: tr('What do you feel or notice?'))),
+        TextField(
+            controller: c.value,
+            decoration: InputDecoration(
+                labelText: tr(c.key),
+                hintText: tr('What do you feel or notice?'))),
       ],
       gap(14),
-      TextField(controller: text, maxLines: 4, minLines: 2, decoration: InputDecoration(labelText: tr('Notes'))),
+      TextField(
+          controller: text,
+          maxLines: 4,
+          minLines: 2,
+          decoration: InputDecoration(labelText: tr('Notes'))),
       gap(18),
       Row(children: [
-        if (editing) TextButton.icon(onPressed: _delete, icon: const Icon(LucideIcons.trash2), label: Text(tr('Delete'))),
-        Expanded(child: pillButton(editing ? tr('Save changes') : tr('Save'), _save)),
+        if (editing)
+          TextButton.icon(
+              onPressed: _delete,
+              icon: const Icon(LucideIcons.trash2),
+              label: Text(tr('Delete'))),
+        Expanded(
+            child:
+                pillButton(editing ? tr('Save changes') : tr('Save'), _save)),
       ]),
     ]);
   }
@@ -276,19 +339,20 @@ class MoodQuickCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final entries = ref.watch(journalProvider).value ?? <JournalEntry>[];
     final now = DateTime.now();
-    final today = entries.where((e) => e.hasMood && sameDay(e.at, now)).toList()..sort((a, b) => b.at.compareTo(a.at));
+    final today = entries.where((e) => e.hasMood && sameDay(e.at, now)).toList()
+      ..sort((a, b) => b.at.compareTo(a.at));
 
     Widget card(Widget child) => Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-          decoration: cardBox(context, radius: 24),
+          decoration: cardBox(context, radius: R.card),
           child: child,
         );
 
     if (today.isNotEmpty) {
       final e = today.first, m = moods[e.mood]!;
       return card(InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(R.card),
         onTap: () {
           HapticFeedback.selectionClick();
           showSheet(context, JournalSheet(initial: e));
@@ -296,25 +360,41 @@ class MoodQuickCard extends ConsumerWidget {
         child: Row(children: [
           Icon(m.$2, color: C.peony, size: 30),
           const SizedBox(width: 14),
-          Expanded(child: Text(tr('Today you feel {0}', [tr(m.$1).toLowerCase()]), style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white))),
-          Icon(LucideIcons.pencil, size: 18, color: Pastel.mist.withValues(alpha: .85)),
+          Expanded(
+              child: Text(tr('Today you feel {0}', [tr(m.$1).toLowerCase()]),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.white))),
+          Icon(LucideIcons.pencil,
+              size: 18, color: Pastel.mist.withValues(alpha: .85)),
         ]),
       ));
     }
     return card(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(tr('How are you feeling today?'), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
+      Text(tr('How are you feeling today?'),
+          style: Theme.of(context)
+              .textTheme
+              .titleSmall
+              ?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
       gap(6),
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Row(children: [
         for (final m in moods.entries)
-          Tooltip(
-            message: tr(m.value.$1),
-            child: IconButton(
-              iconSize: 30,
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                showSheet(context, JournalSheet(presetMood: m.key));
-              },
-              icon: Icon(m.value.$2, color: Pastel.mist.withValues(alpha: .88)),
+          Expanded(
+            child: Center(
+              child: Tooltip(
+                message: tr(m.value.$1),
+                child: IconButton(
+                  iconSize: 26,
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints(minWidth: 44, minHeight: 48),
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    showSheet(context, JournalSheet(presetMood: m.key));
+                  },
+                  icon: Icon(m.value.$2,
+                      color: Pastel.mist.withValues(alpha: .88)),
+                ),
+              ),
             ),
           ),
       ]),

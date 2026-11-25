@@ -13,6 +13,7 @@ import '../../repo.dart';
 import '../../theme.dart';
 import '../../voice_pitch.dart';
 import '../companion_avatar.dart';
+import '../responsive.dart';
 
 /// Optional, easter-egg Voice Pitch Studio with gentle dysphoria awareness,
 /// quiet no-mic warm-up mode, reading prompts, live on-device Hz estimation,
@@ -489,9 +490,11 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-          children: [
+        child: AdaptivePageFrame(
+          reading: true,
+          child: ListView(
+            padding: context.pagePadding(top: 12, bottom: 40),
+            children: [
             Row(
               children: [
                 IconButton(
@@ -1261,6 +1264,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

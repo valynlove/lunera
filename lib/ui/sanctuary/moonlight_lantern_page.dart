@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../l10n.dart';
 import '../../sanctuary_data.dart';
 import '../../theme.dart';
+import '../responsive.dart';
 
 /// Gentle, no-punishment companion lantern that blooms slowly as sparks are lit.
 class MoonlightLanternPage extends StatefulWidget {
@@ -88,9 +89,11 @@ class _MoonlightLanternPageState extends State<MoonlightLanternPage>
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
-          children: [
+        child: AdaptivePageFrame(
+          reading: true,
+          child: ListView(
+            padding: context.pagePadding(top: 12, bottom: 36),
+            children: [
             Row(
               children: [
                 IconButton(
@@ -205,6 +208,7 @@ class _MoonlightLanternPageState extends State<MoonlightLanternPage>
               ),
             ),
           ],
+          ),
         ),
       ),
     );

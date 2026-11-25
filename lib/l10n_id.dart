@@ -1866,4 +1866,98 @@ const Map<String, String> idStrings = {
   'Increase': 'Tambah',
   'Recovery counts too': 'Pemulihan juga dihitung',
   '{0} active days': '{0} hari aktif',
+  'Rotating injection sites gives local tissue time to settle and recover comfortably.':
+      'Merotasi titik injeksi memberi waktu bagi jaringan lokal untuk pulih dengan nyaman.',
+  'Staying gently hydrated helps circulation and eases post-dose fatigue.':
+      'Menjaga hidrasi membantu sirkulasi dan meredakan rasa lelah setelah dosis.',
+  'Trough days before your next dose can feel slower—plan lighter tasks when needed.':
+      'Hari menjelang dosis berikutnya bisa terasa lebih lambat—pilih aktivitas yang lebih ringan bila perlu.',
+  'Testing labs right before your next scheduled dose helps capture true trough levels.':
+      'Pemeriksaan lab tepat sebelum jadwal dosis berikutnya membantu menangkap kadar trough yang akurat.',
+  'Warmth and steady breathing before an injection can ease tension in the muscle.':
+      'Rasa hangat dan napas teratur sebelum injeksi membantu mengurangi ketegangan otot.',
+  'Even 5 minutes of quiet rest counts as caring for your body rhythm.':
+      'Istirahat tenang 5 menit pun tetap dihitung sebagai perawatan bagi ritme tubuhmu.',
+  'Plot twist: you are doing much better than your inner critic thinks.':
+      'Kejutan kecil: kamu jauh lebih baik daripada yang dipikirkan kritik dalam dirimu.',
+  'Certified stardust reminder: surviving today already earns full marks.':
+      'Pengingat debu bintang: bertahan melewati hari ini saja sudah bernilai sempurna.',
+  'If anyone asks who your biggest fan is... well, I am right here.':
+      'Kalau ada yang tanya siapa pendukung terbesarmu... ya aku di sini.',
+  'Wait—did you drink water today, or only iced coffee again?':
+      'Sebentar—hari ini sudah minum air putih, atau baru es kopi lagi?',
+  'Fun fact: even the moon takes a whole month to cycle through its phases.':
+      'Fakta ringan: bulan saja butuh sebulan penuh untuk melewati tiap fasenya.',
+  'Inhale softly for 4, hold for 4, exhale for 6. Let your shoulders drop.':
+      'Tarik napas pelan 4 detik, tahan 4 detik, embuskan 6 detik. Biarkan bahumu turun.',
+  'Name 3 quiet things you can see right now. You only have to handle this minute.':
+      'Sebutkan 3 hal tenang yang bisa kamu lihat sekarang. Kamu cukup melewati menit ini saja.',
+  'Unclench your jaw, soften your hands, and take one slow breath with me.':
+      'Lemaskan rahangmu, kendurkan tanganmu, lalu ambil satu napas pelan bersamaku.',
+  'No rush, no pressure. Take a gentle breath right here.':
+      'Tanpa terburu-buru, tanpa tekanan. Tarik napas lembut di sini.',
+  'You do not have to earn rest. I am keeping watch with you.':
+      'Istirahat tidak perlu diperjuangkan. Aku menemanimu berjaga.',
+  'Whatever today feels like, you are allowed to take it slowly.':
+      'Apa pun yang terasa hari ini, kamu boleh menjalaninya perlahan.',
+  'Whoa, easy there! You startled my stardust.':
+      'Wah, pelan-pelan! Debu bintangku sampai kaget.',
+  'Hehe... alright, you have my undivided attention.':
+      'Hehe... baiklah, sekarang perhatianku penuh untukmu.',
+  'I knew you were going to poke me again, did I not?':
+      'Sudah kuduga kamu bakal mengetukku lagi, kan?',
+  'Okay, okay—you really know how to brighten a quiet moment.':
+      'Oke, oke—kamu memang pintar mencairkan suasana tenang.',
+  'Mmm... five more minutes under the starlight?':
+      'Mmm... lima menit lagi di bawah cahaya bintang?',
+  'Hey, nocturnal tapping is against twilight regulations!':
+      'Hei, mengetuk tengah malam melanggar aturan senja lho!',
+  'Alright, I am awake. Hope you are winding down gently too.':
+      'Baiklah, aku sudah bangun. Semoga kamu juga sedang bersiap istirahat dengan tenang.',
+  'Quiet Hug': 'Pelukan Tenang',
+  'Holding space with you': 'Menemani dengan tenang',
+  'Playful Moment': 'Momen Ceria',
+  'Tap again or reset above': 'Ketuk lagi atau atur ulang di atas',
+  'Steady Breath': 'Napas Teratur',
+  'Tap for another calming cue': 'Ketuk untuk panduan tenang lainnya',
+  'Gentle Care Tip': 'Tips Perawatan Lembut',
+  'Tap for another tip': 'Ketuk untuk tips lainnya',
+  'Light Moment': 'Selingan Ringan',
+  'Tap for another smile': 'Ketuk untuk senyuman lainnya',
+  'Calm me': 'Tenangkan',
+  'Care tip': 'Tips rawat',
+  'Smile': 'Senyum',
+  'Open Breathing': 'Buka Napas',
+  'Read Guides': 'Baca Panduan',
+  'Lighter pace selected': 'Ritme lebih ringan dipilih',
+  'Got it—Light Mode is on so you can move gently without draining your tank.':
+      'Siap—Mode Ringan aktif agar kamu tetap bergerak lembut tanpa menguras tenaga.',
+  'Take joints & muscles easy': 'Jaga sendi & otot tetap santai',
+  'Easy mobility and gentle stretches are your friend today—skip anything tender.':
+      'Mobilitas ringan dan peregangan lembut cocok hari ini—lewati bagian yang terasa nyeri.',
+  'Warmed up & ready': 'Sudah hangat & siap',
+  'Steady rhythm today. Start whenever you feel like moving.':
+      'Ritme stabil hari ini. Mulai kapan pun kamu siap bergerak.',
+  'Low energy': 'Energi rendah',
+  'Feeling sore': 'Terasa pegal',
+  'Ready to go': 'Siap bergerak',
+  'Body check-in': 'Cek kondisi tubuh',
+  'Hold steady—smooth breath, strong form.':
+      'Tahan stabil—napas teratur, postur tetap terjaga.',
+  'Lighter pace active—smooth form beats intensity.':
+      'Ritme ringan aktif—gerakan halus lebih penting dari intensitas.',
+  'Final set done! Catch your breath and finish strong.':
+      'Set terakhir selesai! Atur napas dan akhiri dengan mantap.',
+  'Move smoothly through comfortable range—no forcing.':
+      'Gerakkan perlahan dalam rentang yang nyaman—tanpa memaksakan.',
+  'Warmed up and ready—start at your own pace.':
+      'Sudah siap—mulai saja sesuai ritmemu sendiri.',
+  'Steady rhythm—you are doing great.':
+      'Ritme terjaga—kamu melakukannya dengan baik.',
+  'Tap to switch to easier pace': 'Ketuk untuk beralih ke ritme lebih ringan',
+  'Slow inhale, drop your shoulders.': 'Tarik napas pelan, turunkan bahumu.',
+  'Next set is yours whenever you are ready.':
+      'Set berikutnya siap dimulai kapan pun kamu siap.',
+  'Decrease quantity': 'Kurangi jumlah',
+  'Increase quantity': 'Tambah jumlah',
 };

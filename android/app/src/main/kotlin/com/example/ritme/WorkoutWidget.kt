@@ -29,8 +29,8 @@ class WorkoutWidget : HomeWidgetProvider() {
         val resting = widgetData.getString("wrk_resting", "0") == "1"
 
         val mascotRes = when (mood) {
-            "care" -> R.drawable.coach_care
-            "cheer" -> R.drawable.coach_cheer
+            "care", "rest", "gentle" -> R.drawable.coach_care
+            "cheer", "ready", "stretch" -> R.drawable.coach_cheer
             "celebrate", "proud" -> R.drawable.coach_celebrate
             else -> R.drawable.coach_greet
         }

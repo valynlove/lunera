@@ -15,6 +15,7 @@ import '../repo.dart';
 import '../theme.dart';
 import 'journal.dart';
 import 'companion_avatar.dart';
+import 'responsive.dart';
 import '../l10n.dart';
 
 /// Tubuh & perubahan: ringkasan, garis waktu jurnal, ukuran badan, dan milestone privat.
@@ -110,74 +111,88 @@ class _BodyPageState extends ConsumerState<BodyPage> {
       );
     }
 
-    final overview = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: cardBox(context),
-        child: LayoutBuilder(builder: (c, cons) {
-          final maxW = cons.maxWidth;
-          const h = 380.0;
-          final diagramW = maxW > 460.0 ? 440.0 : maxW;
-          const aspectRatio = 372.0 / 682.0;
-          final maxAvatarW = diagramW * 0.48;
-          const maxAvatarH = h * 0.96;
-          final avatarW = (maxAvatarH * aspectRatio).clamp(0.0, maxAvatarW);
-          final avatarH = avatarW / aspectRatio;
-          final avatarRect = Rect.fromCenter(
-            center: Offset(diagramW * 0.24, h * 0.50),
-            width: avatarW,
-            height: avatarH,
-          );
-          return Center(
-            child: SizedBox(
-              width: diagramW,
-              height: h,
-              child: Stack(children: [
-                Positioned.fromRect(
-                  rect: avatarRect,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          C.peony.withValues(alpha: 0.14),
-                          Colors.transparent,
-                        ],
-                      ),
+    final overviewDiagram = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: cardBox(context, radius: R.card),
+      child: LayoutBuilder(builder: (c, cons) {
+        final maxW = cons.maxWidth;
+        const h = 380.0;
+        final diagramW = maxW > 460.0 ? 440.0 : maxW;
+        const aspectRatio = 372.0 / 682.0;
+        final maxAvatarW = diagramW * 0.48;
+        const maxAvatarH = h * 0.96;
+        final avatarW = (maxAvatarH * aspectRatio).clamp(0.0, maxAvatarW);
+        final avatarH = avatarW / aspectRatio;
+        final avatarRect = Rect.fromCenter(
+          center: Offset(diagramW * 0.24, h * 0.50),
+          width: avatarW,
+          height: avatarH,
+        );
+        return Center(
+          child: SizedBox(
+            width: diagramW,
+            height: h,
+            child: Stack(children: [
+              Positioned.fromRect(
+                rect: avatarRect,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        C.peony.withValues(alpha: 0.14),
+                        Colors.transparent,
+                      ],
                     ),
-                    child: Image.asset(
-                      'assets/images/body_front.png',
-                      fit: BoxFit.contain,
-                      filterQuality: FilterQuality.medium,
-                      errorBuilder: (_, __, ___) => Icon(
-                        LucideIcons.user,
-                        color: C.peony,
-                        size: 48,
-                      ),
+                  ),
+                  child: Image.asset(
+                    'assets/images/body_front.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder: (_, __, ___) => Icon(
+                      LucideIcons.user,
+                      color: C.peony,
+                      size: 48,
                     ),
                   ),
                 ),
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _BodyCalloutPainter(C.peony, avatarRect),
-                  ),
+              ),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _BodyCalloutPainter(C.peony, avatarRect),
                 ),
-                for (final a in _onBody) callout(a.$1, a.$2, diagramW, h),
-              ]),
-            ),
-          );
-        }),
-      ),
-      gap(12),
-      otherRow('Energy'),
-      otherRow('Sleep'),
-      gap(4),
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: C.peony.withValues(alpha: .08), borderRadius: BorderRadius.circular(20)),
-        child: Text(tr('Change takes time. Record things as they are, then compare again a few weeks later.')),
-      ),
-    ]);
+              ),
+              for (final a in _onBody) callout(a.$1, a.$2, diagramW, h),
+            ]),
+          ),
+        );
+      }),
+    );
+
+    final overviewNotes = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        otherRow('Energy'),
+        otherRow('Sleep'),
+        gap(4),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: C.peony.withValues(alpha: .08),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(tr(
+              'Change takes time. Record things as they are, then compare again a few weeks later.')),
+        ),
+      ],
+    );
+
+    final overview = AdaptiveSplitView(
+      primaryFlex: 6,
+      secondaryFlex: 5,
+      primary: overviewDiagram,
+      secondary: overviewNotes,
+    );
 
     final items = [for (final e in withBody) if (e.body.containsKey(area)) (e.at, e.body[area]!)];
     final detail = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -230,50 +245,57 @@ class _BodyPageState extends ConsumerState<BodyPage> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
-              children: [
-                Row(children: [
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.arrowLeft)),
-                  Expanded(child: Text(tr('Body & changes'), style: display(28))),
-                ]),
-                gap(12),
-                PillTabs<int>(
-                  items: [
-                    (0, tr('Overview')),
-                    (1, tr('Timeline')),
-                    (2, tr('Size & Measures')),
-                    (3, tr('Milestones')),
-                  ],
-                  value: tab,
-                  onChanged: (v) => setState(() => tab = v),
-                ),
-                gap(16),
-                if (tab == 0)
-                  overview
-                else if (tab == 1)
-                  detail
-                else if (tab == 2)
-                  sizeTab
-                else
-                  milestonesTab,
-              ],
+        child: ListView(
+          padding: context.pagePadding(top: 16, bottom: 96),
+          children: [
+            AdaptivePageFrame(
+              maxWidth: 1020,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AdaptivePageHeader(
+                    title: tr('Body & changes'),
+                    onBack: () => Navigator.pop(context),
+                  ),
+                  gap(12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: PillTabs<int>(
+                        items: [
+                          (0, tr('Overview')),
+                          (1, tr('Timeline')),
+                          (2, tr('Size & Measures')),
+                          (3, tr('Milestones')),
+                        ],
+                        value: tab,
+                        onChanged: (v) => setState(() => tab = v),
+                      ),
+                    ),
+                  ),
+                  gap(16),
+                  if (tab == 0)
+                    overview
+                  else if (tab == 1)
+                    detail
+                  else if (tab == 2)
+                    sizeTab
+                  else
+                    milestonesTab,
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-              child: actionButton,
-            ),
+        child: AdaptivePageFrame(
+          maxWidth: 1020,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            child: actionButton,
           ),
         ),
       ),

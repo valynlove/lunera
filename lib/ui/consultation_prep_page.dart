@@ -13,6 +13,7 @@ import '../lock.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
+import 'responsive.dart';
 
 /// Halaman persiapan konsultasi dokter pintar (Smart Consultation Prep).
 /// Mengelompokkan gejala jurnal berulang, mengkorelasikan dengan ritme dosis,
@@ -269,9 +270,11 @@ class _ConsultationPrepPageState extends ConsumerState<ConsultationPrepPage> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 48),
-        children: [
+      body: AdaptivePageFrame(
+        maxWidth: 960,
+        child: ListView(
+          padding: context.pagePadding(top: 8, bottom: 48),
+          children: [
           // 1. Appointment Overview Card
           AppCard(
             child: Column(
@@ -898,6 +901,7 @@ class _ConsultationPrepPageState extends ConsumerState<ConsultationPrepPage> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

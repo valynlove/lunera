@@ -26,7 +26,7 @@ enum CompanionMood {
   shocked,
   shy;
 
-  String get assetPath => 'assets/images/companion/$name.png';
+  String get assetPath => 'assets/images/companion/regular/$name.png';
 }
 
 /// Renders the Lunera companion illustration for a given [mood] with an optional ambient glow.

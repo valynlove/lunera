@@ -82,7 +82,7 @@ class WeekCard extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
-      decoration: cardBox(context, radius: 28),
+      decoration: cardBox(context, radius: R.card),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,29 +105,37 @@ class WeekCard extends ConsumerWidget {
                 ],
               ),
             ),
-            InkWell(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                ref.read(tabProvider.notifier).state = 0;
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      tr('Levels'),
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: C.iconActive,
-                      ),
+            Semantics(
+              button: true,
+              label: tr('Levels'),
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(tabProvider.notifier).state = 0;
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 44),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          tr('Levels'),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: C.iconActive,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(LucideIcons.chevronRight,
+                            size: 16, color: C.iconActive),
+                      ],
                     ),
-                    const SizedBox(width: 2),
-                    const Icon(LucideIcons.chevronRight,
-                        size: 16, color: C.iconActive),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -192,10 +200,10 @@ class WeekCard extends ConsumerWidget {
         gap(4),
         Text(
           summaryTexts.join('  •  '),
-          style: TextStyle(
-              fontSize: 11,
+          style: tabular(TextStyle(
+              fontSize: 11.5,
               color: Pastel.mist.withValues(alpha: 0.85),
-              fontWeight: FontWeight.w500),
+              fontWeight: FontWeight.w500)),
         ),
       ]),
     );

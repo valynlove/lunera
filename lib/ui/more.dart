@@ -16,6 +16,7 @@ import 'guides_page.dart';
 import 'insights.dart';
 import 'pickup_assistant_sheet.dart';
 import 'profile_page.dart';
+import 'responsive.dart';
 import 'about_sheet.dart';
 import 'consultation_prep_page.dart';
 import 'moments_page.dart';
@@ -211,11 +212,11 @@ class MorePage extends ConsumerWidget {
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: tabular(const TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
-                ),
+                )),
               ),
               const SizedBox(height: 2),
               Text(
@@ -234,398 +235,421 @@ class MorePage extends ConsumerWidget {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
-      children: [
-        Text(tr('More'), style: display(40)),
-        gap(16),
-
-        // 1. User Profile Hero Card (Eternal Dusk Glassmorphic Membership Card)
-        Container(
-          margin: const EdgeInsets.only(top: 4, bottom: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: C.lavender.withValues(alpha: 0.42),
-              width: 1.25,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: C.voidBg.withValues(alpha: 0.55),
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              ),
-              BoxShadow(
-                color: C.aurora.withValues(alpha: 0.22),
-                blurRadius: 20,
-                offset: const Offset(0, -1),
-              ),
-            ],
+    final heroCard = Container(
+      margin: const EdgeInsets.only(top: 4, bottom: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: C.lavender.withValues(alpha: 0.42),
+          width: 1.25,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: C.voidBg.withValues(alpha: 0.55),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(27),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/profile_banner_dusk.jpg',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    errorBuilder: (_, __, ___) => Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            C.nebula.withValues(alpha: 0.94),
-                            C.midnight.withValues(alpha: 0.98),
+          BoxShadow(
+            color: C.aurora.withValues(alpha: 0.22),
+            blurRadius: 20,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(27),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/profile_banner_dusk.jpg',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                errorBuilder: (_, __, ___) => Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        C.nebula.withValues(alpha: 0.94),
+                        C.midnight.withValues(alpha: 0.98),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      C.voidBg.withValues(alpha: 0.48),
+                      C.midnight.withValues(alpha: 0.72),
+                      C.voidBg.withValues(alpha: 0.62),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.center,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(27),
+                onTap: openProfile,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Top Header Row
+                      LayoutBuilder(
+                        builder: (context, constraints) => Row(
+                          children: [
+                            const Icon(
+                              LucideIcons.moonStar,
+                              size: 15,
+                              color: C.lavender,
+                            ),
+                            const SizedBox(width: 6),
+                            const Flexible(
+                              child: Text(
+                                appName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: C.mist,
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                            ),
+                            if (constraints.maxWidth >= 280) ...[
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        C.lavender.withValues(alpha: 0.38),
+                                        C.lavender.withValues(alpha: 0.08),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else
+                              const Spacer(),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              flex: 2,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: C.midnight.withValues(alpha: 0.48),
+                                  border: Border.all(
+                                    color: C.lavender.withValues(alpha: 0.4),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      LucideIcons.pencil,
+                                      size: 12,
+                                      color: C.mist,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        tr('Edit Profile'),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          C.voidBg.withValues(alpha: 0.48),
-                          C.midnight.withValues(alpha: 0.72),
-                          C.voidBg.withValues(alpha: 0.62),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.center,
-                        colors: [
-                          Colors.white.withValues(alpha: 0.12),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(27),
-                    onTap: openProfile,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                      const SizedBox(height: 14),
+                      // Middle Horizontal Profile Row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Top Header Row
-                          LayoutBuilder(
-                            builder: (context, constraints) => Row(
+                          Container(
+                            padding: const EdgeInsets.all(3.5),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: C.lavender.withValues(alpha: 0.72),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: C.aurora.withValues(alpha: 0.42),
+                                  blurRadius: 18,
+                                  spreadRadius: 1,
+                                ),
+                                BoxShadow(
+                                  color: C.rose.withValues(alpha: 0.24),
+                                  blurRadius: 22,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: const UserAvatar(size: 72),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
-                                  LucideIcons.moonStar,
-                                  size: 15,
-                                  color: C.lavender,
-                                ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  appName,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: C.mist,
-                                    letterSpacing: 0.6,
+                                Text(
+                                  displayName ?? appName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 0.2,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Container(
-                                    height: 1,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          C.lavender.withValues(alpha: 0.38),
-                                          C.lavender.withValues(alpha: 0.08),
-                                        ],
-                                      ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      username == null && user?.email != null
+                                          ? LucideIcons.mail
+                                          : LucideIcons.user,
+                                      size: 13,
+                                      color: C.lavender.withValues(alpha: 0.9),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: constraints.maxWidth * 0.58,
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 9,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: C.midnight.withValues(alpha: 0.48),
-                                      border: Border.all(
-                                        color:
-                                            C.lavender.withValues(alpha: 0.4),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          LucideIcons.pencil,
-                                          size: 12,
-                                          color: C.mist,
+                                    const SizedBox(width: 5),
+                                    Expanded(
+                                      child: Text(
+                                        username != null
+                                            ? '@$username'
+                                            : (user?.email != null
+                                                ? user!.email!
+                                                : tr('Lunera User')),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          color: C.mist.withValues(alpha: 0.88),
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                        const SizedBox(width: 5),
-                                        Flexible(
-                                          child: Text(
-                                            tr('Edit Profile'),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white,
-                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: C.nebula.withValues(alpha: 0.55),
+                                    border: Border.all(
+                                      color: C.lavender.withValues(alpha: 0.35),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        user != null
+                                            ? LucideIcons.shieldCheck
+                                            : LucideIcons.shield,
+                                        size: 13,
+                                        color: user != null
+                                            ? Pastel.mint
+                                            : C.lavender,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Flexible(
+                                        child: Text(
+                                          user != null
+                                              ? tr('Cloud Synced')
+                                              : tr('Local Account'),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          // Middle Horizontal Profile Row
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(3.5),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: C.lavender.withValues(alpha: 0.72),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: C.aurora.withValues(alpha: 0.42),
-                                      blurRadius: 18,
-                                      spreadRadius: 1,
-                                    ),
-                                    BoxShadow(
-                                      color: C.rose.withValues(alpha: 0.24),
-                                      blurRadius: 22,
-                                      spreadRadius: 2,
-                                    ),
-                                  ],
-                                ),
-                                child: const UserAvatar(size: 72),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      displayName ?? appName,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          username == null &&
-                                                  user?.email != null
-                                              ? LucideIcons.mail
-                                              : LucideIcons.user,
-                                          size: 13,
-                                          color:
-                                              C.lavender.withValues(alpha: 0.9),
-                                        ),
-                                        const SizedBox(width: 5),
-                                        Expanded(
-                                          child: Text(
-                                            username != null
-                                                ? '@$username'
-                                                : (user?.email != null
-                                                    ? user!.email!
-                                                    : tr('Lunera User')),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 12.5,
-                                              color: C.mist
-                                                  .withValues(alpha: 0.88),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: C.nebula.withValues(alpha: 0.55),
-                                        border: Border.all(
-                                          color: C.lavender
-                                              .withValues(alpha: 0.35),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            user != null
-                                                ? LucideIcons.shieldCheck
-                                                : LucideIcons.shield,
-                                            size: 13,
-                                            color: user != null
-                                                ? Pastel.mint
-                                                : C.lavender,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Flexible(
-                                            child: Text(
-                                              user != null
-                                                  ? tr('Cloud Synced')
-                                                  : tr('Local Account'),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 11.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      // Ornamental Divider
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    C.lavender.withValues(alpha: 0.35),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(height: 14),
-                          // Ornamental Divider
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        C.lavender.withValues(alpha: 0.35),
-                                      ],
-                                    ),
-                                  ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Icon(
+                              LucideIcons.sparkles,
+                              size: 12,
+                              color: C.lavender.withValues(alpha: 0.85),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    C.lavender.withValues(alpha: 0.35),
+                                    Colors.transparent,
+                                  ],
                                 ),
                               ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                                child: Icon(
-                                  LucideIcons.sparkles,
-                                  size: 12,
-                                  color: C.lavender.withValues(alpha: 0.85),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        C.lavender.withValues(alpha: 0.35),
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          // Mini Stats Strip
-                          Row(
-                            children: [
-                              profileStat(journeyLabel, tr('Journey')),
-                              Container(
-                                width: 1,
-                                height: 22,
-                                color: C.lavender.withValues(alpha: 0.22),
-                              ),
-                              profileStat(
-                                '${therapies.length}',
-                                tr('Therapies'),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 22,
-                                color: C.lavender.withValues(alpha: 0.22),
-                              ),
-                              profileStat(
-                                '${takenLogs.length}',
-                                tr('Doses'),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 22,
-                                color: C.lavender.withValues(alpha: 0.22),
-                              ),
-                              profileStat(adherenceLabel, tr('Adherence')),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          // Tagline
-                          Text(
-                            tr(tagline),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontStyle: FontStyle.italic,
-                              color: C.mist.withValues(alpha: 0.82),
-                              letterSpacing: 0.3,
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 10),
+                      // Mini Stats Strip
+                      Row(
+                        children: [
+                          profileStat(journeyLabel, tr('Journey')),
+                          Container(
+                            width: 1,
+                            height: 22,
+                            color: C.lavender.withValues(alpha: 0.22),
+                          ),
+                          profileStat(
+                            '${therapies.length}',
+                            tr('Therapies'),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 22,
+                            color: C.lavender.withValues(alpha: 0.22),
+                          ),
+                          profileStat(
+                            '${takenLogs.length}',
+                            tr('Doses'),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 22,
+                            color: C.lavender.withValues(alpha: 0.22),
+                          ),
+                          profileStat(adherenceLabel, tr('Adherence')),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Tagline
+                      Text(
+                        tr(tagline),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontStyle: FontStyle.italic,
+                          color: C.mist.withValues(alpha: 0.82),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+
+    final systemSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: tr('System')),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              tile(
+                icon: LucideIcons.slidersHorizontal,
+                color: C.peony,
+                title: tr('Settings'),
+                subtitle: tr('Appearance, units, reminders, security & backup'),
+                onTap: () => openPage(const SettingsPage()),
+              ),
+              const Divider(height: 1, indent: 68),
+              tile(
+                icon: LucideIcons.info,
+                color: Pastel.lilac,
+                title: tr('About {0}', [appName]),
+                subtitle: tr('Version, mission, and medical disclaimer'),
+                onTap: () => showAboutLuneraSheet(context),
+              ),
+            ],
           ),
         ),
+      ],
+    );
 
-        // 2. Health & Journey
+    final healthAndTools = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         SectionHeader(title: tr('Health & Journey')),
         AppCard(
           padding: EdgeInsets.zero,
@@ -668,8 +692,6 @@ class MorePage extends ConsumerWidget {
             ],
           ),
         ),
-
-        // 3. Care & Assistant Tools
         SectionHeader(title: tr('Care & Assistant Tools')),
         AppCard(
           padding: EdgeInsets.zero,
@@ -722,27 +744,47 @@ class MorePage extends ConsumerWidget {
             ],
           ),
         ),
+      ],
+    );
 
-        // 4. System & Settings
-        SectionHeader(title: tr('System')),
-        AppCard(
-          padding: EdgeInsets.zero,
+    return ListView(
+      padding: context.pagePadding(top: 12, bottom: 36),
+      children: [
+        AdaptivePageFrame(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              tile(
-                icon: LucideIcons.slidersHorizontal,
-                color: C.peony,
-                title: tr('Settings'),
-                subtitle: tr('Appearance, units, reminders, security & backup'),
-                onTap: () => openPage(const SettingsPage()),
+              Semantics(
+                header: true,
+                child:
+                    Text(tr('More'), style: display(context.isWide ? 36 : 40)),
               ),
-              const Divider(height: 1, indent: 68),
-              tile(
-                icon: LucideIcons.info,
-                color: Pastel.lilac,
-                title: tr('About {0}', [appName]),
-                subtitle: tr('Version, mission, and medical disclaimer'),
-                onTap: () => showAboutLuneraSheet(context),
+              gap(16),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= kSplitMinWidth) {
+                    return AdaptiveSplitView(
+                      primaryFlex: 5,
+                      secondaryFlex: 7,
+                      primary: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          heroCard,
+                          systemSection,
+                        ],
+                      ),
+                      secondary: healthAndTools,
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      heroCard,
+                      healthAndTools,
+                      systemSection,
+                    ],
+                  );
+                },
               ),
             ],
           ),

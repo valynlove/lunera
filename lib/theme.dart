@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'l10n.dart';
 
 const appName = 'Lunera';
@@ -10,7 +11,8 @@ const tagline = 'Every Phase, Your Own.';
 /// Eternal Dusk color tokens combining Midnight Aurora with Vice City Sunset warmth.
 class C {
   static const voidBg = Color(0xFF090817); // Deepest obsidian void
-  static const midnight = Color(0xFF11102B); // Primary nocturnal midnight canvas
+  static const midnight =
+      Color(0xFF11102B); // Primary nocturnal midnight canvas
   static const nebula = Color(0xFF292052); // Elevated cosmic plum surface
   static const aurora = Color(0xFF8065E8); // Primary electric aurora violet
   static const violet = Color(0xFFA58BFF); // Luminous violet highlight
@@ -99,6 +101,30 @@ TextStyle wordmark(double size, {Color? color, FontWeight? weight}) =>
       color: color,
     );
 
+/// 4pt spacing scale for consistent vertical & horizontal rhythm.
+class S {
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 20;
+  static const double xxl = 24;
+  static const double xxxl = 32;
+}
+
+/// Concentric radius scale (outer = inner + padding).
+class R {
+  static const double chip = 10;
+  static const double inner = 12;
+  static const double card = 22;
+  static const double modal = 26;
+  static const double pill = 999;
+}
+
+/// Applies tabular numerals for aligned countdowns, doses, lab values, and stats.
+TextStyle tabular(TextStyle base) =>
+    base.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
 ThemeData buildTheme([Brightness b = Brightness.dark]) {
   const fg = C.mist;
   final scheme =
@@ -137,10 +163,77 @@ ThemeData buildTheme([Brightness b = Brightness.dark]) {
     ),
   );
   return base.copyWith(
+    hoverColor: C.lavender.withValues(alpha: 0.06),
+    focusColor: C.violet.withValues(alpha: 0.14),
+    highlightColor: C.aurora.withValues(alpha: 0.10),
     textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme)
         .apply(bodyColor: fg, displayColor: fg),
     iconTheme: const IconThemeData(color: C.iconDefault, size: 24),
     primaryIconTheme: const IconThemeData(color: C.iconActive, size: 24),
+    iconButtonTheme: IconButtonThemeData(
+      style: ButtonStyle(
+        tapTargetSize: MaterialTapTargetSize.padded,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) {
+            return C.violet.withValues(alpha: 0.18);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return C.lavender.withValues(alpha: 0.08);
+          }
+          return null;
+        }),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: ButtonStyle(
+        tapTargetSize: MaterialTapTargetSize.padded,
+        side: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) {
+            return const BorderSide(color: C.lavender, width: 1.5);
+          }
+          return null;
+        }),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: ButtonStyle(
+        tapTargetSize: MaterialTapTargetSize.padded,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) {
+            return C.violet.withValues(alpha: 0.14);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return C.lavender.withValues(alpha: 0.06);
+          }
+          return null;
+        }),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: ButtonStyle(
+        tapTargetSize: MaterialTapTargetSize.padded,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) {
+            return C.violet.withValues(alpha: 0.14);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return C.lavender.withValues(alpha: 0.06);
+          }
+          return null;
+        }),
+      ),
+    ),
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.hovered) ||
+            states.contains(WidgetState.dragged)) {
+          return C.lavender.withValues(alpha: 0.45);
+        }
+        return C.lavender.withValues(alpha: 0.24);
+      }),
+      radius: const Radius.circular(999),
+      thickness: const WidgetStatePropertyAll(6),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: C.midnight.withValues(alpha: 0.78),
@@ -228,22 +321,23 @@ Widget appBackdrop(BuildContext context, Widget? child) {
   );
 }
 
-/// Layered dark card decoration with subtle lavender hairline border and ambient shadow.
-BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = false}) {
+/// Layered dark card decoration with subtle lavender hairline border and grounded shadow.
+BoxDecoration cardBox(BuildContext c,
+    {double radius = R.card, bool highlight = false}) {
   return BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: highlight
           ? [
-              C.nebula.withValues(alpha: 0.90),
-              C.surface.withValues(alpha: 0.92),
-              C.deepCard.withValues(alpha: 0.95),
+              C.nebula.withValues(alpha: 0.92),
+              C.surface.withValues(alpha: 0.94),
+              C.deepCard.withValues(alpha: 0.96),
             ]
           : [
-              C.nebula.withValues(alpha: 0.70),
-              C.surface.withValues(alpha: 0.84),
-              C.deepCard.withValues(alpha: 0.88),
+              C.nebula.withValues(alpha: 0.62),
+              C.surface.withValues(alpha: 0.88),
+              C.deepCard.withValues(alpha: 0.94),
             ],
       stops: const [0.0, 0.55, 1.0],
     ),
@@ -251,15 +345,15 @@ BoxDecoration cardBox(BuildContext c, {double radius = 28, bool highlight = fals
     border: Border.all(
       color: highlight
           ? C.violet.withValues(alpha: 0.55)
-          : C.lavender.withValues(alpha: 0.18),
+          : C.lavender.withValues(alpha: 0.16),
       width: highlight ? 1.2 : 1.0,
     ),
     boxShadow: [
       BoxShadow(
         color: (highlight ? C.aurora : C.voidBg)
-            .withValues(alpha: highlight ? 0.22 : 0.44),
-        blurRadius: highlight ? 24 : 18,
-        offset: const Offset(0, 4),
+            .withValues(alpha: highlight ? 0.18 : 0.36),
+        blurRadius: highlight ? 20 : 16,
+        offset: const Offset(0, 6),
       ),
     ],
   );
@@ -297,43 +391,61 @@ class PillTabs<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = Theme.of(context).colorScheme.onSurface;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: fg.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: C.lavender.withValues(alpha: 0.12)),
       ),
       child: Row(children: [
         for (final it in items)
           Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onChanged(it.$1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: it.$1 == value
-                      ? const LinearGradient(
-                          colors: [C.aurora, C.magenta],
-                        )
-                      : null,
+            child: Semantics(
+              button: true,
+              selected: it.$1 == value,
+              label: it.$2,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
                   borderRadius: BorderRadius.circular(999),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      it.$2,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: it.$1 == value
-                            ? Colors.white
-                            : fg.withValues(alpha: 0.72),
+                  hoverColor: C.lavender.withValues(alpha: 0.06),
+                  focusColor: C.violet.withValues(alpha: 0.16),
+                  onTap: () => onChanged(it.$1),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: AnimatedContainer(
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: it.$1 == value
+                            ? const LinearGradient(
+                                colors: [C.aurora, C.magenta],
+                              )
+                            : null,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            it.$2,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                              color: it.$1 == value
+                                  ? Colors.white
+                                  : fg.withValues(alpha: 0.78),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -419,7 +531,8 @@ class _MoonPainter extends CustomPainter {
 
     final moon = Path.combine(
       PathOperation.difference,
-      Path()..addOval(Rect.fromCircle(center: const Offset(24, 24), radius: 16)),
+      Path()
+        ..addOval(Rect.fromCircle(center: const Offset(24, 24), radius: 16)),
       Path()
         ..addOval(Rect.fromCircle(center: const Offset(32, 19), radius: 13)),
     );
@@ -639,23 +752,83 @@ class _NightPainter extends CustomPainter {
   bool shouldRepaint(_NightPainter o) => false;
 }
 
-Future<T?> showSheet<T>(BuildContext c, Widget w) => showModalBottomSheet<T>(
+/// Adaptive modal container: bottom sheet on compact windows (< 600dp), centered dialog on tablets/desktop.
+Future<T?> showSheet<T>(BuildContext c, Widget w) {
+  final isWide = MediaQuery.sizeOf(c).width >= 600;
+  if (!isWide) {
+    return showModalBottomSheet<T>(
       context: c,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (b) => Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: Padding(
-            padding:
-                EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(b).viewInsets.bottom + 24),
-            child: SingleChildScrollView(child: w),
-          ),
+      builder: (b) => SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+              20, 0, 20, MediaQuery.of(b).viewInsets.bottom + 24),
+          child: SingleChildScrollView(child: w),
         ),
       ),
     );
+  }
+  return showDialog<T>(
+    context: c,
+    builder: (b) {
+      final maxH = MediaQuery.sizeOf(b).height * 0.88;
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 560, maxHeight: maxH),
+          child: Container(
+            decoration: BoxDecoration(
+              color: C.deepCard,
+              borderRadius: BorderRadius.circular(R.modal),
+              border: Border.all(
+                color: C.lavender.withValues(alpha: 0.22),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: C.voidBg.withValues(alpha: 0.56),
+                  blurRadius: 28,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 8, 0),
+                    child: IconButton(
+                      onPressed: () => Navigator.of(b).pop(),
+                      icon: const Icon(LucideIcons.x, size: 20),
+                      tooltip: b.tr('Close'),
+                      constraints:
+                          const BoxConstraints(minWidth: 48, minHeight: 48),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                        24, 0, 24, MediaQuery.of(b).viewInsets.bottom + 24),
+                    child: w,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
 
-/// Layered dark container card with hairline border and soft ambient shadow.
+/// Layered dark container card with hairline border and grounded shadow.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -673,7 +846,7 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(R.card),
       side: BorderSide(
         color: highlight
             ? C.violet.withValues(alpha: 0.55)
@@ -689,14 +862,14 @@ class AppCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: highlight
               ? [
-                  C.nebula.withValues(alpha: 0.90),
-                  C.surface.withValues(alpha: 0.92),
-                  C.deepCard.withValues(alpha: 0.95),
+                  C.nebula.withValues(alpha: 0.92),
+                  C.surface.withValues(alpha: 0.94),
+                  C.deepCard.withValues(alpha: 0.96),
                 ]
               : [
-                  C.nebula.withValues(alpha: 0.70),
-                  C.surface.withValues(alpha: 0.84),
-                  C.deepCard.withValues(alpha: 0.88),
+                  C.nebula.withValues(alpha: 0.62),
+                  C.surface.withValues(alpha: 0.88),
+                  C.deepCard.withValues(alpha: 0.94),
                 ],
           stops: const [0.0, 0.55, 1.0],
         ),
@@ -704,9 +877,9 @@ class AppCard extends StatelessWidget {
         shadows: [
           BoxShadow(
             color: (highlight ? C.aurora : C.voidBg)
-                .withValues(alpha: highlight ? 0.22 : 0.44),
-            blurRadius: highlight ? 24 : 18,
-            offset: const Offset(0, 4),
+                .withValues(alpha: highlight ? 0.18 : 0.36),
+            blurRadius: highlight ? 20 : 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -716,6 +889,8 @@ class AppCard extends StatelessWidget {
         shape: shape,
         child: InkWell(
           onTap: onTap,
+          hoverColor: onTap != null ? C.lavender.withValues(alpha: 0.06) : null,
+          focusColor: onTap != null ? C.violet.withValues(alpha: 0.14) : null,
           child: Padding(padding: padding, child: child),
         ),
       ),
@@ -743,16 +918,18 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.78),
-                  letterSpacing: 0.2,
-                ),
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.78),
+                    letterSpacing: 0.2,
+                  ),
+            ),
           ),
           if (actionLabel != null && onAction != null)
             InkWell(
@@ -797,7 +974,8 @@ Widget iconBadge(
 
 Widget gap(double h) => SizedBox(height: h);
 
-Future<bool> confirm(BuildContext c, String text, {String ok = 'Delete'}) async =>
+Future<bool> confirm(BuildContext c, String text,
+        {String ok = 'Delete'}) async =>
     (await showDialog<bool>(
       context: c,
       builder: (d) => AlertDialog(
@@ -887,7 +1065,8 @@ class _LakePainter extends CustomPainter {
         Offset(rnd.nextDouble() * w, rnd.nextDouble() * h * 0.5),
         0.5 + rnd.nextDouble() * 1.1,
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.3 + rnd.nextDouble() * 0.6),
+          ..color =
+              Colors.white.withValues(alpha: 0.3 + rnd.nextDouble() * 0.6),
       );
     }
 
@@ -952,7 +1131,8 @@ class _LakePainter extends CustomPainter {
     canvas.translate(0, horizon * 2);
     canvas.scale(1, -1);
     for (final l in _far) {
-      canvas.drawPath(ridge(l), Paint()..color = C.nebula.withValues(alpha: 0.35));
+      canvas.drawPath(
+          ridge(l), Paint()..color = C.nebula.withValues(alpha: 0.35));
     }
     for (final l in _near) {
       canvas.drawPath(

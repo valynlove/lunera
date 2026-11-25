@@ -15,6 +15,7 @@ import '../moments.dart';
 import '../repo.dart';
 import '../schedule.dart';
 import '../theme.dart';
+import 'responsive.dart';
 
 /// Halaman album visual kenangan dan tonggak transisi (Lunera Moments).
 /// Menyimpan foto kenangan dan catatan refleksi secara privat dan aman di perangkat lokal.
@@ -45,12 +46,14 @@ class _MomentsPageState extends ConsumerState<MomentsPage> {
       builder: (d) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: C.midnight,
-            border: Border.all(color: C.lavender.withValues(alpha: 0.35)),
-          ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: C.midnight,
+              border: Border.all(color: C.lavender.withValues(alpha: 0.35)),
+            ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -119,6 +122,7 @@ class _MomentsPageState extends ConsumerState<MomentsPage> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -179,92 +183,107 @@ class _MomentsPageState extends ConsumerState<MomentsPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 48),
+        padding: context.pagePadding(top: 8, bottom: 48),
         children: [
-          // Subtitle card
-          Text(
-            tr('A private visual scrapbook celebrating milestones and cherished memories on your path.'),
-            style: TextStyle(
-              fontSize: 12.5,
-              color: Pastel.mist.withValues(alpha: 0.85),
-              height: 1.35,
-            ),
-          ),
-          gap(14),
-
-          // Category filter bar
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
+          AdaptivePageFrame(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FilterChip(
-                  selected: _selectedCategory == 'all',
-                  label: Text(tr('All Moments')),
-                  onSelected: (_) => setState(() => _selectedCategory = 'all'),
-                ),
-                const SizedBox(width: 8),
-                for (final cat in momentCategories) ...[
-                  FilterChip(
-                    selected: _selectedCategory == cat.id,
-                    avatar: Icon(cat.icon, size: 14),
-                    label: Text(cat.name),
-                    onSelected: (_) =>
-                        setState(() => _selectedCategory = cat.id),
+                // Subtitle card
+                Text(
+                  tr('A private visual scrapbook celebrating milestones and cherished memories on your path.'),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: Pastel.mist.withValues(alpha: 0.85),
+                    height: 1.35,
                   ),
-                  const SizedBox(width: 8),
-                ],
+                ),
+                gap(14),
+
+                // Category filter bar
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      FilterChip(
+                        selected: _selectedCategory == 'all',
+                        label: Text(tr('All Moments')),
+                        onSelected: (_) =>
+                            setState(() => _selectedCategory = 'all'),
+                      ),
+                      const SizedBox(width: 8),
+                      for (final cat in momentCategories) ...[
+                        FilterChip(
+                          selected: _selectedCategory == cat.id,
+                          avatar: Icon(cat.icon, size: 14),
+                          label: Text(cat.name),
+                          onSelected: (_) =>
+                              setState(() => _selectedCategory = cat.id),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ),
+                gap(16),
+
+                // Moments list or empty state
+                if (filtered.isEmpty)
+                  AppCard(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 36),
+                    child: Column(
+                      children: [
+                        iconBadge(LucideIcons.camera, Pastel.rose),
+                        gap(14),
+                        Text(
+                          tr('No visual moments yet'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        gap(6),
+                        Text(
+                          tr('Capture transition milestones, affirming outfits, self-love reflections, or anniversary smiles. All photos remain 100% private on your device.'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Pastel.mist.withValues(alpha: 0.8),
+                            height: 1.35,
+                          ),
+                        ),
+                        gap(18),
+                        pillButton(
+                          tr('Create First Moment'),
+                          () => _openEditor(),
+                          icon: LucideIcons.plus,
+                          color: C.peony,
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  AdaptiveGrid(
+                    compactColumns: 1,
+                    mediumColumns: 2,
+                    expandedColumns: 3,
+                    minColumnWidth: 260,
+                    children: [
+                      for (final m in filtered)
+                        _MomentCard(
+                          moment: m,
+                          journeyStart: journeyStart,
+                          onTap: () => _viewFullscreen(m),
+                          onEdit: () => _openEditor(m),
+                          onDelete: () => _confirmDelete(m),
+                        ),
+                    ],
+                  ),
               ],
             ),
           ),
-          gap(16),
-
-          // Moments list or empty state
-          if (filtered.isEmpty)
-            AppCard(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
-              child: Column(
-                children: [
-                  iconBadge(LucideIcons.camera, Pastel.rose),
-                  gap(14),
-                  Text(
-                    tr('No visual moments yet'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  gap(6),
-                  Text(
-                    tr('Capture transition milestones, affirming outfits, self-love reflections, or anniversary smiles. All photos remain 100% private on your device.'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Pastel.mist.withValues(alpha: 0.8),
-                      height: 1.35,
-                    ),
-                  ),
-                  gap(18),
-                  pillButton(
-                    tr('Create First Moment'),
-                    () => _openEditor(),
-                    icon: LucideIcons.plus,
-                    color: C.peony,
-                  ),
-                ],
-              ),
-            )
-          else
-            for (final m in filtered) ...[
-              _MomentCard(
-                moment: m,
-                journeyStart: journeyStart,
-                onTap: () => _viewFullscreen(m),
-                onEdit: () => _openEditor(m),
-                onDelete: () => _confirmDelete(m),
-              ),
-              gap(14),
-            ],
         ],
       ),
     );

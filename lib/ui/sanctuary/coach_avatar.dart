@@ -16,6 +16,14 @@ extension CoachMoodAssets on CoachMood {
         CoachMood.celebrate => CompanionMood.happy,
         CoachMood.think => CompanionMood.think,
         CoachMood.proud => CompanionMood.love,
+        CoachMood.ready => CompanionMood.cheer,
+        CoachMood.focus => CompanionMood.ponder,
+        CoachMood.breathe => CompanionMood.calm,
+        CoachMood.stretch => CompanionMood.happy,
+        CoachMood.gentle => CompanionMood.care,
+        CoachMood.effort => CompanionMood.laugh,
+        CoachMood.rest => CompanionMood.sleepy,
+        CoachMood.listen => CompanionMood.ponder,
       };
 }
 

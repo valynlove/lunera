@@ -12,7 +12,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-A58BFF?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-D76ABF?logo=firebase&logoColor=white)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-7DE2C7?labelColor=11102B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.35-F2A17C?labelColor=11102B)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.2.41-F2A17C?labelColor=11102B)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Direct Download APK](https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk) • [📋 Changelog](CHANGELOG.md)
 
@@ -26,10 +26,18 @@
 
 ---
 
-## 🆕 Recent Highlights (`v2.2.35`)
 
-- **Scaled Companion & Coach Mascots:** Refined `CompanionAvatar` and `CoachAvatar` sizing across cards, headers, empty states, guided injection, voice warm-up, Movement Coach screens, and the 2×2 Android Movement Coach widget (`50dp × 58dp`) for clear visual presence without crowding compact layouts.
-- **HRT-Aware Movement Coach (`v2.2.34`):** Guilt-free personal trainer inside Twilight Sanctuary featuring 4 HRT-aware preset programs, Custom Routine Builder, 2-pose animated exercise diagrams, injection-site & trough-window adaptation, zero-streak-penalty *Ease Back In* flow, and a 2×2 Android Home Screen widget.
+## 🆕 Recent Highlights (`v2.2.41`)
+
+- **Wordmark Branding (`v2.2.41`):** Updated the landing page header/footer branding, Flutter splash screen wordmark, and About Lunera showcase wordmark to use `lunera_text.png`.
+
+- **Adaptive Multi-Device Layout & Visual System (`v2.2.40`):** Added window-first responsive navigation (Bottom Bar on phones, Navigation Rail on tablets, Persistent Sidebar with `Alt+1–5` shortcuts on desktop), split views, responsive grids, adaptive modal dialogs, tabular numerals, `Reduce Motion` support, and `48×48dp` accessible touch targets across screens.
+- **Companion Asset Organization (`v2.2.39`):** Organized the 20 regular companion mascot sprites into `assets/images/companion/regular/` alongside `assets/images/companion/coach/`.
+- **16 Sporty Coach Expressions & Interactive Guidance (`v2.2.38`):** Expanded `CoachMood` to 16 expressions (`ready`, `focus`, `breathe`, `stretch`, `gentle`, `effort`, `rest`, `listen` + original 8), paired with interactive _Body check-in_ chips on Movement Coach and dynamic live-session cues.
+- **Interactive Ambient Companion (`v2.2.37`):** Long-press _Quiet Hugs_, rapid-tap _Playful Moment_ reactions across 20 `CompanionMood` expressions, and offline _Calm me_, _Care tip_, and _Smile_ topic chips with direct shortcuts to Starlight Breathing and Care Guides.
+- **New Eternal Dusk App Launcher & Orbital Emblem (`v2.2.36`):** Refreshed the Android/iOS/macOS/Windows launcher icons (including Android 8+ adaptive icons) with the glowing _Lunera_ crescent crest, and updated the in-app `MoonLogo`, Web/PWA icons, and showcase logos to the new orbital crescent emblem.
+- **Scaled Companion & Coach Mascots (`v2.2.35`):** Refined `CompanionAvatar` and `CoachAvatar` sizing across cards, headers, empty states, guided injection, voice warm-up, Movement Coach screens, and the 2×2 Android Movement Coach widget (`50dp × 58dp`) for clear visual presence without crowding compact layouts.
+- **HRT-Aware Movement Coach (`v2.2.34`):** Guilt-free personal trainer inside Twilight Sanctuary featuring 4 HRT-aware preset programs, Custom Routine Builder, 2-pose animated exercise diagrams, injection-site & trough-window adaptation, zero-streak-penalty _Ease Back In_ flow, and a 2×2 Android Home Screen widget.
 - **Responsive Showcase & Split-ABI Releases (`v2.2.32–v2.2.33`):** Per-ABI Android APKs (`arm64-v8a`, `armeabi-v7a`, `x86_64`) for smaller downloads plus an accessible mobile/tablet navigation drawer on the landing page.
 
 ---
@@ -57,21 +65,24 @@ Lunera combines **Midnight Aurora** depth with **Vice City Sunset** warmth acros
 ## ✨ Key Features
 
 ### 🩺 Clinical Tracking, Scheduling & Insights
+
 - 📊 **Pharmacokinetic Level Simulations:** Multi-compartment pharmacokinetic curves for Estradiol and Testosterone (including long-acting esters & transdermal gel profiles), customizable target bands, upcoming scheduled dose projections, peak/trough estimates, and lab calibration with `<` / `>` censored comparators and `ng/L` / `µg/L` units.
 - 💉 **Visual Injection Site Map & Syringe Calculator:** Interactive Front & Back Lunera body diagram with tissue rest tracking, smart site rotation suggestions, Guided Calm Injection mode, and a live `mg` → `mL` / `U-100` draw-volume calculator in `DoseSheet`.
 - 📅 **Pharmacokinetic-Aware Timeline & Smart Care Alerts:** Week/month calendar grid with dose, trough lab window, journal, supply depletion, and appointment indicators, paired with a unified Smart Reminder Drawer (`CareAlertsSheet`).
 - 🩺 **Smart Consultation Prep & Doctor Visit Reports:** 90-day symptom clustering correlated with dose/trough rhythms, pre-visit document checklists, and one-tap Markdown or A4 PDF clinician summaries (automatically excluding private notes, journal entries, supplies, and measurements).
 - 📦 **Predictive Supply & Refill Horizon:** Inventory tracking for vials, syringes, wipes, and needles with automatic deduction upon dose intake and tiered refill forecasts (depleted, critical `<=7d`, reorder window `8–14d`).
-- 🔔 **Precision Offline Notifications:** Native local reminders (`flutter_local_notifications`) with exact alarm receivers, *"Mark taken"* & 15/30-minute snooze actions, optional trough bloodwork reminders, and discreet wellness masking by default.
+- 🔔 **Precision Offline Notifications:** Native local reminders (`flutter_local_notifications`) with exact alarm receivers, _"Mark taken"_ & 15/30-minute snooze actions, optional trough bloodwork reminders, and discreet wellness masking by default.
 
 ### 🌙 Companion, Sanctuary & Personal Journey
+
 - 💜 **Empathetic Ambient Companion & Sporty Coach Mascots:** 20-mood `CompanionAvatar` on Home (contextual greetings, imminent-dose & post-dose care, tap-to-cycle affirmations, reduced-motion support) plus 8-mood `CoachAvatar` in Movement Coach.
-- 🏃 **HRT-Aware Movement Coach:** Offline-first personal trainer inside Twilight Sanctuary with 4 preset programs (*Feminizing Focus*, *Masculinizing Focus*, *Bone & Heart Care*, *Low-Energy / Trough Recovery*), Custom Routine Builder, baseline calibration, active rest/hold timers, and 2-pose animated diagrams.
-- ✨ **Twilight Sanctuary Mini-Experiences:** Touch-ripple 4-4-6 breathing canvas (*Starlight Ripples*), 5-question *Safety & Dosing Sense* practice quiz, zero-punishment daily *Moonlight Lantern*, and unlockable *Voice Pitch Studio* (in-RAM YIN pitch + FFT spectral resonance/vocal weight analysis with zero audio saved, 4-step SOVTE warm-up, pitch pipe, and reading passages).
-- 📖 **Journal, Body Progress, Moments & Milestones:** Structured symptom check-ins & mood journal, dual-unit body measurement tracking with bra-size & WHR/chest trend charts (`fl_chart`), *Lunera Moments* visual scrapbook, and private local-only transition milestones behind biometric/PIN lock.
+- 🏃 **HRT-Aware Movement Coach:** Offline-first personal trainer inside Twilight Sanctuary with 4 preset programs (_Feminizing Focus_, _Masculinizing Focus_, _Bone & Heart Care_, _Low-Energy / Trough Recovery_), Custom Routine Builder, baseline calibration, active rest/hold timers, and 2-pose animated diagrams.
+- ✨ **Twilight Sanctuary Mini-Experiences:** Touch-ripple 4-4-6 breathing canvas (_Starlight Ripples_), 5-question _Safety & Dosing Sense_ practice quiz, zero-punishment daily _Moonlight Lantern_, and unlockable _Voice Pitch Studio_ (in-RAM YIN pitch + FFT spectral resonance/vocal weight analysis with zero audio saved, 4-step SOVTE warm-up, pitch pipe, and reading passages).
+- 📖 **Journal, Body Progress, Moments & Milestones:** Structured symptom check-ins & mood journal, dual-unit body measurement tracking with bra-size & WHR/chest trend charts (`fl_chart`), _Lunera Moments_ visual scrapbook, and private local-only transition milestones behind biometric/PIN lock.
 - 📚 **Care & HRT Guides Library:** 14 offline-first, bilingual (EN/ID) evidence-informed educational & harm-reduction articles with full-text search, category filters, and trusted references.
 
 ### 🔒 Privacy, Widgets & Ecosystem
+
 - 🔐 **Biometric / PIN Security & Decoy Mode:** 6-digit salted SHA-256 PIN lock (`flutter_secure_storage` + biometric `local_auth`), Decoy Calculator camouflage, and per-UID local data isolation.
 - 💾 **Encrypted Backups & Dual Safety:** Offline plain JSON, passphrase-protected AES-256-GCM + PBKDF2-HMAC-SHA256 (`.enc.json`) encrypted backups, standalone CSV/JSON history export, and optional Firebase Cloud Firestore sync.
 - 📱 **4 Android Home Screen Widgets:** Celestial-backdrop glanceable widgets for **Schedule**, **HRT Cycle Dial**, **Hormone Levels Chart**, and **2×2 Movement Coach** with quick **Start** / **Rest** actions and `widgetHide` privacy masking.
@@ -103,7 +114,7 @@ Lunera combines **Midnight Aurora** depth with **Vice City Sunset** warmth acros
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (Dart `>= 3.3.0 < 4.0.0`)
 - [Android Studio](https://developer.android.com/studio) or VS Code
-- *(Optional)* Firebase Project configured with Authentication and Cloud Firestore for cloud sync
+- _(Optional)_ Firebase Project configured with Authentication and Cloud Firestore for cloud sync
 
 ### Installation
 

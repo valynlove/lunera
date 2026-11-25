@@ -11,6 +11,7 @@ import '../../theme.dart';
 import '../../voice_pitch.dart';
 import '../../workout_coach.dart';
 import '../companion_avatar.dart';
+import '../responsive.dart';
 import 'moonlight_lantern_page.dart';
 import 'safety_quiz_page.dart';
 import 'starlight_breath_page.dart';
@@ -108,129 +109,126 @@ class _SanctuaryPageState extends State<SanctuaryPage> {
         ? tr('Best: {0}/5', [_state.quizBest])
         : tr('5 quick questions');
 
+    final sanctuaryCards = <Widget>[
+      _SanctuaryCard(
+        icon: LucideIcons.wind,
+        accent: C.lavender,
+        title: tr('Starlight Ripples & Breath'),
+        subtitle:
+            tr('Tap ripples and follow a slow 4-4-6 breath to ease tension'),
+        badgeText: tr('No score • Calming'),
+        onTap: () => _open(const StarlightBreathPage()),
+      ),
+      _SanctuaryCard(
+        icon: LucideIcons.shieldCheck,
+        accent: C.rose,
+        title: tr('Safety & Dosing Sense'),
+        subtitle: tr('5-question practice on dosing math, labs, and safe care'),
+        badgeText: quizMeta,
+        onTap: () => _open(const SafetyQuizPage()),
+      ),
+      _SanctuaryCard(
+        icon: LucideIcons.sparkles,
+        accent: C.coral,
+        title: tr('Moonlight Lantern'),
+        subtitle: tr(
+            'Light a quiet spark each day you visit — never wilts if you rest'),
+        badgeText: tr('{0} {0?spark|sparks}', [_state.sparks]),
+        showMintDot: canLight,
+        onTap: () => _open(const MoonlightLanternPage()),
+      ),
+      _SanctuaryCard(
+        icon: LucideIcons.dumbbell,
+        accent: Pastel.mint,
+        title: tr('Movement Coach'),
+        subtitle: tr(
+            'HRT-aware personal trainer with 2-pose guides & guilt-free pacing'),
+        badgeText: _workoutSessionsThisMonth > 0
+            ? tr('{0} {0?session|sessions} this month',
+                [_workoutSessionsThisMonth])
+            : tr('No streaks • Adaptive'),
+        onTap: () => _open(const WorkoutCoachPage()),
+      ),
+      if (_voiceUnlocked)
+        _SanctuaryCard(
+          icon: LucideIcons.mic,
+          accent: C.violet,
+          title: tr('Voice Pitch Studio'),
+          subtitle: tr(
+              'Gentle voice warm-up, reading prompts & live pitch category check'),
+          badgeText: tr('Optional • On-device'),
+          onTap: () => _open(const VoicePitchPage()),
+        ),
+    ];
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
+          padding: context.pagePadding(top: 12, bottom: 36),
           children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(LucideIcons.arrowLeft),
-                  tooltip: tr('Back'),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    tr('Twilight Sanctuary'),
-                    style: display(34),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            gap(8),
-            AppCard(
-              padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
-              child: Row(
+            AdaptivePageFrame(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const CompanionAvatar(
-                    mood: CompanionMood.care,
-                    size: 74,
-                    glowColor: C.magenta,
+                  AdaptivePageHeader(
+                    title: tr('Twilight Sanctuary'),
+                    onBack: () => Navigator.pop(context),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      tr('Gentle breathing, safety practice, and a quiet light — always at your own pace.'),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Pastel.mist.withValues(alpha: 0.84),
-                        height: 1.4,
-                      ),
+                  gap(8),
+                  AppCard(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
+                    child: Row(
+                      children: [
+                        const CompanionAvatar(
+                          mood: CompanionMood.care,
+                          size: 74,
+                          glowColor: C.magenta,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            tr('Gentle breathing, safety practice, and a quiet light — always at your own pace.'),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Pastel.mist.withValues(alpha: 0.84),
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            gap(20),
-            _SanctuaryCard(
-              icon: LucideIcons.wind,
-              accent: C.lavender,
-              title: tr('Starlight Ripples & Breath'),
-              subtitle: tr(
-                  'Tap ripples and follow a slow 4-4-6 breath to ease tension'),
-              badgeText: tr('No score • Calming'),
-              onTap: () => _open(const StarlightBreathPage()),
-            ),
-            gap(14),
-            _SanctuaryCard(
-              icon: LucideIcons.shieldCheck,
-              accent: C.rose,
-              title: tr('Safety & Dosing Sense'),
-              subtitle: tr(
-                  '5-question practice on dosing math, labs, and safe care'),
-              badgeText: quizMeta,
-              onTap: () => _open(const SafetyQuizPage()),
-            ),
-            gap(14),
-            _SanctuaryCard(
-              icon: LucideIcons.sparkles,
-              accent: C.coral,
-              title: tr('Moonlight Lantern'),
-              subtitle: tr(
-                  'Light a quiet spark each day you visit — never wilts if you rest'),
-              badgeText: tr('{0} {0?spark|sparks}', [_state.sparks]),
-              showMintDot: canLight,
-              onTap: () => _open(const MoonlightLanternPage()),
-            ),
-            gap(14),
-            _SanctuaryCard(
-              icon: LucideIcons.dumbbell,
-              accent: Pastel.mint,
-              title: tr('Movement Coach'),
-              subtitle: tr(
-                  'HRT-aware personal trainer with 2-pose guides & guilt-free pacing'),
-              badgeText: _workoutSessionsThisMonth > 0
-                  ? tr('{0} {0?session|sessions} this month',
-                      [_workoutSessionsThisMonth])
-                  : tr('No streaks • Adaptive'),
-              onTap: () => _open(const WorkoutCoachPage()),
-            ),
-            if (_voiceUnlocked) ...[
-              gap(14),
-              _SanctuaryCard(
-                icon: LucideIcons.mic,
-                accent: C.violet,
-                title: tr('Voice Pitch Studio'),
-                subtitle: tr(
-                    'Gentle voice warm-up, reading prompts & live pitch category check'),
-                badgeText: tr('Optional • On-device'),
-                onTap: () => _open(const VoicePitchPage()),
-              ),
-            ],
-            gap(22),
-            AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    LucideIcons.heartHandshake,
-                    size: 18,
-                    color: Pastel.mint,
+                  gap(20),
+                  AdaptiveGrid(
+                    compactColumns: 1,
+                    mediumColumns: 2,
+                    expandedColumns: 2,
+                    minColumnWidth: 320,
+                    children: sanctuaryCards,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      tr('No timers, leaderboards, or penalties here. Step in whenever you need a calm minute or a quick safety refresher.'),
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Pastel.mist.withValues(alpha: 0.82),
-                        height: 1.45,
-                      ),
+                  gap(22),
+                  AppCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          LucideIcons.heartHandshake,
+                          size: 18,
+                          color: Pastel.mint,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            tr('No timers, leaderboards, or penalties here. Step in whenever you need a calm minute or a quick safety refresher.'),
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: Pastel.mist.withValues(alpha: 0.82),
+                              height: 1.45,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -321,12 +319,16 @@ class _SanctuaryCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                       ],
-                      Text(
-                        badgeText,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: accent,
+                      Flexible(
+                        child: Text(
+                          badgeText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: accent,
+                          ),
                         ),
                       ),
                     ],

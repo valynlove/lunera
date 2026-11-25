@@ -303,32 +303,38 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                 ),
                                 const SizedBox(height: 16),
 
-                                // Brand Name: LUNERA
+                                // Brand Wordmark: Lunera
                                 FadeTransition(
                                   opacity: _brandFade,
                                   child: SlideTransition(
                                     position: _brandSlide,
-                                    child: Text(
-                                      appName.toUpperCase(),
-                                      textAlign: TextAlign.center,
-                                      style: wordmark(
-                                        titleSize,
-                                        color: Colors.white,
-                                      ).copyWith(
-                                        letterSpacing: 5.5,
-                                        shadows: [
-                                          Shadow(
-                                            color:
-                                                C.aurora.withValues(alpha: 0.55),
-                                            blurRadius: 18,
-                                          ),
-                                          Shadow(
-                                            color:
-                                                C.voidBg.withValues(alpha: 0.75),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
+                                    child: Image.asset(
+                                      'assets/images/lunera_text.png',
+                                      height: (shortest * 0.14).clamp(48.0, 72.0),
+                                      fit: BoxFit.contain,
+                                      semanticLabel: appName,
+                                      errorBuilder: (_, __, ___) => Text(
+                                        appName.toUpperCase(),
+                                        textAlign: TextAlign.center,
+                                        style: wordmark(
+                                          titleSize,
+                                          color: Colors.white,
+                                        ).copyWith(
+                                          letterSpacing: 5.5,
+                                          shadows: [
+                                            Shadow(
+                                              color: C.aurora
+                                                  .withValues(alpha: 0.55),
+                                              blurRadius: 18,
+                                            ),
+                                            Shadow(
+                                              color: C.voidBg
+                                                  .withValues(alpha: 0.75),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

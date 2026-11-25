@@ -22,149 +22,188 @@ class LevelsPage extends ConsumerWidget {
     // Hormon yang hanya memiliki hasil lab (tanpa simulasi PK aktif)
     final labOnlyHormones = byH.keys.where((h) => !simIds.contains(h)).toList();
 
+    final isWide = context.isWide;
+    final addLabBtn = FilledButton.icon(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        showSheet(context, const LabSheet());
+      },
+      icon: const Icon(LucideIcons.plus, size: 20),
+      label: Text(tr('Add Lab Result'),
+          maxLines: 1, overflow: TextOverflow.ellipsis),
+      style: FilledButton.styleFrom(
+        backgroundColor: C.peony,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+        elevation: 2,
+        shadowColor: C.peony.withValues(alpha: 0.35),
+      ),
+    );
+    final insightsBtn = OutlinedButton.icon(
+      onPressed: () {
+        HapticFeedback.selectionClick();
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const InsightsPage()));
+      },
+      icon: const Icon(LucideIcons.activity, size: 20),
+      label: Text(tr('Insights'), maxLines: 1, overflow: TextOverflow.ellipsis),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: C.lavender,
+        backgroundColor: C.midnight.withValues(alpha: 0.55),
+        side: BorderSide(
+          color: C.lavender.withValues(alpha: 0.28),
+          width: 1.1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+      ),
+    );
+    final guideBtn = switch (guideById('peak_trough')) {
+      final guide? => IconButton(
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ArticlePage(article: guide),
+              ),
+            );
+          },
+          icon: const Icon(LucideIcons.bookOpen, size: 22),
+          color: C.iconDefault,
+          tooltip: tr('Peak, Trough & Labs Guide'),
+        ),
+      null => null,
+    };
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+      padding: context.pagePadding(top: 12, bottom: 32),
       children: [
-        // 1. Header Judul
-        Row(
-          children: [
-            Expanded(child: Text(tr('Levels'), style: display(40))),
-            if (guideById('peak_trough') case final guide?)
-              IconButton(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ArticlePage(article: guide),
+        AdaptivePageFrame(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Header Judul (+ aksi inline di layar lebar)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(tr('Levels'),
+                          style: display(isWide ? 36 : 40)),
                     ),
-                  );
-                },
-                icon: const Icon(LucideIcons.bookOpen, size: 22),
-                color: C.iconDefault,
-                tooltip: tr('Peak, Trough & Labs Guide'),
-              ),
-          ],
-        ),
-        const SizedBox(height: 14),
-
-        // 2. Baris Aksi Seimbang
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  showSheet(context, const LabSheet());
-                },
-                icon: const Icon(LucideIcons.plus, size: 20),
-                label: Text(tr('Add Lab Result'),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                style: FilledButton.styleFrom(
-                  backgroundColor: C.peony,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 13.5),
-                  elevation: 2,
-                  shadowColor: C.peony.withValues(alpha: 0.35),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const InsightsPage()));
-                },
-                icon: const Icon(LucideIcons.activity, size: 20),
-                label: Text(tr('Insights'),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: C.lavender,
-                  backgroundColor: C.midnight.withValues(alpha: 0.55),
-                  side: BorderSide(
-                    color: C.lavender.withValues(alpha: 0.28),
-                    width: 1.1,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 13.5),
-                ),
+                  if (guideBtn != null) guideBtn,
+                  if (isWide) ...[
+                    const SizedBox(width: 8),
+                    insightsBtn,
+                    const SizedBox(width: 10),
+                    addLabBtn,
+                  ],
+                ],
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
-
-        // 3. Konten Utama / Empty State
-        if (byH.isEmpty && simIds.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 60),
-            child: Column(
-              children: [
-                iconBadge(LucideIcons.activity, Pastel.sky,
-                    size: 56, iconSize: 28),
-                const SizedBox(height: 16),
-                Text(tr('No level data yet'), style: display(26)),
-                const SizedBox(height: 8),
-                Text(
-                  tr('Log a dose or add your first blood test result to view hormone curves.'),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Pastel.mist.withValues(alpha: 0.85), fontSize: 13),
-                ),
-                const SizedBox(height: 20),
-                pillButton(
-                  tr('Add Lab Result'),
-                  () {
-                    HapticFeedback.lightImpact();
-                    showSheet(context, const LabSheet());
-                  },
-                  icon: LucideIcons.plus,
+              if (!isWide) ...[
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(child: addLabBtn),
+                    const SizedBox(width: 10),
+                    Expanded(child: insightsBtn),
+                  ],
                 ),
               ],
-            ),
-          )
-        else ...[
-          if (computeTroughLabReminder(
-            ths,
-            ref.watch(logsProvider).value ?? const <DoseLog>[],
-            labs,
-            ref.watch(prefsProvider).value ?? const Prefs(),
-          )
-              case final reminder?) ...[
-            _TroughReminderCard(reminder: reminder),
-            const SizedBox(height: 14),
-          ],
-          // Kurva simulasi untuk hormon aktif (dengan ringkasan lab terintegrasi)
-          for (final h in simIds)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: LevelPanel(h, compact: true),
-            ),
+              const SizedBox(height: 18),
 
-          // Marker lab tersendiri tanpa simulasi PK (misalnya Prolaktin, LH, FSH)
-          if (labOnlyHormones.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 12, 0, 10),
-              child: Text(
-                tr('Blood Tests & Lab Markers'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+              // 3. Konten Utama / Empty State
+              if (byH.isEmpty && simIds.isEmpty)
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 60),
+                      child: Column(
+                        children: [
+                          iconBadge(LucideIcons.activity, Pastel.sky,
+                              size: 56, iconSize: 28),
+                          const SizedBox(height: 16),
+                          Text(tr('No level data yet'), style: display(26)),
+                          const SizedBox(height: 8),
+                          Text(
+                            tr('Log a dose or add your first blood test result to view hormone curves.'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Pastel.mist.withValues(alpha: 0.85),
+                                fontSize: 13),
+                          ),
+                          const SizedBox(height: 20),
+                          pillButton(
+                            tr('Add Lab Result'),
+                            () {
+                              HapticFeedback.lightImpact();
+                              showSheet(context, const LabSheet());
+                            },
+                            icon: LucideIcons.plus,
+                          ),
+                        ],
+                      ),
                     ),
-              ),
-            ),
-            for (final h in labOnlyHormones)
-              _LevelCard(hormoneId: h, labs: byH[h]!),
-          ],
-        ],
+                  ),
+                )
+              else ...[
+                if (computeTroughLabReminder(
+                  ths,
+                  ref.watch(logsProvider).value ?? const <DoseLog>[],
+                  labs,
+                  ref.watch(prefsProvider).value ?? const Prefs(),
+                )
+                    case final reminder?) ...[
+                  _TroughReminderCard(reminder: reminder),
+                  const SizedBox(height: 14),
+                ],
+                // Kurva simulasi untuk hormon aktif (side-by-side di desktop bila >= 2 hormon)
+                if (simIds.isNotEmpty) ...[
+                  AdaptiveGrid(
+                    compactColumns: 1,
+                    mediumColumns: 1,
+                    expandedColumns: simIds.length >= 2 ? 2 : 1,
+                    minColumnWidth: 400,
+                    children: [
+                      for (final h in simIds) LevelPanel(h, compact: true),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                // Marker lab tersendiri tanpa simulasi PK (misalnya Prolaktin, LH, FSH)
+                if (labOnlyHormones.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 12, 0, 10),
+                    child: Text(
+                      tr('Blood Tests & Lab Markers'),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                    ),
+                  ),
+                  AdaptiveGrid(
+                    compactColumns: 1,
+                    mediumColumns: 2,
+                    expandedColumns: 2,
+                    minColumnWidth: 300,
+                    children: [
+                      for (final h in labOnlyHormones)
+                        _LevelCard(hormoneId: h, labs: byH[h]!),
+                    ],
+                  ),
+                ],
+              ],
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -208,107 +247,111 @@ class _LevelCard extends ConsumerWidget {
         ),
       );
     }
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: cardBox(context),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(28),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(28),
-          onTap: () {
-            HapticFeedback.selectionClick();
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => HormonePage(hormoneId)));
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(children: [
-              Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: hColor,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: hColor.withValues(alpha: 0.5),
-                                    blurRadius: 6,
-                                    spreadRadius: 1),
-                              ],
+    return Semantics(
+      button: true,
+      label: '${p.name}, ${last.prefix}${fmt(last.base / f)} $u',
+      child: Container(
+        decoration: cardBox(context, radius: R.card),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(R.card),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(R.card),
+            onTap: () {
+              HapticFeedback.selectionClick();
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => HormonePage(hormoneId)));
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(children: [
+                Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: hColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: hColor.withValues(alpha: 0.5),
+                                      blurRadius: 6,
+                                      spreadRadius: 1),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              p.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                p.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        tr('Lab result, {0}', [_date(last.at)]),
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Pastel.mist.withValues(alpha: 0.85)),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      gap(8),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text.rich(TextSpan(
-                            text: '${last.prefix}${fmt(last.base / f)}',
-                            style: display(36, color: Colors.white),
-                            children: [
-                              TextSpan(
-                                  text: ' $u',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Pastel.cream.withValues(alpha: 0.88),
-                                      fontWeight: FontWeight.w500)),
-                            ])),
-                      ),
-                      if (delta != null) ...[
-                        gap(4),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
                         Text(
-                          tr('{0} {1}% from previous test', [
-                            delta >= 0 ? '↑' : '↓',
-                            delta.abs().toStringAsFixed(0)
-                          ]),
-                          style: TextStyle(
-                              fontSize: 11.5,
-                              color: Pastel.mist.withValues(alpha: 0.90),
-                              fontWeight: FontWeight.w500),
+                          tr('Lab result, {0}', [_date(last.at)]),
+                          style: tabular(TextStyle(
+                              fontSize: 12,
+                              color: Pastel.mist.withValues(alpha: 0.85))),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                      if (status != null) status,
-                    ]),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                  width: 100,
-                  height: 60,
-                  child: _spark([for (final l in recent) l.base], hColor)),
-            ]),
+                        gap(8),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text.rich(TextSpan(
+                              text: '${last.prefix}${fmt(last.base / f)}',
+                              style: tabular(display(36, color: Colors.white)),
+                              children: [
+                                TextSpan(
+                                    text: ' $u',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color:
+                                            Pastel.cream.withValues(alpha: 0.88),
+                                        fontWeight: FontWeight.w500)),
+                              ])),
+                        ),
+                        if (delta != null) ...[
+                          gap(4),
+                          Text(
+                            tr('{0} {1}% from previous test', [
+                              delta >= 0 ? '↑' : '↓',
+                              delta.abs().toStringAsFixed(0)
+                            ]),
+                            style: tabular(TextStyle(
+                                fontSize: 11.5,
+                                color: Pastel.mist.withValues(alpha: 0.90),
+                                fontWeight: FontWeight.w500)),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (status != null) status,
+                      ]),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                    width: 100,
+                    height: 60,
+                    child: _spark([for (final l in recent) l.base], hColor)),
+              ]),
+            ),
           ),
         ),
       ),

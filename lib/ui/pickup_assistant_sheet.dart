@@ -75,20 +75,33 @@ ${tr('Note')}: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCAT
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final bg = dark ? C.deepCard : Colors.white;
+    final isWide = MediaQuery.sizeOf(context).width >= 600;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: dark ? Border.all(color: Colors.white.withValues(alpha: 0.12)) : null,
-      ),
-      padding: EdgeInsets.fromLTRB(
-        22,
-        18,
-        22,
-        MediaQuery.of(context).viewInsets.bottom + 28,
-      ),
-      child: SingleChildScrollView(
+    return Align(
+      alignment: isWide ? Alignment.center : Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 600,
+          maxHeight: MediaQuery.sizeOf(context).height * (isWide ? 0.88 : 0.94),
+        ),
+        child: Container(
+          margin: isWide ? const EdgeInsets.all(24) : EdgeInsets.zero,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: isWide
+                ? BorderRadius.circular(R.modal)
+                : const BorderRadius.vertical(top: Radius.circular(32)),
+            border: dark
+                ? Border.all(color: Colors.white.withValues(alpha: 0.14))
+                : null,
+          ),
+          padding: EdgeInsets.fromLTRB(
+            22,
+            18,
+            22,
+            MediaQuery.of(context).viewInsets.bottom + 28,
+          ),
+          child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -308,7 +321,9 @@ ${tr('Note')}: MOHON DITAHAN DI KANTOR AGEN UNTUK DIAMBIL SENDIRI (HOLD AT LOCAT
             ),
           ],
         ),
+        ),
       ),
+    ),
     );
   }
 }
