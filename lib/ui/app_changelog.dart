@@ -42,10 +42,24 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.2.32',
+      version: '2.2.33',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Accessibility & Responsive Polish: Added mobile/tablet navigation drawer, keyboard skip-links, sequential landmarks, >=44px touch targets, crisp inline SVGs, and multi-device viewport responsiveness.',
+          textId:
+              'Penyempurnaan Aksesibilitas & Responsivitas Landing Page: Menambahkan drawer navigasi mobile/tablet, skip-link keyboard, landmark semantik berurutan, target sentuh >=44px, ikon SVG tajam, dan tata letak responsif multi-perangkat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.32',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

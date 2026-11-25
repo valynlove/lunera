@@ -4,7 +4,7 @@
  */
 
 const LUNERA_REPO = "valynlove/lunera";
-const APP_VERSION = "2.2.32";
+const APP_VERSION = "2.2.33";
 
 // Helper to update button label text without stripping SVG icon or shimmer span
 function setButtonLabel(button, text) {
@@ -223,6 +223,11 @@ function setupRouteSwitcher() {
         chartDot.setAttribute("cx", data.dotCx);
         chartDot.setAttribute("cy", data.dotCy);
       }
+
+      const liveStatus = document.getElementById("route-live-status");
+      if (liveStatus) {
+        liveStatus.textContent = `Selected ${data.name}: ${data.amount}, ${data.schedule}, estimated ${data.levelNum} ${data.levelUnit}.`;
+      }
     });
   });
 }
@@ -374,10 +379,61 @@ function setupCycleScrubber() {
   updateScrubberState(6);
 }
 
+// Setup responsive Mobile & Tablet Navigation Drawer
+function setupMobileNav() {
+  const toggleBtn = document.getElementById("nav-toggle");
+  const drawer = document.getElementById("mobile-nav-drawer");
+  const header = document.getElementById("site-header");
+  if (!toggleBtn || !drawer) return;
+
+  const setOpen = (isOpen) => {
+    toggleBtn.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) {
+      drawer.removeAttribute("hidden");
+      requestAnimationFrame(() => drawer.classList.add("open"));
+    } else {
+      drawer.classList.remove("open");
+      drawer.setAttribute("hidden", "");
+    }
+  };
+
+  toggleBtn.addEventListener("click", () => {
+    const isExpanded = toggleBtn.getAttribute("aria-expanded") === "true";
+    setOpen(!isExpanded);
+  });
+
+  drawer.querySelectorAll(".mobile-nav-link, .mobile-nav-cta").forEach(link => {
+    link.addEventListener("click", () => setOpen(false));
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && toggleBtn.getAttribute("aria-expanded") === "true") {
+      setOpen(false);
+      toggleBtn.focus();
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (
+      toggleBtn.getAttribute("aria-expanded") === "true" &&
+      header &&
+      !header.contains(e.target)
+    ) {
+      setOpen(false);
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900 && toggleBtn.getAttribute("aria-expanded") === "true") {
+      setOpen(false);
+    }
+  }, { passive: true });
+}
+
 // Active Nav state on scroll and dynamic header elevation
 function setupActiveNav() {
   const sections = document.querySelectorAll("header[id], section[id]");
-  const navLinks = document.querySelectorAll("nav ul a");
+  const navLinks = document.querySelectorAll("nav ul a, .mobile-nav-link");
   const header = document.getElementById("site-header");
 
   const onScroll = () => {
@@ -415,6 +471,7 @@ function setupActiveNav() {
 document.addEventListener("DOMContentLoaded", () => {
   fetchLatestReleaseVersion();
   updateMockupGreeting();
+  setupMobileNav();
   setupActiveNav();
   setupRouteSwitcher();
   setupCycleScrubber();

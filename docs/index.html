@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <!-- Ambient Atmospheric Lighting Elements -->
   <div class="ambient-mesh" aria-hidden="true">
     <div class="mesh-glow glow-top-right"></div>
@@ -43,10 +44,10 @@
     <div class="nav-wrap">
       <a class="logo" href="#home" aria-label="Lunera home">
         <div class="logo-mark">
-          <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="logo-img">
+          <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="logo-img" width="512" height="512">
         </div>
         <span class="logo-text">Lunera</span>
-        <span class="app-version-tag">v2.2.32</span>
+        <span class="app-version-tag">v2.2.33</span>
       </a>
       <nav aria-label="Main Navigation">
         <ul class="nav-list">
@@ -67,9 +68,30 @@
           </svg>
           <span>Download APK</span>
         </a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav-drawer" aria-label="Toggle navigation menu">
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer" hidden>
+      <nav aria-label="Mobile Navigation">
+        <ul class="mobile-nav-list">
+          <li><a class="mobile-nav-link on" href="#home">Home</a></li>
+          <li><a class="mobile-nav-link" href="#features">Features</a></li>
+          <li><a class="mobile-nav-link" href="#widgets">Widgets</a></li>
+          <li><a class="mobile-nav-link" href="#architecture">Architecture</a></li>
+          <li><a class="mobile-nav-link" href="#faq">FAQ</a></li>
+        </ul>
+        <a class="btn btn-primary mobile-nav-cta apk-download-btn" href="https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk">
+          <span>Download APK (v2.2.33)</span>
+        </a>
+      </nav>
+    </div>
   </header>
+
+  <main id="main-content">
 
   <!-- Hero Section (Spacious Editorial Art Direction) -->
   <section class="hero" id="home">
@@ -90,7 +112,7 @@
       <div class="hero-copy">
         <div class="hero-kicker">
           <span class="kicker-glow-dot" aria-hidden="true"></span>
-          <span>Version 2.2.32 · 100% Offline-First Care</span>
+          <span>Version 2.2.33 · 100% Offline-First Care</span>
         </div>
         <h1 class="hero-title">
           Your Journey,<br>
@@ -116,9 +138,9 @@
             </svg>
           </a>
         </div>
-        <p class="hero-abi-note" style="margin-top: 10px; font-size: 0.82rem; color: var(--text-muted, #a9a4c8);">
+        <p class="hero-abi-note abi-note">
           Default APK targets Android 64-bit (<code>arm64-v8a</code>). Using a 32-bit device or emulator?
-          <a href="https://github.com/valynlove/lunera/releases/latest" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">Choose another ABI on GitHub Releases</a>.
+          <a href="https://github.com/valynlove/lunera/releases/latest" target="_blank" rel="noopener noreferrer">Choose another ABI on GitHub Releases</a>.
         </p>
         <div class="hero-proof-bar">
           <div class="proof-item">
@@ -147,7 +169,7 @@
 
       <div class="hero-card-wrap">
         <figure class="hero-showcase-card">
-          <img src="images/hero_card_dusk.jpg" alt="Lunera Eternal Dusk companion showcase card" loading="eager">
+          <img src="images/hero_card_dusk.jpg" alt="Lunera Eternal Dusk companion showcase card" loading="eager" width="768" height="1024" fetchpriority="high">
           <div class="hero-card-sheen" aria-hidden="true"></div>
           <div class="hero-card-floating-badge" aria-hidden="true">
             <span class="badge-dot-mint"></span>
@@ -161,6 +183,7 @@
   <div class="wrap">
     <!-- Highlights & Architectural Telemetry Strip -->
     <section class="telemetry-strip" aria-label="Core Capabilities">
+      <h2 class="sr-only">Core Capabilities</h2>
       <div class="telemetry-grid">
         <div class="telemetry-card">
           <div class="telemetry-icon-box">
@@ -242,34 +265,43 @@
         </div>
         <div class="route-pills-bar" role="tablist" aria-label="Select therapy route">
           <button class="route-pill active" data-route="inj" role="tab" aria-selected="true" title="Intramuscular & Subcutaneous Injections">
-            <span class="route-pill-ico">💉</span>
+            <span class="route-pill-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg>
+            </span>
             <div class="route-pill-text">
               <strong class="route-pill-name">Injections</strong>
               <span class="route-pill-detail">Ester multi-compartment PK</span>
             </div>
           </button>
           <button class="route-pill" data-route="patch" role="tab" aria-selected="false" title="Transdermal Matrix Patches">
-            <span class="route-pill-ico">🩹</span>
+            <span class="route-pill-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M10 10h.01"/><path d="M14 14h.01"/><path d="M14 10h.01"/><path d="M10 14h.01"/></svg>
+            </span>
             <div class="route-pill-text">
               <strong class="route-pill-name">Patches</strong>
               <span class="route-pill-detail">Twice-weekly matrix</span>
             </div>
           </button>
           <button class="route-pill" data-route="gel" role="tab" aria-selected="false" title="Transdermal Gel Application">
-            <span class="route-pill-ico">🧴</span>
+            <span class="route-pill-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            </span>
             <div class="route-pill-text">
               <strong class="route-pill-name">Gels</strong>
               <span class="route-pill-detail">Daily diurnal plateau</span>
             </div>
           </button>
           <button class="route-pill" data-route="oral" role="tab" aria-selected="false" title="Sublingual & Oral Micronized">
-            <span class="route-pill-ico">💊</span>
+            <span class="route-pill-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+            </span>
             <div class="route-pill-text">
               <strong class="route-pill-name">Sublingual &amp; Oral</strong>
               <span class="route-pill-detail">Biphasic absorption curve</span>
             </div>
           </button>
         </div>
+        <span class="sr-only" id="route-live-status" aria-live="polite"></span>
       </div>
 
       <div class="phones" aria-hidden="true">
@@ -293,7 +325,7 @@
               <div class="phone-header-actions">
                 <span class="phone-add-btn" title="Add Therapy">+</span>
                 <div class="phone-avatar-badge">
-                  <img src="images/logo.png" alt="Eternal Dusk Profile" class="phone-avatar-img">
+                  <img src="images/logo.png" alt="Eternal Dusk Profile" class="phone-avatar-img" width="512" height="512">
                 </div>
               </div>
             </div>
@@ -667,7 +699,7 @@
       <div class="widgets-canvas-frame">
         <!-- Celestial Wallpaper Backing -->
         <div class="widgets-wallpaper-bg">
-          <img src="images/celestial_bg.jpg" alt="Lunera Celestial Wallpaper" class="widgets-wallpaper-img" loading="lazy">
+          <img src="images/celestial_bg.jpg" alt="Lunera Celestial Wallpaper" class="widgets-wallpaper-img" loading="lazy" width="576" height="1024">
           <div class="widgets-wallpaper-scrim" aria-hidden="true"></div>
         </div>
 
@@ -676,7 +708,7 @@
           <div class="widget-card widget-schedule">
             <div class="widget-hdr">
               <div class="widget-brand">
-                <img src="images/icon.png" alt="Lunera icon" class="widget-brand-ico">
+                <img src="images/icon.png" alt="Lunera icon" class="widget-brand-ico" width="512" height="512">
                 <span class="widget-brand-name">LUNERA SCHEDULE</span>
               </div>
               <span class="widget-pill-active">Next Dose</span>
@@ -839,14 +871,14 @@
             <div class="scrubber-slider-container">
               <input type="range" min="0" max="7" value="6" step="1" id="cycle-scrubber-range" class="cycle-slider" aria-label="Simulate cycle day (0 to 7)">
               <div class="scrubber-ticks-row" aria-hidden="true">
-                <span class="tick" data-step="0">D0 Dose</span>
-                <span class="tick" data-step="1">D1 Peak</span>
+                <span class="tick" data-step="0">D0<span class="tick-sub"> Dose</span></span>
+                <span class="tick" data-step="1">D1<span class="tick-sub"> Peak</span></span>
                 <span class="tick" data-step="2">D2</span>
                 <span class="tick" data-step="3">D3</span>
                 <span class="tick" data-step="4">D4</span>
                 <span class="tick" data-step="5">D5</span>
-                <span class="tick active" data-step="6">D6 Lab</span>
-                <span class="tick" data-step="7">D7 Due</span>
+                <span class="tick active" data-step="6">D6<span class="tick-sub"> Lab</span></span>
+                <span class="tick" data-step="7">D7<span class="tick-sub"> Due</span></span>
               </div>
             </div>
             <p class="scrubber-hint-text" id="scrubber-hint-text">
@@ -1023,7 +1055,7 @@
           Everything you need to know about privacy, offline reliability, and how Lunera keeps your personal health journey safe.
         </p>
         <div class="chibi-stage chibi-stage-faq">
-          <img class="chibi-img" src="images/companion/explain.png" alt="Lunera companion explaining answers" loading="lazy">
+          <img class="chibi-img" src="images/companion/explain.png" alt="Lunera companion explaining answers" loading="lazy" width="359" height="349">
         </div>
       </div>
 
@@ -1075,7 +1107,7 @@
     <section class="cta" id="download">
       <div class="cta-copy">
         <span class="eyebrow-pill">✦ Get Started Today ✦</span>
-        <h3 class="cta-title">Ready to begin your journey with Lunera?</h3>
+        <h2 class="cta-title">Ready to begin your journey with Lunera?</h2>
         <p class="cta-desc">
           Download the official standalone Android APK. Step into a peaceful, mindful rhythm with complete privacy and zero advertisements.
         </p>
@@ -1087,7 +1119,7 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            <span>Download APK (v2.2.32)</span>
+            <span>Download APK (v2.2.33)</span>
           </a>
           <a class="btn btn-secondary" href="https://github.com/valynlove/lunera" target="_blank" rel="noopener noreferrer">
             <svg class="btn-svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1096,9 +1128,9 @@
             <span>View on GitHub</span>
           </a>
         </div>
-        <p class="cta-abi-note" style="margin-top: 10px; font-size: 0.82rem; color: var(--text-muted, #a9a4c8);">
+        <p class="cta-abi-note abi-note">
           Default APK targets Android 64-bit (<code>arm64-v8a</code>). Using a 32-bit device or emulator?
-          <a href="https://github.com/valynlove/lunera/releases/latest" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">Choose another ABI on GitHub Releases</a>.
+          <a href="https://github.com/valynlove/lunera/releases/latest" target="_blank" rel="noopener noreferrer">Choose another ABI on GitHub Releases</a>.
         </p>
         <div class="cta-specs">
           <span>Requires Android 8.0+</span>
@@ -1109,19 +1141,20 @@
         </div>
       </div>
       <div class="chibi-stage chibi-stage-cta">
-        <img class="chibi-img" src="images/companion/cheer.png" alt="Lunera companion cheering you on" loading="lazy">
+        <img class="chibi-img" src="images/companion/cheer.png" alt="Lunera companion cheering you on" loading="lazy" width="391" height="349">
       </div>
     </section>
   </div> <!-- /.wrap -->
+  </main>
 
   <!-- Site Footer (Minimalist Apple/Linear-Grade Structure) -->
   <footer class="site-footer">
     <div class="footer-wrap">
       <div class="footer-brand-row">
         <div class="footer-logo">
-          <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="footer-logo-img">
+          <img src="images/logo.png" alt="Lunera Eternal Dusk Crescent" class="footer-logo-img" width="512" height="512">
           <span class="footer-brand-name">Lunera</span>
-          <span class="app-version-tag">v2.2.32</span>
+          <span class="app-version-tag">v2.2.33</span>
         </div>
         <p class="footer-tagline">
           A personal wellness companion for hormone therapy, health rhythms, and transition tracking.

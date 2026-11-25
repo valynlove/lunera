@@ -4,6 +4,19 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.33] - 2026-11-25
+
+### Added
+- **Mobile & Tablet Navigation Drawer (`docs/index.html`, `docs/style.css`, `docs/script.js`):** Added an accessible hamburger toggle (`#nav-toggle`) and frosted glass navigation drawer (`#mobile-nav-drawer`) for viewports `<= 900px` with keyboard `Escape`, outside-click, and resize auto-close handling.
+- **Accessibility & Semantic Landmarks (`docs/index.html`, `docs/style.css`, `docs/script.js`):** Added a keyboard skip link (`.skip-link`), `<main id="main-content">` landmark, sequential heading hierarchy (`h1` -> `h2` -> `h3`), and an `aria-live="polite"` route status announcer (`#route-live-status`).
+
+### Changed
+- **Multi-Device Responsive Layout (`docs/style.css`):** Refined breakpoints across `1024px`, `900px`, `768px`, `480px`, and `360px` to prevent `.phones` mockup horizontal overflow on narrow screens (`320px–390px`), stack `.track` and `.widgets-grid` gracefully on tablets, wrap `.widget-site-strip`, `.cycle-scrubber-top`, and `.footer-links`, and compact `.scrubber-ticks-row` labels on phones.
+- **Touch Targets, Icons & Motion Polish (`docs/index.html`, `docs/style.css`):** Enforced `>= 44px` touch targets on header CTA, mobile nav links, and footer links; enlarged slider thumbs under `@media (pointer: coarse)`; replaced route selector emojis with crisp inline SVGs; added explicit `width`/`height` image attributes to prevent CLS; added smooth chart dot transitions (`#mockup-chart-dot`, `#bento-scrubber-dot`), subtle `<details>` content reveal, `@media (hover: none)` sticky-hover guard, and explicit reduced-motion animation overrides.
+
+### Fixed
+- **CSS Token & Contrast Bugs (`docs/style.css`, `docs/index.html`):** Replaced undefined `--duration-fast` with `--duration-snappy`, removed the dead `kickerPulse` animation reference and infinite dot pulse, replaced undefined `--text-muted` inline styles with `.abi-note`, and removed `opacity: 0.8` on `.footer-disclaimer` for stronger dark-mode readability.
+
 ## [2.2.32] - 2026-11-25
 
 ### Changed
