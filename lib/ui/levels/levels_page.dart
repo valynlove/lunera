@@ -400,12 +400,49 @@ class _TroughReminderCardState extends ConsumerState<_TroughReminderCard> {
     if (mounted) setState(() => _scheduledAt = at);
   }
 
+  Future<void> _pickNextLabDate() async {
+    HapticFeedback.selectionClick();
+    final prefs = ref.read(prefsProvider).value ?? const Prefs();
+    final now = DateTime.now();
+    final initial = prefs.nextLabDate ?? now.add(const Duration(days: 30));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial.isBefore(now) ? now : initial,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 2),
+    );
+    if (picked == null || !mounted) {
+      return;
+    }
+    await ref
+        .read(repoProvider)
+        ?.setPrefs(prefs.copy(nextLabDate: DateUtils.dateOnly(picked)));
+  }
+
+  Future<void> _clearNextLabDate() async {
+    HapticFeedback.selectionClick();
+    final prefs = ref.read(prefsProvider).value ?? const Prefs();
+    await ref.read(repoProvider)?.setPrefs(prefs.copy(clearNextLabDate: true));
+  }
+
   @override
   Widget build(BuildContext context) {
     final reminder = widget.reminder;
     final slot = reminder.nextTroughSlot;
+    final df = DateFormat('d MMM y', L10n.code);
     final String routineText;
-    if (reminder.daysSinceLastLab == null) {
+    if (reminder.isCustomDate && reminder.nextRoutineLabDate != null) {
+      final days = reminder.daysUntilTarget ?? 0;
+      final countdown = days == 0
+          ? tr('Scheduled today')
+          : (days > 0
+              ? tr('In {0} {0?day|days}', [days])
+              : tr('{0} {0?day|days} overdue', [days.abs()]));
+      routineText = tr('Next bloodwork: {0} ({1})', [
+        df.format(reminder.nextRoutineLabDate!),
+        countdown,
+      ]);
+    } else if (reminder.daysSinceLastLab == null) {
       routineText = tr(
           'No bloodwork logged yet — aim to test at trough after 4–8 weeks on a steady routine.');
     } else if (reminder.isDue) {
@@ -417,10 +454,11 @@ class _TroughReminderCardState extends ConsumerState<_TroughReminderCard> {
           'Last bloodwork: {0} {0?day|days} ago • Next 3-month check: {1}',
           [
             reminder.daysSinceLastLab!,
-            DateFormat('d MMM y', L10n.code)
-                .format(reminder.nextRoutineLabDate!),
+            df.format(reminder.nextRoutineLabDate!),
           ]);
     }
+
+    final daysBadge = reminder.daysUntilTarget;
 
     return AppCard(
       padding: const EdgeInsets.all(16),
@@ -438,13 +476,47 @@ class _TroughReminderCardState extends ConsumerState<_TroughReminderCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  tr('Trough & Bloodwork Timing'),
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        tr('Trough & Bloodwork Timing'),
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    if (daysBadge != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: (reminder.isDue ? C.coral : Pastel.mint)
+                              .withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: (reminder.isDue ? C.coral : Pastel.mint)
+                                .withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Text(
+                          daysBadge <= 0
+                              ? (daysBadge == 0
+                                  ? tr('Today')
+                                  : tr('{0}d due', [daysBadge.abs()]))
+                              : tr('In {0}d', [daysBadge]),
+                          style: tabular(TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: reminder.isDue ? C.coral : Pastel.mint,
+                          )),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 if (slot != null) ...[
                   const SizedBox(height: 4),
@@ -455,53 +527,89 @@ class _TroughReminderCardState extends ConsumerState<_TroughReminderCard> {
                           DateFormat('EEE, d MMM • HH:mm', L10n.code)
                               .format(slot.at),
                         ]),
-                    style: const TextStyle(
+                    style: tabular(const TextStyle(
                       fontSize: 12,
                       color: C.lavender,
                       fontWeight: FontWeight.w600,
                       height: 1.35,
-                    ),
+                    )),
                   ),
                 ],
                 const SizedBox(height: 4),
                 Text(
                   routineText,
-                  style: TextStyle(
+                  style: tabular(TextStyle(
                     fontSize: 12,
                     color: Pastel.mist.withValues(alpha: 0.82),
                     height: 1.35,
-                  ),
+                  )),
                 ),
-                if (slot != null) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () => _toggleReminder(slot),
-                    icon: Icon(
-                      _scheduledAt != null
-                          ? LucideIcons.bellRing
-                          : LucideIcons.bellPlus,
-                      size: 15,
-                    ),
-                    label: Text(
-                      _scheduledAt != null
-                          ? tr('Trough reminder set')
-                          : tr('Remind me 2h before trough'),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor:
-                          _scheduledAt != null ? Pastel.mint : C.lavender,
-                      side: BorderSide(
-                        color: (_scheduledAt != null ? Pastel.mint : C.lavender)
-                            .withValues(alpha: 0.45),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (slot != null)
+                      OutlinedButton.icon(
+                        onPressed: () => _toggleReminder(slot),
+                        icon: Icon(
+                          _scheduledAt != null
+                              ? LucideIcons.bellRing
+                              : LucideIcons.bellPlus,
+                          size: 15,
+                        ),
+                        label: Text(
+                          _scheduledAt != null
+                              ? tr('Trough reminder set')
+                              : tr('Remind me 2h before trough'),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor:
+                              _scheduledAt != null ? Pastel.mint : C.lavender,
+                          side: BorderSide(
+                            color: (_scheduledAt != null
+                                    ? Pastel.mint
+                                    : C.lavender)
+                                .withValues(alpha: 0.45),
+                          ),
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          visualDensity: VisualDensity.compact,
+                        ),
                       ),
-                      shape: const StadiumBorder(),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      visualDensity: VisualDensity.compact,
+                    OutlinedButton.icon(
+                      onPressed: _pickNextLabDate,
+                      icon: const Icon(LucideIcons.calendarDays, size: 15),
+                      label: Text(
+                        reminder.isCustomDate
+                            ? tr('Change lab date')
+                            : tr('Set lab date'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: C.lavender,
+                        side: BorderSide(
+                          color: C.lavender.withValues(alpha: 0.4),
+                        ),
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        visualDensity: VisualDensity.compact,
+                      ),
                     ),
-                  ),
-                ],
+                    if (reminder.isCustomDate)
+                      IconButton(
+                        onPressed: _clearNextLabDate,
+                        icon: const Icon(LucideIcons.x, size: 16),
+                        color: C.iconDefault,
+                        tooltip: tr('Clear lab date'),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                  ],
+                ),
               ],
             ),
           ),

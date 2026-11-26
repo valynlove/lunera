@@ -14,7 +14,9 @@ import '../schedule.dart';
 import '../theme.dart';
 import '../update_checker.dart';
 import '../widget_sync.dart';
+import 'ambient_companion.dart';
 import 'calendar.dart';
+import 'daily_checkin_sheet.dart';
 import 'home.dart';
 import 'levels.dart';
 import 'more.dart';
@@ -58,6 +60,7 @@ class _ShellState extends ConsumerState<Shell> {
   final GlobalKey _stackKey = GlobalKey();
   bool _openingQuickDose = false;
   bool _openingWorkoutWidget = false;
+  bool _openingCompanionRitual = false;
   StreamSubscription<Uri?>? _widgetClickSub;
 
   @override
@@ -65,6 +68,7 @@ class _ShellState extends ConsumerState<Shell> {
     super.initState();
     AppNotifier.pendingQuickDose.addListener(_onQuickDosePending);
     WidgetSync.pendingWorkoutAction.addListener(_onWorkoutActionPending);
+    WidgetSync.pendingCompanionAction.addListener(_onCompanionActionPending);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       try {
         HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetUri);
@@ -80,6 +84,7 @@ class _ShellState extends ConsumerState<Shell> {
       }
       _tryOpenQuickDose();
       _tryOpenWorkoutWidget();
+      _tryOpenCompanionWidget();
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted && (!Lock.instance.state.value.enabled || Lock.instance.sessionUnlocked)) {
           UpdateCheckerService.checkAndNotify(ref, context: context);
@@ -92,14 +97,45 @@ class _ShellState extends ConsumerState<Shell> {
   void dispose() {
     AppNotifier.pendingQuickDose.removeListener(_onQuickDosePending);
     WidgetSync.pendingWorkoutAction.removeListener(_onWorkoutActionPending);
+    WidgetSync.pendingCompanionAction.removeListener(_onCompanionActionPending);
     _widgetClickSub?.cancel();
     super.dispose();
   }
 
   void _handleWidgetUri(Uri? uri) {
-    if (uri == null || uri.host != 'workout') return;
+    if (uri == null) {
+      return;
+    }
+    if (uri.host == 'companion') {
+      WidgetSync.pendingCompanionAction.value = 'open';
+      return;
+    }
+    if (uri.host != 'workout') return;
     final action = uri.path == '/start' ? 'start' : 'coach';
     WidgetSync.pendingWorkoutAction.value = action;
+  }
+
+  void _onCompanionActionPending() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryOpenCompanionWidget());
+  }
+
+  Future<void> _tryOpenCompanionWidget() async {
+    if (!mounted || _openingCompanionRitual) {
+      return;
+    }
+    final action = WidgetSync.pendingCompanionAction.value;
+    if (action == null) {
+      return;
+    }
+    WidgetSync.pendingCompanionAction.value = null;
+    _openingCompanionRitual = true;
+    try {
+      ref.read(tabProvider.notifier).state = 2;
+      ref.read(ambientCompanionDismissedProvider.notifier).state = false;
+      await showSheet<bool>(context, const DailyCheckInSheet());
+    } finally {
+      _openingCompanionRitual = false;
+    }
   }
 
   void _onWorkoutActionPending() {

@@ -13,6 +13,7 @@ import '../lock.dart';
 import '../models.dart';
 import '../repo.dart';
 import '../theme.dart';
+import 'care_card_sheet.dart';
 import 'responsive.dart';
 
 /// Halaman persiapan konsultasi dokter pintar (Smart Consultation Prep).
@@ -258,6 +259,14 @@ class _ConsultationPrepPageState extends ConsumerState<ConsultationPrepPage> {
         title: Text(tr('Smart Consultation Prep'),
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
         actions: [
+          IconButton(
+            tooltip: tr('Quick Clinic Care Card'),
+            icon: const Icon(LucideIcons.heartPulse, size: 20),
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              showSheet(context, const CareCardSheet());
+            },
+          ),
           IconButton(
             tooltip: tr('Copy Questions'),
             icon: const Icon(LucideIcons.copy, size: 20),

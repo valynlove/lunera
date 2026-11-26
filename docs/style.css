@@ -3072,6 +3072,80 @@ details[open] p {
   border-radius: var(--radius-full);
 }
 
+.widgets-grid-secondary {
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 22px;
+}
+
+.widget-mascot-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 6px;
+}
+
+.widget-mascot-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-height: 88px;
+}
+
+.widget-mascot-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.widget-mascot-sub {
+  font-size: 0.78rem;
+  color: rgba(236, 232, 255, 0.85);
+}
+
+.widget-mascot-speech {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #ECE8FF;
+}
+
+.widget-mascot-img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 14px rgba(128, 101, 232, 0.35));
+}
+
+.widget-action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.widget-action-btn {
+  flex: 1;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 7px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(128, 101, 232, 0.22);
+  border: 1px solid rgba(165, 139, 255, 0.36);
+  color: var(--lavender);
+}
+
+.widget-action-btn.primary {
+  color: #FFFFFF;
+  background: rgba(128, 101, 232, 0.38);
+}
+
+.widget-action-btn.rose {
+  color: #F3A8F4;
+  border-color: rgba(243, 168, 244, 0.42);
+  background: rgba(243, 168, 244, 0.16);
+}
+
 /* ==========================================================================
    Interactive 7-Day Cycle Timeline Scrubber Bar
    ========================================================================== */
@@ -3456,7 +3530,8 @@ details[open] p {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .widgets-grid {
+  .widgets-grid,
+  .widgets-grid-secondary {
     grid-template-columns: 1fr;
   }
 

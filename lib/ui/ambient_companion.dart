@@ -9,12 +9,66 @@ import '../l10n.dart';
 import '../models.dart';
 import '../schedule.dart';
 import '../theme.dart';
+import '../widget_sync.dart';
 import 'companion_avatar.dart';
+import 'daily_checkin_sheet.dart';
 import 'guides_page.dart';
 import 'sanctuary/starlight_breath_page.dart';
 
 /// Provider holding whether the ambient companion card is dismissed for the current session.
 final ambientCompanionDismissedProvider = StateProvider<bool>((ref) => false);
+
+/// Returns the companion bond tier for a given affection (`pats`) count.
+({int level, String title, int? nextAt}) companionBondTier(int pats) {
+  if (pats < 5) {
+    return (level: 1, title: 'Stardust Pal', nextAt: 5);
+  }
+  if (pats < 20) {
+    return (level: 2, title: 'Moonbeam Friend', nextAt: 20);
+  }
+  if (pats < 50) {
+    return (level: 3, title: 'Twilight Bestie', nextAt: 50);
+  }
+  if (pats < 100) {
+    return (level: 4, title: 'Celestial Confidante', nextAt: 100);
+  }
+  return (level: 5, title: 'Eternal Dusk Soulmate', nextAt: null);
+}
+
+Color companionTierGlowColor(int level, Color fallback) => switch (level) {
+      2 => Pastel.sky,
+      3 => C.lavender,
+      4 => C.rose,
+      5 => C.coral,
+      _ => fallback,
+    };
+
+const List<(int level, String title, String perk)> companionBondPerks = [
+  (1, 'Stardust Pal', 'Daily status check-ins, water tracker & comforting hugs'),
+  (2, 'Moonbeam Friend', 'Unlocks Moonbeam affirmations & soft azure aura'),
+  (3, 'Twilight Bestie', 'Unlocks Twilight reflections & lavender sanctuary halo'),
+  (4, 'Celestial Confidante', 'Unlocks Confidante encouragement & twilight rose glow'),
+  (5, 'Eternal Dusk Soulmate', 'Unlocks all soulful keepsake notes & starlight cream aura'),
+];
+
+const Map<int, List<String>> _tierUnlockedAffirmations = {
+  2: [
+    'Moonbeams never rush to cross the sky—neither do you.',
+    'Thank you for checking in with yourself like a true friend.',
+  ],
+  3: [
+    'Through every twilight phase, I am right beside you.',
+    'Your consistency—even on quiet days—deserves gentle praise.',
+  ],
+  4: [
+    'You know your rhythm better each month. Trust your quiet wisdom.',
+    'Whatever today asks of you, you do not carry it alone.',
+  ],
+  5: [
+    'Eternal Dusk Soulmate: every phase you walk is luminous and yours.',
+    'From your first step to today, thank you for letting me keep watch with you.',
+  ],
+};
 
 /// Evaluated contextual status of the companion.
 class AmbientCompanionStatus {
@@ -213,7 +267,8 @@ AmbientCompanionStatus evaluateAmbientCompanion({
         mood: CompanionMood.care,
         headline: isInj ? tr('Gentle Post-Care') : tr('Nurturing Rhythm'),
         subtext: isInj
-            ? tr('Injected recently. Take rest, stay hydrated, and be gentle with yourself.')
+            ? tr(
+                'Injected recently. Take rest, stay hydrated, and be gentle with yourself.')
             : tr('Recent dose logged. Take today at your own peaceful pace.'),
         glowColor: C.peony,
         tag: 'post_dose',
@@ -282,12 +337,16 @@ class AmbientCompanionCard extends ConsumerStatefulWidget {
 }
 
 class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
+  static const int _waterTarget = 8;
+
   _CompanionMode _mode = _CompanionMode.status;
   int _affirmationIndex = 0;
   int _topicIndex = 0;
   int _hugIndex = 0;
   int _pokeIndex = 0;
   int _rapidTapCount = 0;
+  int _pats = 0;
+  int _waterCups = 0;
   DateTime? _lastTapAt;
 
   @override
@@ -301,10 +360,66 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
       final prefs = await SharedPreferences.getInstance();
       final saved = prefs.getString('ambient_companion_dismissed_date');
       final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      if (saved == todayStr && mounted) {
-        ref.read(ambientCompanionDismissedProvider.notifier).state = true;
+      final pats = prefs.getInt('cmp_pats_count') ?? 0;
+      final savedWaterDate = prefs.getString('cmp_hydration_date');
+      final water = savedWaterDate == todayStr
+          ? (prefs.getInt('cmp_hydration_cups') ?? 0)
+          : 0;
+      if (mounted) {
+        if (saved == todayStr) {
+          ref.read(ambientCompanionDismissedProvider.notifier).state = true;
+        }
+        setState(() {
+          _pats = pats;
+          _waterCups = water;
+        });
       }
     } catch (_) {}
+  }
+
+  Future<void> _recordPat() async {
+    final prevLevel = companionBondTier(_pats).level;
+    final nextPats = _pats + 1;
+    final nextTier = companionBondTier(nextPats);
+    setState(() => _pats = nextPats);
+    if (nextTier.level > prevLevel && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '✨ ${tr('Bond Level {0}: {1}', [
+                  nextTier.level,
+                  tr(nextTier.title)
+                ])}',
+          ),
+        ),
+      );
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('cmp_pats_count', nextPats);
+    } catch (_) {}
+    await WidgetSync.syncCompanionStats(pats: nextPats, waterCups: _waterCups);
+  }
+
+  Future<void> _logWaterCup({bool reset = false}) async {
+    HapticFeedback.lightImpact();
+    final nextWater = reset ? 0 : _waterCups + 1;
+    setState(() => _waterCups = nextWater);
+    if (!reset && nextWater == _waterTarget && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('💧 ${tr('Hydration goal reached! Your body thanks you.')}'),
+        ),
+      );
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      await prefs.setString('cmp_hydration_date', todayStr);
+      await prefs.setInt('cmp_hydration_cups', nextWater);
+    } catch (_) {}
+    await WidgetSync.syncCompanionStats(pats: _pats, waterCups: nextWater);
   }
 
   Future<void> _dismissForToday() async {
@@ -349,6 +464,7 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
         _mode = _CompanionMode.affirmation;
       }
     });
+    _recordPat();
   }
 
   void _triggerQuietHug() {
@@ -361,6 +477,7 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
         _mode = _CompanionMode.quietHug;
       }
     });
+    _recordPat();
   }
 
   void _selectTopic(_CompanionMode topicMode) {
@@ -392,13 +509,20 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
     String hintText,
     IconData hintIcon,
   }) _resolvePresentation(AmbientCompanionStatus status) {
+    final tier = companionBondTier(_pats);
+    final affirmationsPool = <String>[
+      ...companionAffirmations,
+      for (final e in _tierUnlockedAffirmations.entries)
+        if (tier.level >= e.key) ...e.value,
+    ];
+
     switch (_mode) {
       case _CompanionMode.status:
         return (
           mood: status.mood,
           title: status.headline,
           message: status.subtext,
-          glowColor: status.glowColor,
+          glowColor: companionTierGlowColor(tier.level, status.glowColor),
           hintText: tr('Tap for gentle thought'),
           hintIcon: LucideIcons.heartHandshake,
         );
@@ -406,9 +530,9 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
         return (
           mood: companionAffirmationMoods[
               _affirmationIndex % companionAffirmationMoods.length],
-          title: tr('Gentle Thought'),
-          message: tr(companionAffirmations[_affirmationIndex]),
-          glowColor: C.peony,
+          title: tier.level >= 2 ? tr(tier.title) : tr('Gentle Thought'),
+          message: tr(affirmationsPool[_affirmationIndex % affirmationsPool.length]),
+          glowColor: companionTierGlowColor(tier.level, C.peony),
           hintText: tr('Tap for another thought'),
           hintIcon: LucideIcons.sparkles,
         );
@@ -467,6 +591,122 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
           hintIcon: LucideIcons.smile,
         );
     }
+  }
+
+  Future<void> _openDailyRitual() async {
+    HapticFeedback.selectionClick();
+    final completed = await showSheet<bool>(context, const DailyCheckInSheet());
+    if (completed == true && mounted) {
+      await _checkDismissedState();
+    }
+  }
+
+  void _openBondPerksSheet() {
+    HapticFeedback.selectionClick();
+    final tier = companionBondTier(_pats);
+    showSheet<void>(
+      context,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              CompanionAvatar(
+                mood: CompanionMood.love,
+                size: 56,
+                glowColor: companionTierGlowColor(tier.level, C.peony),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tr(tier.title),
+                      style: display(24, color: Colors.white),
+                    ),
+                    Text(
+                      tier.nextAt != null
+                          ? tr('♥ {0} • Next tier at {1}', [_pats, tier.nextAt!])
+                          : tr('♥ {0} • Highest bond tier reached', [_pats]),
+                      style: tabular(const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: C.lavender,
+                      )),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          gap(16),
+          for (final item in companionBondPerks) ...[
+            Builder(builder: (_) {
+              final unlocked = tier.level >= item.$1;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: C.midnight.withValues(alpha: unlocked ? 0.8 : 0.45),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: unlocked
+                        ? Pastel.mint.withValues(alpha: 0.4)
+                        : C.lavender.withValues(alpha: 0.14),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      unlocked ? LucideIcons.check : LucideIcons.moon,
+                      size: 16,
+                      color: unlocked ? Pastel.mint : C.iconDefault,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tr('Bond Level {0}: {1}', [item.$1, tr(item.$2)]),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: unlocked
+                                  ? Colors.white
+                                  : Pastel.mist.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          Text(
+                            tr(item.$3),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: Pastel.mist
+                                  .withValues(alpha: unlocked ? 0.82 : 0.55),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+          gap(10),
+          pillButton(
+            tr('Start 60s Daily Ritual'),
+            () {
+              Navigator.pop(context);
+              _openDailyRitual();
+            },
+            icon: LucideIcons.sparkles,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -570,13 +810,12 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
                                         : const Duration(milliseconds: 200),
                                     child: Text(
                                       currentTitle,
-                                      key:
-                                          ValueKey('ambient_title_$currentTitle'),
+                                      key: ValueKey(
+                                          'ambient_title_$currentTitle'),
                                       style: display(15.5,
                                           weight: FontWeight.w700,
-                                          color: dark
-                                              ? Colors.white
-                                              : C.midnight),
+                                          color:
+                                              dark ? Colors.white : C.midnight),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -679,6 +918,30 @@ class _AmbientCompanionCardState extends ConsumerState<AmbientCompanionCard> {
                         accent: C.coral,
                         onTap: () => _selectTopic(_CompanionMode.topicSmile),
                       ),
+                      GestureDetector(
+                        onLongPress: () => _logWaterCup(reset: true),
+                        child: _CompanionTopicChip(
+                          icon: LucideIcons.droplet,
+                          label: '${tr('Water')} $_waterCups/$_waterTarget',
+                          selected: _waterCups >= _waterTarget,
+                          accent: Pastel.sky,
+                          onTap: _logWaterCup,
+                        ),
+                      ),
+                      _CompanionTopicChip(
+                        icon: LucideIcons.heart,
+                        label: '$_pats · ${tr(companionBondTier(_pats).title)}',
+                        selected: false,
+                        accent: C.peony,
+                        onTap: _openBondPerksSheet,
+                      ),
+                      _CompanionTopicChip(
+                        icon: LucideIcons.sparkles,
+                        label: tr('Daily ritual'),
+                        selected: false,
+                        accent: C.lavender,
+                        onTap: _openDailyRitual,
+                      ),
                       if (_mode == _CompanionMode.topicCalm)
                         _CompanionTopicChip(
                           icon: LucideIcons.arrowUpRight,
@@ -774,16 +1037,20 @@ class _CompanionTopicChip extends StatelessWidget {
                         : C.midnight.withValues(alpha: 0.72)),
               ),
               const SizedBox(width: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  color: selected
-                      ? (dark ? Colors.white : C.midnight)
-                      : (dark
-                          ? Pastel.mist.withValues(alpha: 0.85)
-                          : C.midnight.withValues(alpha: 0.78)),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                    color: selected
+                        ? (dark ? Colors.white : C.midnight)
+                        : (dark
+                            ? Pastel.mist.withValues(alpha: 0.85)
+                            : C.midnight.withValues(alpha: 0.78)),
+                  ),
                 ),
               ),
             ],

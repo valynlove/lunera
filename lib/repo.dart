@@ -377,8 +377,7 @@ class Repo {
   Future<void> deleteVoiceResult(String id) =>
       _safeWrite(() => _c('voiceResults').doc(id).delete());
 
-  Future<void> clearVoiceResults(
-      {Iterable<String> knownIds = const []}) async {
+  Future<void> clearVoiceResults({Iterable<String> knownIds = const []}) async {
     final refs = <String, DocumentReference<Map<String, dynamic>>>{
       for (final id in knownIds)
         if (id.trim().isNotEmpty) id: _c('voiceResults').doc(id),
@@ -768,7 +767,11 @@ class Repo {
   static bool _isValidDocId(dynamic id) {
     if (id is! String) return false;
     final s = id.trim();
-    if (s.isEmpty || s.length > 128 || s == '.' || s == '..' || s.contains('/')) {
+    if (s.isEmpty ||
+        s.length > 128 ||
+        s == '.' ||
+        s == '..' ||
+        s.contains('/')) {
       return false;
     }
     return true;
@@ -816,7 +819,19 @@ class Repo {
             cmpOk;
       case 'supplies':
         final qty = _finiteNum(r['qty']);
-        return r['name'] is String && qty != null && qty >= 0;
+        final dead = r['deadSpace'];
+        final bud = r['beyondUseDays'];
+        return r['name'] is String &&
+            qty != null &&
+            qty >= 0 &&
+            (r['openedAt'] == null || _isValidDate(r['openedAt'])) &&
+            (dead == null ||
+                (_finiteNum(dead) != null && _finiteNum(dead)! >= 0)) &&
+            (bud == null || (_finiteNum(bud) != null && _finiteNum(bud)! >= 1));
+      case 'prefs':
+        return (r['nextLabDate'] == null || _isValidDate(r['nextLabDate'])) &&
+            (r['careAllergies'] == null || r['careAllergies'] is String) &&
+            (r['careClinicInfo'] == null || r['careClinicInfo'] is String);
       case 'journal':
       case 'measurements':
         return _isValidDate(r['at']);
@@ -842,7 +857,8 @@ class Repo {
       case 'consultation':
         return r['id'] is String;
       case 'workoutProfile':
-        return r['id'] is String && (r['focus'] == null || r['focus'] is String);
+        return r['id'] is String &&
+            (r['focus'] == null || r['focus'] is String);
       case 'workoutRoutines':
         return r['title'] is String && _isValidDate(r['updatedAt']);
       case 'workoutLogs':

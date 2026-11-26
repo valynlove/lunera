@@ -12,6 +12,7 @@ import 'home.dart';
 import 'journal.dart';
 import 'responsive.dart';
 import 'sheets.dart';
+import 'travel_shift_sheet.dart';
 import '../l10n.dart';
 
 /// Tab Kalender: jadwal per hari (strip minggu) dan riwayat.
@@ -566,7 +567,16 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                         child: Text(tr('Calendar'), style: display(36)),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    IconButton(
+                      icon: const Icon(LucideIcons.globe, size: 20),
+                      color: C.iconDefault,
+                      tooltip: tr('Travel & Timezone Helper'),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        showSheet(context, const TravelShiftSheet());
+                      },
+                    ),
+                    const SizedBox(width: 8),
                     SizedBox(width: 380, child: tabs),
                   ],
                 );
@@ -574,9 +584,24 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Semantics(
-                    header: true,
-                    child: Text(tr('Calendar'), style: display(40)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Text(tr('Calendar'), style: display(40)),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(LucideIcons.globe, size: 20),
+                        color: C.iconDefault,
+                        tooltip: tr('Travel & Timezone Helper'),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          showSheet(context, const TravelShiftSheet());
+                        },
+                      ),
+                    ],
                   ),
                   gap(14),
                   tabs,

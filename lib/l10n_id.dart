@@ -1952,4 +1952,268 @@ const Map<String, String> idStrings = {
       'Set berikutnya siap dimulai kapan pun kamu siap.',
   'Decrease quantity': 'Kurangi jumlah',
   'Increase quantity': 'Tambah jumlah',
+
+  // Companion milestones, hydration & widget gallery
+  'Water': 'Air',
+  'Stardust Pal': 'Sahabat Bintang',
+  'Moonbeam Friend': 'Teman Cahaya Bulan',
+  'Twilight Bestie': 'Bestie Senja',
+  'Celestial Confidante': 'Sahabat Langit',
+  'Eternal Dusk Soulmate': 'Jiwa Eternal Dusk',
+  'Bond Level {0}: {1}': 'Level Kedekatan {0}: {1}',
+  'Hydration goal reached! Your body thanks you.':
+      'Target minum tercapai! Tubuhmu berterima kasih.',
+  'Long-press home screen, choose Widgets, then find Lunera: available Companion, Movement Coach, HRT counter, schedule, and level chart widgets.':
+      'Tekan lama layar utama, pilih Widget, lalu cari Lunera: tersedia widget Companion, Pelatih Gerak, durasi HRT, jadwal, dan grafik level.',
+  'Browse & Pin Widgets': 'Jelajahi & Sematkan Widget',
+  'Preview all 5 Lunera widgets and pin them to your home screen.':
+      'Lihat semua 5 widget Lunera dan sematkan ke layar utama.',
+  'Pin any Lunera widget directly to your Android home screen, or add them manually from your launcher.':
+      'Sematkan widget Lunera langsung ke layar utama Android, atau tambahkan manual dari launcher.',
+  'Pin': 'Sematkan',
+  'Refresh Widgets': 'Segarkan Widget',
+  'All home screen widgets refreshed.': 'Semua widget layar utama diperbarui.',
+  'Long-press your home screen, choose Widgets, then pick Lunera.':
+      'Tekan lama layar utama, pilih Widget, lalu pilih Lunera.',
+  'Lunera: Companion': 'Lunera: Companion',
+  'Interactive mascot with pokes, headpats, chats & ♥ counter':
+      'Maskot interaktif dengan colek, elus, sapa & penghitung ♥',
+  'Lunera: Movement Coach': 'Lunera: Pelatih Gerak',
+  'Daily HRT-aware movement plan with quick Start & Rest':
+      'Rencana gerak adaptif HRT harian dengan tombol Mulai & Istirahat',
+  'Lunera: Schedule': 'Lunera: Jadwal',
+  'Next 3 upcoming doses with site rotation hints':
+      '3 jadwal dosis berikutnya lengkap dengan saran rotasi lokasi',
+  'Lunera: Time on Therapy': 'Lunera: Lama Terapi',
+  'Tracks your total duration and logged doses':
+      'Menghitung durasi terapi dan total dosis tercatat',
+  'Lunera: Levels': 'Lunera: Grafik Level',
+  'Estimated hormone curve and recent lab window':
+      'Kurva estimasi kadar hormon dan jendela hasil lab',
+
+  // Notification sound, persistent injection dismiss & hydration reminders
+  'Dismiss': 'Tutup',
+  'Hydration reminders': 'Pengingat minum air',
+  'Gentle daily water check-in reminders':
+      'Pengingat lembut minum air harian',
+  'Gentle daily water reminders at 10:00, 14:00, 18:00 & 21:00.':
+      'Pengingat minum air harian pada pukul 10:00, 14:00, 18:00 & 21:00.',
+  'Time for a gentle sip of water. Stay hydrated!':
+      'Waktunya minum air sebentar. Tetap terhidrasi ya!',
+
+  // v2.3.0 — Open-vial & dead-space supply tracking, trough lab countdown
+  'Open Vial Past Limit: {0}': 'Vial Terbuka Melewati Batas: {0}',
+  'Opened {0}-day window has passed. Replace with a fresh vial for safety.':
+      'Batas pemakaian {0} hari setelah dibuka sudah lewat. Ganti dengan vial baru demi keamanan.',
+  'Open Vial Expiring Soon: {0}': 'Vial Terbuka Segera Kedaluwarsa: {0}',
+  '{0} {0?day|days} left in {1}-day open-vial window.':
+      'Tersisa {0} hari dalam batas pakai {1} hari setelah dibuka.',
+  'Includes +{0} {1} hub loss/dose': 'Termasuk +{0} {1} sisa jarum/dosis',
+  'Open vial past {0}d limit': 'Vial terbuka lewat batas {0} hari',
+  'Opened • {0}d left ({1}d limit)': 'Dibuka • sisa {0}h (batas {1}h)',
+  'Mark vial opened today': 'Tandai vial dibuka hari ini',
+  'Hub / dead-space loss per dose (optional)':
+      'Sisa cairan di jarum/hub per dosis (opsional)',
+  'E.g. 0.05 mL left in syringe hub so remaining doses stay accurate.':
+      'Mis. 0.05 mL tertinggal di hub spuit agar estimasi sisa dosis akurat.',
+  'Clear expiry date': 'Hapus tanggal kedaluwarsa',
+  'Vial opened date (optional)': 'Tanggal vial dibuka (opsional)',
+  'Opened {0}': 'Dibuka {0}',
+  'Clear opened date': 'Hapus tanggal buka vial',
+  'Beyond-use days after opening': 'Batas hari pakai setelah dibuka',
+  'Standard multi-dose vial guideline is 28 days.':
+      'Panduan umum vial multi-dosis adalah 28 hari.',
+  'Scheduled today': 'Dijadwalkan hari ini',
+  'In {0} {0?day|days}': 'Dalam {0} hari',
+  '{0} {0?day|days} overdue': 'Terlewat {0} hari',
+  'Next bloodwork: {0} ({1})': 'Tes darah berikutnya: {0} ({1})',
+  '{0}d due': 'Lewat {0}h',
+  'In {0}d': '{0}h lagi',
+  'Change lab date': 'Ubah tanggal lab',
+  'Set lab date': 'Atur tanggal lab',
+  'Clear lab date': 'Hapus tanggal lab',
+
+  // v2.3.0 — Cycle-aware insights & monthly reflection
+  'Peak window': 'Fase puncak',
+  'Mid-cycle': 'Pertengahan siklus',
+  'Peak': 'Puncak',
+  'Mid': 'Tengah',
+  'Trough': 'Trough',
+  'Mood tends to feel brighter near peak ({0}/5) than during trough windows ({1}/5).':
+      'Suasana hati cenderung lebih cerah di fase puncak ({0}/5) dibanding fase trough ({1}/5).',
+  'Mood tends to feel steadier near trough ({0}/5) than around peak ({1}/5).':
+      'Suasana hati cenderung lebih stabil di fase trough ({0}/5) dibanding fase puncak ({1}/5).',
+  'Cycle-aware observation ({0}): average mood is {1}/5 near peak vs {2}/5 in trough windows over {3} days.':
+      'Observasi siklus ({0}): rata-rata mood {1}/5 di puncak vs {2}/5 di fase trough selama {3} hari.',
+  '{0} appears most often during trough windows ({1}x in the last {2} days).':
+      '{0} paling sering muncul di fase trough ({1}x dalam {2} hari terakhir).',
+  'Cycle-aware observation ({0}): "{1}" was logged {2}x during trough windows.':
+      'Observasi siklus ({0}): "{1}" tercatat {2}x saat fase trough.',
+  'Your mood and check-ins stay relatively steady across {0} cycle phases.':
+      'Suasana hati dan catatanmu relatif stabil di seluruh fase siklus {0}.',
+  'Cycle-aware observation ({0}): check-ins stay steady across {1} entries over {2} days.':
+      'Observasi siklus ({0}): catatan stabil di {1} entri selama {2} hari.',
+  '{0} {0?check-in|check-ins}': '{0} catatan',
+  'Hormone Phase & Mood Correlation': 'Korelasi Fase Hormon & Mood',
+  'Log at least 3 mood or symptom check-ins alongside an active hormone curve to map Peak, Mid-cycle, and Trough patterns.':
+      'Catat minimal 3 mood atau gejala bersama kurva hormon aktif untuk memetakan pola Puncak, Pertengahan, dan Trough.',
+  "Log today's mood": 'Catat mood hari ini',
+  'Mapped from your simulated {0} curve over the last 90 days.':
+      'Dipetakan dari kurva simulasi {0} selama 90 hari terakhir.',
+  'Added phase observation to Consultation Prep.':
+      'Observasi fase ditambahkan ke Persiapan Konsultasi.',
+  'Add to Consultation Prep': 'Tambah ke Persiapan Konsultasi',
+  'Lunera Monthly Reflection': 'Refleksi Bulanan Lunera',
+  'Doses logged': 'Dosis tercatat',
+  'Journal check-ins': 'Catatan jurnal',
+  'Movement ({0}m)': 'Gerak ({0}m)',
+  'Movement': 'Gerak',
+  'Milestones & moments': 'Tonggak & momen',
+  'Most frequent mood: {0}': 'Mood paling sering: {0}',
+  'Monthly reflection copied to clipboard.':
+      'Refleksi bulanan disalin ke papan klip.',
+  'Copy Reflection': 'Salin Refleksi',
+  'Quiet months count too. Whenever you log a dose, breath, or note, it will appear gently here.':
+      'Bulan yang tenang tetap berarti. Kapan pun kamu mencatat dosis, napas, atau jurnal, ringkasannya akan tampil di sini.',
+  'You cared for your rhythm and movement at your own pace this month—every quiet step counted.':
+      'Kamu menjaga ritme dan gerak sesuai kecepatanmu bulan ini—setiap langkah kecil sangat berarti.',
+  'Thank you for showing up gently for yourself this month. Progress never needs perfection.':
+      'Terima kasih sudah hadir dengan lembut untuk dirimu bulan ini. Progres tidak butuh kesempurnaan.',
+
+  // v2.3.0 — Travel timezone shift & Quick Clinic Care Card
+  'Travel & Timezone Helper': 'Asisten Zona Waktu & Perjalanan',
+  'Shift dose times gradually across time zones without drops or overlap.':
+      'Geser jam dosis secara bertahap lintas zona waktu tanpa kadar drop atau menumpuk.',
+  'Gradually shift dose times when crossing time zones':
+      'Geser jam dosis bertahap saat bepergian lintas zona waktu',
+  'Therapy': 'Terapi',
+  'Usual dose time: {0}': 'Jam dosis biasa: {0}',
+  'Origin zone': 'Zona asal',
+  'Destination zone': 'Zona tujuan',
+  'Arrival: {0}': 'Tiba: {0}',
+  '{0}h / step': '{0}j / langkah',
+  'Suggested Transition Plan': 'Rencana Transisi yang Disarankan',
+  'Copy Transition Plan': 'Salin Rencana Transisi',
+  'Transition plan copied to clipboard.':
+      'Rencana transisi disalin ke papan klip.',
+  'No timezone shift needed — keep {0} local time.':
+      'Tidak perlu geser jam — tetap gunakan pukul {0} waktu setempat.',
+  'Arrival equivalent of your usual {0} ({1})':
+      'Jam setara saat tiba dari jadwal {0} ({1})',
+  'later': 'lebih lambat',
+  'earlier': 'lebih awal',
+  '{0}h {1}': '{0}j {1}',
+  '{0}m {1}': '{0}m {1}',
+  'Target {0} local time reached ({1})':
+      'Target pukul {0} waktu setempat tercapai ({1})',
+  'Shift {0} toward {1}': 'Geser {0} menuju {1}',
+  'Quick Clinic Care Card': 'Kartu Ringkas Klinik & Apotek',
+  'Fast summary for clinic visits, labs, or pharmacy refills.':
+      'Ringkasan cepat untuk kunjungan klinik, lab, atau tebus resep apotek.',
+  'Updated': 'Diperbarui',
+  'Active Regimen': 'Rejimen Aktif',
+  'No active therapies added yet.': 'Belum ada terapi aktif yang ditambahkan.',
+  'Latest Lab Results': 'Hasil Lab Terbaru',
+  'No lab results recorded': 'Belum ada hasil lab tercatat',
+  'Allergies & Sensitivities': 'Alergi & Sensitivitas',
+  'e.g. Sesame oil sensitivity, latex-free...':
+      'mis. Sensitif minyak wijen, bebas lateks...',
+  'Clinic & Pharmacy': 'Klinik & Apotek',
+  'Doctor name, clinic phone, or preferred pharmacy...':
+      'Nama dokter, nomor klinik, atau apotek langganan...',
+  'Care card notes saved.': 'Catatan kartu klinik disimpan.',
+  'Save Notes': 'Simpan Catatan',
+  'Copy Clinic Summary': 'Salin Ringkasan Klinik',
+  'Care card summary copied to clipboard.':
+      'Ringkasan klinik disalin ke papan klip.',
+
+  // v2.3.0 — Sanctuary breathing presets, 60s daily ritual, voice 30d & journey timeline
+  'Starlight': 'Starlight',
+  'Box': 'Kotak',
+  'Calm Sigh': 'Hembusan Tenang',
+  'Custom': 'Kustom',
+  'Rest softly': 'Istirahat lembut',
+  'Custom Breathing Rhythm': 'Ritme Napas Kustom',
+  'Inhale': 'Tarik napas',
+  'Hold after inhale': 'Tahan setelah tarik',
+  'Exhale': 'Hembus napas',
+  'Rest after exhale': 'Jeda setelah hembus',
+  'Apply rhythm': 'Terapkan ritme',
+  '60-Second Daily Ritual': 'Ritual Harian 60 Detik',
+  'Step {0} of 3': 'Langkah {0} dari 3',
+  'How does your body and mind feel right now?':
+      'Bagaimana perasaan tubuh dan pikiranmu saat ini?',
+  'Anything to note quietly? (optional)':
+      'Ada yang ingin dicatat pelan-pelan? (opsional)',
+  "Hydration & today's rhythm": 'Hidrasi & ritme hari ini',
+  'Water today: {0} / 8': 'Air hari ini: {0} / 8',
+  'Even one small sip supports circulation and comfort.':
+      'Seteguk kecil pun membantu sirkulasi dan kenyamanan tubuh.',
+  'All scheduled doses for today are handled.':
+      'Semua jadwal dosis hari ini sudah tertangani.',
+  '{0} {0?dose|doses} still pending today.':
+      '{0} dosis masih menunggu hari ini.',
+  'Take 3 gentle breaths to close': 'Tarik 3 napas lembut untuk menutup',
+  'Drop your shoulders, unclench your jaw, and tap each star as you exhale slowly.':
+      'Turunkan bahu, lemesin rahang, dan ketuk tiap bintang sambil menghembus pelan.',
+  'Breath {0}': 'Napas {0}',
+  'You are safe here. Take today at your own pace ✨':
+      'Kamu aman di sini. Jalani hari ini sesuai ritmemu ✨',
+  '{0} / 3 breaths': '{0} / 3 napas',
+  'Next': 'Lanjut',
+  'Complete Ritual': 'Selesaikan Ritual',
+  'Daily check-in complete ✨ Bond +2 with your companion.':
+      'Check-in harian selesai ✨ Kedekatan +2 dengan companion.',
+  'Daily ritual': 'Ritual harian',
+  'Start 60s Daily Ritual': 'Mulai Ritual Harian 60d',
+  '♥ {0} • Next tier at {1}': '♥ {0} • Level berikutnya di {1}',
+  '♥ {0} • Highest bond tier reached': '♥ {0} • Level kedekatan tertinggi tercapai',
+  'Daily status check-ins, water tracker & comforting hugs':
+      'Check-in status harian, pelacak air minum & pelukan hangat',
+  'Unlocks Moonbeam affirmations & soft azure aura':
+      'Membuka afirmasi Moonbeam & aura biru lembut',
+  'Unlocks Twilight reflections & lavender sanctuary halo':
+      'Membuka refleksi Twilight & halo lavender sanctuary',
+  'Unlocks Confidante encouragement & twilight rose glow':
+      'Membuka dukungan Confidante & pendar rose senja',
+  'Unlocks all soulful keepsake notes & starlight cream aura':
+      'Membuka seluruh catatan kenangan & aura starlight cream',
+  'Moonbeams never rush to cross the sky—neither do you.':
+      'Cahaya bulan tak pernah terburu-buru melintasi langit—begitu juga kamu.',
+  'Thank you for checking in with yourself like a true friend.':
+      'Terima kasih sudah menanyakan kabar dirimu sendiri seperti sahabat sejati.',
+  'Through every twilight phase, I am right beside you.':
+      'Di setiap fase senja, aku selalu ada di sampingmu.',
+  'Your consistency—even on quiet days—deserves gentle praise.':
+      'Konsistensimu—bahkan di hari yang sepi—layak mendapat apresiasi lembut.',
+  'You know your rhythm better each month. Trust your quiet wisdom.':
+      'Kamu makin mengenal ritmemu setiap bulan. Percayai kebijaksanaan dirimu.',
+  'Whatever today asks of you, you do not carry it alone.':
+      'Apa pun yang diminta hari ini, kamu tidak memikulnya sendirian.',
+  'Eternal Dusk Soulmate: every phase you walk is luminous and yours.':
+      'Jiwa Eternal Dusk: setiap fase yang kamu jalani bersinar dan sepenuhnya milikmu.',
+  'From your first step to today, thank you for letting me keep watch with you.':
+      'Dari langkah pertamamu hingga hari ini, terima kasih sudah mengizinkanku menemanimu.',
+  '30 days': '30 hari',
+  'Recent 20': '20 terbaru',
+  'Overall avg: {0} Hz • 30d median: {1} Hz':
+      'Rata-rata: {0} Hz • Median 30h: {1} Hz',
+  '30d shift: {0}{1} Hz vs first session':
+      'Perubahan 30h: {0}{1} Hz vs sesi pertama',
+  'Journey Timeline': 'Linimasa Perjalanan',
+  'Unified history of labs, regimens, milestones & moments':
+      'Riwayat terpadu lab, rejimen, tonggak & momen',
+  'Regimen started': 'Rejimen dimulai',
+  'Personal milestone': 'Tonggak personal',
+  'Milestone': 'Tonggak',
+  'Regimen': 'Rejimen',
+  'Moments': 'Momen',
+  'Your timeline is ready': 'Linimasamu siap digunakan',
+  'No entries for this filter': 'Belum ada entri untuk filter ini',
+  'Therapies, blood tests, milestones, and moments will appear here chronologically.':
+      'Terapi, hasil tes darah, tonggak, dan momen akan muncul berurutan di sini.',
+  'Try switching back to All to view your complete journey.':
+      'Coba kembali ke Semua untuk melihat perjalanan lengkapmu.',
+  'Show all entries': 'Tampilkan semua entri',
+  'Earliest vs. Latest Lab Levels': 'Kadar Lab Awal vs. Terbaru',
 };

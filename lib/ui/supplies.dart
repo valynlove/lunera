@@ -288,12 +288,22 @@ class _MedCard extends ConsumerWidget {
   final Supply s;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expired = s.expiry != null && s.expiry!.isBefore(DateTime.now());
+    final now = DateTime.now();
+    final today = DateUtils.dateOnly(now);
+    final expired = s.expired;
     final low = s.low;
     final color = expired ? C.peony : (low ? C.amber : C.lagoon);
     final repo = ref.read(repoProvider);
     final ths = ref.watch(therapiesProvider).value ?? const <Therapy>[];
     final forecast = estimateSupplyForecast(s, ths);
+    final openExp = s.openExpiry;
+    final openDaysLeft =
+        openExp == null ? null : daysBetween(today, DateUtils.dateOnly(openExp));
+    final looksLikeVial = !s.generic &&
+        s.openedAt == null &&
+        (s.unitLabel.toLowerCase().contains('ml') ||
+            s.unitLabel.toLowerCase().contains('vial'));
+
     return Container(
       decoration: cardBox(context, radius: R.card),
       child: Material(
@@ -344,20 +354,112 @@ class _MedCard extends ConsumerWidget {
                     : tr('{0} {0?dose|doses} left', [s.doses]),
                 style: tabular(const TextStyle()),
               ),
+              if (s.deadSpace != null && s.deadSpace! > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Text(
+                    tr('Includes +{0} {1} hub loss/dose', [
+                      fmt(s.deadSpace!),
+                      s.unitLabel,
+                    ]),
+                    style: tabular(Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: C.iconDefault) ??
+                        const TextStyle()),
+                  ),
+                ),
               if (forecast != null) ...[
                 gap(6),
                 _forecastChip(context, forecast),
+              ],
+              if (openDaysLeft != null) ...[
+                gap(6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: (openDaysLeft < 0
+                            ? C.coral
+                            : (openDaysLeft <= 5 ? C.amber : Pastel.mint))
+                        .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: (openDaysLeft < 0
+                              ? C.coral
+                              : (openDaysLeft <= 5 ? C.amber : Pastel.mint))
+                          .withValues(alpha: 0.34),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        openDaysLeft < 0
+                            ? LucideIcons.alertTriangle
+                            : LucideIcons.flaskConical,
+                        size: 12.5,
+                        color: openDaysLeft < 0
+                            ? C.coral
+                            : (openDaysLeft <= 5 ? C.amber : Pastel.mint),
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          openDaysLeft < 0
+                              ? tr('Open vial past {0}d limit',
+                                  [s.beyondUseDays])
+                              : tr('Opened • {0}d left ({1}d limit)',
+                                  [openDaysLeft, s.beyondUseDays]),
+                          style: tabular(TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: openDaysLeft < 0
+                                ? C.coral
+                                : (openDaysLeft <= 5 ? C.amber : Pastel.mint),
+                          )),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else if (looksLikeVial) ...[
+                const SizedBox(height: 2),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      repo?.updateSupply(s.copy(openedAt: today));
+                    },
+                    icon: const Icon(LucideIcons.flaskConical, size: 15),
+                    label: Text(tr('Mark vial opened today')),
+                    style: TextButton.styleFrom(
+                      foregroundColor: C.lavender,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ),
               ],
               if (s.expiry != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                      tr(expired ? 'Expired since {0}' : 'Expires {0}',
+                      tr(
+                          s.expiry!.isBefore(now)
+                              ? 'Expired since {0}'
+                              : 'Expires {0}',
                           [DateFormat('d MMM y', L10n.code).format(s.expiry!)]),
                       style: tabular(Theme.of(context)
                               .textTheme
                               .bodySmall
-                              ?.copyWith(color: expired ? C.peony : null) ??
+                              ?.copyWith(
+                                  color: s.expiry!.isBefore(now)
+                                      ? C.peony
+                                      : null) ??
                           const TextStyle())),
                 ),
             ]),
@@ -446,7 +548,26 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
       text: widget.initial?.dosePerUnit == null
           ? ''
           : fmt(widget.initial!.dosePerUnit!));
+  late final deadSpaceCtrl = TextEditingController(
+      text: widget.initial?.deadSpace == null
+          ? ''
+          : fmt(widget.initial!.deadSpace!));
+  late final budCtrl =
+      TextEditingController(text: '${widget.initial?.beyondUseDays ?? 28}');
   late DateTime? expiry = widget.initial?.expiry;
+  late DateTime? openedAt = widget.initial?.openedAt;
+
+  @override
+  void dispose() {
+    name.dispose();
+    qty.dispose();
+    per.dispose();
+    label.dispose();
+    dpu.dispose();
+    deadSpaceCtrl.dispose();
+    budCtrl.dispose();
+    super.dispose();
+  }
 
   void _save() {
     final q = parseNum(qty.text);
@@ -467,6 +588,8 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
     } else {
       final p = parseNum(per.text);
       if (name.text.trim().isEmpty || p == null || p <= 0) return;
+      final dead = parseNum(deadSpaceCtrl.text);
+      final parsedBud = int.tryParse(budCtrl.text.trim()) ?? 28;
       s = Supply(
         id: old?.id ?? '',
         name: name.text.trim(),
@@ -476,6 +599,9 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
         unitLabel: label.text.trim().isEmpty ? 'buah' : label.text.trim(),
         expiry: expiry,
         dosePerUnit: parseNum(dpu.text),
+        openedAt: openedAt,
+        beyondUseDays: parsedBud.clamp(1, 365),
+        deadSpace: (dead != null && dead > 0) ? dead : null,
       );
     }
     if (old == null) {
@@ -564,20 +690,82 @@ class _SupplySheetState extends ConsumerState<SupplySheet> {
                   'E.g. 40 for 40 mg/mL. If filled in, usage is calculated from the dose (mg).')),
         ),
         gap(10),
-        OutlinedButton.icon(
-          onPressed: () async {
-            final d = await showDatePicker(
-                context: context,
-                initialDate: expiry ?? DateTime.now(),
-                firstDate: DateTime(2020),
-                lastDate: DateTime(2100));
-            if (d != null) setState(() => expiry = d);
-          },
-          icon: const Icon(LucideIcons.calendarDays, size: 18),
-          label: Text(expiry == null
-              ? tr('Expiry date (optional)')
-              : DateFormat('d MMM y', L10n.code).format(expiry!)),
+        TextField(
+          controller: deadSpaceCtrl,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+              labelText: tr('Hub / dead-space loss per dose (optional)'),
+              helperText: tr(
+                  'E.g. 0.05 mL left in syringe hub so remaining doses stay accurate.')),
         ),
+        gap(10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () async {
+                final d = await showDatePicker(
+                    context: context,
+                    initialDate: expiry ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2100));
+                if (d != null && mounted) setState(() => expiry = d);
+              },
+              icon: const Icon(LucideIcons.calendarDays, size: 18),
+              label: Text(expiry == null
+                  ? tr('Expiry date (optional)')
+                  : DateFormat('d MMM y', L10n.code).format(expiry!)),
+            ),
+            if (expiry != null)
+              IconButton(
+                onPressed: () => setState(() => expiry = null),
+                icon: const Icon(LucideIcons.x, size: 18),
+                tooltip: tr('Clear expiry date'),
+              ),
+          ],
+        ),
+        gap(10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () async {
+                final d = await showDatePicker(
+                    context: context,
+                    initialDate: openedAt ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now().add(const Duration(days: 30)));
+                if (d != null && mounted) setState(() => openedAt = d);
+              },
+              icon: const Icon(LucideIcons.flaskConical, size: 18),
+              label: Text(openedAt == null
+                  ? tr('Vial opened date (optional)')
+                  : tr('Opened {0}',
+                      [DateFormat('d MMM y', L10n.code).format(openedAt!)])),
+            ),
+            if (openedAt != null)
+              IconButton(
+                onPressed: () => setState(() => openedAt = null),
+                icon: const Icon(LucideIcons.x, size: 18),
+                tooltip: tr('Clear opened date'),
+              ),
+          ],
+        ),
+        if (openedAt != null) ...[
+          gap(10),
+          TextField(
+            controller: budCtrl,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: tr('Beyond-use days after opening'),
+              helperText: tr('Standard multi-dose vial guideline is 28 days.'),
+            ),
+          ),
+        ],
       ],
       gap(20),
       Row(children: [

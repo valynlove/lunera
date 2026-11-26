@@ -117,8 +117,18 @@ String _verb(Therapy t) => switch (t.route) {
   );
 }
 
+/// Format gentle hydration reminder copy respecting lockscreen privacy mode.
+(String, String) hydrationNotificationText(Prefs prefs) {
+  if (prefs.discreetNotify == 'minimal') {
+    return ('Lunera ✦', tr('Gentle reminder.'));
+  }
+  return ('Lunera 💧', tr('Time for a gentle sip of water. Stay hydrated!'));
+}
+
+const _luneraSound = RawResourceAndroidNotificationSound('lunera_chime');
 const _snoozeTag = 'snz';
 const markTakenActionId = 'mark_taken';
+const dismissDoseActionId = 'dismiss_dose';
 const _snooze15Action = 'snooze_15';
 const _snooze30Action = 'snooze_30';
 const _doseCategory = 'dose_actions';
@@ -128,6 +138,7 @@ String snoozePayload({
   required String slot,
   required String title,
   required String body,
+  bool isInjection = false,
 }) =>
     jsonEncode({
       'k': _snoozeTag,
@@ -135,6 +146,7 @@ String snoozePayload({
       'slot': slot,
       'title': title,
       'body': body,
+      if (isInjection) 'inj': true,
     });
 
 Map<String, dynamic>? parseSnoozePayload(String? payload) {
@@ -168,7 +180,10 @@ bool keepSnooze(String? payload, Set<String> pendingKeys) {
   return p != null && pendingKeys.contains('${p['tid']}|${p['slot']}');
 }
 
-NotificationDetails _buildDoseDetails({bool withActions = true}) =>
+NotificationDetails buildDoseNotificationDetails({
+  bool withActions = true,
+  bool ongoing = false,
+}) =>
     NotificationDetails(
       android: AndroidNotificationDetails(
         'doses',
@@ -176,6 +191,10 @@ NotificationDetails _buildDoseDetails({bool withActions = true}) =>
         channelDescription: tr('Medication and injection schedule reminders'),
         importance: Importance.max,
         priority: Priority.max,
+        sound: _luneraSound,
+        playSound: true,
+        ongoing: ongoing,
+        autoCancel: !ongoing,
         actions: withActions
             ? [
                 AndroidNotificationAction(
@@ -190,12 +209,20 @@ NotificationDetails _buildDoseDetails({bool withActions = true}) =>
                   showsUserInterface: false,
                   cancelNotification: true,
                 ),
-                AndroidNotificationAction(
-                  _snooze30Action,
-                  tr('Snooze 30 min'),
-                  showsUserInterface: false,
-                  cancelNotification: true,
-                ),
+                if (ongoing)
+                  AndroidNotificationAction(
+                    dismissDoseActionId,
+                    '✕ ${tr('Dismiss')}',
+                    showsUserInterface: false,
+                    cancelNotification: true,
+                  )
+                else
+                  AndroidNotificationAction(
+                    _snooze30Action,
+                    tr('Snooze 30 min'),
+                    showsUserInterface: false,
+                    cancelNotification: true,
+                  ),
               ]
             : null,
       ),
@@ -210,6 +237,13 @@ NotificationDetails _buildDoseDetails({bool withActions = true}) =>
 
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse response) {
+  if (response.actionId == dismissDoseActionId) {
+    final id = response.id;
+    if (id != null) {
+      FlutterLocalNotificationsPlugin().cancel(id: id);
+    }
+    return;
+  }
   AppNotifier.snoozeFromResponse(response);
 }
 
@@ -240,8 +274,17 @@ class AppNotifier {
       _plugin.resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin>();
 
-  /// Handles foreground notification responses (both snooze and Mark taken).
+  /// Handles foreground notification responses (dismiss, snooze, and Mark taken).
   static Future<void> handleNotificationResponse(NotificationResponse r) async {
+    if (r.actionId == dismissDoseActionId) {
+      final id = r.id;
+      if (id != null) {
+        try {
+          await FlutterLocalNotificationsPlugin().cancel(id: id);
+        } catch (_) {}
+      }
+      return;
+    }
     if (snoozeMinutes(r.actionId) != null) {
       await snoozeFromResponse(r);
       return;
@@ -279,7 +322,10 @@ class AppNotifier {
         title: p['title'] as String,
         body: p['body'] as String,
         scheduledDate: tz.TZDateTime.now(tz.local).add(Duration(minutes: m)),
-        notificationDetails: _buildDoseDetails(withActions: true),
+        notificationDetails: buildDoseNotificationDetails(
+          withActions: true,
+          ongoing: p['inj'] == true,
+        ),
         androidScheduleMode: mode,
         payload: r.payload,
       );
@@ -328,8 +374,7 @@ class AppNotifier {
     _ready = true;
   }
 
-  NotificationDetails get _details => _buildDoseDetails(withActions: false);
-  NotificationDetails get _doseDetails => _buildDoseDetails(withActions: true);
+  NotificationDetails get _details => buildDoseNotificationDetails(withActions: false);
 
   Future<bool> requestPermission() async {
     if (!supported) return false;
@@ -370,6 +415,8 @@ class AppNotifier {
   static const _troughReminderPrefKey = 'labs.trough_reminder_at';
   static const _troughPayload = 'trough_lab';
   static const _workoutPayload = 'workout_reminder';
+  static const _hydrationPrefKey = 'hydration_notify_enabled';
+  static const _hydrationPayload = 'hydration_reminder';
   static int get _troughReminderId =>
       'trough_lab_reminder'.hashCode & 0x7fffffff;
 
@@ -381,6 +428,8 @@ class AppNotifier {
               tr('Gentle optional movement reminders in your comfort window'),
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
+          sound: _luneraSound,
+          playSound: true,
         ),
         iOS: const DarwinNotificationDetails(
           interruptionLevel: InterruptionLevel.active,
@@ -389,6 +438,76 @@ class AppNotifier {
           presentSound: true,
         ),
       );
+
+  NotificationDetails get hydrationDetails => NotificationDetails(
+        android: AndroidNotificationDetails(
+          'hydration',
+          tr('Hydration reminders'),
+          channelDescription: tr('Gentle daily water check-in reminders'),
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+          sound: _luneraSound,
+          playSound: true,
+          ongoing: false,
+          autoCancel: true,
+        ),
+        iOS: const DarwinNotificationDetails(
+          interruptionLevel: InterruptionLevel.active,
+          presentAlert: true,
+          presentBadge: false,
+          presentSound: true,
+        ),
+      );
+
+  Future<bool> isHydrationReminderEnabled() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_hydrationPrefKey) ?? false;
+  }
+
+  Future<void> setHydrationReminderEnabled(bool enabled, Prefs prefs) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_hydrationPrefKey, enabled);
+    await syncHydrationReminders(prefs);
+  }
+
+  Future<void> syncHydrationReminders(Prefs prefs, {DateTime? now}) async {
+    if (!supported) return;
+    await init();
+    for (final req in await _plugin.pendingNotificationRequests()) {
+      if (req.payload == _hydrationPayload) {
+        await _plugin.cancel(id: req.id);
+      }
+    }
+    final enabled = await isHydrationReminderEnabled();
+    if (!enabled) return;
+
+    final refNow = now ?? DateTime.now();
+    final mode = await _canExact()
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+    final (title, body) = hydrationNotificationText(prefs);
+    const hours = [10, 14, 18, 21];
+
+    for (var d = 0; d < 7; d++) {
+      for (final h in hours) {
+        final at = DateTime(refNow.year, refNow.month, refNow.day + d, h, 0);
+        if (!at.isAfter(refNow)) continue;
+        final dateIso =
+            '${at.year.toString().padLeft(4, '0')}-${at.month.toString().padLeft(2, '0')}-${at.day.toString().padLeft(2, '0')}';
+        final id = 'hydration|$dateIso|$h'.hashCode & 0x7fffffff;
+        await _plugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate:
+              tz.TZDateTime(tz.local, at.year, at.month, at.day, at.hour, 0),
+          notificationDetails: hydrationDetails,
+          androidScheduleMode: mode,
+          payload: _hydrationPayload,
+        );
+      }
+    }
+  }
 
   /// Schedules or cancels optional guilt-free workout reminders independently
   /// from the critical medication `doses` channel.
@@ -525,7 +644,9 @@ class AppNotifier {
     await init();
     if (!prefs.notify) {
       for (final req in await _plugin.pendingNotificationRequests()) {
-        if (req.payload != _troughPayload && req.payload != _workoutPayload) {
+        if (req.payload != _troughPayload &&
+            req.payload != _workoutPayload &&
+            req.payload != _hydrationPayload) {
           await _plugin.cancel(id: req.id);
         }
       }
@@ -544,7 +665,8 @@ class AppNotifier {
     for (final req in await _plugin.pendingNotificationRequests()) {
       if (!keepSnooze(req.payload, pendingKeys) &&
           req.payload != _troughPayload &&
-          req.payload != _workoutPayload) {
+          req.payload != _workoutPayload &&
+          req.payload != _hydrationPayload) {
         await _plugin.cancel(id: req.id);
       }
     }
@@ -562,6 +684,7 @@ class AppNotifier {
       final place = t.adm.places ? suggestPlace(prefs, desc, t.id) : '';
       final (title, body) = doseNotificationText(t, prefs, place: place);
       final slot = slotKey(s.at);
+      final isInj = t.route == 'inj';
 
       await _plugin.zonedSchedule(
         id: _id(t, s.at),
@@ -569,10 +692,16 @@ class AppNotifier {
         body: body,
         scheduledDate: tz.TZDateTime(
             tz.local, s.at.year, s.at.month, s.at.day, s.at.hour, s.at.minute),
-        notificationDetails: _doseDetails,
+        notificationDetails:
+            buildDoseNotificationDetails(withActions: true, ongoing: isInj),
         androidScheduleMode: mode,
         payload: snoozePayload(
-            therapyId: t.id, slot: slot, title: title, body: body),
+          therapyId: t.id,
+          slot: slot,
+          title: title,
+          body: body,
+          isInjection: isInj,
+        ),
       );
     }
 
@@ -602,7 +731,7 @@ class AppNotifier {
               body);
         }
       }
-      final e = s.expiry;
+      final e = s.effectiveExpiry;
       if (e != null) {
         for (final lead in const [14, 3, 0]) {
           final at = DateTime(e.year, e.month, e.day - lead, 9);

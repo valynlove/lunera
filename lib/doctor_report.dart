@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:intl/intl.dart';
 
+import 'cycle_insights.dart';
 import 'l10n.dart';
 import 'models.dart';
 import 'schedule.dart';
@@ -147,6 +148,17 @@ _DoctorReportData _collectDoctorReportData({
       if ((symptomCounts[entry.key] ?? 0) > 0)
         '${tr(entry.value.$1)}: ${symptomCounts[entry.key]}x',
   ];
+
+  final cycleReport = analyzeCyclePhaseInsights(
+    therapies: therapies,
+    logs: logs,
+    journal: journal,
+    now: now,
+    lookbackDays: months * 30,
+  );
+  if (cycleReport?.clinicianNote != null) {
+    symptomLines.add(cycleReport!.clinicianNote!);
+  }
 
   return _DoctorReportData(
     generatedText: tr('Generated: {0}', [df.format(now)]),

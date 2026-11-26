@@ -42,10 +42,59 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.3.0',
+      dateEn: 'November 26, 2026',
+      dateId: '26 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Cycle-Aware Insights & Monthly Reflection: Maps mood and symptoms across simulated Peak, Mid-cycle, and Trough hormone phases with one-tap Consultation Prep export and a guilt-free Lunera Monthly Reflection card.',
+          textId:
+              'Wawasan Fase Siklus & Refleksi Bulanan: Memetakan suasana hati dan gejala di fase Puncak, Pertengahan, dan Trough hormon lengkap dengan ekspor ke Persiapan Konsultasi serta kartu Refleksi Bulanan Lunera tanpa rasa bersalah.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Smart Vial & Lab Radar: Added open-vial beyond-use countdowns, syringe hub/dead-space loss calculation, open-vial CareAlerts, and custom target bloodwork countdowns on Levels.',
+          textId:
+              'Radar Vial & Jadwal Lab Pintar: Menambahkan hitung mundur batas pakai vial setelah dibuka, kalkulasi sisa cairan hub spuit, peringatan CareAlerts, serta hitung mundur tanggal tes lab kustom di halaman Kadar.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Companion Daily Ritual, Breathing Presets & Voice 30-Day Trends: Added a 60-second Daily Check-in flow, Bond Tier Perks, Starlight Breathing presets (Box, 4-7-8 Sleep, Calm Sigh, Custom) with phase haptics, and 30-day voice pitch medians.',
+          textId:
+              'Ritual Harian Companion, Preset Napas & Tren Suara 30 Hari: Menambahkan alur Check-in 60 Detik, benefit Level Kedekatan, preset napas Starlight (Kotak, Tidur 4-7-8, Hembusan Tenang, Kustom) dengan getar fase, dan median pitch suara 30 hari.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Unified Journey Timeline, Travel Shift & Quick Care Card: Added chronological Journey Timeline with earliest-vs-latest lab comparisons, Travel & Timezone dose shift calculator, and 1-tap Quick Clinic Care Card.',
+          textId:
+              'Linimasa Perjalanan Terpadu, Asisten Zona Waktu & Kartu Klinik: Menambahkan Linimasa Perjalanan lengkap dengan perbandingan lab awal vs terbaru, kalkulator geser dosis lintas zona waktu, dan Kartu Ringkas Klinik 1-ketuk.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.2.45',
+      dateEn: 'November 26, 2026',
+      dateId: '26 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Interactive Companion Widget, Bond Milestones & Hydration Tracker: Added the 2×2 Android Companion widget, 5 bond tiers, Water 0/8 chip, Widget Gallery in Settings, and custom celestial chime notifications.',
+          textId:
+              'Widget Companion Interaktif, Level Kedekatan & Pelacak Hidrasi: Menambahkan widget Android Companion 2×2, 5 level kedekatan, chip Air 0/8, Galeri Widget di Pengaturan, serta nada notifikasi kustom.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.2.44',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

@@ -16,10 +16,16 @@ import 'theme.dart';
 import 'l10n.dart';
 import 'workout_coach.dart';
 
-/// Background callback triggered by tapping "Rest / Resume" on the 2x2 WorkoutWidget.
+/// Background callback triggered by interactive Android Home Screen widgets
+/// (WorkoutWidget "Rest / Resume" and CompanionWidget "Poke / Pat / Chat").
 @pragma('vm:entry-point')
 Future<void> workoutWidgetBackgroundCallback(Uri? uri) async {
-  if (uri == null || uri.host != 'workout' || uri.path != '/rest') return;
+  if (uri == null) return;
+  if (uri.host == 'companion') {
+    await _handleCompanionWidgetAction(uri.path);
+    return;
+  }
+  if (uri.host != 'workout' || uri.path != '/rest') return;
   try {
     await L10n.load();
     final sp = await SharedPreferences.getInstance();
@@ -69,6 +75,118 @@ Future<void> workoutWidgetBackgroundCallback(Uri? uri) async {
   }
 }
 
+const List<(String, String, String)> _companionPokeLines = [
+  ('shocked', 'Whoa—! That startled me a little!', 'Eh—! Kaget aku tiba-tiba dicolek!'),
+  ('wink', 'Hehe, bored? I am right here with you.', 'Hehe, lagi gabut ya? Aku temenin di sini.'),
+  ('laugh', 'Poking my cheeks is officially your new hobby.', 'Nyolek pipiku udah jadi hobi baru nih ya.'),
+  ('shy', 'U-um, you keep tapping me... not that I mind.', 'E-eh, dicolek terus... bukan berarti gak suka sih.'),
+  ('happy', 'Boop! Sending a tiny spark of stardust your way.', 'Boop! Kirim sepercik energi bintang buat kamu.'),
+  ('annoyed', 'Okay okay, my cheeks are not a stress ball!', 'Iya iyaa, pipiku bukan mainan pencet tau!'),
+];
+
+const List<(String, String, String)> _companionPatLines = [
+  ('love', 'Warm headpats received! Energy +100 ♥', 'Elusan diterima! Energi langsung penuh lagi ♥'),
+  ('happy', 'That feels super cozy. You are doing great today.', 'Nyaman banget~ Kamu udah hebat banget hari ini.'),
+  ('shy', 'Aww... thank you. Take a soft breath with me.', 'Aww... makasih ya. Tarik napas pelan bareng aku.'),
+  ('care', 'You deserve just as much gentleness as you give.', 'Kamu juga berhak disayang pelan-pelan kayak gini.'),
+  ('cheer', 'Yay! Instant serotonin boost unlocked ✨', 'Yay! Boost semangat instan aktif ✨'),
+];
+
+const List<(String, String, String)> _companionTalkLines = [
+  ('calm', 'Plot twist: surviving today already earns full marks.', 'Plot twist: bertahan sampai hari ini aja udah nilai sempurna.'),
+  ('ponder', 'Have you had a sip of water recently? Go grab one!', 'Udah minum air putih belum barusan? Minum dikit yuk!'),
+  ('wink', 'Even the moon takes a whole month to cycle its phases.', 'Bulan aja butuh sebulan penuh buat ganti fase, santai aja.'),
+  ('care', 'Drop your shoulders and unclench your jaw for a second.', 'Turunin bahunya sebentar, lemesin rahangnya ya.'),
+  ('cheer', 'Small steady steps still count as moving forward.', 'Langkah kecil yang pelan tetap dihitung maju kok.'),
+  ('sleepy', 'If it is getting late, promise me you will rest soon.', 'Kalau udah larut, janji ya bentar lagi istirahat.'),
+  ('wave', 'Just checking in—I am always cheering from your home screen.', 'Cuma mau nyapa—aku selalu nyemangatin dari home screen.'),
+];
+
+Future<void> _handleCompanionWidgetAction(String path) async {
+  try {
+    await L10n.load();
+    final id = L10n.code == 'id';
+    final sp = await SharedPreferences.getInstance();
+    var pats = sp.getInt('cmp_pats_count') ?? 0;
+    var pokeStreak = sp.getInt('cmp_poke_streak') ?? 0;
+    var talkIdx = sp.getInt('cmp_talk_idx') ?? 0;
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    var water = sp.getString('cmp_hydration_date') == todayStr
+        ? (sp.getInt('cmp_hydration_cups') ?? 0)
+        : 0;
+    final rng = math.Random();
+
+    late String mood;
+    late String speech;
+
+    if (path == '/water') {
+      water += 1;
+      pokeStreak = 0;
+      await sp.setString('cmp_hydration_date', todayStr);
+      await sp.setInt('cmp_hydration_cups', water);
+      if (water >= 8) {
+        mood = 'cheer';
+        speech = id
+            ? 'Target minum tercapai ($water/8)! Hebat banget 💧'
+            : 'Hydration goal reached ($water/8)! Amazing job 💧';
+      } else {
+        mood = water.isEven ? 'care' : 'happy';
+        speech = id
+            ? 'Minum +1 ($water/8)! Tubuhmu pasti senang 💧'
+            : 'Hydration +1 ($water/8)! Your future self thanks you 💧';
+      }
+    } else if (path == '/pat') {
+      pats += 1;
+      pokeStreak = 0;
+      final pick = _companionPatLines[rng.nextInt(_companionPatLines.length)];
+      mood = pick.$1;
+      speech = id ? pick.$3 : pick.$2;
+    } else if (path == '/talk') {
+      pokeStreak = 0;
+      final hour = DateTime.now().hour;
+      if ((hour >= 22 || hour < 5) && rng.nextInt(3) == 0) {
+        mood = 'sleepy';
+        speech = id
+            ? 'Udah malam nih... jangan lupa istirahat ya 🌙'
+            : 'It is getting late... do not forget to rest 🌙';
+      } else {
+        final pick = _companionTalkLines[talkIdx % _companionTalkLines.length];
+        talkIdx += 1;
+        mood = pick.$1;
+        speech = id ? pick.$3 : pick.$2;
+      }
+    } else {
+      // /poke (tap directly on mascot)
+      pats += 1;
+      pokeStreak += 1;
+      final (String, String, String) pick;
+      if (pokeStreak >= 4) {
+        pick = _companionPokeLines.last;
+        pokeStreak = 0;
+      } else {
+        pick = _companionPokeLines[rng.nextInt(_companionPokeLines.length - 1)];
+      }
+      mood = pick.$1;
+      speech = id ? pick.$3 : pick.$2;
+    }
+
+    await sp.setInt('cmp_pats_count', pats);
+    await sp.setInt('cmp_poke_streak', pokeStreak);
+    await sp.setInt('cmp_talk_idx', talkIdx);
+
+    await HomeWidget.saveWidgetData<String>('lang', L10n.code);
+    await HomeWidget.saveWidgetData<String>('cmp_mood', mood);
+    await HomeWidget.saveWidgetData<String>('cmp_speech', speech);
+    await HomeWidget.saveWidgetData<String>('cmp_pats', '$pats');
+    await HomeWidget.saveWidgetData<String>('cmp_water', '$water');
+    await HomeWidget.updateWidget(
+      qualifiedAndroidName: 'com.example.ritme.CompanionWidget',
+    );
+  } catch (e) {
+    debugPrint('Companion widget background action failed: $e');
+  }
+}
+
 /// Mengirim data ke widget layar utama Android: lama terapi, jadwal, dan grafik level.
 /// Data ditulis ke penyimpanan bersama (SharedPreferences) yang dibaca kode Kotlin widget.
 class WidgetSync {
@@ -76,12 +194,14 @@ class WidgetSync {
 
   static bool get supported => !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   static final pendingWorkoutAction = ValueNotifier<String?>(null);
-  static const _widgets = ['HrtWidget', 'ScheduleWidget', 'LevelWidget', 'WorkoutWidget'];
+  static final pendingCompanionAction = ValueNotifier<String?>(null);
+  static const _widgets = ['HrtWidget', 'ScheduleWidget', 'LevelWidget', 'WorkoutWidget', 'CompanionWidget'];
   static const _keys = [
     'hrt_first_date', 'hrt_count',
     'sch_0_title', 'sch_0_at', 'sch_0_sub', 'sch_1_title', 'sch_1_at', 'sch_1_sub', 'sch_2_title', 'sch_2_at', 'sch_2_sub',
     'lvl_title', 'lvl_value', 'lvl_note', 'lvl_image',
     'wrk_badge', 'wrk_title', 'wrk_sub', 'wrk_mood', 'wrk_resting',
+    'cmp_mood', 'cmp_speech', 'cmp_pats', 'cmp_water',
   ];
   static Timer? _timer;
 
@@ -170,7 +290,48 @@ class WidgetSync {
     await HomeWidget.saveWidgetData<String>(
         'wrk_resting', rec.kind == CoachContextKind.restedToday ? '1' : '0');
 
+    // 5. Companion 2x2 interactive mascot widget (preserve existing state if already set)
+    final sp = await SharedPreferences.getInstance();
+    final pats = sp.getInt('cmp_pats_count') ?? 0;
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final water = sp.getString('cmp_hydration_date') == todayStr
+        ? (sp.getInt('cmp_hydration_cups') ?? 0)
+        : 0;
+    await HomeWidget.saveWidgetData<String>('cmp_pats', '$pats');
+    await HomeWidget.saveWidgetData<String>('cmp_water', '$water');
+    final existingMood = await HomeWidget.getWidgetData<String>('cmp_mood');
+    if (existingMood == null || existingMood.isEmpty) {
+      await HomeWidget.saveWidgetData<String>('cmp_mood', 'wave');
+    }
+
     await _refresh();
+  }
+
+  /// Immediately pushes updated companion affection & hydration counts to CompanionWidget.
+  static Future<void> syncCompanionStats({
+    required int pats,
+    required int waterCups,
+  }) async {
+    if (!supported) return;
+    try {
+      await HomeWidget.saveWidgetData<String>('cmp_pats', '$pats');
+      await HomeWidget.saveWidgetData<String>('cmp_water', '$waterCups');
+      await HomeWidget.updateWidget(
+        qualifiedAndroidName: 'com.example.ritme.CompanionWidget',
+      );
+    } catch (e) {
+      debugPrint('Companion stats sync failed: $e');
+    }
+  }
+
+  /// Forces an immediate refresh of all Android home screen widgets.
+  static Future<void> refreshAll() async {
+    if (!supported) return;
+    try {
+      await _refresh();
+    } catch (e) {
+      debugPrint('Widget refresh failed: $e');
+    }
   }
 
   static Future<void> _chart(List<Therapy> ths, List<DoseLog> logs, List<Lab> labs, Map<String, List<double>> targets, Prefs prefs) async {

@@ -14,6 +14,7 @@ import 'body.dart';
 import 'guided_injection.dart';
 import 'guides_page.dart';
 import 'insights.dart';
+import 'journey_timeline_page.dart';
 import 'pickup_assistant_sheet.dart';
 import 'profile_page.dart';
 import 'responsive.dart';
@@ -23,6 +24,7 @@ import 'moments_page.dart';
 import 'sanctuary/sanctuary_page.dart';
 import 'settings_page.dart';
 import 'site_map.dart';
+import 'travel_shift_sheet.dart';
 
 /// Halaman pusat fitur (Feature Hub) Lunera: perjalanan tubuh, analitik kepatuhan,
 /// peta rotasi jaringan suntik, panduan suntik mandiri, dan asisten ekspedisi privat.
@@ -656,6 +658,15 @@ class MorePage extends ConsumerWidget {
           child: Column(
             children: [
               tile(
+                icon: LucideIcons.compass,
+                color: C.coral,
+                title: tr('Journey Timeline'),
+                subtitle:
+                    tr('Unified history of labs, regimens, milestones & moments'),
+                onTap: () => openPage(const JourneyTimelinePage()),
+              ),
+              const Divider(height: 1, indent: 68),
+              tile(
                 icon: LucideIcons.activity,
                 color: Pastel.lilac,
                 title: tr('Insights & Patterns'),
@@ -740,6 +751,15 @@ class MorePage extends ConsumerWidget {
                 subtitle: tr(
                     'Format package for pickup at courier branch (Hold at Location)'),
                 onTap: openPickupAssistant,
+              ),
+              const Divider(height: 1, indent: 68),
+              tile(
+                icon: LucideIcons.globe,
+                color: Pastel.sky,
+                title: tr('Travel & Timezone Helper'),
+                subtitle: tr(
+                    'Gradually shift dose times when crossing time zones'),
+                onTap: () => showSheet(context, const TravelShiftSheet()),
               ),
             ],
           ),

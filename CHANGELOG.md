@@ -4,6 +4,31 @@ All notable changes to the **Lunera** personal health & therapy tracking applica
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-11-26
+
+### Added
+- **Cycle-Aware Insights & Monthly Calm Reflection (`lib/cycle_insights.dart`, `lib/ui/insights.dart`, `lib/doctor_report.dart`):** Correlates simulated hormone phases (Peak, Mid-cycle, Trough) with journal moods and symptoms, exports phase observations to Consultation Prep and Doctor Reports, and adds a guilt-free **Lunera Monthly Reflection** recap card.
+- **Smart Vial & Lab Radar (`lib/models.dart`, `lib/schedule.dart`, `lib/care_alerts.dart`, `lib/notifications.dart`, `lib/ui/supplies.dart`, `lib/ui/levels/levels_page.dart`):** Adds open-vial puncture date & beyond-use-day tracking (default 28 days), syringe hub/dead-space loss dosing math, open-vial CareAlerts & expiry notifications, and custom target bloodwork countdowns.
+- **Companion Daily Ritual, Breathing Presets & Voice 30-Day Trend (`lib/ui/daily_checkin_sheet.dart`, `lib/ui/ambient_companion.dart`, `lib/ui/shell.dart`, `lib/ui/sanctuary/starlight_breath_page.dart`, `lib/voice_pitch.dart`, `lib/ui/sanctuary/voice_pitch_page.dart`):** Adds a 60-second Daily Check-in Ritual (mood, hydration, 3 calm breaths), Bond Tier Perks, `StarlightBreathPage` rhythm presets (*Box*, *4-7-8 Sleep*, *Calm Sigh*, *Custom*) with phase-transition haptics, and 30-day voice pitch medians & baseline deltas.
+- **Unified Journey Timeline, Travel Shift & Quick Care Card (`lib/ui/journey_timeline_page.dart`, `lib/travel_shift.dart`, `lib/ui/travel_shift_sheet.dart`, `lib/ui/care_card_sheet.dart`, `lib/ui/calendar.dart`, `lib/ui/profile_page.dart`, `lib/ui/consultation_prep_page.dart`, `lib/ui/more.dart`):** Adds a filterable chronological Journey Timeline with earliest-vs-latest lab comparison, a gradual timezone dose-shift calculator, and a 1-tap Quick Clinic Care Card.
+- **v2.3.0 Test Suite & Localization (`test/v230_features_test.dart`, `lib/l10n_id.dart`):** Added unit, backward-compatibility backup, and responsive widget tests alongside complete Indonesian translations.
+
+## [2.2.45] - 2026-11-26
+
+### Added
+- **Interactive Companion Home Screen Widget (`CompanionWidget.kt`, `widget_companion.xml`, `companion_widget_info.xml`, `lib/widget_sync.dart`):** Added a new 2×2 resizable Android home screen widget featuring Lunera's chibi companion mascot with 14 expressive poses, an interactive `♥` & `💧` badge (tap to log water directly from the home screen), direct mascot poke reactions, **Pat**, and **Chat** background actions.
+- **Companion Bond Milestones & Hydration Check-In (`lib/ui/ambient_companion.dart`, `lib/widget_sync.dart`, `lib/l10n_id.dart`):** Connected the `♥` affection counter to in-app `AmbientCompanionCard` interactions with 5 progressive bond tiers (*Stardust Pal* → *Eternal Dusk Soulmate*), added an interactive daily `Water 0/8` micro-tracker chip synced with `CompanionWidget`, and added full Indonesian translations.
+- **Home Screen Widgets Gallery & Android Pinning (`lib/ui/settings_page.dart`, `MainActivity.kt`):** Added a **Browse & Pin Widgets** sheet in Settings listing all 5 Lunera widgets with one-tap Android `requestPinAppWidget` support and a **Refresh Widgets** action.
+- **Celestial Chime Notification Sound & Persistent Injection Alerts (`android/app/src/main/res/raw/lunera_chime.wav`, `lib/notifications.dart`, `lib/ui/settings_page.dart`):** Added the custom `lunera_chime.wav` ringtone across Lunera notification channels, configured injection reminders as persistent (`ongoing: true`, `autoCancel: false`) with an explicit **✕ Dismiss** action button, and added optional normal daily **Hydration reminders** (`10:00`, `14:00`, `18:00`, `21:00`) in Settings.
+- **Companion Widget Unit Tests (`test/companion_widget_test.dart`):** Added unit tests covering `companionBondTier` thresholds and `CompanionWidget` background callback actions (`/pat`, `/poke`, `/talk`).
+
+### Changed
+- **Movement Coach Widget Mascot Placement (`android/app/src/main/res/layout/widget_workout.xml`):** Moved the Movement Coach mascot out of the compact top-left corner into the spacious middle-right area alongside the subtitle and enlarged it (`96dp` width, full middle-row height) for clearer visibility.
+- **Landing Page Widgets Showcase (`docs/index.html`, `docs/style.css`, `docs/images/companion/`):** Expanded the Widgets showcase section to display all 5 Android widgets including the new **Movement Coach** and **Companion** cards.
+
+### Fixed
+- **Dart Analyzer Cleanup (`lib/ui/journal.dart`, `lib/ui/settings_page.dart`):** Wrapped single-statement `if` branches in braces to resolve all remaining `curly_braces_in_flow_control_structures` info lints.
+
 ## [2.2.44] - 2026-11-25
 
 ### Fixed

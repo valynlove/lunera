@@ -1184,3 +1184,39 @@ class VoiceStore {
     );
   }
 }
+
+/// Computes 30-day session count, median Hz, and delta from the earliest saved session.
+({int count30d, double? medianHz, double? deltaFromFirstHz})
+    computeVoice30DaySummary(
+  List<VoiceTestResult> results, {
+  DateTime? now,
+}) {
+  if (results.isEmpty) {
+    return (count30d: 0, medianHz: null, deltaFromFirstHz: null);
+  }
+  final refNow = now ?? DateTime.now();
+  final cutoff = refNow.subtract(const Duration(days: 30));
+  final recent = [
+    for (final r in results)
+      if (!r.at.isBefore(cutoff)) r,
+  ];
+  if (recent.isEmpty) {
+    return (count30d: 0, medianHz: null, deltaFromFirstHz: null);
+  }
+  final values = [for (final r in recent) r.avgHz]..sort();
+  final mid = values.length ~/ 2;
+  final median = values.length.isOdd
+      ? values[mid]
+      : (values[mid - 1] + values[mid]) / 2.0;
+
+  final byDate = [...recent]..sort((a, b) => a.at.compareTo(b.at));
+  final delta = byDate.length >= 2
+      ? byDate.last.avgHz - byDate.first.avgHz
+      : null;
+
+  return (
+    count30d: recent.length,
+    medianHz: median,
+    deltaFromFirstHz: delta,
+  );
+}

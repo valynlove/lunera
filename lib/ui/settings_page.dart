@@ -19,6 +19,7 @@ import '../notifications.dart';
 import '../repo.dart';
 import '../theme.dart';
 import '../update_checker.dart';
+import '../widget_sync.dart';
 import 'app_changelog.dart';
 import 'about_sheet.dart';
 import 'auth.dart';
@@ -41,7 +42,23 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _busyCloud = false;
+  bool _hydrationNotify = false;
   int _tab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHydrationNotify();
+  }
+
+  Future<void> _loadHydrationNotify() async {
+    try {
+      final enabled = await AppNotifier.instance.isHydrationReminderEnabled();
+      if (mounted) {
+        setState(() => _hydrationNotify = enabled);
+      }
+    } catch (_) {}
+  }
 
   void _save(Prefs p) => ref.read(repoProvider)?.setPrefs(p);
 
@@ -232,9 +249,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
     } catch (e) {
       final msg = e is FormatException ? e.message : tr('Failed: {0}', [e]);
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg)));
+      }
     }
   }
 
@@ -425,8 +443,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   HapticFeedback.selectionClick();
                   final t =
                       await showTimePicker(context: context, initialTime: ds);
-                  if (t != null)
+                  if (t != null) {
                     _save(p.copy(dayStart: t.hour * 60 + t.minute));
+                  }
                 },
               ),
               const Divider(height: 16),
@@ -528,6 +547,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                     ],
                   ),
+                ),
+              ],
+              if (AppNotifier.instance.supported) ...[
+                const Divider(height: 1, indent: 68),
+                SwitchListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  secondary: iconBadge(LucideIcons.droplet, Pastel.sky),
+                  title: Text(
+                    tr('Hydration reminders'),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    tr('Gentle daily water reminders at 10:00, 14:00, 18:00 & 21:00.'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  value: _hydrationNotify,
+                  onChanged: (v) async {
+                    HapticFeedback.selectionClick();
+                    if (v &&
+                        !await AppNotifier.instance.requestPermission()) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(tr(
+                                  'Notification permission was denied. Enable it in system settings.'))),
+                        );
+                      }
+                      return;
+                    }
+                    setState(() => _hydrationNotify = v);
+                    await AppNotifier.instance
+                        .setHydrationReminderEnabled(v, p);
+                  },
                 ),
               ],
             ],
@@ -926,10 +980,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   style: theme.textTheme.labelLarge),
               gap(4),
               Text(
-                tr('Long-press home screen, choose Widgets, then find Lunera: available HRT counter, schedule, and level chart widgets.'),
+                tr('Long-press home screen, choose Widgets, then find Lunera: available Companion, Movement Coach, HRT counter, schedule, and level chart widgets.'),
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: 8),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: iconBadge(LucideIcons.layoutGrid, Pastel.lilac),
+                title: Text(tr('Browse & Pin Widgets')),
+                subtitle: Text(tr(
+                    'Preview all 5 Lunera widgets and pin them to your home screen.')),
+                trailing: const Icon(LucideIcons.chevronRight,
+                    size: 18, color: C.iconDefault),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  _showWidgetsGallerySheet(context);
+                },
+              ),
+              const Divider(height: 16),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(tr('Hide details on widgets')),
@@ -1021,7 +1089,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       HapticFeedback.selectionClick();
                       if (!await confirm(
                           context, tr('Add sample data to your account?'),
-                          ok: tr('Add'))) return;
+                          ok: tr('Add'))) {
+                        return;
+                      }
                       HapticFeedback.lightImpact();
                       ref.read(repoProvider)?.addDemo();
                     },
@@ -1031,7 +1101,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onPressed: () async {
                       HapticFeedback.selectionClick();
                       if (!await confirm(context, tr('Delete all sample data?'),
-                          ok: tr('Delete'))) return;
+                          ok: tr('Delete'))) {
+                        return;
+                      }
                       HapticFeedback.mediumImpact();
                       ref.read(repoProvider)?.clearDemo();
                     },
@@ -1261,6 +1333,188 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showWidgetsGallerySheet(BuildContext context) {
+    showSheet(context, const _WidgetsGallerySheet());
+  }
+}
+
+class _WidgetsGallerySheet extends StatelessWidget {
+  const _WidgetsGallerySheet();
+
+  static const _channel = MethodChannel('com.example.ritme/app_utils');
+
+  static const _items = [
+    (
+      className: 'CompanionWidget',
+      title: 'Lunera: Companion',
+      desc: 'Interactive mascot with pokes, headpats, chats & ♥ counter',
+      size: '2×2',
+      icon: LucideIcons.sparkles,
+      color: Pastel.lilac,
+    ),
+    (
+      className: 'WorkoutWidget',
+      title: 'Lunera: Movement Coach',
+      desc: 'Daily HRT-aware movement plan with quick Start & Rest',
+      size: '2×2',
+      icon: LucideIcons.dumbbell,
+      color: Pastel.mint,
+    ),
+    (
+      className: 'ScheduleWidget',
+      title: 'Lunera: Schedule',
+      desc: 'Next 3 upcoming doses with site rotation hints',
+      size: '4×2',
+      icon: LucideIcons.calendarClock,
+      color: Pastel.sky,
+    ),
+    (
+      className: 'HrtWidget',
+      title: 'Lunera: Time on Therapy',
+      desc: 'Tracks your total duration and logged doses',
+      size: '2×2',
+      icon: LucideIcons.clock,
+      color: Pastel.butter,
+    ),
+    (
+      className: 'LevelWidget',
+      title: 'Lunera: Levels',
+      desc: 'Estimated hormone curve and recent lab window',
+      size: '4×2',
+      icon: LucideIcons.activity,
+      color: Pastel.rose,
+    ),
+  ];
+
+  Future<void> _pinWidget(BuildContext context, String className) async {
+    HapticFeedback.selectionClick();
+    var ok = false;
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        ok = await _channel.invokeMethod<bool>(
+              'requestPinWidget',
+              {'widgetName': className},
+            ) ??
+            false;
+      } catch (_) {
+        ok = false;
+      }
+    }
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr(
+              'Long-press your home screen, choose Widgets, then pick Lunera.')),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.72);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(tr('Home Screen Widgets'), style: display(24)),
+        gap(4),
+        Text(
+          tr('Pin any Lunera widget directly to your Android home screen, or add them manually from your launcher.'),
+          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+        ),
+        gap(14),
+        for (final w in _items) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: C.deepCard.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
+              children: [
+                iconBadge(w.icon, w.color),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              tr(w.title),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: w.color.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              w.size,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: w.color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        tr(w.desc),
+                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.tonal(
+                  onPressed: () => _pinWidget(context, w.className),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    minimumSize: const Size(0, 34),
+                  ),
+                  child: Text(tr('Pin')),
+                ),
+              ],
+            ),
+          ),
+          gap(8),
+        ],
+        gap(4),
+        OutlinedButton.icon(
+          onPressed: () async {
+            HapticFeedback.selectionClick();
+            await WidgetSync.refreshAll();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(tr('All home screen widgets refreshed.'))),
+              );
+            }
+          },
+          icon: const Icon(LucideIcons.refreshCw, size: 16),
+          label: Text(tr('Refresh Widgets')),
+        ),
+      ],
     );
   }
 }

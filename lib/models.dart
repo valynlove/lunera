@@ -7,13 +7,17 @@ DateTime _d(dynamic t) {
   if (t is Timestamp) return t.toDate();
   if (t is DateTime) return t;
   if (t is String) return DateTime.parse(t);
-  if (t is Map && t.containsKey(r'$ts')) return DateTime.parse(t[r'$ts'] as String);
+  if (t is Map && t.containsKey(r'$ts'))
+    return DateTime.parse(t[r'$ts'] as String);
   return (t as Timestamp).toDate();
 }
+
 Timestamp _t(DateTime d) => Timestamp.fromDate(d);
 
-double? parseNum(String? s) => s == null ? null : double.tryParse(s.trim().replaceAll(',', '.'));
-String fmt(double v) => v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(1);
+double? parseNum(String? s) =>
+    s == null ? null : double.tryParse(s.trim().replaceAll(',', '.'));
+String fmt(double v) =>
+    v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(1);
 
 /// Computes liquid draw volume (mL) and equivalent U-100 insulin syringe units
 /// for a given [doseMg] and vial [concentrationMgPerMl]. Returns null on invalid inputs.
@@ -42,15 +46,20 @@ class HormonePreset {
 }
 
 const presets = <HormonePreset>[
-  HormonePreset('estradiol', 'Estradiol', {'pg/mL': 1, 'pmol/L': 1 / 3.671, 'ng/L': 1}),
-  HormonePreset('testosterone', 'Testosterone', {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84, 'µg/L': 100}),
-  HormonePreset('progesterone', 'Progesterone', {'ng/mL': 1, 'nmol/L': 1 / 3.18, 'µg/L': 1}),
+  HormonePreset(
+      'estradiol', 'Estradiol', {'pg/mL': 1, 'pmol/L': 1 / 3.671, 'ng/L': 1}),
+  HormonePreset('testosterone', 'Testosterone',
+      {'ng/dL': 1, 'ng/mL': 100, 'nmol/L': 28.84, 'µg/L': 100}),
+  HormonePreset('progesterone', 'Progesterone',
+      {'ng/mL': 1, 'nmol/L': 1 / 3.18, 'µg/L': 1}),
   HormonePreset('lh', 'LH', {'IU/L': 1, 'mIU/mL': 1}),
   HormonePreset('fsh', 'FSH', {'IU/L': 1, 'mIU/mL': 1}),
-  HormonePreset('prolactin', 'Prolactin', {'ng/mL': 1, 'mIU/L': 1 / 21.2, 'µg/L': 1}),
+  HormonePreset(
+      'prolactin', 'Prolactin', {'ng/mL': 1, 'mIU/L': 1 / 21.2, 'µg/L': 1}),
 ];
 HormonePreset presetOf(String id) {
-  if (id == 'blocker') return const HormonePreset('blocker', 'Anti-androgen (Blocker)', {'mg': 1});
+  if (id == 'blocker')
+    return const HormonePreset('blocker', 'Anti-androgen (Blocker)', {'mg': 1});
   return presets.firstWhere((p) => p.id == id, orElse: () => presets.first);
 }
 
@@ -67,7 +76,8 @@ class CompoundPreset {
   });
 
   final String id;
-  final String hormoneId; // estradiol | testosterone | progesterone | blocker | other
+  final String
+      hormoneId; // estradiol | testosterone | progesterone | blocker | other
   final String en;
   String get name => tr(en);
   final String defaultRoute;
@@ -78,39 +88,171 @@ class CompoundPreset {
 
 const compoundPresets = <CompoundPreset>[
   // Estradiol (E2)
-  CompoundPreset(id: 'ev_inj', hormoneId: 'estradiol', en: 'Estradiol valerate', defaultRoute: 'inj', defaultDose: 4, pk: 'e2_valerate'),
-  CompoundPreset(id: 'ec_inj', hormoneId: 'estradiol', en: 'Estradiol cypionate', defaultRoute: 'inj', defaultDose: 5, pk: 'e2_cypionate'),
-  CompoundPreset(id: 'een_inj', hormoneId: 'estradiol', en: 'Estradiol enanthate', defaultRoute: 'inj', defaultDose: 5, pk: 'e2_enanthate'),
-  CompoundPreset(id: 'eun_inj', hormoneId: 'estradiol', en: 'Estradiol undecylate', defaultRoute: 'inj', defaultDose: 10, pk: 'e2_undecylate'),
-  CompoundPreset(id: 'eb_inj', hormoneId: 'estradiol', en: 'Estradiol benzoate', defaultRoute: 'inj', defaultDose: 2, pk: 'e2_benzoate'),
-  CompoundPreset(id: 'e2_hemi', hormoneId: 'estradiol', en: 'Estradiol hemihydrate', defaultRoute: 'oral', defaultDose: 2, pk: 'e2_oral'),
-  CompoundPreset(id: 'e2_val_oral', hormoneId: 'estradiol', en: 'Estradiol valerate (oral)', defaultRoute: 'oral', defaultDose: 2, pk: 'e2_oral'),
-  CompoundPreset(id: 'e2_gel', hormoneId: 'estradiol', en: 'Estradiol gel (transdermal)', defaultRoute: 'gel', defaultDose: 1, pk: 'e2_gel'),
+  CompoundPreset(
+      id: 'ev_inj',
+      hormoneId: 'estradiol',
+      en: 'Estradiol valerate',
+      defaultRoute: 'inj',
+      defaultDose: 4,
+      pk: 'e2_valerate'),
+  CompoundPreset(
+      id: 'ec_inj',
+      hormoneId: 'estradiol',
+      en: 'Estradiol cypionate',
+      defaultRoute: 'inj',
+      defaultDose: 5,
+      pk: 'e2_cypionate'),
+  CompoundPreset(
+      id: 'een_inj',
+      hormoneId: 'estradiol',
+      en: 'Estradiol enanthate',
+      defaultRoute: 'inj',
+      defaultDose: 5,
+      pk: 'e2_enanthate'),
+  CompoundPreset(
+      id: 'eun_inj',
+      hormoneId: 'estradiol',
+      en: 'Estradiol undecylate',
+      defaultRoute: 'inj',
+      defaultDose: 10,
+      pk: 'e2_undecylate'),
+  CompoundPreset(
+      id: 'eb_inj',
+      hormoneId: 'estradiol',
+      en: 'Estradiol benzoate',
+      defaultRoute: 'inj',
+      defaultDose: 2,
+      pk: 'e2_benzoate'),
+  CompoundPreset(
+      id: 'e2_hemi',
+      hormoneId: 'estradiol',
+      en: 'Estradiol hemihydrate',
+      defaultRoute: 'oral',
+      defaultDose: 2,
+      pk: 'e2_oral'),
+  CompoundPreset(
+      id: 'e2_val_oral',
+      hormoneId: 'estradiol',
+      en: 'Estradiol valerate (oral)',
+      defaultRoute: 'oral',
+      defaultDose: 2,
+      pk: 'e2_oral'),
+  CompoundPreset(
+      id: 'e2_gel',
+      hormoneId: 'estradiol',
+      en: 'Estradiol gel (transdermal)',
+      defaultRoute: 'gel',
+      defaultDose: 1,
+      pk: 'e2_gel'),
 
   // Testosterone (T)
-  CompoundPreset(id: 'te_inj', hormoneId: 'testosterone', en: 'Testosterone enanthate', defaultRoute: 'inj', defaultDose: 100, pk: 't_enanthate'),
-  CompoundPreset(id: 'tc_inj', hormoneId: 'testosterone', en: 'Testosterone cypionate', defaultRoute: 'inj', defaultDose: 100, pk: 't_cypionate'),
-  CompoundPreset(id: 'tu_inj', hormoneId: 'testosterone', en: 'Testosterone undecanoate (Nebido)', defaultRoute: 'inj', defaultDose: 1000, pk: 't_undecanoate'),
-  CompoundPreset(id: 'tp_inj', hormoneId: 'testosterone', en: 'Testosterone propionate', defaultRoute: 'inj', defaultDose: 50, pk: 't_propionate'),
-  CompoundPreset(id: 't_gel_comp', hormoneId: 'testosterone', en: 'Bioidentical testosterone (gel)', defaultRoute: 'gel', defaultDose: 50, pk: 't_gel'),
+  CompoundPreset(
+      id: 'te_inj',
+      hormoneId: 'testosterone',
+      en: 'Testosterone enanthate',
+      defaultRoute: 'inj',
+      defaultDose: 100,
+      pk: 't_enanthate'),
+  CompoundPreset(
+      id: 'tc_inj',
+      hormoneId: 'testosterone',
+      en: 'Testosterone cypionate',
+      defaultRoute: 'inj',
+      defaultDose: 100,
+      pk: 't_cypionate'),
+  CompoundPreset(
+      id: 'tu_inj',
+      hormoneId: 'testosterone',
+      en: 'Testosterone undecanoate (Nebido)',
+      defaultRoute: 'inj',
+      defaultDose: 1000,
+      pk: 't_undecanoate'),
+  CompoundPreset(
+      id: 'tp_inj',
+      hormoneId: 'testosterone',
+      en: 'Testosterone propionate',
+      defaultRoute: 'inj',
+      defaultDose: 50,
+      pk: 't_propionate'),
+  CompoundPreset(
+      id: 't_gel_comp',
+      hormoneId: 'testosterone',
+      en: 'Bioidentical testosterone (gel)',
+      defaultRoute: 'gel',
+      defaultDose: 50,
+      pk: 't_gel'),
 
   // Progesterone & Progestins (P4)
-  CompoundPreset(id: 'mpa_comp', hormoneId: 'progesterone', en: 'Medroxyprogesterone acetate (MPA)', defaultRoute: 'inj', defaultDose: 25, pk: 'mpa_susp'),
-  CompoundPreset(id: 'p4_micron', hormoneId: 'progesterone', en: 'Micronized progesterone', defaultRoute: 'oral', defaultDose: 200, pk: 'p4_oral'),
-  CompoundPreset(id: 'dydro', hormoneId: 'progesterone', en: 'Dydrogesterone', defaultRoute: 'oral', defaultDose: 10),
-  CompoundPreset(id: '17ohpc', hormoneId: 'progesterone', en: 'Hydroxyprogesterone caproate', defaultRoute: 'inj', defaultDose: 250),
+  CompoundPreset(
+      id: 'mpa_comp',
+      hormoneId: 'progesterone',
+      en: 'Medroxyprogesterone acetate (MPA)',
+      defaultRoute: 'inj',
+      defaultDose: 25,
+      pk: 'mpa_susp'),
+  CompoundPreset(
+      id: 'p4_micron',
+      hormoneId: 'progesterone',
+      en: 'Micronized progesterone',
+      defaultRoute: 'oral',
+      defaultDose: 200,
+      pk: 'p4_oral'),
+  CompoundPreset(
+      id: 'dydro',
+      hormoneId: 'progesterone',
+      en: 'Dydrogesterone',
+      defaultRoute: 'oral',
+      defaultDose: 10),
+  CompoundPreset(
+      id: '17ohpc',
+      hormoneId: 'progesterone',
+      en: 'Hydroxyprogesterone caproate',
+      defaultRoute: 'inj',
+      defaultDose: 250),
 
   // Anti-Androgens / Blockers
-  CompoundPreset(id: 'cpa', hormoneId: 'blocker', en: 'Cyproterone acetate (CPA)', defaultRoute: 'oral', defaultDose: 10),
-  CompoundPreset(id: 'spiro', hormoneId: 'blocker', en: 'Spironolactone', defaultRoute: 'oral', defaultDose: 50),
-  CompoundPreset(id: 'bica', hormoneId: 'blocker', en: 'Bicalutamide', defaultRoute: 'oral', defaultDose: 50),
-  CompoundPreset(id: 'fina', hormoneId: 'blocker', en: 'Finasteride', defaultRoute: 'oral', defaultDose: 1),
-  CompoundPreset(id: 'duta', hormoneId: 'blocker', en: 'Dutasteride', defaultRoute: 'oral', defaultDose: 0.5),
-  CompoundPreset(id: 'gnrh', hormoneId: 'blocker', en: 'Leuprorelin (GnRH agonist)', defaultRoute: 'inj', defaultDose: 3.75),
+  CompoundPreset(
+      id: 'cpa',
+      hormoneId: 'blocker',
+      en: 'Cyproterone acetate (CPA)',
+      defaultRoute: 'oral',
+      defaultDose: 10),
+  CompoundPreset(
+      id: 'spiro',
+      hormoneId: 'blocker',
+      en: 'Spironolactone',
+      defaultRoute: 'oral',
+      defaultDose: 50),
+  CompoundPreset(
+      id: 'bica',
+      hormoneId: 'blocker',
+      en: 'Bicalutamide',
+      defaultRoute: 'oral',
+      defaultDose: 50),
+  CompoundPreset(
+      id: 'fina',
+      hormoneId: 'blocker',
+      en: 'Finasteride',
+      defaultRoute: 'oral',
+      defaultDose: 1),
+  CompoundPreset(
+      id: 'duta',
+      hormoneId: 'blocker',
+      en: 'Dutasteride',
+      defaultRoute: 'oral',
+      defaultDose: 0.5),
+  CompoundPreset(
+      id: 'gnrh',
+      hormoneId: 'blocker',
+      en: 'Leuprorelin (GnRH agonist)',
+      defaultRoute: 'inj',
+      defaultDose: 3.75),
 ];
 
-List<CompoundPreset> compoundsFor(String hormoneId) => compoundPresets.where((c) => c.hormoneId == hormoneId).toList();
-CompoundPreset? compoundOf(String? id) => id == null ? null : compoundPresets.where((c) => c.id == id).firstOrNull;
+List<CompoundPreset> compoundsFor(String hormoneId) =>
+    compoundPresets.where((c) => c.hormoneId == hormoneId).toList();
+CompoundPreset? compoundOf(String? id) =>
+    id == null ? null : compoundPresets.where((c) => c.id == id).firstOrNull;
 
 /// Cara pemakaian obat. `places`: butuh lokasi (suntik, patch).
 class AdminRoute {
@@ -133,7 +275,8 @@ const adminRoutes = <AdminRoute>[
   AdminRoute('drops', 'Drops', LucideIcons.droplets),
   AdminRoute('other', 'Other', LucideIcons.ellipsis),
 ];
-AdminRoute routeOf(String id) => adminRoutes.firstWhere((r) => r.id == id, orElse: () => adminRoutes.last);
+AdminRoute routeOf(String id) =>
+    adminRoutes.firstWhere((r) => r.id == id, orElse: () => adminRoutes.last);
 
 const routes = adminRoutes;
 
@@ -147,9 +290,21 @@ const genericSupplyTypes = <String, (String, IconData)>{
 };
 const genericTypes = genericSupplyTypes;
 
-const defaultPlaces = ['Left thigh', 'Right thigh', 'Left buttock', 'Right buttock'];
+const defaultPlaces = [
+  'Left thigh',
+  'Right thigh',
+  'Left buttock',
+  'Right buttock'
+];
 const placePresets = [
-  'Left thigh', 'Right thigh', 'Left arm', 'Right arm', 'Left buttock', 'Right buttock', 'Left abdomen', 'Right abdomen'
+  'Left thigh',
+  'Right thigh',
+  'Left arm',
+  'Right arm',
+  'Left buttock',
+  'Right buttock',
+  'Left abdomen',
+  'Right abdomen'
 ];
 
 /// Jadwal: kind = interval (1 hari = setiap hari) | weekly | monthly | asneeded.
@@ -251,9 +406,14 @@ class Therapy {
         weekdays: weekdays ?? this.weekdays,
         monthDay: monthDay ?? this.monthDay,
         kind: kind ?? this.kind,
-        secondaryHormoneId: clearSecondary ? null : (secondaryHormoneId ?? this.secondaryHormoneId),
-        secondaryDose: clearSecondary ? null : (secondaryDose ?? this.secondaryDose),
-        secondaryDoseUnit: clearSecondary ? null : (secondaryDoseUnit ?? this.secondaryDoseUnit),
+        secondaryHormoneId: clearSecondary
+            ? null
+            : (secondaryHormoneId ?? this.secondaryHormoneId),
+        secondaryDose:
+            clearSecondary ? null : (secondaryDose ?? this.secondaryDose),
+        secondaryDoseUnit: clearSecondary
+            ? null
+            : (secondaryDoseUnit ?? this.secondaryDoseUnit),
         secondaryPk: clearSecondary ? null : (secondaryPk ?? this.secondaryPk),
         compound: compound ?? this.compound,
         secondaryCompound: secondaryCompound ?? this.secondaryCompound,
@@ -275,7 +435,8 @@ class Therapy {
         'weekdays': weekdays,
         'monthDay': monthDay,
         'kind': kind,
-        if (secondaryHormoneId != null) 'secondaryHormoneId': secondaryHormoneId,
+        if (secondaryHormoneId != null)
+          'secondaryHormoneId': secondaryHormoneId,
         if (secondaryDose != null) 'secondaryDose': secondaryDose,
         if (secondaryDoseUnit != null) 'secondaryDoseUnit': secondaryDoseUnit,
         if (secondaryPk != null) 'secondaryPk': secondaryPk,
@@ -296,10 +457,15 @@ class Therapy {
         pk: m['pk'],
         rolling: m['rolling'] ?? false,
         injType: m['injType'] ?? 'im',
-        times: m['times'] is List && (m['times'] as List).isNotEmpty ? [for (final x in m['times'] as List) x as String] : const ['08:00'],
-        weekdays: m['weekdays'] is List && (m['weekdays'] as List).isNotEmpty ? [for (final x in m['weekdays'] as List) (x as num).toInt()] : const [1],
+        times: m['times'] is List && (m['times'] as List).isNotEmpty
+            ? [for (final x in m['times'] as List) x as String]
+            : const ['08:00'],
+        weekdays: m['weekdays'] is List && (m['weekdays'] as List).isNotEmpty
+            ? [for (final x in m['weekdays'] as List) (x as num).toInt()]
+            : const [1],
         monthDay: (m['monthDay'] as num?)?.toInt() ?? 1,
-        kind: m['kind'] ?? ((m['everyDays'] as num?) != null ? 'interval' : 'interval'),
+        kind: m['kind'] ??
+            ((m['everyDays'] as num?) != null ? 'interval' : 'interval'),
         secondaryHormoneId: m['secondaryHormoneId'],
         secondaryDose: (m['secondaryDose'] as num?)?.toDouble(),
         secondaryDoseUnit: m['secondaryDoseUnit'],
@@ -392,7 +558,9 @@ class DoseLog {
         at: _d(m['at']),
         places: m['places'] is List
             ? [for (final x in m['places'] as List) _key(x as String)]
-            : (m['site'] is String && m['site'] != '' && m['site'] != 'oral' ? [_key(m['site'] as String)] : <String>[]),
+            : (m['site'] is String && m['site'] != '' && m['site'] != 'oral'
+                ? [_key(m['site'] as String)]
+                : <String>[]),
         dose: (m['dose'] as num?)?.toDouble(),
         secondaryDose: (m['secondaryDose'] as num?)?.toDouble(),
         note: m['note'],
@@ -400,7 +568,12 @@ class DoseLog {
         dead: (m['dead'] as num?)?.toDouble(),
         injType: m['injType'],
         slot: m['slot'],
-        usedSupplies: m['usedSupplies'] is Map ? {for (final e in (m['usedSupplies'] as Map).entries) e.key as String: (e.value as num).toDouble()} : const {},
+        usedSupplies: m['usedSupplies'] is Map
+            ? {
+                for (final e in (m['usedSupplies'] as Map).entries)
+                  e.key as String: (e.value as num).toDouble()
+              }
+            : const {},
         skipped: m['skipped'] ?? false,
       );
 }
@@ -458,6 +631,9 @@ class Supply {
     this.kind = 'med',
     this.gtype,
     this.dosePerUnit,
+    this.openedAt,
+    this.beyondUseDays = 28,
+    this.deadSpace,
   });
   final String id;
   final String name;
@@ -467,14 +643,45 @@ class Supply {
   final String unitLabel;
   final DateTime? expiry;
   final String kind; // med | generic
-  final String? gtype; // syringe | wipe | needle | gloves | bandage (jika kind == generic)
+  final String?
+      gtype; // syringe | wipe | needle | gloves | bandage (jika kind == generic)
   final double? dosePerUnit; // mg per unitLabel, mis. 40 mg/mL
+  final DateTime? openedAt; // tanggal vial pertama kali dibuka/ditusuk
+  final int beyondUseDays; // batas aman pakai setelah dibuka (default 28 hari)
+  final double?
+      deadSpace; // kehilangan cairan di jarum/hub per dosis (unitLabel)
 
   bool get generic => kind == 'generic';
-  int get doses => perDose > 0 ? (qty / perDose).floor() : 0;
+  double get effectivePerDose =>
+      perDose +
+      ((deadSpace != null && deadSpace! > 0 && deadSpace!.isFinite)
+          ? deadSpace!
+          : 0.0);
+  int get doses =>
+      effectivePerDose > 0 ? ((qty / effectivePerDose) + 1e-9).floor() : 0;
   bool get low => generic ? qty <= 5 : doses <= 3;
-  bool get expired => expiry != null && expiry!.isBefore(DateTime.now());
+  DateTime? get openExpiry => openedAt == null
+      ? null
+      : DateTime(
+          openedAt!.year, openedAt!.month, openedAt!.day + beyondUseDays);
+  DateTime? get effectiveExpiry {
+    final a = expiry;
+    final b = openExpiry;
+    if (a == null) {
+      return b;
+    }
+    if (b == null) {
+      return a;
+    }
+    return a.isBefore(b) ? a : b;
+  }
+
+  bool get isOpenExpired =>
+      openExpiry != null && openExpiry!.isBefore(DateTime.now());
+  bool get expired =>
+      effectiveExpiry != null && effectiveExpiry!.isBefore(DateTime.now());
   int? get daysToExpiry => expiry?.difference(DateTime.now()).inDays;
+  int? get daysToOpenExpiry => openExpiry?.difference(DateTime.now()).inDays;
 
   Supply copy({
     String? name,
@@ -483,9 +690,15 @@ class Supply {
     double? perDose,
     String? unitLabel,
     DateTime? expiry,
+    bool clearExpiry = false,
     String? kind,
     String? gtype,
     double? dosePerUnit,
+    DateTime? openedAt,
+    bool clearOpenedAt = false,
+    int? beyondUseDays,
+    double? deadSpace,
+    bool clearDeadSpace = false,
   }) =>
       Supply(
         id: id,
@@ -494,10 +707,13 @@ class Supply {
         initial: initial ?? this.initial,
         perDose: perDose ?? this.perDose,
         unitLabel: unitLabel ?? this.unitLabel,
-        expiry: expiry ?? this.expiry,
+        expiry: clearExpiry ? null : (expiry ?? this.expiry),
         kind: kind ?? this.kind,
         gtype: gtype ?? this.gtype,
         dosePerUnit: dosePerUnit ?? this.dosePerUnit,
+        openedAt: clearOpenedAt ? null : (openedAt ?? this.openedAt),
+        beyondUseDays: beyondUseDays ?? this.beyondUseDays,
+        deadSpace: clearDeadSpace ? null : (deadSpace ?? this.deadSpace),
       );
 
   Map<String, dynamic> toMap() => {
@@ -510,19 +726,27 @@ class Supply {
         'kind': kind,
         'gtype': gtype,
         'dosePerUnit': dosePerUnit,
+        if (openedAt != null) 'openedAt': _t(openedAt!),
+        if (beyondUseDays != 28) 'beyondUseDays': beyondUseDays,
+        if (deadSpace != null && deadSpace! > 0) 'deadSpace': deadSpace,
       };
 
   factory Supply.from(String id, Map<String, dynamic> m) => Supply(
-      id: id,
-      name: m['name'],
-      qty: (m['qty'] as num).toDouble(),
-      initial: (m['initial'] as num).toDouble(),
-      perDose: (m['perDose'] as num?)?.toDouble() ?? 1,
-      unitLabel: m['unitLabel'] ?? 'pcs',
-      expiry: m['expiry'] == null ? null : _d(m['expiry']),
-      kind: m['kind'] ?? 'med',
-      gtype: m['gtype'],
-      dosePerUnit: (m['dosePerUnit'] as num?)?.toDouble());
+        id: id,
+        name: m['name'],
+        qty: (m['qty'] as num).toDouble(),
+        initial: (m['initial'] as num).toDouble(),
+        perDose: (m['perDose'] as num?)?.toDouble() ?? 1,
+        unitLabel: m['unitLabel'] ?? 'pcs',
+        expiry: m['expiry'] == null ? null : _d(m['expiry']),
+        kind: m['kind'] ?? 'med',
+        gtype: m['gtype'],
+        dosePerUnit: (m['dosePerUnit'] as num?)?.toDouble(),
+        openedAt: _optDate(m['openedAt']),
+        beyondUseDays:
+            ((m['beyondUseDays'] as num?)?.toInt() ?? 28).clamp(1, 365),
+        deadSpace: (m['deadSpace'] as num?)?.toDouble(),
+      );
 }
 
 /// Pengaturan yang ikut tersinkron antar perangkat.
@@ -539,6 +763,9 @@ class Prefs {
     this.locale = 'en',
     this.discreetNotify = 'wellness',
     this.showWorkoutHomeCard = false,
+    this.nextLabDate,
+    this.careAllergies = '',
+    this.careClinicInfo = '',
   });
   final String accent; // kunci di `accents`
   final bool notify; // pengingat dosis
@@ -550,7 +777,11 @@ class Prefs {
   final bool hrtCounter;
   final int dayStart; // menit sejak 00:00; hari "logis" mulai di jam ini
   final String discreetNotify; // 'off' | 'wellness' | 'minimal'
-  final bool showWorkoutHomeCard; // tampilkan kartu pintasan Movement Coach di Home
+  final bool
+      showWorkoutHomeCard; // tampilkan kartu pintasan Movement Coach di Home
+  final DateTime? nextLabDate; // jadwal tes darah berikutnya (opsional)
+  final String careAllergies; // catatan alergi/sensitivitas untuk Care Card
+  final String careClinicInfo; // kontak klinik/farmasi untuk Care Card
 
   String unitOf(String hormoneId) {
     final p = presetOf(hormoneId), u = units[hormoneId];
@@ -569,6 +800,10 @@ class Prefs {
     String? locale,
     String? discreetNotify,
     bool? showWorkoutHomeCard,
+    DateTime? nextLabDate,
+    bool clearNextLabDate = false,
+    String? careAllergies,
+    String? careClinicInfo,
   }) =>
       Prefs(
         theme: theme ?? this.theme,
@@ -582,6 +817,10 @@ class Prefs {
         locale: locale ?? this.locale,
         discreetNotify: discreetNotify ?? this.discreetNotify,
         showWorkoutHomeCard: showWorkoutHomeCard ?? this.showWorkoutHomeCard,
+        nextLabDate:
+            clearNextLabDate ? null : (nextLabDate ?? this.nextLabDate),
+        careAllergies: careAllergies ?? this.careAllergies,
+        careClinicInfo: careClinicInfo ?? this.careClinicInfo,
       );
 
   Map<String, dynamic> toMap() => {
@@ -596,12 +835,18 @@ class Prefs {
         'locale': locale,
         'discreetNotify': discreetNotify,
         'showWorkoutHomeCard': showWorkoutHomeCard,
+        if (nextLabDate != null) 'nextLabDate': _t(nextLabDate!),
+        if (careAllergies.isNotEmpty) 'careAllergies': careAllergies,
+        if (careClinicInfo.isNotEmpty) 'careClinicInfo': careClinicInfo,
       };
 
   factory Prefs.from(Map<String, dynamic> m) => Prefs(
         theme: m['theme'] ?? 'system',
         units: m['units'] is Map
-            ? {for (final e in (m['units'] as Map).entries) e.key as String: e.value as String}
+            ? {
+                for (final e in (m['units'] as Map).entries)
+                  e.key as String: e.value as String
+              }
             : const <String, String>{},
         places: m['places'] is List && (m['places'] as List).isNotEmpty
             ? [for (final x in m['places'] as List) _key(x as String)]
@@ -614,19 +859,39 @@ class Prefs {
         locale: m['locale'] ?? 'en',
         discreetNotify: m['discreetNotify'] ?? 'wellness',
         showWorkoutHomeCard: m['showWorkoutHomeCard'] == true,
+        nextLabDate: _optDate(m['nextLabDate']),
+        careAllergies:
+            m['careAllergies'] is String ? m['careAllergies'] as String : '',
+        careClinicInfo:
+            m['careClinicInfo'] is String ? m['careClinicInfo'] as String : '',
       );
 }
 
 /// Lokasi dan bagian tubuh yang dulu disimpan dengan nama Indonesia dipetakan ke kunci English saat dibaca.
 const _legacyKeys = {
-  'Paha kiri': 'Left thigh', 'Paha kanan': 'Right thigh', 'Bokong kiri': 'Left buttock', 'Bokong kanan': 'Right buttock',
-  'Lengan kiri': 'Left arm', 'Lengan kanan': 'Right arm', 'Perut kiri': 'Left abdomen', 'Perut kanan': 'Right abdomen',
-  'Kulit': 'Skin', 'Payudara': 'Breasts', 'Bentuk tubuh': 'Body shape', 'Rambut': 'Hair', 'Energi': 'Energy', 'Tidur': 'Sleep',
+  'Paha kiri': 'Left thigh',
+  'Paha kanan': 'Right thigh',
+  'Bokong kiri': 'Left buttock',
+  'Bokong kanan': 'Right buttock',
+  'Lengan kiri': 'Left arm',
+  'Lengan kanan': 'Right arm',
+  'Perut kiri': 'Left abdomen',
+  'Perut kanan': 'Right abdomen',
+  'Kulit': 'Skin',
+  'Payudara': 'Breasts',
+  'Bentuk tubuh': 'Body shape',
+  'Rambut': 'Hair',
+  'Energi': 'Energy',
+  'Tidur': 'Sleep',
 };
 String _key(String s) => _legacyKeys[s] ?? s;
 
 class CloudBackup {
-  const CloudBackup({required this.id, required this.at, required this.count, required this.bytes});
+  const CloudBackup(
+      {required this.id,
+      required this.at,
+      required this.count,
+      required this.bytes});
   final String id;
   final DateTime at;
   final int count, bytes;
@@ -709,7 +974,13 @@ class JournalEntry {
 }
 
 /// Skor suasana hati untuk menghitung pola (1 terendah, 5 tertinggi).
-const moodScore = <String, double>{'happy': 5, 'calm': 4, 'neutral': 3, 'low': 2, 'anxious': 1};
+const moodScore = <String, double>{
+  'happy': 5,
+  'calm': 4,
+  'neutral': 3,
+  'low': 2,
+  'anxious': 1
+};
 
 /// Hasil perhitungan ukuran bra dan dada
 class BraSizeResult {
@@ -755,66 +1026,121 @@ class ShoeSizeResult {
 ShoeSizeResult calculateShoeSize(double footCm) {
   String eu, usW, usM, uk;
   if (footCm < 22.0) {
-    eu = '34'; usW = '4'; usM = '2.5'; uk = '1.5';
+    eu = '34';
+    usW = '4';
+    usM = '2.5';
+    uk = '1.5';
   } else if (footCm < 22.5) {
-    eu = '35'; usW = '5'; usM = '3.5'; uk = '2.5';
+    eu = '35';
+    usW = '5';
+    usM = '3.5';
+    uk = '2.5';
   } else if (footCm < 23.0) {
-    eu = '36'; usW = '5.5'; usM = '4'; uk = '3';
+    eu = '36';
+    usW = '5.5';
+    usM = '4';
+    uk = '3';
   } else if (footCm < 23.5) {
-    eu = '37'; usW = '6.5'; usM = '5'; uk = '4';
+    eu = '37';
+    usW = '6.5';
+    usM = '5';
+    uk = '4';
   } else if (footCm < 24.0) {
-    eu = '37.5'; usW = '7'; usM = '5.5'; uk = '4.5';
+    eu = '37.5';
+    usW = '7';
+    usM = '5.5';
+    uk = '4.5';
   } else if (footCm < 24.5) {
-    eu = '38'; usW = '7.5'; usM = '6'; uk = '5';
+    eu = '38';
+    usW = '7.5';
+    usM = '6';
+    uk = '5';
   } else if (footCm < 25.0) {
-    eu = '39'; usW = '8.5'; usM = '7'; uk = '6';
+    eu = '39';
+    usW = '8.5';
+    usM = '7';
+    uk = '6';
   } else if (footCm < 25.5) {
-    eu = '40'; usW = '9'; usM = '7.5'; uk = '6.5';
+    eu = '40';
+    usW = '9';
+    usM = '7.5';
+    uk = '6.5';
   } else if (footCm < 26.0) {
-    eu = '40.5'; usW = '9.5'; usM = '8'; uk = '7';
+    eu = '40.5';
+    usW = '9.5';
+    usM = '8';
+    uk = '7';
   } else if (footCm < 26.5) {
-    eu = '41'; usW = '10'; usM = '8.5'; uk = '7.5';
+    eu = '41';
+    usW = '10';
+    usM = '8.5';
+    uk = '7.5';
   } else if (footCm < 27.0) {
-    eu = '42'; usW = '10.5'; usM = '9'; uk = '8';
+    eu = '42';
+    usW = '10.5';
+    usM = '9';
+    uk = '8';
   } else if (footCm < 27.5) {
-    eu = '43'; usW = '11.5'; usM = '10'; uk = '9';
+    eu = '43';
+    usW = '11.5';
+    usM = '10';
+    uk = '9';
   } else if (footCm < 28.0) {
-    eu = '44'; usW = '12'; usM = '10.5'; uk = '9.5';
+    eu = '44';
+    usW = '12';
+    usM = '10.5';
+    uk = '9.5';
   } else {
-    eu = '45'; usW = '13'; usM = '11.5'; uk = '10.5';
+    eu = '45';
+    usW = '13';
+    usM = '11.5';
+    uk = '10.5';
   }
-  return ShoeSizeResult(eu: eu, usWomen: usW, usMen: usM, uk: uk, footCm: footCm);
+  return ShoeSizeResult(
+      eu: eu, usWomen: usW, usMen: usM, uk: uk, footCm: footCm);
 }
 
 /// Menghitung ukuran bra berdasarkan lingkar dada (bust) dan bawah dada (underbust) dalam cm
-BraSizeResult calculateBraSize({required double bustCm, required double underbustCm}) {
+BraSizeResult calculateBraSize(
+    {required double bustCm, required double underbustCm}) {
   final diff = (bustCm - underbustCm).clamp(0.0, 100.0);
 
   // Band EU & US
   int bandEu;
   int bandUs;
   if (underbustCm < 63) {
-    bandEu = 60; bandUs = 28;
+    bandEu = 60;
+    bandUs = 28;
   } else if (underbustCm < 68) {
-    bandEu = 65; bandUs = 30;
+    bandEu = 65;
+    bandUs = 30;
   } else if (underbustCm < 73) {
-    bandEu = 70; bandUs = 32;
+    bandEu = 70;
+    bandUs = 32;
   } else if (underbustCm < 78) {
-    bandEu = 75; bandUs = 34;
+    bandEu = 75;
+    bandUs = 34;
   } else if (underbustCm < 83) {
-    bandEu = 80; bandUs = 36;
+    bandEu = 80;
+    bandUs = 36;
   } else if (underbustCm < 88) {
-    bandEu = 85; bandUs = 38;
+    bandEu = 85;
+    bandUs = 38;
   } else if (underbustCm < 93) {
-    bandEu = 90; bandUs = 40;
+    bandEu = 90;
+    bandUs = 40;
   } else if (underbustCm < 98) {
-    bandEu = 95; bandUs = 42;
+    bandEu = 95;
+    bandUs = 42;
   } else if (underbustCm < 103) {
-    bandEu = 100; bandUs = 44;
+    bandEu = 100;
+    bandUs = 44;
   } else if (underbustCm < 108) {
-    bandEu = 105; bandUs = 46;
+    bandEu = 105;
+    bandUs = 46;
   } else {
-    bandEu = 110; bandUs = 48;
+    bandEu = 110;
+    bandUs = 48;
   }
 
   // Cup ladder
@@ -822,25 +1148,35 @@ BraSizeResult calculateBraSize({required double bustCm, required double underbus
   String cup;
   int cupIndex;
   if (diff < 10.0) {
-    cup = 'AA'; cupIndex = 0;
+    cup = 'AA';
+    cupIndex = 0;
   } else if (diff < 12.0) {
-    cup = 'A'; cupIndex = 1;
+    cup = 'A';
+    cupIndex = 1;
   } else if (diff < 14.0) {
-    cup = 'B'; cupIndex = 2;
+    cup = 'B';
+    cupIndex = 2;
   } else if (diff < 16.0) {
-    cup = 'C'; cupIndex = 3;
+    cup = 'C';
+    cupIndex = 3;
   } else if (diff < 18.0) {
-    cup = 'D'; cupIndex = 4;
+    cup = 'D';
+    cupIndex = 4;
   } else if (diff < 20.0) {
-    cup = 'DD'; cupIndex = 5;
+    cup = 'DD';
+    cupIndex = 5;
   } else if (diff < 22.0) {
-    cup = 'E'; cupIndex = 6;
+    cup = 'E';
+    cupIndex = 6;
   } else if (diff < 24.0) {
-    cup = 'F'; cupIndex = 7;
+    cup = 'F';
+    cupIndex = 7;
   } else if (diff < 26.0) {
-    cup = 'FF'; cupIndex = 8;
+    cup = 'FF';
+    cupIndex = 8;
   } else {
-    cup = 'G'; cupIndex = 9;
+    cup = 'G';
+    cupIndex = 9;
   }
 
   final usUk = '$bandUs$cup';
@@ -848,11 +1184,13 @@ BraSizeResult calculateBraSize({required double bustCm, required double underbus
 
   String? sisterTight;
   if (bandUs > 28 && cupIndex < cupLadder.length - 1) {
-    sisterTight = '${bandUs - 2}${cupLadder[cupIndex + 1]} (${bandEu - 5}${cupLadder[cupIndex + 1]})';
+    sisterTight =
+        '${bandUs - 2}${cupLadder[cupIndex + 1]} (${bandEu - 5}${cupLadder[cupIndex + 1]})';
   }
   String? sisterLoose;
   if (bandUs < 48 && cupIndex > 0) {
-    sisterLoose = '${bandUs + 2}${cupLadder[cupIndex - 1]} (${bandEu + 5}${cupLadder[cupIndex - 1]})';
+    sisterLoose =
+        '${bandUs + 2}${cupLadder[cupIndex - 1]} (${bandEu + 5}${cupLadder[cupIndex - 1]})';
   }
 
   return BraSizeResult(
@@ -900,20 +1238,31 @@ class BodyMeasurement {
   final double? calf; // Lingkar betis
   final double? inseam; // Panjang kaki bagian dalam (selangkangan ke mata kaki)
   final double? footLength; // Panjang telapak kaki
-  final String? shoeSize; // Ukuran sepatu yang biasa dipakai / manual (misal: "39" atau "EU 39")
+  final String?
+      shoeSize; // Ukuran sepatu yang biasa dipakai / manual (misal: "39" atau "EU 39")
   final double? weight; // Berat badan (kg)
   final double? height; // Tinggi badan (cm)
   final String? note;
 
-  double? get bustCm => bust == null ? null : (unit == 'in' ? bust! * 2.54 : bust);
-  double? get underbustCm => underbust == null ? null : (unit == 'in' ? underbust! * 2.54 : underbust);
-  double? get waistCm => waist == null ? null : (unit == 'in' ? waist! * 2.54 : waist);
-  double? get hipsCm => hips == null ? null : (unit == 'in' ? hips! * 2.54 : hips);
-  double? get shoulderCm => shoulder == null ? null : (unit == 'in' ? shoulder! * 2.54 : shoulder);
-  double? get thighCm => thigh == null ? null : (unit == 'in' ? thigh! * 2.54 : thigh);
-  double? get calfCm => calf == null ? null : (unit == 'in' ? calf! * 2.54 : calf);
-  double? get inseamCm => inseam == null ? null : (unit == 'in' ? inseam! * 2.54 : inseam);
-  double? get footLengthCm => footLength == null ? null : (unit == 'in' ? footLength! * 2.54 : footLength);
+  double? get bustCm =>
+      bust == null ? null : (unit == 'in' ? bust! * 2.54 : bust);
+  double? get underbustCm =>
+      underbust == null ? null : (unit == 'in' ? underbust! * 2.54 : underbust);
+  double? get waistCm =>
+      waist == null ? null : (unit == 'in' ? waist! * 2.54 : waist);
+  double? get hipsCm =>
+      hips == null ? null : (unit == 'in' ? hips! * 2.54 : hips);
+  double? get shoulderCm =>
+      shoulder == null ? null : (unit == 'in' ? shoulder! * 2.54 : shoulder);
+  double? get thighCm =>
+      thigh == null ? null : (unit == 'in' ? thigh! * 2.54 : thigh);
+  double? get calfCm =>
+      calf == null ? null : (unit == 'in' ? calf! * 2.54 : calf);
+  double? get inseamCm =>
+      inseam == null ? null : (unit == 'in' ? inseam! * 2.54 : inseam);
+  double? get footLengthCm => footLength == null
+      ? null
+      : (unit == 'in' ? footLength! * 2.54 : footLength);
 
   /// Hitung ukuran bra / dada lengkap (US/UK, EU/ID, cup, sister sizes)
   BraSizeResult? get braSize {
@@ -931,7 +1280,8 @@ class BodyMeasurement {
 
   /// Teks ringkas ukuran sepatu untuk ditampilkan di kartu pakaian
   String? get displayShoeSize {
-    if (shoeSize != null && shoeSize!.trim().isNotEmpty) return shoeSize!.trim();
+    if (shoeSize != null && shoeSize!.trim().isNotEmpty)
+      return shoeSize!.trim();
     final res = shoeSizeResult;
     if (res == null) return null;
     return 'EU ${res.eu} (US W ${res.usWomen})';
@@ -1035,7 +1385,8 @@ class BodyMeasurement {
         'note': note,
       };
 
-  factory BodyMeasurement.from(String id, Map<String, dynamic> m) => BodyMeasurement(
+  factory BodyMeasurement.from(String id, Map<String, dynamic> m) =>
+      BodyMeasurement(
         id: id,
         at: _d(m['at']),
         unit: m['unit'] ?? 'cm',
@@ -1121,9 +1472,8 @@ class WorkoutProfile {
         notifyWorkout: notifyWorkout ?? this.notifyWorkout,
         consecutiveEasyCount: consecutiveEasyCount ?? this.consecutiveEasyCount,
         baselineAt: clearBaselineAt ? null : (baselineAt ?? this.baselineAt),
-        skippedDateIso: clearSkippedDate
-            ? null
-            : (skippedDateIso ?? this.skippedDateIso),
+        skippedDateIso:
+            clearSkippedDate ? null : (skippedDateIso ?? this.skippedDateIso),
       );
 
   Map<String, dynamic> toMap() => {
@@ -1153,10 +1503,17 @@ class WorkoutProfile {
               if (d is num && d.toInt() >= 1 && d.toInt() <= 7) d.toInt(),
           ]
         : const <int>[2, 4, 6];
-    const validFocus = {'feminizing', 'masculinizing', 'bone_heart', 'recovery'};
+    const validFocus = {
+      'feminizing',
+      'masculinizing',
+      'bone_heart',
+      'recovery'
+    };
     const validLevel = {'gentle', 'steady', 'active'};
-    final focus = validFocus.contains(m['focus']) ? m['focus'] as String : 'bone_heart';
-    final level = validLevel.contains(m['level']) ? m['level'] as String : 'gentle';
+    final focus =
+        validFocus.contains(m['focus']) ? m['focus'] as String : 'bone_heart';
+    final level =
+        validLevel.contains(m['level']) ? m['level'] as String : 'gentle';
     return WorkoutProfile(
       id: (m['id'] is String && (m['id'] as String).trim().isNotEmpty)
           ? m['id'] as String
@@ -1166,13 +1523,16 @@ class WorkoutProfile {
       level: level,
       equipment: rawEq.isEmpty ? const ['bodyweight'] : rawEq,
       weekdays: rawDays,
-      reminderTime: m['reminderTime'] is String && (m['reminderTime'] as String).contains(':')
+      reminderTime: m['reminderTime'] is String &&
+              (m['reminderTime'] as String).contains(':')
           ? m['reminderTime'] as String
           : '18:00',
       notifyWorkout: m['notifyWorkout'] == true,
-      consecutiveEasyCount: (m['consecutiveEasyCount'] as num?)?.toInt().clamp(0, 10) ?? 0,
+      consecutiveEasyCount:
+          (m['consecutiveEasyCount'] as num?)?.toInt().clamp(0, 10) ?? 0,
       baselineAt: _optDate(m['baselineAt']),
-      skippedDateIso: m['skippedDateIso'] is String ? m['skippedDateIso'] as String : null,
+      skippedDateIso:
+          m['skippedDateIso'] is String ? m['skippedDateIso'] as String : null,
     );
   }
 }
@@ -1261,7 +1621,8 @@ class WorkoutRoutine {
 
   final String id;
   final String title;
-  final String category; // feminizing | masculinizing | bone_heart | recovery | custom
+  final String
+      category; // feminizing | masculinizing | bone_heart | recovery | custom
   final bool isCustom;
   final int estimatedMinutes;
   final List<WorkoutExerciseItem> items;

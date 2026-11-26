@@ -158,6 +158,82 @@ void main() {
       );
       AppNotifier.pendingQuickDose.value = null;
     });
+
+    test('Injection notifications use lunera_chime sound, ongoing mode, and Dismiss action', () {
+      L10n.notifier.value = 'en';
+      final inj = buildDoseNotificationDetails(withActions: true, ongoing: true);
+      final injAndroid = inj.android!;
+      expect(injAndroid.ongoing, isTrue);
+      expect(injAndroid.autoCancel, isFalse);
+      expect(
+        injAndroid.sound,
+        equals(const RawResourceAndroidNotificationSound('lunera_chime')),
+      );
+      expect(
+        injAndroid.actions?.map((a) => a.id).toList(),
+        containsAll([markTakenActionId, dismissDoseActionId]),
+      );
+
+      final oral = buildDoseNotificationDetails(withActions: true, ongoing: false);
+      final oralAndroid = oral.android!;
+      expect(oralAndroid.ongoing, isFalse);
+      expect(oralAndroid.autoCancel, isTrue);
+      expect(
+        oralAndroid.sound,
+        equals(const RawResourceAndroidNotificationSound('lunera_chime')),
+      );
+      expect(
+        oralAndroid.actions?.map((a) => a.id).toList(),
+        isNot(contains(dismissDoseActionId)),
+      );
+
+      final hydroAndroid = AppNotifier.instance.hydrationDetails.android!;
+      expect(hydroAndroid.ongoing, isFalse);
+      expect(hydroAndroid.autoCancel, isTrue);
+      expect(
+        hydroAndroid.sound,
+        equals(const RawResourceAndroidNotificationSound('lunera_chime')),
+      );
+    });
+
+    test('Dismiss action does not populate pendingQuickDose and snoozePayload preserves injection flag', () async {
+      AppNotifier.pendingQuickDose.value = null;
+      final payload = snoozePayload(
+        therapyId: 't_inj',
+        slot: '2026-11-26 08:00',
+        title: 'Time for your injection',
+        body: '4 mg',
+        isInjection: true,
+      );
+      final parsed = parseSnoozePayload(payload);
+      expect(parsed?['inj'], isTrue);
+
+      await AppNotifier.handleNotificationResponse(
+        NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotificationAction,
+          actionId: dismissDoseActionId,
+          payload: payload,
+        ),
+      );
+      expect(AppNotifier.pendingQuickDose.value, isNull);
+    });
+
+    test('hydrationNotificationText respects lockscreen privacy modes', () {
+      L10n.notifier.value = 'en';
+      expect(
+        hydrationNotificationText(const Prefs(discreetNotify: 'off')),
+        equals(('Lunera 💧', 'Time for a gentle sip of water. Stay hydrated!')),
+      );
+      expect(
+        hydrationNotificationText(const Prefs(discreetNotify: 'wellness')),
+        equals(('Lunera 💧', 'Time for a gentle sip of water. Stay hydrated!')),
+      );
+      expect(
+        hydrationNotificationText(const Prefs(discreetNotify: 'minimal')),
+        equals(('Lunera ✦', 'Gentle reminder.')),
+      );
+    });
   });
 }
 

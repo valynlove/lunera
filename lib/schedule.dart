@@ -229,8 +229,15 @@ SupplyForecast? estimateSupplyForecast(
     );
   }
 
-  final remainingDoses = s.qty / s.perDose;
-  final daysLeft = (remainingDoses / dosesPerDay).floor();
+  final remainingDoses = s.qty / s.effectivePerDose;
+  var daysLeft = (remainingDoses / dosesPerDay).floor();
+  if (s.openExpiry != null) {
+    final openDaysLeft = math.max(
+      0,
+      daysBetween(DateTime(base.year, base.month, base.day), s.openExpiry!),
+    );
+    daysLeft = math.min(daysLeft, openDaysLeft);
+  }
   final runOutDate = DateTime(base.year, base.month, base.day + daysLeft);
 
   final reorderOffset = math.max(0, daysLeft - bufferDays);
@@ -263,12 +270,16 @@ class TroughLabReminder {
     this.daysSinceLastLab,
     this.nextRoutineLabDate,
     required this.isDue,
+    this.isCustomDate = false,
+    this.daysUntilTarget,
   });
 
   final Slot? nextTroughSlot;
   final int? daysSinceLastLab;
   final DateTime? nextRoutineLabDate;
   final bool isDue;
+  final bool isCustomDate;
+  final int? daysUntilTarget;
 }
 
 TroughLabReminder? computeTroughLabReminder(
@@ -278,20 +289,55 @@ TroughLabReminder? computeTroughLabReminder(
   Prefs prefs, {
   DateTime? now,
 }) {
-  if (therapies.isEmpty) return null;
+  if (therapies.isEmpty) {
+    return null;
+  }
   final refNow = now ?? DateTime.now();
+  final refToday = DateUtils.dateOnly(refNow);
+
+  final sortedLabs = [...labs]..sort((a, b) => b.at.compareTo(a.at));
+  final latestLab = sortedLabs.firstOrNull;
+  final daysSince =
+      latestLab == null ? null : math.max(0, daysBetween(latestLab.at, refNow));
 
   final scheduled = therapies.where((t) => !t.asNeeded).toList();
+  final customTarget = prefs.nextLabDate;
+  final daysUntilCustom = customTarget == null
+      ? null
+      : daysBetween(refToday, DateUtils.dateOnly(customTarget));
+  final aheadDays = daysUntilCustom != null && daysUntilCustom > 0
+      ? math.max(35, daysUntilCustom + 7).clamp(35, 365)
+      : 35;
+
   final upcoming = scheduled.isEmpty
       ? <Slot>[]
       : [
-          for (final s in buildSlots(scheduled, logs, prefs, back: 0, ahead: 35))
+          for (final s in buildSlots(scheduled, logs, prefs, back: 0, ahead: aheadDays))
             if (s.pending && s.at.isAfter(refNow)) s,
         ]
     ..sort((a, b) => a.at.compareTo(b.at));
 
-  final sortedLabs = [...labs]..sort((a, b) => b.at.compareTo(a.at));
-  final latestLab = sortedLabs.firstOrNull;
+  if (customTarget != null) {
+    final targetDay = DateUtils.dateOnly(customTarget);
+    final daysUntil = daysUntilCustom!;
+    final nearTarget = upcoming.where((s) {
+      final diff = daysBetween(targetDay, DateUtils.dateOnly(s.at));
+      return diff >= 0 && diff <= 2;
+    }).toList();
+    final bestSlot = nearTarget.where(isTroughEligibleSlot).firstOrNull ??
+        nearTarget.firstOrNull ??
+        upcoming.where(isTroughEligibleSlot).firstOrNull ??
+        upcoming.firstOrNull;
+    return TroughLabReminder(
+      nextTroughSlot: bestSlot,
+      daysSinceLastLab: daysSince,
+      nextRoutineLabDate: targetDay,
+      isDue: daysUntil <= 7,
+      isCustomDate: true,
+      daysUntilTarget: daysUntil,
+    );
+  }
+
   if (latestLab == null) {
     return TroughLabReminder(
       nextTroughSlot: upcoming.firstOrNull,
@@ -301,7 +347,6 @@ TroughLabReminder? computeTroughLabReminder(
     );
   }
 
-  final daysSince = math.max(0, daysBetween(latestLab.at, refNow));
   final nextRoutine = DateTime(
     latestLab.at.year,
     latestLab.at.month,
@@ -311,7 +356,8 @@ TroughLabReminder? computeTroughLabReminder(
     nextTroughSlot: upcoming.firstOrNull,
     daysSinceLastLab: daysSince,
     nextRoutineLabDate: nextRoutine,
-    isDue: daysSince >= 90,
+    isDue: daysSince! >= 90,
+    daysUntilTarget: daysBetween(refToday, nextRoutine),
   );
 }
 

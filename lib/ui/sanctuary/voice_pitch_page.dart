@@ -237,7 +237,8 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
         latestHz = hz;
         _samples.add(hz);
         _contourPoints.add(hz);
-        final tone = analyzeVoiceToneFromPcm16(frame, sampleRate: 16000, f0Hz: hz);
+        final tone =
+            analyzeVoiceToneFromPcm16(frame, sampleRate: 16000, f0Hz: hz);
         if (tone != null) {
           _brightnessSamples.add(tone.brightnessScore);
           _weightSamples.add(tone.weightScore);
@@ -484,8 +485,7 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
           _brightnessSamples.length;
       final wAvg =
           _weightSamples.reduce((a, b) => a + b) / _weightSamples.length;
-      displayTone =
-          VoiceToneAnalysis(brightnessScore: bAvg, weightScore: wAvg);
+      displayTone = VoiceToneAnalysis(brightnessScore: bAvg, weightScore: wAvg);
     }
 
     return Scaffold(
@@ -495,775 +495,779 @@ class _VoicePitchPageState extends State<VoicePitchPage> {
           child: ListView(
             padding: context.pagePadding(top: 12, bottom: 40),
             children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(LucideIcons.arrowLeft),
-                  tooltip: tr('Back'),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    tr('Voice Pitch Studio'),
-                    style: display(30),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            gap(10),
-
-            // Gentle dysphoria warning & privacy reassurance
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: C.coral.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: C.coral.withValues(alpha: 0.34)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  const Icon(LucideIcons.heartHandshake,
-                      size: 18, color: C.coral),
-                  const SizedBox(width: 10),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(LucideIcons.arrowLeft),
+                    tooltip: tr('Back'),
+                  ),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      tr('Voice practice can sometimes feel heavy. Live mic checks are 100% optional, run in memory without saving recordings, and you can switch to Quiet Warm-up or hide this studio anytime.'),
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Pastel.mist.withValues(alpha: 0.90),
-                        height: 1.45,
-                      ),
+                      tr('Voice Pitch Studio'),
+                      style: display(30),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-            ),
-            gap(16),
+              gap(10),
 
-            PillTabs<int>(
-              items: [
-                (0, tr('Live Voice Test')),
-                (1, tr('Quiet Warm-up')),
-              ],
-              value: _mode,
-              onChanged: (v) async {
-                if (v != 0 && _listening) {
-                  await _stopListening();
-                }
-                if (mounted) setState(() => _mode = v);
-              },
-            ),
-            gap(16),
-
-            if (_mode == 0) ...[
-              // Reading prompt / article passage card
-              AppCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+              // Gentle dysphoria warning & privacy reassurance
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: C.coral.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: C.coral.withValues(alpha: 0.34)),
+                ),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(LucideIcons.messageSquareQuote,
-                            size: 16, color: C.lavender),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            tr('Reading prompt'),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: C.lavender,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _shufflePrompt,
-                          icon: const Icon(LucideIcons.refreshCw, size: 17),
-                          color: C.iconDefault,
-                          tooltip: _readingMode == 1
-                              ? tr('Shuffle passage')
-                              : tr('Shuffle prompt'),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                        IconButton(
-                          onPressed: _editCustomPrompt,
-                          icon: const Icon(LucideIcons.pencil, size: 17),
-                          color: C.iconDefault,
-                          tooltip: tr('Edit custom text'),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ],
-                    ),
-                    gap(8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        _SelectableChip(
-                          label: tr('Short prompt'),
-                          selected: _readingMode == 0,
-                          onTap: () => setState(() {
-                            _readingMode = 0;
-                            _customPrompt = null;
-                          }),
-                        ),
-                        _SelectableChip(
-                          label: tr('Article passage'),
-                          selected: _readingMode == 1,
-                          onTap: () => setState(() {
-                            _readingMode = 1;
-                            _customPrompt = null;
-                          }),
-                        ),
-                      ],
-                    ),
-                    gap(10),
-                    if (_customPrompt != null)
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 155),
-                        child: SingleChildScrollView(
-                          child: Text(
-                            '"$_customPrompt"',
-                            style: const TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      )
-                    else if (_readingMode == 1) ...[
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          _MetaBadge(
-                            text: passage.topic,
-                            color: C.violet,
-                          ),
-                          _MetaBadge(
-                            text: tr('~{0}s read', [passage.estSeconds]),
-                            color: Pastel.mint,
-                          ),
-                        ],
-                      ),
-                      gap(8),
-                      Text(
-                        passage.title,
-                        style: const TextStyle(
-                          fontSize: 15.5,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      gap(6),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 165),
-                        child: SingleChildScrollView(
-                          child: Text(
-                            passage.body,
-                            style: TextStyle(
-                              fontSize: 13.8,
-                              color: Pastel.mist.withValues(alpha: 0.92),
-                              height: 1.55,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ] else
-                      Text(
-                        '"$promptText"',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                    const Icon(LucideIcons.heartHandshake,
+                        size: 18, color: C.coral),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        tr('Voice practice can sometimes feel heavy. Live mic checks are 100% optional, run in memory without saving recordings, and you can switch to Quiet Warm-up or hide this studio anytime.'),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: Pastel.mist.withValues(alpha: 0.90),
                           height: 1.45,
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
-              gap(14),
+              gap(16),
 
-              // Live pitch meter & contour card
-              AppCard(
-                highlight: true,
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  children: [
-                    Text(
-                      displayHz != null ? '${displayHz.round()} Hz' : '— Hz',
-                      style: display(44, color: Colors.white),
-                    ),
-                    gap(8),
-                    if (category != null) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: category.color.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                              color: category.color.withValues(alpha: 0.45)),
-                        ),
-                        child: Text(
-                          '${category.label} (${category.rangeHint})',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: category.color,
-                          ),
-                        ),
-                      ),
-                      gap(4),
-                      Text(
-                        category.description,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Pastel.mist.withValues(alpha: 0.85),
-                        ),
-                      ),
-                    ] else
-                      Text(
-                        _listening
-                            ? tr('Speak comfortably at your own pace...')
-                            : tr('Press Start when you feel ready'),
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: Pastel.mist.withValues(alpha: 0.78),
-                        ),
-                      ),
-                    gap(12),
-                    _LivePitchContourChart(
-                      points: _contourPoints,
-                      target: _targetRange,
-                    ),
-                    gap(10),
-                    _PitchGaugeBar(hz: displayHz, target: _targetRange),
-                    gap(10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            tr('Target: {0}–{1} Hz', [
-                              _targetRange.minHz.round(),
-                              _targetRange.maxHz.round(),
-                            ]),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Pastel.mint.withValues(alpha: 0.92),
+              PillTabs<int>(
+                items: [
+                  (0, tr('Live Voice Test')),
+                  (1, tr('Quiet Warm-up')),
+                ],
+                value: _mode,
+                onChanged: (v) async {
+                  if (v != 0 && _listening) {
+                    await _stopListening();
+                  }
+                  if (mounted) setState(() => _mode = v);
+                },
+              ),
+              gap(16),
+
+              if (_mode == 0) ...[
+                // Reading prompt / article passage card
+                AppCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(LucideIcons.messageSquareQuote,
+                              size: 16, color: C.lavender),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              tr('Reading prompt'),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: C.lavender,
+                              ),
                             ),
                           ),
-                        ),
-                        TextButton.icon(
-                          onPressed: () => setState(
-                              () => _showTargetEditor = !_showTargetEditor),
-                          icon: Icon(
-                            _showTargetEditor
-                                ? LucideIcons.chevronUp
-                                : LucideIcons.slidersHorizontal,
-                            size: 14,
-                          ),
-                          label: Text(
-                            tr('Adjust target'),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          style: TextButton.styleFrom(
+                          IconButton(
+                            onPressed: _shufflePrompt,
+                            icon: const Icon(LucideIcons.refreshCw, size: 17),
+                            color: C.iconDefault,
+                            tooltip: _readingMode == 1
+                                ? tr('Shuffle passage')
+                                : tr('Shuffle prompt'),
                             visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
                           ),
-                        ),
-                      ],
-                    ),
-                    if (_showTargetEditor) ...[
-                      gap(6),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: C.midnight.withValues(alpha: 0.65),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                              color: C.lavender.withValues(alpha: 0.16)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tr('Target zone'),
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: Pastel.mist.withValues(alpha: 0.8),
-                              ),
-                            ),
-                            gap(6),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 6,
-                              children: [
-                                _SelectableChip(
-                                  label: tr('Masculine'),
-                                  selected: _targetRange ==
-                                      VoiceTargetRange.masculine,
-                                  color: C.violet,
-                                  onTap: () => _setTargetRange(
-                                      VoiceTargetRange.masculine),
-                                ),
-                                _SelectableChip(
-                                  label: tr('Neutral pitch'),
-                                  selected:
-                                      _targetRange == VoiceTargetRange.neutral,
-                                  color: Pastel.mint,
-                                  onTap: () =>
-                                      _setTargetRange(VoiceTargetRange.neutral),
-                                ),
-                                _SelectableChip(
-                                  label: tr('Feminine'),
-                                  selected:
-                                      _targetRange == VoiceTargetRange.feminine,
-                                  color: C.rose,
-                                  onTap: () => _setTargetRange(
-                                      VoiceTargetRange.feminine),
-                                ),
-                              ],
-                            ),
-                            RangeSlider(
-                              values: RangeValues(
-                                _targetRange.minHz.clamp(80.0, 275.0),
-                                _targetRange.maxHz.clamp(85.0, 280.0),
-                              ),
-                              min: 80,
-                              max: 280,
-                              divisions: 40,
-                              activeColor: Pastel.mint,
-                              inactiveColor:
-                                  C.lavender.withValues(alpha: 0.22),
-                              labels: RangeLabels(
-                                '${_targetRange.minHz.round()} Hz',
-                                '${_targetRange.maxHz.round()} Hz',
-                              ),
-                              onChanged: (v) {
-                                final minV = v.start;
-                                final maxV = math.max(minV + 5.0, v.end);
-                                _setTargetRange(
-                                  VoiceTargetRange(minHz: minV, maxHz: maxV),
-                                  persist: false,
-                                );
-                              },
-                              onChangeEnd: (v) {
-                                final minV = v.start;
-                                final maxV = math.max(minV + 5.0, v.end);
-                                _setTargetRange(
-                                  VoiceTargetRange(minHz: minV, maxHz: maxV),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
+                          IconButton(
+                            onPressed: _editCustomPrompt,
+                            icon: const Icon(LucideIcons.pencil, size: 17),
+                            color: C.iconDefault,
+                            tooltip: tr('Edit custom text'),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ],
                       ),
-                    ],
-                    if (metrics != null) ...[
                       gap(8),
                       Wrap(
                         spacing: 8,
                         runSpacing: 6,
-                        alignment: WrapAlignment.center,
                         children: [
-                          _MetaBadge(
-                            text: tr('In target: {0}%',
-                                [metrics.inTargetPercent.round()]),
-                            color: Pastel.mint,
+                          _SelectableChip(
+                            label: tr('Short prompt'),
+                            selected: _readingMode == 0,
+                            onTap: () => setState(() {
+                              _readingMode = 0;
+                              _customPrompt = null;
+                            }),
                           ),
-                          _MetaBadge(
-                            text: tr('Intonation: {0} Hz • {1}', [
-                              metrics.spreadHz.round(),
-                              metrics.intonationLabel,
-                            ]),
-                            color: C.lavender,
+                          _SelectableChip(
+                            label: tr('Article passage'),
+                            selected: _readingMode == 1,
+                            onTap: () => setState(() {
+                              _readingMode = 1;
+                              _customPrompt = null;
+                            }),
                           ),
                         ],
                       ),
-                    ],
-                    gap(12),
-                    _ToneBalanceCard(tone: displayTone),
-                    gap(12),
-                    _ReferenceToneStrip(
-                      playingHz: _playingToneHz,
-                      onPlay: _playReferenceTone,
-                    ),
-                    gap(8),
-                    Text(
-                      tr('Pitch is only one piece alongside resonance & comfort.'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: Pastel.mist.withValues(alpha: 0.72),
-                      ),
-                    ),
-                    if (_statusNote != null) ...[
                       gap(10),
-                      Text(
-                        _statusNote!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: C.coral,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                    gap(14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: pillButton(
-                        _listening
-                            ? tr('Stop voice check')
-                            : tr('Start live voice check'),
-                        _toggleListening,
-                        icon: _listening ? LucideIcons.square : LucideIcons.mic,
-                        color: _listening ? C.coral : C.aurora,
-                      ),
-                    ),
-                    if (!_listening &&
-                        avgHz != null &&
-                        minHz != null &&
-                        maxHz != null) ...[
-                      gap(14),
-                      const Divider(height: 1),
-                      gap(12),
-                      Text(
-                        tr('Session average: {0} Hz ({1}–{2} Hz)', [
-                          avgHz.round(),
-                          minHz.round(),
-                          maxHz.round(),
-                        ]),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      gap(10),
-                      if (_savedCurrentSession)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(LucideIcons.check,
-                                size: 16, color: Pastel.mint),
-                            const SizedBox(width: 6),
-                            Text(
-                              tr('Result saved (numbers only)'),
+                      if (_customPrompt != null)
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 155),
+                          child: SingleChildScrollView(
+                            child: Text(
+                              '"$_customPrompt"',
                               style: const TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: Pastel.mint,
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                height: 1.5,
                               ),
                             ),
-                          ],
+                          ),
                         )
-                      else ...[
+                      else if (_readingMode == 1) ...[
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: [
+                            _MetaBadge(
+                              text: passage.topic,
+                              color: C.violet,
+                            ),
+                            _MetaBadge(
+                              text: tr('~{0}s read', [passage.estSeconds]),
+                              color: Pastel.mint,
+                            ),
+                          ],
+                        ),
+                        gap(8),
                         Text(
-                          tr('Session tag (optional)'),
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: Pastel.mist.withValues(alpha: 0.72),
+                          passage.title,
+                          style: const TextStyle(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
                           ),
                         ),
                         gap(6),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 165),
+                          child: SingleChildScrollView(
+                            child: Text(
+                              passage.body,
+                              style: TextStyle(
+                                fontSize: 13.8,
+                                color: Pastel.mist.withValues(alpha: 0.92),
+                                height: 1.55,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else
+                        Text(
+                          '"$promptText"',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                            height: 1.45,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                gap(14),
+
+                // Live pitch meter & contour card
+                AppCard(
+                  highlight: true,
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    children: [
+                      Text(
+                        displayHz != null ? '${displayHz.round()} Hz' : '— Hz',
+                        style: display(44, color: Colors.white),
+                      ),
+                      gap(8),
+                      if (category != null) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: category.color.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                                color: category.color.withValues(alpha: 0.45)),
+                          ),
+                          child: Text(
+                            '${category.label} (${category.rangeHint})',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: category.color,
+                            ),
+                          ),
+                        ),
+                        gap(4),
+                        Text(
+                          category.description,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Pastel.mist.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ] else
+                        Text(
+                          _listening
+                              ? tr('Speak comfortably at your own pace...')
+                              : tr('Press Start when you feel ready'),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: Pastel.mist.withValues(alpha: 0.78),
+                          ),
+                        ),
+                      gap(12),
+                      _LivePitchContourChart(
+                        points: _contourPoints,
+                        target: _targetRange,
+                      ),
+                      gap(10),
+                      _PitchGaugeBar(hz: displayHz, target: _targetRange),
+                      gap(10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              tr('Target: {0}–{1} Hz', [
+                                _targetRange.minHz.round(),
+                                _targetRange.maxHz.round(),
+                              ]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Pastel.mint.withValues(alpha: 0.92),
+                              ),
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () => setState(
+                                () => _showTargetEditor = !_showTargetEditor),
+                            icon: Icon(
+                              _showTargetEditor
+                                  ? LucideIcons.chevronUp
+                                  : LucideIcons.slidersHorizontal,
+                              size: 14,
+                            ),
+                            label: Text(
+                              tr('Adjust target'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_showTargetEditor) ...[
+                        gap(6),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: C.midnight.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                                color: C.lavender.withValues(alpha: 0.16)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tr('Target zone'),
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Pastel.mist.withValues(alpha: 0.8),
+                                ),
+                              ),
+                              gap(6),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: [
+                                  _SelectableChip(
+                                    label: tr('Masculine'),
+                                    selected: _targetRange ==
+                                        VoiceTargetRange.masculine,
+                                    color: C.violet,
+                                    onTap: () => _setTargetRange(
+                                        VoiceTargetRange.masculine),
+                                  ),
+                                  _SelectableChip(
+                                    label: tr('Neutral pitch'),
+                                    selected: _targetRange ==
+                                        VoiceTargetRange.neutral,
+                                    color: Pastel.mint,
+                                    onTap: () => _setTargetRange(
+                                        VoiceTargetRange.neutral),
+                                  ),
+                                  _SelectableChip(
+                                    label: tr('Feminine'),
+                                    selected: _targetRange ==
+                                        VoiceTargetRange.feminine,
+                                    color: C.rose,
+                                    onTap: () => _setTargetRange(
+                                        VoiceTargetRange.feminine),
+                                  ),
+                                ],
+                              ),
+                              RangeSlider(
+                                values: RangeValues(
+                                  _targetRange.minHz.clamp(80.0, 275.0),
+                                  _targetRange.maxHz.clamp(85.0, 280.0),
+                                ),
+                                min: 80,
+                                max: 280,
+                                divisions: 40,
+                                activeColor: Pastel.mint,
+                                inactiveColor:
+                                    C.lavender.withValues(alpha: 0.22),
+                                labels: RangeLabels(
+                                  '${_targetRange.minHz.round()} Hz',
+                                  '${_targetRange.maxHz.round()} Hz',
+                                ),
+                                onChanged: (v) {
+                                  final minV = v.start;
+                                  final maxV = math.max(minV + 5.0, v.end);
+                                  _setTargetRange(
+                                    VoiceTargetRange(minHz: minV, maxHz: maxV),
+                                    persist: false,
+                                  );
+                                },
+                                onChangeEnd: (v) {
+                                  final minV = v.start;
+                                  final maxV = math.max(minV + 5.0, v.end);
+                                  _setTargetRange(
+                                    VoiceTargetRange(minHz: minV, maxHz: maxV),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (metrics != null) ...[
+                        gap(8),
                         Wrap(
                           spacing: 8,
                           runSpacing: 6,
                           alignment: WrapAlignment.center,
                           children: [
-                            for (final tag in voiceContextTags)
-                              _SelectableChip(
-                                label: tr(tag.$2),
-                                selected: _selectedContextTag == tag.$1,
-                                color: C.lavender,
-                                onTap: () => setState(() =>
-                                    _selectedContextTag =
-                                        _selectedContextTag == tag.$1
-                                            ? null
-                                            : tag.$1),
-                              ),
+                            _MetaBadge(
+                              text: tr('In target: {0}%',
+                                  [metrics.inTargetPercent.round()]),
+                              color: Pastel.mint,
+                            ),
+                            _MetaBadge(
+                              text: tr('Intonation: {0} Hz • {1}', [
+                                metrics.spreadHz.round(),
+                                metrics.intonationLabel,
+                              ]),
+                              color: C.lavender,
+                            ),
                           ],
                         ),
-                        gap(12),
-                        OutlinedButton.icon(
-                          onPressed: _saveSessionResult,
-                          icon: const Icon(LucideIcons.bookmarkCheck, size: 17),
-                          label: Text(tr('Save result (numbers only)')),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: C.lavender,
-                            side: BorderSide(
-                                color: C.lavender.withValues(alpha: 0.4)),
-                            shape: const StadiumBorder(),
+                      ],
+                      gap(12),
+                      _ToneBalanceCard(tone: displayTone),
+                      gap(12),
+                      _ReferenceToneStrip(
+                        playingHz: _playingToneHz,
+                        onPlay: _playReferenceTone,
+                      ),
+                      gap(8),
+                      Text(
+                        tr('Pitch is only one piece alongside resonance & comfort.'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Pastel.mist.withValues(alpha: 0.72),
+                        ),
+                      ),
+                      if (_statusNote != null) ...[
+                        gap(10),
+                        Text(
+                          _statusNote!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: C.coral,
+                            height: 1.4,
                           ),
                         ),
                       ],
-                    ],
-                  ],
-                ),
-              ),
-              gap(18),
-
-              // Saved numeric history
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    tr('Saved results'),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  if (_results.isNotEmpty)
-                    TextButton(
-                      onPressed: _clearAllResults,
-                      child: Text(tr('Clear all')),
-                    ),
-                ],
-              ),
-              Text(
-                tr('Numbers and category only — zero audio is ever stored.'),
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: Pastel.mist.withValues(alpha: 0.72),
-                ),
-              ),
-              gap(10),
-              if (_results.length >= 2) ...[
-                _VoiceTrendChartCard(results: _results, target: _targetRange),
-                gap(12),
-              ],
-              if (_results.isEmpty)
-                AppCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    tr('No saved pitch results yet.'),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Pastel.mist.withValues(alpha: 0.78),
-                    ),
-                  ),
-                )
-              else
-                for (final r in _results) ...[
-                  _SavedResultTile(
-                    result: r,
-                    onDelete: () => _deleteResult(r.id),
-                  ),
-                  gap(8),
-                ],
-            ] else ...[
-              // Guided 4-Step SOVTE & Resonance Quiet Warm-up (No-Mic)
-              Builder(builder: (_) {
-                final step = voiceWarmupSteps[_warmupStepIndex];
-                final progress = _warmupCompleted
-                    ? 1.0
-                    : (_warmupStepIndex + 1) / voiceWarmupSteps.length;
-                return AppCard(
-                  highlight: true,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _MetaBadge(
-                            text: tr('Step {0} of {1}', [
-                              _warmupStepIndex + 1,
-                              voiceWarmupSteps.length,
-                            ]),
-                            color: C.lavender,
-                          ),
-                          Text(
-                            '${(progress * 100).round()}%',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: C.iconDefault,
-                            ),
-                          ),
-                        ],
-                      ),
-                      gap(10),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(999),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 5,
-                          backgroundColor: C.midnight.withValues(alpha: 0.7),
-                          valueColor:
-                              const AlwaysStoppedAnimation<Color>(Pastel.mint),
+                      gap(14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: pillButton(
+                          _listening
+                              ? tr('Stop voice check')
+                              : tr('Start live voice check'),
+                          _toggleListening,
+                          icon:
+                              _listening ? LucideIcons.square : LucideIcons.mic,
+                          color: _listening ? C.coral : C.aurora,
                         ),
                       ),
-                      gap(18),
-                      if (_warmupCompleted) ...[
-                        const CompanionAvatar(
-                          mood: CompanionMood.laugh,
-                          size: 96,
-                          glowColor: Pastel.mint,
-                        ),
+                      if (!_listening &&
+                          avgHz != null &&
+                          minHz != null &&
+                          maxHz != null) ...[
+                        gap(14),
+                        const Divider(height: 1),
                         gap(12),
                         Text(
-                          tr('Warm-up complete!'),
-                          textAlign: TextAlign.center,
+                          tr('Session average: {0} Hz ({1}–{2} Hz)', [
+                            avgHz.round(),
+                            minHz.round(),
+                            maxHz.round(),
+                          ]),
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
-                        gap(8),
-                        Text(
-                          tr('Your voice is gently warmed up. Switch to Live Voice Test anytime you feel ready.'),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            color: Pastel.mist.withValues(alpha: 0.88),
-                            height: 1.45,
-                          ),
-                        ),
-                        gap(16),
-                        pillButton(
-                          tr('Restart routine'),
-                          _toggleWarmupTimer,
-                          icon: LucideIcons.rotateCcw,
-                          color: Pastel.mint,
-                        ),
-                      ] else ...[
-                        iconBadge(LucideIcons.wind, Pastel.mint,
-                            size: 50, iconSize: 24),
                         gap(10),
-                        Text(
-                          '${_warmupSecondsLeft}s',
-                          style: display(42, color: Colors.white),
-                        ),
-                        gap(8),
-                        Text(
-                          step.title,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        gap(6),
-                        Text(
-                          step.subtitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            color: Pastel.mist.withValues(alpha: 0.88),
-                            height: 1.45,
-                          ),
-                        ),
-                        gap(12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: C.midnight.withValues(alpha: 0.62),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                                color: C.lavender.withValues(alpha: 0.16)),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        if (_savedCurrentSession)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(LucideIcons.sparkles,
+                              const Icon(LucideIcons.check,
                                   size: 16, color: Pastel.mint),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  step.tip,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Pastel.mist.withValues(alpha: 0.85),
-                                    height: 1.4,
-                                  ),
+                              const SizedBox(width: 6),
+                              Text(
+                                tr('Result saved (numbers only)'),
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Pastel.mint,
                                 ),
                               ),
                             ],
+                          )
+                        else ...[
+                          Text(
+                            tr('Session tag (optional)'),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: Pastel.mist.withValues(alpha: 0.72),
+                            ),
                           ),
-                        ),
-                        gap(16),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: _warmupStepIndex > 0
-                                  ? () => _selectWarmupStep(_warmupStepIndex - 1)
-                                  : null,
-                              icon: const Icon(LucideIcons.chevronLeft),
-                              tooltip: tr('Previous step'),
+                          gap(6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              for (final tag in voiceContextTags)
+                                _SelectableChip(
+                                  label: tr(tag.$2),
+                                  selected: _selectedContextTag == tag.$1,
+                                  color: C.lavender,
+                                  onTap: () => setState(() =>
+                                      _selectedContextTag =
+                                          _selectedContextTag == tag.$1
+                                              ? null
+                                              : tag.$1),
+                                ),
+                            ],
+                          ),
+                          gap(12),
+                          OutlinedButton.icon(
+                            onPressed: _saveSessionResult,
+                            icon:
+                                const Icon(LucideIcons.bookmarkCheck, size: 17),
+                            label: Text(tr('Save result (numbers only)')),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: C.lavender,
+                              side: BorderSide(
+                                  color: C.lavender.withValues(alpha: 0.4)),
+                              shape: const StadiumBorder(),
                             ),
-                            Expanded(
-                              child: pillButton(
-                                _warmupRunning
-                                    ? tr('Pause warm-up')
-                                    : tr('Start step'),
-                                _toggleWarmupTimer,
-                                icon: _warmupRunning
-                                    ? LucideIcons.pause
-                                    : LucideIcons.play,
-                                color: C.aurora,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                if (_warmupStepIndex <
-                                    voiceWarmupSteps.length - 1) {
-                                  _selectWarmupStep(_warmupStepIndex + 1);
-                                } else {
-                                  HapticFeedback.selectionClick();
-                                  _warmupTimer?.cancel();
-                                  setState(() {
-                                    _warmupRunning = false;
-                                    _warmupSecondsLeft = 0;
-                                    _warmupCompleted = true;
-                                  });
-                                }
-                              },
-                              icon: const Icon(LucideIcons.chevronRight),
-                              tooltip: tr('Next step'),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ],
                     ],
                   ),
-                );
-              }),
-            ],
+                ),
+                gap(18),
 
-            gap(24),
-            OutlinedButton.icon(
-              onPressed: _hideStudio,
-              icon: const Icon(LucideIcons.eyeOff, size: 17),
-              label: Text(tr('Hide Voice Pitch Studio')),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: C.iconDefault,
-                side: BorderSide(color: C.lavender.withValues(alpha: 0.22)),
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(vertical: 13),
+                // Saved numeric history
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      tr('Saved results'),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (_results.isNotEmpty)
+                      TextButton(
+                        onPressed: _clearAllResults,
+                        child: Text(tr('Clear all')),
+                      ),
+                  ],
+                ),
+                Text(
+                  tr('Numbers and category only — zero audio is ever stored.'),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: Pastel.mist.withValues(alpha: 0.72),
+                  ),
+                ),
+                gap(10),
+                if (_results.length >= 2) ...[
+                  _VoiceTrendChartCard(results: _results, target: _targetRange),
+                  gap(12),
+                ],
+                if (_results.isEmpty)
+                  AppCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      tr('No saved pitch results yet.'),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Pastel.mist.withValues(alpha: 0.78),
+                      ),
+                    ),
+                  )
+                else
+                  for (final r in _results) ...[
+                    _SavedResultTile(
+                      result: r,
+                      onDelete: () => _deleteResult(r.id),
+                    ),
+                    gap(8),
+                  ],
+              ] else ...[
+                // Guided 4-Step SOVTE & Resonance Quiet Warm-up (No-Mic)
+                Builder(builder: (_) {
+                  final step = voiceWarmupSteps[_warmupStepIndex];
+                  final progress = _warmupCompleted
+                      ? 1.0
+                      : (_warmupStepIndex + 1) / voiceWarmupSteps.length;
+                  return AppCard(
+                    highlight: true,
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _MetaBadge(
+                              text: tr('Step {0} of {1}', [
+                                _warmupStepIndex + 1,
+                                voiceWarmupSteps.length,
+                              ]),
+                              color: C.lavender,
+                            ),
+                            Text(
+                              '${(progress * 100).round()}%',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: C.iconDefault,
+                              ),
+                            ),
+                          ],
+                        ),
+                        gap(10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(999),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 5,
+                            backgroundColor: C.midnight.withValues(alpha: 0.7),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Pastel.mint),
+                          ),
+                        ),
+                        gap(18),
+                        if (_warmupCompleted) ...[
+                          const CompanionAvatar(
+                            mood: CompanionMood.laugh,
+                            size: 96,
+                            glowColor: Pastel.mint,
+                          ),
+                          gap(12),
+                          Text(
+                            tr('Warm-up complete!'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          gap(8),
+                          Text(
+                            tr('Your voice is gently warmed up. Switch to Live Voice Test anytime you feel ready.'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: Pastel.mist.withValues(alpha: 0.88),
+                              height: 1.45,
+                            ),
+                          ),
+                          gap(16),
+                          pillButton(
+                            tr('Restart routine'),
+                            _toggleWarmupTimer,
+                            icon: LucideIcons.rotateCcw,
+                            color: Pastel.mint,
+                          ),
+                        ] else ...[
+                          iconBadge(LucideIcons.wind, Pastel.mint,
+                              size: 50, iconSize: 24),
+                          gap(10),
+                          Text(
+                            '${_warmupSecondsLeft}s',
+                            style: display(42, color: Colors.white),
+                          ),
+                          gap(8),
+                          Text(
+                            step.title,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          gap(6),
+                          Text(
+                            step.subtitle,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: Pastel.mist.withValues(alpha: 0.88),
+                              height: 1.45,
+                            ),
+                          ),
+                          gap(12),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: C.midnight.withValues(alpha: 0.62),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                  color: C.lavender.withValues(alpha: 0.16)),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(LucideIcons.sparkles,
+                                    size: 16, color: Pastel.mint),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    step.tip,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          Pastel.mist.withValues(alpha: 0.85),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          gap(16),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: _warmupStepIndex > 0
+                                    ? () =>
+                                        _selectWarmupStep(_warmupStepIndex - 1)
+                                    : null,
+                                icon: const Icon(LucideIcons.chevronLeft),
+                                tooltip: tr('Previous step'),
+                              ),
+                              Expanded(
+                                child: pillButton(
+                                  _warmupRunning
+                                      ? tr('Pause warm-up')
+                                      : tr('Start step'),
+                                  _toggleWarmupTimer,
+                                  icon: _warmupRunning
+                                      ? LucideIcons.pause
+                                      : LucideIcons.play,
+                                  color: C.aurora,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  if (_warmupStepIndex <
+                                      voiceWarmupSteps.length - 1) {
+                                    _selectWarmupStep(_warmupStepIndex + 1);
+                                  } else {
+                                    HapticFeedback.selectionClick();
+                                    _warmupTimer?.cancel();
+                                    setState(() {
+                                      _warmupRunning = false;
+                                      _warmupSecondsLeft = 0;
+                                      _warmupCompleted = true;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(LucideIcons.chevronRight),
+                                tooltip: tr('Next step'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
+              ],
+
+              gap(24),
+              OutlinedButton.icon(
+                onPressed: _hideStudio,
+                icon: const Icon(LucideIcons.eyeOff, size: 17),
+                label: Text(tr('Hide Voice Pitch Studio')),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: C.iconDefault,
+                  side: BorderSide(color: C.lavender.withValues(alpha: 0.22)),
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),
@@ -1310,7 +1314,8 @@ class _SelectableChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? Colors.white : Pastel.mist.withValues(alpha: 0.78),
+              color:
+                  selected ? Colors.white : Pastel.mist.withValues(alpha: 0.78),
             ),
           ),
         ),
@@ -1543,7 +1548,13 @@ class _PitchGaugeBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       gradient: const LinearGradient(
-                        colors: [C.aurora, C.violet, Pastel.mint, C.rose, C.coral],
+                        colors: [
+                          C.aurora,
+                          C.violet,
+                          Pastel.mint,
+                          C.rose,
+                          C.coral
+                        ],
                         stops: [0.10, 0.32, 0.54, 0.78, 0.96],
                       ),
                     ),
@@ -1600,17 +1611,31 @@ class _PitchGaugeBar extends StatelessWidget {
   }
 }
 
-class _VoiceTrendChartCard extends StatelessWidget {
+class _VoiceTrendChartCard extends StatefulWidget {
   const _VoiceTrendChartCard({required this.results, required this.target});
 
   final List<VoiceTestResult> results;
   final VoiceTargetRange target;
 
   @override
+  State<_VoiceTrendChartCard> createState() => _VoiceTrendChartCardState();
+}
+
+class _VoiceTrendChartCardState extends State<_VoiceTrendChartCard> {
+  bool _last30DaysOnly = true;
+
+  @override
   Widget build(BuildContext context) {
-    final ordered = results.take(20).toList().reversed.toList();
+    final cutoff = DateTime.now().subtract(const Duration(days: 30));
+    final filtered = _last30DaysOnly
+        ? widget.results.where((r) => !r.at.isBefore(cutoff)).toList()
+        : widget.results.take(20).toList();
+    final source =
+        filtered.length >= 2 ? filtered : widget.results.take(20).toList();
+    final ordered = source.toList().reversed.toList();
     if (ordered.length < 2) return const SizedBox.shrink();
 
+    final summary30 = computeVoice30DaySummary(widget.results);
     final overallAvg =
         ordered.fold<double>(0, (s, r) => s + r.avgHz) / ordered.length;
     var minSample = ordered.first.minHz;
@@ -1623,13 +1648,16 @@ class _VoiceTrendChartCard extends StatelessWidget {
     final maxY = math.max(290.0, (maxSample + 15.0).clamp(150.0, 380.0));
 
     final avgSpots = [
-      for (var i = 0; i < ordered.length; i++) FlSpot(i.toDouble(), ordered[i].avgHz),
+      for (var i = 0; i < ordered.length; i++)
+        FlSpot(i.toDouble(), ordered[i].avgHz),
     ];
     final maxSpots = [
-      for (var i = 0; i < ordered.length; i++) FlSpot(i.toDouble(), ordered[i].maxHz),
+      for (var i = 0; i < ordered.length; i++)
+        FlSpot(i.toDouble(), ordered[i].maxHz),
     ];
     final minSpots = [
-      for (var i = 0; i < ordered.length; i++) FlSpot(i.toDouble(), ordered[i].minHz),
+      for (var i = 0; i < ordered.length; i++)
+        FlSpot(i.toDouble(), ordered[i].minHz),
     ];
     final totalX = (ordered.length - 1).toDouble();
 
@@ -1652,6 +1680,15 @@ class _VoiceTrendChartCard extends StatelessWidget {
                   ),
                 ),
               ),
+              InkWell(
+                onTap: () => setState(() => _last30DaysOnly = !_last30DaysOnly),
+                borderRadius: BorderRadius.circular(999),
+                child: _MetaBadge(
+                  text: _last30DaysOnly ? tr('30 days') : tr('Recent 20'),
+                  color: Pastel.mint,
+                ),
+              ),
+              const SizedBox(width: 6),
               _MetaBadge(
                 text: tr('{0} sessions', [ordered.length]),
                 color: C.lavender,
@@ -1660,11 +1697,22 @@ class _VoiceTrendChartCard extends StatelessWidget {
           ),
           gap(4),
           Text(
-            tr('Overall avg: {0} Hz', [overallAvg.round()]),
-            style: TextStyle(
+            summary30.medianHz != null
+                ? tr('Overall avg: {0} Hz • 30d median: {1} Hz', [
+                      overallAvg.round(),
+                      summary30.medianHz!.round(),
+                    ]) +
+                    (summary30.deltaFromFirstHz != null &&
+                            summary30.deltaFromFirstHz!.abs() >= 1
+                        ? ' (${summary30.deltaFromFirstHz! >= 0 ? '+' : ''}${summary30.deltaFromFirstHz!.round()} Hz)'
+                        : '')
+                : tr('Overall avg: {0} Hz', [overallAvg.round()]),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: tabular(TextStyle(
               fontSize: 11.5,
               color: Pastel.mist.withValues(alpha: 0.78),
-            ),
+            )),
           ),
           gap(12),
           SizedBox(
@@ -1722,8 +1770,8 @@ class _VoiceTrendChartCard extends StatelessWidget {
                 rangeAnnotations: RangeAnnotations(
                   horizontalRangeAnnotations: [
                     HorizontalRangeAnnotation(
-                      y1: target.minHz,
-                      y2: target.maxHz,
+                      y1: widget.target.minHz,
+                      y2: widget.target.maxHz,
                       color: Pastel.mint.withValues(alpha: 0.12),
                     ),
                   ],
@@ -1772,7 +1820,7 @@ class _VoiceTrendChartCard extends StatelessWidget {
                     isStrokeCapRound: true,
                     dotData: FlDotData(
                       getDotPainter: (spot, _, __, ___) {
-                        final inTarget = target.contains(spot.y);
+                        final inTarget = widget.target.contains(spot.y);
                         return FlDotCirclePainter(
                           radius: 3.6,
                           color: inTarget ? Pastel.mint : C.lavender,

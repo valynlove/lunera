@@ -12,7 +12,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.3+-A58BFF?logo=dart&logoColor=white)](https://dart.dev)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-D76ABF?logo=firebase&logoColor=white)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-7DE2C7?labelColor=11102B)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.44-F2A17C?labelColor=11102B)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.3.0-F2A17C?labelColor=11102B)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://valynlove.github.io/lunera/) • [📥 Direct Download APK](https://github.com/valynlove/lunera/releases/latest/download/Lunera.apk) • [📋 Changelog](CHANGELOG.md)
 
@@ -27,8 +27,10 @@
 ---
 
 
-## 🆕 Recent Highlights (`v2.2.44`)
+## 🆕 Recent Highlights (`v2.3.0`)
 
+- **Cycle-Aware Insights, Smart Vial Radar, Companion Daily Ritual & Journey Timeline (`v2.3.0`):** Added Peak/Mid/Trough hormone-phase correlation with mood & symptoms, open-vial beyond-use & syringe dead-space tracking, custom bloodwork countdowns, 60-second Daily Check-in Ritual & Bond Tier Perks, customizable Starlight Breathing presets with phase haptics, 30-day voice pitch trend summaries, Travel & Timezone dose-shift helper, Quick Clinic Care Card, and a unified chronological Journey Timeline.
+- **Interactive Companion Ecosystem & Widget Gallery (`v2.2.45`):** Added a new 2×2 interactive Android Companion home screen widget (poke, pat, and cozy chats with 14 mascot expressions), connected `♥` affection bond milestones & daily hydration (`💧`) check-ins between the home screen widget and in-app `AmbientCompanionCard`, added a **Browse & Pin Widgets** gallery in Settings, moved/enlarged the Movement Coach widget mascot into the middle-right area, expanded the landing page showcase to all 5 widgets, and resolved all remaining analyzer lints.
 - **Android App Launcher Fix (`v2.2.44`):** Restored the original **Lunera** wordmark launcher artwork across Android mipmaps (distinct from the in-app emblem) with clean transparent legacy corners and seamless adaptive layers so no black corners appear.
 - **Celestial Reverie Theme & Artwork Refresh (`v2.2.43`):** Adopted the Celestial Reverie color tokens (`#170B3D`–`#FFE2C8`) with verified WCAG AA contrast alongside refreshed cosmic backdrop, splash, overlay, avatar frame, and profile banner artwork.
 - **Audit Polish, Bug Fixes & Asset Cleanup (`v2.2.42`):** Switched desktop sidebar & PIN/Biometric lock screen to `lunera_text.png` (removing the lock-screen emblem circle), fixed injection site rotation date sorting and `BodyPage` layout collapse, removed the HRT Time-Lapse mini-game plus unused legacy assets, and regenerated full-bleed Android launcher icons without black corners.

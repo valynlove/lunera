@@ -238,8 +238,9 @@ class _JournalSheetState extends ConsumerState<JournalSheet> {
   }
 
   Future<void> _delete() async {
-    if (!await confirm(context, tr('Delete this journal entry?')) || !mounted)
+    if (!await confirm(context, tr('Delete this journal entry?')) || !mounted) {
       return;
+    }
     ref.read(repoProvider)?.deleteJournal(widget.initial!.id);
     Navigator.pop(context);
   }

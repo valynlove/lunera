@@ -1,5 +1,7 @@
 package com.example.ritme
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFormat
@@ -67,6 +69,33 @@ class MainActivity : FlutterFragmentActivity() {
                     val hz = (call.argument<Number>("hz")?.toDouble() ?: 175.0).coerceIn(65.0, 440.0)
                     val durationMs = (call.argument<Number>("durationMs")?.toInt() ?: 1400).coerceIn(200, 2500)
                     result.success(playGentleSineTone(hz, durationMs))
+                }
+                "requestPinWidget" -> {
+                    val widgetName = call.argument<String>("widgetName")?.trim() ?: ""
+                    val allowed = setOf(
+                        "HrtWidget",
+                        "ScheduleWidget",
+                        "LevelWidget",
+                        "WorkoutWidget",
+                        "CompanionWidget",
+                    )
+                    if (widgetName !in allowed) {
+                        result.error("INVALID_WIDGET", "Unknown widget", null)
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val mgr = AppWidgetManager.getInstance(this)
+                        if (mgr.isRequestPinAppWidgetSupported) {
+                            val ok = mgr.requestPinAppWidget(
+                                ComponentName(this, "com.example.ritme.$widgetName"),
+                                null,
+                                null,
+                            )
+                            result.success(ok)
+                        } else {
+                            result.success(false)
+                        }
+                    } else {
+                        result.success(false)
+                    }
                 }
                 else -> result.notImplemented()
             }

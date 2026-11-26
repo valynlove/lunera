@@ -13,6 +13,7 @@ import '../lock.dart';
 import '../profile.dart';
 import '../repo.dart';
 import '../theme.dart';
+import 'care_card_sheet.dart';
 import 'responsive.dart';
 
 /// Halaman manajemen profil: Foto profil, nama panggilan (nickname), serta info akun.
@@ -65,7 +66,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       } catch (_) {
         // Fallback untuk platform desktop / file selector
         try {
-          const typeGroup = XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
+          const typeGroup = XTypeGroup(
+              label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
           final file = await openFile(acceptedTypeGroups: [typeGroup]);
           if (file == null) return;
           final bytes = await file.readAsBytes();
@@ -202,7 +204,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      await ref.read(profileProvider.notifier).setNickname(_nicknameController.text);
+      await ref
+          .read(profileProvider.notifier)
+          .setNickname(_nicknameController.text);
       if (!mounted) return;
       HapticFeedback.lightImpact();
       _toast(tr('Profile saved.'));
@@ -234,112 +238,131 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         child: ListView(
           padding: context.pagePadding(top: 18, bottom: 32),
           children: [
-          Center(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                UserAvatar(
-                  size: 112,
-                  heroTag: widget.enableHero ? 'profile_photo_hero' : null,
-                  onTap: () {
-                    if (hasPhoto) {
-                      _viewPhoto();
-                    } else {
-                      _showPhotoBottomSheet(context);
-                    }
-                  },
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Material(
-                    color: C.peony,
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => _showPhotoBottomSheet(context),
-                      child: const Padding(
-                        padding: EdgeInsets.all(9),
-                        child: Icon(
-                          LucideIcons.camera,
-                          size: 20,
-                          color: Colors.white,
+            Center(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  UserAvatar(
+                    size: 112,
+                    heroTag: widget.enableHero ? 'profile_photo_hero' : null,
+                    onTap: () {
+                      if (hasPhoto) {
+                        _viewPhoto();
+                      } else {
+                        _showPhotoBottomSheet(context);
+                      }
+                    },
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Material(
+                      color: C.peony,
+                      shape: const CircleBorder(),
+                      elevation: 3,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => _showPhotoBottomSheet(context),
+                        child: const Padding(
+                          padding: EdgeInsets.all(9),
+                          child: Icon(
+                            LucideIcons.camera,
+                            size: 20,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton.icon(
-                onPressed: () => _showPhotoBottomSheet(context),
-                icon: const Icon(LucideIcons.image, size: 18),
-                label: Text(tr('Change photo')),
+                ],
               ),
-              if (hasPhoto) ...[
-                const SizedBox(width: 8),
-                TextButton.icon(
-                  onPressed: _viewPhoto,
-                  icon: const Icon(LucideIcons.eye, size: 18),
-                  label: Text(tr('View Photo')),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: cardBox(context),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextField(
-                  controller: _nicknameController,
-                  textCapitalization: TextCapitalization.words,
-                  maxLength: 30,
-                  decoration: InputDecoration(
-                    labelText: tr('Nickname'),
-                    hintText: tr('e.g. Lunaria'),
-                    helperText: tr('Shown in greetings on the Home screen and profile card.'),
-                    prefixIcon: const Icon(LucideIcons.badge),
-                  ),
+                TextButton.icon(
+                  onPressed: () => _showPhotoBottomSheet(context),
+                  icon: const Icon(LucideIcons.image, size: 18),
+                  label: Text(tr('Change photo')),
                 ),
-                gap(16),
-                if (username != null && username.isNotEmpty)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(LucideIcons.atSign, color: C.peony),
-                    title: Text('@$username', style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text(tr('Account username')),
+                if (hasPhoto) ...[
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: _viewPhoto,
+                    icon: const Icon(LucideIcons.eye, size: 18),
+                    label: Text(tr('View Photo')),
                   ),
-                if (user?.email != null)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(LucideIcons.mail, color: C.peony),
-                    title: Text(user!.email!, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text(tr('Registered email')),
-                  ),
-                gap(8),
-                Text(
-                  tr('Username and email are used for login authentication and cannot be changed.'),
-                  style: theme.textTheme.bodySmall?.copyWith(color: fg.withValues(alpha: 0.6)),
-                ),
+                ],
               ],
             ),
-          ),
-          gap(24),
-          pillButton(
-            _saving ? '...' : tr('Save Profile'),
-            _saving ? () {} : _save,
-            icon: LucideIcons.circleCheck,
-          ),
-        ],
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: cardBox(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _nicknameController,
+                    textCapitalization: TextCapitalization.words,
+                    maxLength: 30,
+                    decoration: InputDecoration(
+                      labelText: tr('Nickname'),
+                      hintText: tr('e.g. Lunaria'),
+                      helperText: tr(
+                          'Shown in greetings on the Home screen and profile card.'),
+                      prefixIcon: const Icon(LucideIcons.badge),
+                    ),
+                  ),
+                  gap(16),
+                  if (username != null && username.isNotEmpty)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(LucideIcons.atSign, color: C.peony),
+                      title: Text('@$username',
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      subtitle: Text(tr('Account username')),
+                    ),
+                  if (user?.email != null)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(LucideIcons.mail, color: C.peony),
+                      title: Text(user!.email!,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text(tr('Registered email')),
+                    ),
+                  gap(8),
+                  Text(
+                    tr('Username and email are used for login authentication and cannot be changed.'),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: fg.withValues(alpha: 0.6)),
+                  ),
+                ],
+              ),
+            ),
+            gap(16),
+            OutlinedButton.icon(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                showSheet(context, const CareCardSheet());
+              },
+              icon: const Icon(LucideIcons.heartPulse, size: 18, color: C.rose),
+              label: Text(tr('Quick Clinic Care Card')),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: C.lavender.withValues(alpha: 0.28)),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+            gap(12),
+            pillButton(
+              _saving ? '...' : tr('Save Profile'),
+              _saving ? () {} : _save,
+              icon: LucideIcons.circleCheck,
+            ),
+          ],
         ),
       ),
     );
@@ -406,7 +429,8 @@ class ProfilePhotoCropPage extends StatefulWidget {
 }
 
 class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
-  final TransformationController _transformController = TransformationController();
+  final TransformationController _transformController =
+      TransformationController();
   ui.Image? _rawImage;
   bool _isLoading = true;
   bool _isSaving = false;
@@ -462,7 +486,8 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
     try {
       const targetSize = 512.0;
       final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, targetSize, targetSize));
+      final canvas =
+          Canvas(recorder, const Rect.fromLTWH(0, 0, targetSize, targetSize));
 
       final scaleFactor = targetSize / cropSize;
       canvas.scale(scaleFactor, scaleFactor);
@@ -493,8 +518,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
       canvas.restore();
 
       final picture = recorder.endRecording();
-      final croppedImg = await picture.toImage(targetSize.toInt(), targetSize.toInt());
-      final byteData = await croppedImg.toByteData(format: ui.ImageByteFormat.png);
+      final croppedImg =
+          await picture.toImage(targetSize.toInt(), targetSize.toInt());
+      final byteData =
+          await croppedImg.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData != null && mounted) {
         Navigator.of(context).pop(byteData.buffer.asUint8List());
@@ -524,7 +551,8 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
         ),
         title: Text(
           tr('Crop Photo'),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -543,7 +571,8 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : LayoutBuilder(
               builder: (context, constraints) {
-                final maxDim = min(constraints.maxWidth - 32, constraints.maxHeight - 120);
+                final maxDim =
+                    min(constraints.maxWidth - 32, constraints.maxHeight - 120);
                 final cropSize = maxDim.clamp(240.0, 360.0);
 
                 final rawW = _rawImage!.width.toDouble();
@@ -568,10 +597,12 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                             children: [
                               ClipRect(
                                 child: InteractiveViewer(
-                                  transformationController: _transformController,
+                                  transformationController:
+                                      _transformController,
                                   minScale: 0.8,
                                   maxScale: 4.0,
-                                  boundaryMargin: EdgeInsets.all(cropSize * 0.8),
+                                  boundaryMargin:
+                                      EdgeInsets.all(cropSize * 0.8),
                                   child: SizedBox(
                                     width: cropSize,
                                     height: cropSize,
@@ -613,7 +644,8 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.white70,
                                   side: const BorderSide(color: Colors.white24),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 12),
                                 ),
                                 onPressed: () => Navigator.of(context).pop(),
                                 child: Text(
@@ -627,7 +659,8 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(LucideIcons.rotateCw, color: Colors.white),
+                              icon: const Icon(LucideIcons.rotateCw,
+                                  color: Colors.white),
                               tooltip: tr('Rotate'),
                               onPressed: _rotate,
                             ),
@@ -637,21 +670,28 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                                 style: FilledButton.styleFrom(
                                   backgroundColor: C.peony,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 12),
                                 ),
-                                onPressed: _isSaving ? null : () => _cropAndSave(cropSize),
+                                onPressed: _isSaving
+                                    ? null
+                                    : () => _cropAndSave(cropSize),
                                 icon: _isSaving
                                     ? const SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white),
                                       )
                                     : const Icon(LucideIcons.check, size: 18),
                                 label: Text(
                                   tr('Done'),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
                                 ),
                               ),
                             ),
@@ -699,16 +739,19 @@ class _WhatsAppCropOverlayPainter extends CustomPainter {
 
     // 3. Garis pandu grid rule-of-thirds di dalam lingkaran
     canvas.save();
-    canvas.clipPath(Path()..addOval(Rect.fromCircle(center: center, radius: radius)));
+    canvas.clipPath(
+        Path()..addOval(Rect.fromCircle(center: center, radius: radius)));
     final gridPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.22)
       ..strokeWidth = 0.8
       ..style = PaintingStyle.stroke;
     final step = size.width / 3;
     canvas.drawLine(Offset(step, 0), Offset(step, size.height), gridPaint);
-    canvas.drawLine(Offset(step * 2, 0), Offset(step * 2, size.height), gridPaint);
+    canvas.drawLine(
+        Offset(step * 2, 0), Offset(step * 2, size.height), gridPaint);
     canvas.drawLine(Offset(0, step), Offset(size.width, step), gridPaint);
-    canvas.drawLine(Offset(0, step * 2), Offset(size.width, step * 2), gridPaint);
+    canvas.drawLine(
+        Offset(0, step * 2), Offset(size.width, step * 2), gridPaint);
     canvas.restore();
 
     // 4. Bracket sudut bingkai foto (gaya WhatsApp)
@@ -760,7 +803,8 @@ class _WhatsAppCropOverlayPainter extends CustomPainter {
 class ProfilePhotoViewPage extends ConsumerWidget {
   const ProfilePhotoViewPage({super.key});
 
-  Future<void> _pickAndCrop(BuildContext context, WidgetRef ref, ImageSource source) async {
+  Future<void> _pickAndCrop(
+      BuildContext context, WidgetRef ref, ImageSource source) async {
     await Lock.instance.suppressLockDuring(() async {
       try {
         final picker = ImagePicker();
@@ -789,7 +833,8 @@ class ProfilePhotoViewPage extends ConsumerWidget {
         }
       } catch (_) {
         try {
-          const typeGroup = XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
+          const typeGroup = XTypeGroup(
+              label: 'images', extensions: ['jpg', 'png', 'jpeg', 'webp']);
           final file = await openFile(acceptedTypeGroups: [typeGroup]);
           if (file == null) return;
           final bytes = await file.readAsBytes();
@@ -847,7 +892,8 @@ class ProfilePhotoViewPage extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: sheetTheme.colorScheme.onSurface.withValues(alpha: 0.2),
+                  color:
+                      sheetTheme.colorScheme.onSurface.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -925,7 +971,8 @@ class ProfilePhotoViewPage extends ConsumerWidget {
         ),
         title: Text(
           name,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(

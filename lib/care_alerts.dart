@@ -76,8 +76,50 @@ List<CareAlert> evaluateCareAlerts({
     );
   }
 
-  // 2. Critical or Depleted Supplies from Refill Horizon
+  // 2. Critical, Depleted, or Open-Vial Beyond-Use Supplies
+  final refToday = DateTime(
+    referenceTime.year,
+    referenceTime.month,
+    referenceTime.day,
+  );
   for (final s in supplies) {
+    if (!s.generic && s.openExpiry != null && s.qty > 0) {
+      final openDays = daysBetween(refToday, s.openExpiry!);
+      if (openDays < 0) {
+        alerts.add(
+          CareAlert(
+            id: 'openvial_exp_${s.id}',
+            priority: AlertPriority.critical,
+            icon: LucideIcons.alertTriangle,
+            color: C.coral,
+            title: tr('Open Vial Past Limit: {0}', [s.name]),
+            description: tr(
+              'Opened {0}-day window has passed. Replace with a fresh vial for safety.',
+              [s.beyondUseDays],
+            ),
+            target: AlertActionTarget.supplies,
+            actionLabel: tr('View Supplies'),
+          ),
+        );
+      } else if (openDays <= 5) {
+        alerts.add(
+          CareAlert(
+            id: 'openvial_soon_${s.id}',
+            priority: AlertPriority.warning,
+            icon: LucideIcons.flaskConical,
+            color: C.amber,
+            title: tr('Open Vial Expiring Soon: {0}', [s.name]),
+            description: tr(
+              '{0} {0?day|days} left in {1}-day open-vial window.',
+              [openDays, s.beyondUseDays],
+            ),
+            target: AlertActionTarget.supplies,
+            actionLabel: tr('View Supplies'),
+          ),
+        );
+      }
+    }
+
     final forecast = estimateSupplyForecast(s, therapies);
     if (forecast == null) continue;
 
